@@ -72,7 +72,7 @@ function composeSetup() {
   return { document, compose, posted, paragraph, rect, open, box, question, press, type };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S1
 test("CR 265: a new comment box near the bottom of the window opens above its text, entirely visible", () => {
   const { rect, open } = composeSetup();
   rect.top = 560; rect.bottom = 580;
@@ -83,14 +83,15 @@ test("CR 265: a new comment box near the bottom of the window opens above its te
   assert.ok(top + EDITOR_HEIGHT <= rect.top, "the box sits above the selected text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S2
 test("CR 265: a new comment box with room below stays below its text", () => {
   const { rect, open } = composeSetup();
   const root = open();
   assert.equal(px(root, "top"), rect.bottom + 6);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S2
 test("CR 265: a new comment box follows its text on scroll, even off screen, and keeps the draft", () => {
   const { document, rect, open, box, type } = composeSetup();
   const root = open();
@@ -109,7 +110,7 @@ test("CR 265: a new comment box follows its text on scroll, even off screen, and
   assert.equal(px(root, "top"), 326, "it comes back with the text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S1
 test("CR 265: Escape closes an empty or unchanged comment box wherever the focus is", () => {
   const { document, paragraph, open, box, posted, type } = composeSetup();
   open();
@@ -124,7 +125,7 @@ test("CR 265: Escape closes an empty or unchanged comment box wherever the focus
   assert.deepEqual(posted, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S2
 test("CR 265: Escape on a changed comment draft asks Discard or Keep editing, then acts on the answer", () => {
   const guard = guardConfirm();
   try {
@@ -147,7 +148,8 @@ test("CR 265: Escape on a changed comment draft asks Discard or Keep editing, th
   } finally { guard.restore(); }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S2
 test("CR 265: a press outside closes an unchanged comment box and asks about a changed one", () => {
   const guard = guardConfirm();
   try {
@@ -197,7 +199,7 @@ function threadsSetup() {
   return { document, paragraph, rect, open, popover, question, press, type };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S1
 test("CR 265: the thread popover with its reply box near the bottom of the window opens above its text", () => {
   const { rect, open } = threadsSetup();
   rect.top = 560; rect.bottom = 580;
@@ -206,7 +208,7 @@ test("CR 265: the thread popover with its reply box near the bottom of the windo
   assert.ok(top >= 8 && top + EDITOR_HEIGHT <= rect.top, `top ${top}: above the text and inside the window`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S2
 test("CR 265: the thread popover follows its text on scroll and keeps the reply draft", () => {
   const { document, rect, open, popover, type } = threadsSetup();
   const root = open();
@@ -222,7 +224,8 @@ test("CR 265: the thread popover follows its text on scroll and keeps the reply 
   assert.equal((popover()!.querySelector("textarea") as any).value, "My reply");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S2
 test("CR 265: Escape on a changed reply draft asks Discard or Keep editing", () => {
   const guard = guardConfirm();
   try {
@@ -246,7 +249,8 @@ test("CR 265: Escape on a changed reply draft asks Discard or Keep editing", () 
   } finally { guard.restore(); }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S2
 test("CR 265: a press outside the popover asks about a changed reply draft and closes an empty one", () => {
   const { document, paragraph, open, popover, question, press, type } = threadsSetup();
   open();
@@ -303,7 +307,7 @@ function growingSetup() {
   return { document, paragraph, rect, focused, open, popover, question, press, type };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-217#S1
 test("CR 265 r2: the popover is placed again after the Resolve / Delete row fills it", () => {
   const { rect, open } = growingSetup();
   const root = open();
@@ -312,7 +316,8 @@ test("CR 265 r2: the popover is placed again after the Resolve / Delete row fill
   assert.ok(top >= 8 && top + 160 <= rect.top, `top ${top}: above the text, with its final height, inside the window`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S3
 test("CR 265 r2: Escape on the question returns the focus to the reply box and places the popover again", () => {
   const { document, paragraph, rect, focused, open, popover, question, type } = growingSetup();
   rect.top = 100; rect.bottom = 120;
@@ -329,7 +334,7 @@ test("CR 265 r2: Escape on the question returns the focus to the reply box and p
   assert.equal(px(popover()!, "top"), 126);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-218#S3
 test("CR 265 r2: a repaint while the question shows does not move the focus", () => {
   const { document, paragraph, focused, open, question, type } = growingSetup();
   open();

@@ -3,7 +3,8 @@ import { test } from "node:test";
 
 import { createFocusWorkTracker, focusGroupCommand, groupsToUnlock } from "../../src/host-vscode/groupFocus";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S6
 test("a group position that exists maps to its focus command", () => {
   assert.equal(focusGroupCommand(1, 2), "workbench.action.focusFirstEditorGroup");
   assert.equal(focusGroupCommand(2, 2), "workbench.action.focusSecondEditorGroup");
@@ -23,7 +24,8 @@ test("positions outside the supported range or not known get no command", () => 
   assert.equal(focusGroupCommand(1.5, 3), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S6
 test("only a free group open when the preview closed is unlocked, never a new group at the same column", () => {
   const closedPreview = { viewColumn: 2, free: true };
   const newPreview = { viewColumn: 2, free: true };
@@ -36,7 +38,7 @@ test("only a free group open when the preview closed is unlocked, never a new gr
   assert.deepEqual(groupsToUnlock([occupied], 2, [occupied], isFree), [], "a live preview occupies it");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S7
 test("a stale column falls back to every free group, and a free group at the column wins", () => {
   const shifted = { viewColumn: 1, free: true };
   const other = { viewColumn: 2, free: true };

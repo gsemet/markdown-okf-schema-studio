@@ -5,7 +5,7 @@ import { relativeImageReference } from "../../../src/core/mapping/imageReference
 
 // Tests added by the mutation campaign of src/core (CR-450): they pin the survivors of the first run.
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192#S1
 test("Windows path rules apply when either path holds a backslash, and POSIX rules when neither does", () => {
   assert.equal(relativeImageReference("C:/docs/a.md", "C:\\docs\\img\\p.png"), "img/p.png", "a backslash in the image only");
   assert.equal(relativeImageReference("C:\\docs\\a.md", "C:/docs/img/p.png"), "img/p.png", "a backslash in the document only");

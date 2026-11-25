@@ -14,7 +14,7 @@ import { createRuntimeHarness, RuntimeElement } from "../runtimeHarness";
 const exportRequests = (harness: ReturnType<typeof createRuntimeHarness>): Array<Record<string, unknown>> =>
   harness.messages.filter((message) => message.type === "previewExportHtml");
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
 test("a click on the Export button asks the host for the export with a user gesture", () => {
   const harness = createRuntimeHarness();
   harness.exportButton.dispatch("click");
@@ -26,7 +26,7 @@ test("a click on the Export button asks the host for the export with a user gest
   assert.match(String((request.snapshot as { contentHtml: string }).contentHtml), /^<main/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("the command of the host asks for the export without a user gesture", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage({ type: "previewExportCommand", documentId: "file:///active.md", revision: 7, requestId: 11 });
@@ -36,7 +36,7 @@ test("the command of the host asks for the export without a user gesture", () =>
   assert.equal(request.userGesture, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("a command of another render is ignored, and a second click while one export runs sends nothing more", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage({ type: "previewExportCommand", documentId: "file:///other.md", revision: 7, requestId: 11 });
@@ -143,7 +143,8 @@ function stubs(options: {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S3
 test("the snapshot holds the resolved value of each theme token and the root attributes the CSS reads, and leaves out the zoom", () => {
   const tokens = Object.fromEntries(THEME_TOKEN_NAMES.map((name) => [`--studio-${name}`, ` value-${name} `]));
   const { document, window } = stubs({ tokens, math: ".m1{margin:0}" });
@@ -155,14 +156,15 @@ test("the snapshot holds the resolved value of each theme token and the root att
   assert.match(snapshot.contentHtml, /^<main id="sphinx-myst-preview-content">/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
 test("the snapshot records the shown tab of each tab set and the ticked task boxes", () => {
   const { document, window } = stubs({ tabSets: [["false", "true"], ["true", "false", "false"]], checkboxes: [true, false] });
   const snapshot = takeExportSnapshot(document, window)!;
   assert.deepEqual(snapshot.shownTabs, [1, 0]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("taking a snapshot changes nothing on the page", () => {
   const harness = createRuntimeHarness();
   const before = JSON.stringify([
@@ -232,7 +234,7 @@ test("a diagram that is unavailable is settled and does not hold the export", ()
   assert.equal(exportRequests(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
 test("a page over the size bound tells the user, sends nothing and leaves the button free", () => {
   const { document, window } = stubs();
   const huge = "x".repeat(50_000_001);

@@ -38,9 +38,10 @@ async function editorState(page: Page): Promise<{ value: string; start: number; 
  * inserts the table; `/align` Enter opens Column alignment in the header cell of the first column,
  * Center rewrites its delimiter cell, and Cmd/Ctrl+Enter saves the block. The buffer holds the new
  * table with the first column centred, the rest of the document unchanged.
- * @tests_req StRS-MDOKFSTUDIO-TABLE-016
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-106
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-111
+ * @accepts_req StRS-MDOKFSTUDIO-TABLE-016#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-106#S4
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-106#S7
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-111#S5
  */
 export async function scenarioTableInsertFromSlash(page: Page): Promise<void> {
   await withSmokeDocument("realinput-t45", async (document) => {

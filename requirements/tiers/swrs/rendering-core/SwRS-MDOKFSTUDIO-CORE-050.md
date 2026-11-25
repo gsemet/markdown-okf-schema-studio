@@ -17,6 +17,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-005
 - StRS-MDOKFSTUDIO-THEME-002
 depends_on: []
+scenarios:
+- id: S1
+  title: Soft appearance after the first input
+- id: S2
+  title: No soft appearance after a content patch
+- id: S3
+  title: Palette, popovers and slash menu
+- id: S4
+  title: Closed editor and theme change
+- id: S5
+  title: Reduced-motion attribute
+- id: S6
+  title: Reduced motion
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,38 +56,38 @@ supersedes:
 
 When the preview shows an editor, a bar, a menu, a closed editor or a theme change, the extension SHALL animate it softly by the rules of the scenarios and apply no preview motion when the user prefers reduced motion.
 
-### Scenario (nominal): Soft appearance after the first input
+### Scenario S1 (nominal): Soft appearance after the first input
 - GIVEN a fresh page with no pointer press or key press yet
 - WHEN an editor opens
 - THEN it appears without animation
 - AND after a first pointer press or key press, an editor, bar or menu that opens appears softly
 
-### Scenario (nominal): No soft appearance after a content patch
+### Scenario S2 (nominal): No soft appearance after a content patch
 - GIVEN soft appearance is on after a pointer press
 - WHEN a content patch replaces the content and an editor opens
 - THEN it appears without animation
 - AND after a following key press, an editor that opens appears softly again
 
-### Scenario (nominal): Palette, popovers and slash menu
+### Scenario S3 (nominal): Palette, popovers and slash menu
 - GIVEN soft appearance is on (the attribute data-sphinx-preview-motion is on)
 - WHEN an edition palette appears
 - THEN it starts transparent and fades in over the fast motion time of 120 ms
 - AND a popover or the slash menu starts transparent 3 px above its place and fades in over the same time
 
-### Scenario (nominal): Closed editor and theme change
+### Scenario S4 (nominal): Closed editor and theme change
 | Input | Outcome |
 | --- | --- |
 | a block editor closes while soft appearance is on | the rendered block fades in |
 | a theme switch | the colours transition once |
 | the page idles after the switch | no transition repeats |
 
-### Scenario (nominal): Reduced-motion attribute
+### Scenario S5 (nominal): Reduced-motion attribute
 | Input | Outcome |
 | --- | --- |
 | the system prefers reduced motion, page start or a theme change reported by the host | data-sphinx-preview-reduced-motion of the html element reads true |
 | a system without that preference, or a window without matchMedia | the attribute reads false |
 
-### Scenario (refusal): Reduced motion
+### Scenario S6 (refusal): Reduced motion
 | Input | Outcome |
 | --- | --- |
 | `prefers-reduced-motion: reduce` and a block changes | no glow, fade or transition runs |

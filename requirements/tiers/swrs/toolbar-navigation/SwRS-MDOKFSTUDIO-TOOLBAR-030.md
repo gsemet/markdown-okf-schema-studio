@@ -18,6 +18,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-004
 depends_on: []
+scenarios:
+- id: S1
+  title: Deep allowance
+- id: S2
+  title: Width changes
+- id: S3
+  title: Layout changes with the band
+- id: S4
+  title: Same heading
+- id: S5
+  title: Random scrolling stress run
+- id: S6
+  title: Scroll to the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,32 +50,32 @@ default_owner_email: gaetan@xeberon.net
 
 When the band changes its height or the page updates it after a layout change, the extension SHALL keep the reading offset at least as large as the allowance for the configured depth and the largest band height seen at the current pane width, start the remembered height again when the width changes, measure and update at most three times, and cause at most two corrective scrolls after the end of scrolling input.
 
-### Scenario (nominal): Deep allowance
+### Scenario S1 (nominal): Deep allowance
 - GIVEN depth 6 and a band that shows one line
 - WHEN the reading offset is refreshed
 - THEN the offset is at least the allowance for six lines
 
-### Scenario (boundary): Width changes
+### Scenario S2 (boundary): Width changes
 - GIVEN a pane resized to another width
 - WHEN the reading offset is refreshed
 - THEN the remembered height is reset and measured again
 
-### Scenario (boundary): Layout changes with the band
+### Scenario S3 (boundary): Layout changes with the band
 - GIVEN a band whose new height moves the content each time
 - WHEN the page updates the band
 - THEN it stops after three passes
 
-### Scenario (boundary): Same heading
+### Scenario S4 (boundary): Same heading
 - GIVEN two passes that find the same active heading
 - WHEN the page updates the band
 - THEN it stops at the second pass
 
-### Scenario (nominal): Random scrolling stress run
+### Scenario S5 (nominal): Random scrolling stress run
 - GIVEN 180 random scroll steps of 40 to 220 px at 18 ms intervals, at depth 3
 - WHEN the input ends and 650 ms pass
 - THEN at most 2 programmatic scrolls happen after the input and the position changes by at most 2 px
 
-### Scenario (boundary): Scroll to the end
+### Scenario S6 (boundary): Scroll to the end
 - GIVEN the document scrolled to its end
 - WHEN the reader keeps scrolling down
 - THEN the position stays at the end and no corrective scroll fights the reader

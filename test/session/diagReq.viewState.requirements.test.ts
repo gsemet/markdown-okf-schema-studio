@@ -87,7 +87,8 @@ test("a restricted-reads preview stores a theme choice; its edit requests reach 
   assert.equal(choices.previewThemeMode, "white");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S8
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S12
 test("a preview with restricted reads stores its palette mode, and a message of an older render or with an unknown mode stores nothing", async () => {
   const { store, send } = readOnlyHarness();
   const key = "markdownOkfSchemaStudio.paletteMode";
@@ -102,7 +103,8 @@ test("a preview with restricted reads stores its palette mode, and a message of 
   assert.equal(store.values.get(key), "myst", "the stale message and the unknown mode are dropped");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S5
 test("a view preference message of a render older than the host holds stores nothing, whatever the preference", () => {
   const { choices, send } = readOnlyHarness();
 
@@ -113,7 +115,7 @@ test("a view preference message of a render older than the host holds stores not
   assert.notEqual(choices.viewPreferences.widthMode, "full", "another document's message is dropped");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S7
 test("a stored theme mode outside the four is not carried to the page, so the page starts in Cream", () => {
   for (const stored of ["sepia", 3, null, ""]) {
     const store = memoryStore();
@@ -146,8 +148,10 @@ function hostWithWarnings(warnings: string[], logger: MemoryLogger = createMemor
   } as unknown as HostServices;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-002
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S5
 test("a view preference that cannot be saved holds for the session and warns the reader once", async () => {
   const log = createMemoryLogger();
   const warnings: string[] = [];
@@ -163,7 +167,8 @@ test("a view preference that cannot be saved holds for the session and warns the
   mock.restoreAll();
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S11
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S12
 test("a theme mode that cannot be saved still holds for the session", async () => {
   const log = createMemoryLogger();
   const warnings: string[] = [];

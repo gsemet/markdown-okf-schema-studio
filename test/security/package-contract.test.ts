@@ -33,7 +33,6 @@ test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the share
   );
 });
 
-// @tests_req StRS-MDOKFSTUDIO-LIFE-021
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S8
 test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
@@ -54,8 +53,10 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(packageJson.displayName, "Markdown OKF-Schema Studio");
   assert.match(packageJson.scripts["test:integration"], /npm run bundle/u);
   // CR 119 appended the four edit-mode commands (asserted below); the first two are unchanged.
-  // @tests_req SwRS-MDOKFSTUDIO-LIFE-003
-  // @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S2
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S9
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S1
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S5
   assert.deepEqual(packageJson.contributes.commands.slice(0, 2), [
     {
       command: "markdown-okf-schema-studio.openPreview",
@@ -71,9 +72,10 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       enablement: "resourceExtname == .md",
     },
   ]);
-  // @tests_req SwRS-MDOKFSTUDIO-LIFE-001
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S1
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S2
   assert.doesNotMatch(serialized, /markdown\./u);
-  // @tests_req SwRS-MDOKFSTUDIO-LIFE-018
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-018#S5
   assert.deepEqual(packageJson.contributes.customEditors, [{
     viewType: "markdown-okf-schema-studio.editor",
     displayName: "Markdown OKF-Schema Studio",
@@ -125,7 +127,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       when: "editorTextFocus && resourceExtname == .md",
     },
   ]);
-  // @tests_req SwRS-MDOKFSTUDIO-LIFE-156
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-156#S1
   // The Settings UI shows the categories in this order, most used first; every setting sits in the
   // category of its key prefix.
   const categories = packageJson.contributes.configuration;
@@ -179,7 +181,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
     "markdownOkfSchemaStudio.comments.authorName"
   ] as { type: string; default: string; order: number; markdownDescription: string; description?: string; scope?: string };
   assert.equal(authorName.type, "string");
-  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
+  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S5
   assert.equal(authorName.scope, "resource", "a workspace or folder can override the author name");
   assert.equal(authorName.default, "");
   assert.equal(authorName.order, 50);
@@ -322,7 +324,7 @@ test("CR 149: the chart runtime ships pinned in its own bundle and evaluates exp
   assert.doesNotMatch(preview, /\bfetch\(|XMLHttpRequest|import\(/u, "the chart runtime loads nothing by itself");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
 test("CR 119: undo, redo, select all and delete line are VS Code key bindings on the preview edit context", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {
@@ -347,7 +349,7 @@ test("CR 119: undo, redo, select all and delete line are VS Code key bindings on
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S6
 test("CR 143: Fold All and Unfold All are command palette entries offered to the preview only", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {
@@ -368,7 +370,7 @@ test("CR 143: Fold All and Unfold All are command palette entries offered to the
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
 test("CR 144: Cmd/Ctrl+F runs the find command on the focused preview only", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {
@@ -406,7 +408,7 @@ test("the Marketplace listing declares its categories and keywords", () => {
   assert.deepEqual(manifest.keywords, ["markdown", "OKF", "MyST"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: Cmd/Ctrl+S runs the save command on the side preview and the custom editor, and the command is not in the palette", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {
@@ -428,8 +430,10 @@ test("CR 312: Cmd/Ctrl+S runs the save command on the side preview and the custo
   ], "no input or editor focus clause: the key saves from every text box of the page");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S2
 test("CR-445: Open as Text is in the palette and the editor title overflow of a Studio tab, and the introductions reset is in the palette", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {
@@ -455,7 +459,7 @@ test("CR-445: Open as Text is in the palette and the editor title overflow of a 
   assert.notEqual(title[0]!.group, "navigation", "an overflow entry, not a toolbar button");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-198
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S2
 test("CR-483: Open in Studio at This Line is a palette and title command for Markdown text editors, with no keybinding and no opening setting", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {

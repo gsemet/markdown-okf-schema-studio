@@ -19,6 +19,21 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 - SwRS-MDOKFSTUDIO-PALETTE-036
+scenarios:
+- id: S1
+  title: Picker contents
+- id: S2
+  title: A swatch or a valid code applies the colour of the open tab
+- id: S3
+  title: Invalid colour code in the field
+- id: S4
+  title: The span written and updated
+- id: S5
+  title: Partial selection and whole content
+- id: S6
+  title: Remove drops the property of the open tab
+- id: S7
+  title: What the sanitizer would strip
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,7 +53,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Colour, the extension SHALL open a picker with the tabs Text and Background, sixteen colour swatches, a field for a colour code and a Remove button, apply a swatch, a valid colour code or Remove to the property of the open tab as a span whose only attribute is a colour style, and produce no edit for a value the sanitizer would strip.
 
-### Scenario (nominal): Picker contents
+### Scenario S1 (nominal): Picker contents
 
 - GIVEN an open block editor
 - WHEN the writer presses Colour
@@ -50,7 +65,7 @@ When the writer presses Colour, the extension SHALL open a picker with the tabs 
 
 The action is a strict-mode action for blocks and cells with a swatch popover; the sixteen swatches are distinct and each is a colour the sanitizer keeps.
 
-### Scenario (nominal): A swatch or a valid code applies the colour of the open tab
+### Scenario S2 (nominal): A swatch or a valid code applies the colour of the open tab
 
 - GIVEN a selected word and the Text tab open
 - WHEN the writer presses a swatch
@@ -66,7 +81,7 @@ The action is a strict-mode action for blocks and cells with a swatch popover; t
 
 The action receives the argument text:{colour} or background:{colour} and the picker is removed before the edit. The edit is one undo step and keeps the editor open.
 
-### Scenario (refusal): Invalid colour code in the field
+### Scenario S3 (refusal): Invalid colour code in the field
 
 - GIVEN the field holds red
 - WHEN the writer presses Enter
@@ -74,7 +89,7 @@ The action receives the argument text:{colour} or background:{colour} and the pi
 
 The field is validated as the writer types too: a non-empty invalid value sets aria-invalid, an empty or valid value removes it; the valid values are the colour grammar of the sanitizer, named colours and hsl() included (see SwRS-MDOKFSTUDIO-GFM-034).
 
-### Scenario (nominal): The span written and updated
+### Scenario S4 (nominal): The span written and updated
 
 In this table `[ ]` marks the selection and `|` marks the caret.
 
@@ -101,7 +116,7 @@ In this table `[ ]` marks the selection and `|` marks the caret.
 
 The written opening tag is a span element with a single style attribute whose value is color:#c00; with two declarations they are separated by a semicolon and a space, color first. A span is recognised only when its tag has a style attribute with colour declarations the sanitizer keeps, and no other attribute.
 
-### Scenario (boundary): Partial selection and whole content
+### Scenario S5 (boundary): Partial selection and whole content
 
 - GIVEN a span around one two three and two selected
 - WHEN a colour is applied
@@ -116,7 +131,7 @@ The written opening tag is a span element with a single style attribute whose va
 | x &lt;span style="color:#c00"&gt;a[b]c&lt;/span&gt; | `text:#00f` | x &lt;span style="color:#c00"&gt;a&lt;span style="color:#00f"&gt;[b]&lt;/span&gt;c&lt;/span&gt;, the outer span is unchanged |
 | a[b&lt;span style="color:#c00"&gt;cd&lt;/span&gt;e]f (balanced span inside the selection) | `text:#00f` | the selection is wrapped in a new span around the balanced span |
 
-### Scenario (nominal): Remove drops the property of the open tab
+### Scenario S6 (nominal): Remove drops the property of the open tab
 
 - GIVEN a word in a span with both colours and the Text tab open
 - WHEN the writer presses Remove
@@ -136,7 +151,7 @@ The written opening tag is a span element with a single style attribute whose va
 
 The action receives text: or background: with an empty colour; when no property is left the span is unwrapped (the edit replaces the whole span with its inner text); a property the span does not carry, or no generated span, gives no edit.
 
-### Scenario (refusal): What the sanitizer would strip
+### Scenario S7 (refusal): What the sanitizer would strip
 
 - GIVEN the argument text:red
 - WHEN the colour action runs

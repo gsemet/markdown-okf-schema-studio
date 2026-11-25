@@ -17,6 +17,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Press a palette button and keep writing
+- id: S2
+  title: See the palette appear softly
 user_need: As a writer of a long block, I always find the palette buttons
   without scrolling back to the top of the block, see menus appear calmly, and
   click palette buttons and pickers without losing my place or ending the edit.
@@ -70,7 +75,7 @@ Pressing a palette button or using the file dialog never commits the edit; only 
 
 ### Main paths
 
-#### Path 1: Press a palette button and keep writing
+#### Path S1: Press a palette button and keep writing
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-PALETTE-021: the palette is a toolbar named Edition palette on top of the editor frame, and a small palette sticks over a tall editor
@@ -82,7 +87,7 @@ Pressing a palette button or using the file dialog never commits the edit; only 
    - Option SwRS-MDOKFSTUDIO-BLOCK-047 (boundary): an editor whose text is unchanged closes
 4. The edit is saved and the editor is closed
 
-#### Path 2: See the palette appear softly
+#### Path S2: See the palette appear softly
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-CORE-050: the palette, its popovers and the slash menu appear with a soft fade

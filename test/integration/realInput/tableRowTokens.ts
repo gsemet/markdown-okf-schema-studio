@@ -44,7 +44,7 @@ async function moveNoteLeft(page: Page): Promise<void> {
 /**
  * QA replay 271-c1b-1 (T2): in `| alpha | 1 | first ^row-b |` the Note column moves left and the
  * block id ends the row, after the closing pipe, instead of travelling into the middle of it.
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S3
  */
 export async function scenarioColumnMoveKeepsBlockIdAtRowEnd(page: Page): Promise<void> {
   const document = "# Block id in the last cell\n\n" + table("first ^row-b |");
@@ -62,8 +62,9 @@ export async function scenarioColumnMoveKeepsBlockIdAtRowEnd(page: Page): Promis
  * QA replay 271-c1b-2 (T1, T3, T5): a token after the closing pipe of one row (a block id, a
  * heading-style id, an HTML comment) no longer makes the handles inert: the column moves with the
  * token kept at the end of its row, and a click on a cell opens the cell editor.
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-001
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S8
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S6
  */
 export async function scenarioTailedTableMovesAndOpensCellEditor(page: Page): Promise<void> {
   for (const token of ["^row-a", "{#row-c}", "<!-- keep -->"]) {

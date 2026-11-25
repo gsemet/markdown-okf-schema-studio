@@ -14,6 +14,13 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Move a block with an arrow
+- id: S2
+  title: Move a block with the keyboard
+- id: S3
+  title: Move a list item
 user_need: As a writer, I swap a block or a selected run of blocks with its
   neighbour with one click on an arrow or one key press, also while I edit the
   block, keep typing at the same place, and can undo it with one undo.
@@ -86,7 +93,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Move a block with an arrow
+#### Path S1: Move a block with an arrow
 
 1. Edit mode is on
    - SwRS-MDOKFSTUDIO-BLOCK-109: the writer clicks an enabled arrow of an insert point and the page asks the host to swap the block with its neighbour
@@ -99,7 +106,7 @@ sequenceDiagram
    - SwRS-MDOKFSTUDIO-BLOCK-058: the swap is one undo step and the preview renders once
 4. The block is at its new place and one undo reverts the move
 
-#### Path 2: Move a block with the keyboard
+#### Path S2: Move a block with the keyboard
 
 1. A body block is focused in edit mode
    - SwRS-MDOKFSTUDIO-BLOCK-130: Alt+ArrowUp or Alt+ArrowDown requests the move and focuses the block at its new place
@@ -110,7 +117,7 @@ sequenceDiagram
    - SwRS-MDOKFSTUDIO-BLOCK-058: the swap is one undo step and the preview renders once
 4. The block is at its new place and one undo reverts the move
 
-#### Path 3: Move a list item
+#### Path S3: Move a list item
 
 1. Edit mode is on and a list has two items or more
    - SwRS-MDOKFSTUDIO-BLOCK-262: the writer drags the handle of an item onto a sibling, or presses Alt+Up or Alt+Down on it, and the page saves the list's lines with the item moved

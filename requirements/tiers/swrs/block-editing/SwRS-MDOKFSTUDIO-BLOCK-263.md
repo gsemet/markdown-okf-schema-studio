@@ -20,6 +20,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-006
+scenarios:
+- id: S1
+  title: A text equal to the source but for its line endings is the source
+- id: S2
+  title: The host answers every final save
+- id: S3
+  title: Mixed line endings
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +50,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer leaves a block editor by Done, Cmd/Ctrl+Enter, a click on another block or an arrow past the edge of the text box, the page SHALL compare and post the text of the text box with the line endings of the source block, so that text that differs from the source only by the LF the text box returns is the source again and posts no save, and the host SHALL answer every final save that ends with nothing to render by a previewEditSource message with done set, to which the page answers by closing the editor.
 
-### Scenario (nominal): A text equal to the source but for its line endings is the source
+### Scenario S1 (nominal): A text equal to the source but for its line endings is the source
 
 | Input | Outcome |
 | --- | --- |
@@ -53,7 +60,7 @@ When a writer leaves a block editor by Done, Cmd/Ctrl+Enter, a click on another 
 | A real change in the same editor | The text posted by the autosave and by the final save has the line endings of the source block |
 | The same blocks in an LF file | Unchanged: LF |
 
-### Scenario (nominal): The host answers every final save
+### Scenario S2 (nominal): The host answers every final save
 
 | Input | Outcome |
 | --- | --- |
@@ -63,7 +70,7 @@ When a writer leaves a block editor by Done, Cmd/Ctrl+Enter, a click on another 
 | The same message for another edit id, or for an editor that is not saving | Ignored |
 | A cancel | No answer: the page closed the editor when it posted it |
 
-### Scenario (boundary): Mixed line endings
+### Scenario S3 (boundary): Mixed line endings
 
 | Input | Outcome |
 | --- | --- |

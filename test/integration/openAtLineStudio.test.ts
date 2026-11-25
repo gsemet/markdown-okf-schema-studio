@@ -74,9 +74,9 @@ function historyGo(file: vscode.Uri, direction: "back" | "forward"): void {
   void sendPreviewMessageForTests({ type: "previewHistoryGo", ...context(file), direction });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-197
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-198
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-197#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S1
 /**
  * CR-483 in the real window (specification 7.3), associated (the `*.md` association set) and default
  * (not set): the command "Open in Studio at This Line", a link `#heading` followed in a Studio tab,

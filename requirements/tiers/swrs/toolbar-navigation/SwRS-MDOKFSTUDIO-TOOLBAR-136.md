@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-014
+scenarios:
+- id: S1
+  title: One file with no script
+- id: S2
+  title: Theme, width and images travel with the file
+- id: S3
+  title: Math, missing images and zoom
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,19 +44,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension writes the exported file, it SHALL embed the styles, the preview theme and width, the local images and, only for a page with math, the math fonts, and SHALL leave no script, external stylesheet or reference to the editor in the file.
 
-### Scenario (nominal): One file with no script
+### Scenario S1 (nominal): One file with no script
 
 - GIVEN an exported page
 - WHEN the file text is searched
 - THEN it has no `<script`, no `<link`, no `@import`, no `javascript:`, no `on...=` attribute and no `vscode-` name
 
-### Scenario (nominal): Theme, width and images travel with the file
+### Scenario S2 (nominal): Theme, width and images travel with the file
 
 - GIVEN a cream preview at the default content width, with a local PNG
 - WHEN the file is opened in a browser with JavaScript off
 - THEN the page background and the content column width equal the preview's, and the image `src` is a `data:` URI
 
-### Scenario (boundary): Math, missing images and zoom
+### Scenario S3 (boundary): Math, missing images and zoom
 
 | Input | Outcome |
 | --- | --- |

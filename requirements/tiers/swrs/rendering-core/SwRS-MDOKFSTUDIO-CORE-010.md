@@ -17,6 +17,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Render wikilinks as links
+- id: S2
+  title: A label is the link text
+- id: S3
+  title: Leave wikilink syntax untouched where it is not text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,19 +43,19 @@ supersedes:
 
 When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]` or `[[#Section]]` in plain text, the extension SHALL render a link, with a `wiki:` URL for a note target and an in-page slug anchor for a heading-only target, and leave `[[...]]` unconverted where it appears in code, an existing link, an image, math, raw HTML or an `![[...]]` embed.
 
-### Scenario (nominal): Render wikilinks as links
+### Scenario S1 (nominal): Render wikilinks as links
 
 - GIVEN a paragraph with `[[Note]]` and `[[#Section]]`
 - WHEN it is rendered
 - THEN the first is a link with a `wiki:` URL and the second an in-page `#section` anchor
 
-### Scenario (boundary): A label is the link text
+### Scenario S2 (boundary): A label is the link text
 
 - GIVEN a wikilink with a `|Label`, as in `[[Folder/Note#Heading|Label]]`
 - WHEN it is rendered
 - THEN the link text is the label
 
-### Scenario (refusal): Leave wikilink syntax untouched where it is not text
+### Scenario S3 (refusal): Leave wikilink syntax untouched where it is not text
 
 | Input | Outcome |
 | --- | --- |

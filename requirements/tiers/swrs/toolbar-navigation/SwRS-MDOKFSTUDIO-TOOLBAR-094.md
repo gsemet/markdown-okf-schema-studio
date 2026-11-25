@@ -16,6 +16,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on: []
+scenarios:
+- id: S1
+  title: A file below a root opens
+- id: S2
+  title: A path outside every root
+- id: S3
+  title: A symbolic link out of the workspace
+- id: S4
+  title: A target that is missing or not a regular file
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,7 +42,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a relative Markdown link is followed, the extension SHALL open its target only when the target is a regular file whose path and real path are below a workspace root, and block every other link with the reason of the first check that failed.
 
-### Scenario (nominal): A file below a root opens
+### Scenario S1 (nominal): A file below a root opens
 
 | Input | Outcome |
 | --- | --- |
@@ -41,19 +50,19 @@ When a relative Markdown link is followed, the extension SHALL open its target o
 | a link that resolves below the second folder of a workspace of two folders | opens, because each root is tried before the link is blocked |
 | a link to a symlink inside the workspace that points to a file inside the workspace | opens the real path of the file |
 
-### Scenario (refusal): A path outside every root
+### Scenario S2 (refusal): A path outside every root
 
 - GIVEN a link ../secret.md from a file at the root of the workspace
 - WHEN it is resolved
 - THEN it is blocked with The navigation target is outside the workspace.
 
-### Scenario (refusal): A symbolic link out of the workspace
+### Scenario S3 (refusal): A symbolic link out of the workspace
 
 - GIVEN a link to a symlink inside the workspace that points to a file outside it
 - WHEN the link is resolved
 - THEN it is blocked with The navigation target escapes the workspace.
 
-### Scenario (refusal): A target that is missing or not a regular file
+### Scenario S4 (refusal): A target that is missing or not a regular file
 
 | Input | Outcome |
 | --- | --- |

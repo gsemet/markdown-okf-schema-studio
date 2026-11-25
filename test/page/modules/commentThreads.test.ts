@@ -140,7 +140,7 @@ const thread = (overrides: Record<string, unknown> = {}) => ({
 const marks = (document: FakeDocument) => document.querySelectorAll("[data-okf-comment-thread]");
 const badges = (document: FakeDocument) => document.querySelectorAll("[data-okf-comment-badge]");
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S9
 test("T42: the first occurrence of the quote is wrapped in a mark", () => {
   const { document, comments } = setup();
   const paragraph = document.add("p", { "data-line": "1" }, document.content, "a needle and another needle");
@@ -152,7 +152,7 @@ test("T42: the first occurrence of the quote is wrapped in a mark", () => {
   assert.equal(badges(document).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S5
 test("T42: a quote that spans an element boundary gets a badge, not a mark", () => {
   const { document, comments } = setup();
   const paragraph = document.add("p", { "data-line": "1" }, document.content, "a nee");
@@ -165,7 +165,8 @@ test("T42: a quote that spans an element boundary gets a badge, not a mark", () 
   assert.equal(paragraph.getAttribute("data-okf-comment-badged"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S9
 test("T42: code, math, mermaid, plantuml and the properties table are never wrapped", () => {
   const { document, comments } = setup();
   const pre = document.add("pre", { "data-line": "1" });
@@ -186,7 +187,8 @@ test("T42: code, math, mermaid, plantuml and the properties table are never wrap
   assert.ok(badges(document).some((badge) => badge.previousSibling === pre));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S4
 test("T42: the block that covers the line is searched, not another with the same text", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "needle");
@@ -196,7 +198,8 @@ test("T42: the block that covers the line is searched, not another with the same
   assert.equal(marks(document)[0].parentNode, second);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S2
 test("T42: re-applying is idempotent and survives replaced content", () => {
   const { document, comments } = setup();
   const paragraph = document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -217,7 +220,8 @@ test("T42: re-applying is idempotent and survives replaced content", () => {
   assert.equal(marks(document).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S6
 test("T42: blocks inside an open editor are left alone (O10)", () => {
   const { document, comments } = setup();
   const editing = document.add("p", { "data-line": "1", "data-sphinx-preview-editing": "true" }, document.content, "a needle");
@@ -229,8 +233,9 @@ test("T42: blocks inside an open editor are left alone (O10)", () => {
   assert.equal(editing.textContent, "a needle");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S4
 test("T42: the popover shows author, date and bodies as text, never as HTML", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -294,7 +299,7 @@ test("T42 r2: included content and blocks under a skipped ancestor are never cho
   assert.equal(badges(document).every((badge) => badge.parentNode !== inFigure && badge.parentNode !== included), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S2
 test("T42 r2: a quote at index 0 leaves no empty text node and clear restores the structure", () => {
   const { document, comments } = setup();
   const paragraph = document.add("p", { "data-line": "1" }, document.content, "needle and more");
@@ -356,7 +361,8 @@ const popoverOf = (document: FakeDocument) => document.querySelector("[data-okf-
 const sendButton = (document: FakeDocument) =>
   popoverOf(document).querySelectorAll("button").find((candidate) => candidate.textContent === "Reply")!;
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S10
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S12
 test("T43: the popover has a reply box that posts the thread id and the trimmed body", () => {
   const { document, comments, replies } = setupWithReply();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -378,7 +384,8 @@ test("T43: the popover has a reply box that posts the thread id and the trimmed 
   assert.equal(sendButton(document).hasAttribute("disabled"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S16
 test("T43 r2: a refused reply keeps the text and shows the reason as text", () => {
   const { document, comments, replies } = setupWithReply();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -398,7 +405,8 @@ test("T43 r2: a refused reply keeps the text and shows the reason as text", () =
   assert.equal(replies.length, 2, "the reply can be sent again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S16
 test("T43 r2: no answer keeps the text, says so, and a late ok still empties the box", () => {
   const { document, comments, replies, fireTimers } = setupWithReply();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -496,7 +504,7 @@ const press = (document: FakeDocument, selector: string) => {
 const orphanBox = (document: FakeDocument) => document.querySelector("[data-okf-orphans]");
 const orphanItems = (document: FakeDocument) => document.querySelectorAll("[data-okf-comment-orphan]");
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S1
 test("T44: Resolve sends the flag, waits for ok, and the mark changes style after the re-post", () => {
   const { document, comments, calls } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -516,7 +524,7 @@ test("T44: Resolve sends the flag, waits for ok, and the mark changes style afte
   assert.deepEqual(calls[1], ["resolve", "t1", false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S3
 test("T44: a refused resolve shows the reason as text in an alert and can be retried", () => {
   const { document, comments, calls, fireTimers } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -538,7 +546,7 @@ test("T44: a refused resolve shows the reason as text in an alert and can be ret
   assert.equal(popoverOf(document).querySelector("[data-okf-comment-resolve]")!.hasAttribute("disabled"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S2
 test("T44: Delete asks inside the popover first; No cancels, Yes sends and waits for ok", () => {
   const { document, comments, calls } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -565,7 +573,7 @@ test("T44: Delete asks inside the popover first; No cancels, Yes sends and waits
   assert.equal(document.querySelector("[data-okf-comment-popover]"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S3
 test("T44: a refused delete keeps the thread, shows the reason and returns to the buttons", () => {
   const { document, comments } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -580,7 +588,7 @@ test("T44: a refused delete keeps the thread, shows the reason and returns to th
   assert.equal(marks(document).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S2
 test("T44: the pending question survives the threads being posted again", () => {
   const { document, comments } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -591,7 +599,7 @@ test("T44: the pending question survives the threads being posted again", () => 
   assert.ok(popoverOf(document).querySelector("[data-okf-comment-confirm]"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S2
 test("T44: Escape closes the popover and forgets the question", () => {
   const { document, comments } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -603,7 +611,8 @@ test("T44: Escape closes the popover and forgets the question", () => {
   assert.equal(popoverOf(document).querySelector("[data-okf-comment-confirm]"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S7
 test("CR 174: the trace names what closed an open popover, and a re-apply that keeps it is silent", () => {
   const document = new FakeDocument();
   provideGlobalElement(FakeElement);
@@ -637,7 +646,7 @@ test("CR 174: the trace names what closed an open popover, and a re-apply that k
   assert.deepEqual(traced.slice(4), [["comment popover closed", "toggled, thread t2"]], "a closed popover records nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S1
 test("CR 186: the popover stays open through a reply and a resolve in the host's order, with no close traced", () => {
   // The review-threads stress scenario: the host posts the threads, then its answer; a content
   // update re-applies the threads in between. On the same page nothing here closes the popover.
@@ -688,7 +697,8 @@ test("T44: without resolve and delete hooks (read-only) the popover has neither 
   assert.equal(popoverOf(reply.document).querySelector("[data-okf-comment-resolve]"), null, "hooks decide, not the reply hook");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S4
 test("T44: a thread with no block at its line and no quote anywhere goes to the Orphaned comments box", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "plain text");
@@ -755,7 +765,7 @@ test("T44 r2: a short quote is orphaned even when it occurs once elsewhere", () 
   assert.equal(orphanItems(document).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086#S3
 test("T44 r2: a pending reply disables Resolve and Delete, and a pending resolve disables Reply", () => {
   const { document, comments, calls } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -803,7 +813,7 @@ test("T44: orphans are never reported to the host as changes (the page only disp
 
 // ---- T45: the page trusts the host's re-anchoring verdict ----
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S4
 test("T45: orphaned true goes to the box even when the quote is on the page", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -813,7 +823,7 @@ test("T45: orphaned true goes to the box even when the quote is on the page", ()
   assert.deepEqual(orphanItems(document).map((item) => item.getAttribute("data-okf-comment-orphan")), ["t1"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S7
 test("T45: orphaned false trusts the host lines and does not search the quote elsewhere", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a long unique needle phrase here");
@@ -826,7 +836,8 @@ test("T45: orphaned false trusts the host lines and does not search the quote el
   assert.equal(marks(document).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S4
 test("T45: orphaned false with a block at the line places the thread as before", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -854,8 +865,8 @@ function setupAllMarks() {
   return { document, comments, holders };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S9
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S2
 test("comments hidden: a click, Enter or Space on a highlight, badge or orphan entry opens nothing and is not swallowed", () => {
   for (const [name, off] of HIDDEN_BY) {
     const { document, comments, holders } = setupAllMarks();
@@ -874,7 +885,7 @@ test("comments hidden: a click, Enter or Space on a highlight, badge or orphan e
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S9
 test("comments hidden: highlights leave the Tab order and come back when comments are shown", () => {
   const focusable = (mark: FakeElement) => ["tabindex", "role", "aria-haspopup"].map((name) => mark.getAttribute(name));
   for (const [name, off, on] of HIDDEN_BY) {
@@ -895,7 +906,7 @@ test("comments hidden: highlights leave the Tab order and come back when comment
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S9
 test("comments hidden: an open popover closes and does not come back with the threads or with Show", () => {
   for (const [name, off, on] of HIDDEN_BY) {
     const { document, comments } = setupAllMarks();

@@ -64,7 +64,8 @@ async function capture(
 }
 
 // @accepts_req StRS-MDOKFSTUDIO-GFM-003#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S4
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   const browser: Browser = await bounded("chromium.connectOverCDP to the workbench",

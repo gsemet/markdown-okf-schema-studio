@@ -6,7 +6,7 @@ import { openTableCellEditorForTab } from "./runtimeTestSupport";
 
 /** The blur of a table cell editor and the pointer press of the last 500 ms (features/tableCellEditor.ts). */
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-018
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-018#S5
 test("a blur commits the cell when the last pointer press is older than 500 ms, and not before", async () => {
   for (const [age, committed] of [[0, false], [560, true]] as const) {
     const harness = createRuntimeHarness();

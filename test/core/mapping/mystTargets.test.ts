@@ -10,7 +10,8 @@ import {
   documentTargets,
 } from "../../../src/core/mapping/mystTargets";
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-178
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-178#S3
 test("documentTargets lists (label)= names with the heading or text that follows", () => {
   const text = [
     "(intro)=", "# Introduction", "", "(plain-one)=", "Some paragraph text.", "",
@@ -37,7 +38,7 @@ test("documentTargets caps the list and says so", () => {
   assert.equal(documentTargets("(a)=\n").truncated, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183#S4
 test("bibKeys reads entry keys and titles, and skips comment, string and preamble entries", () => {
   const bib = [
     "@comment{ignored,}", "@string{jan = \"January\"}", "@preamble{\"x\"}",
@@ -62,7 +63,8 @@ test("collectBibKeys merges files, removes duplicates, sorts and caps", () => {
   assert.equal(capped.truncated, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148#S2
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148#S5
 test("docReference gives a POSIX path relative to the document, without the extension", () => {
   assert.equal(docReference("/w/book/chapters/a.md", "/w/book/chapters/b.md"), "b");
   assert.equal(docReference("/w/book/chapters/a.md", "/w/book/guide/c.md"), "../guide/c");

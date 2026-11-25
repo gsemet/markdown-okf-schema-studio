@@ -19,6 +19,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Second file
+- id: S2
+  title: Editor changes that leave the preview as it was
+- id: S3
+  title: A text diff becomes active
+- id: S4
+  title: Editors the side preview does not follow
+- id: S5
+  title: Only the newest following preview switches
+- id: S6
+  title: Quick switching between documents
+- id: S7
+  title: Another workspace folder or trust state
+- id: S8
+  title: Same folder and trust state, or no folder
+- id: S9
+  title: A hidden preview that becomes visible
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,13 +61,13 @@ default_owner_email: gaetan@xeberon.net
 
 When another saved Markdown file becomes the active editor, or a text diff whose real file is another saved Markdown file becomes the active tab, the extension SHALL switch only the newest side preview that follows the editor to that file, show Preview pending with the message Following the active Markdown editor. until its render ends, apply only the last requested document when the editor changes during the switch, and leave the preview unchanged for any other editor change.
 
-### Scenario (nominal): Second file
+### Scenario S1 (nominal): Second file
 
 - GIVEN a side preview of preview.md
 - WHEN the reader makes preview-other.md the active editor
 - THEN the preview shows Following the active Markdown editor., then the render of preview-other.md, and never the output of preview.md as the current one (integration tests test/integration/lifecycle.test.ts, second lifecycle render, and test/integration/sourceMapping.test.ts)
 
-### Scenario (boundary): Editor changes that leave the preview as it was
+### Scenario S2 (boundary): Editor changes that leave the preview as it was
 
 | Input | Outcome |
 | --- | --- |
@@ -56,14 +75,14 @@ When another saved Markdown file becomes the active editor, or a text diff whose
 | the reader focuses package.json with a side preview of preview-other.md | the preview keeps its document, status and requestId, with no reload (integration test test/integration/lifecycle.test.ts, 750 ms bounded sleep) |
 | the reader returns to the Markdown editor | no new render is needed: the requestId is unchanged |
 
-### Scenario (nominal): A text diff becomes active
+### Scenario S3 (nominal): A text diff becomes active
 
 - GIVEN a side preview of a.md that follows the editor
 - WHEN a text diff of b.md becomes the active tab (a git diff, a two-file compare or the replace preview), whichever side holds the cursor
 - THEN the preview switches to the real file of the diff, b.md, as for a text editor
 - AND a move of the cursor between the sides of the same diff, a diff with no side of the file scheme (a stand-in) and a diff whose real file is the shown document switch nothing
 
-### Scenario (boundary): Editors the side preview does not follow
+### Scenario S4 (boundary): Editors the side preview does not follow
 
 | Input | Outcome |
 | --- | --- |
@@ -72,34 +91,34 @@ When another saved Markdown file becomes the active editor, or a text diff whose
 
 The reason is the VS Code API: it gives these two editors no tab input class (only the text, text diff, custom, notebook and similar classes exist), so the host cannot tell them from another editor and reads them as an editor change that leaves the preview unchanged. Open the file in a text editor or in the single-file text diff to preview it (documented in docs/known-limitations.md and docs/user/open-studio.md).
 
-### Scenario (boundary): Only the newest following preview switches
+### Scenario S5 (boundary): Only the newest following preview switches
 
 | Input | Outcome |
 | --- | --- |
 | a side preview that follows and an Open With tab on another file, another Markdown file becomes active | only the side preview switches |
 | a restored older panel made a fixed preview and a newer following panel, another Markdown file becomes active | only the newer panel switches |
 
-### Scenario (boundary): Quick switching between documents
+### Scenario S6 (boundary): Quick switching between documents
 
 | Input | Outcome |
 | --- | --- |
 | a side preview of A and a flush of the page's editors still running, the reader activates B then A before the flush ends | the preview ends on A and does not switch to B |
 | an editor of A is open in the page and the reader returned to A before the switch ran, the flush ends | the page's editor is watched again instead of the document being switched |
 
-### Scenario (nominal): Another workspace folder or trust state
+### Scenario S7 (nominal): Another workspace folder or trust state
 
 - GIVEN a multi-root workspace and a side preview of a file in folder one
 - WHEN a file of folder two becomes active
 - THEN the session of folder one is disposed, a new session is created on the same panel with followsActiveEditor and lockedColumn kept, and it starts from the Preview pending page
 
-### Scenario (boundary): Same folder and trust state, or no folder
+### Scenario S8 (boundary): Same folder and trust state, or no folder
 
 | Input | Outcome |
 | --- | --- |
 | a side preview with restricted reads of a file in no workspace folder, another file of another directory also in no folder becomes active | a new session is created too, because the resource folder is the document's own directory |
 | the same document folder and trust state | the session is kept |
 
-### Scenario (boundary): A hidden preview that becomes visible
+### Scenario S9 (boundary): A hidden preview that becomes visible
 
 | Input | Outcome |
 | --- | --- |

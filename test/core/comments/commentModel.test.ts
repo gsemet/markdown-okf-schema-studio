@@ -25,7 +25,7 @@ const thread = (overrides: Record<string, unknown> = {}) => ({
 const file = (threads: unknown[] = [thread()], extra: Record<string, unknown> = {}) =>
   JSON.stringify({ version: 1, document: "notes.md", threads, ...extra });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S1
 test("T42: sidecarNameFor puts .comments.json next to the document", () => {
   assert.equal(sidecarNameFor("notes.md"), "notes.comments.json");
   assert.equal(sidecarNameFor("/a/b/notes.md"), "/a/b/notes.comments.json");
@@ -42,7 +42,7 @@ test("T42: a valid file parses into threads", () => {
   assert.equal(parsed.threads[0].comments[0].author, "Ada");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S1
 test("T42: malformed JSON and wrong shapes give errors and no threads", () => {
   for (const text of ["", "{", "[]", "null", "42", JSON.stringify({ version: 2, document: "a", threads: [] }),
     JSON.stringify({ version: 1, threads: [] }), JSON.stringify({ version: 1, document: "a" })]) {
@@ -52,7 +52,7 @@ test("T42: malformed JSON and wrong shapes give errors and no threads", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S2
 test("T42: one invalid thread rejects the whole file", () => {
   const bad = [
     thread({ id: "" }), thread({ resolved: "no" }), thread({ createdAt: "yesterday" }),
@@ -72,7 +72,7 @@ test("T42: one invalid thread rejects the whole file", () => {
   assert.ok(parseSidecar(file([thread(), thread()])).errors.length > 0, "duplicate thread ids");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S3
 test("T42: limits on size, threads, comments and string length", () => {
   const many = Array.from({ length: MAX_THREADS + 1 }, (_, index) => thread({ id: `t${index}` }));
   assert.ok(parseSidecar(file(many)).errors.length > 0);

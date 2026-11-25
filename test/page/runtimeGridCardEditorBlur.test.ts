@@ -64,7 +64,8 @@ function assertSavedAndClosedByHost(harness: RuntimeHarness, textarea: RuntimeEl
     why + ": the editor is gone after the host's answer (still open: " + savingStatusShown(harness) + " with the Saving status)");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S6
 test("grid card: a click outside after an autosave landed sends the final save and the host closes the editor", () => {
   const { harness, textarea } = openCardEditor();
   type(textarea);
@@ -77,7 +78,7 @@ test("grid card: a click outside after an autosave landed sends the final save a
   assertSavedAndClosedByHost(harness, textarea, "outside after an autosave");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S6
 test("grid card: a click outside after typing saves the card and closes the editor", () => {
   for (const related of [undefined, null, "body"] as const) {
     const { harness, textarea } = openCardEditor();
@@ -87,7 +88,7 @@ test("grid card: a click outside after typing saves the card and closes the edit
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S6
 test("grid card: a click outside without typing closes the editor at once", () => {
   const { harness, textarea } = openCardEditor();
   textarea.dispatch("blur", { relatedTarget: null });
@@ -95,7 +96,7 @@ test("grid card: a click outside without typing closes the editor at once", () =
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S4
 test("grid card: a click on the palette keeps the text box focused, then a click outside saves", () => {
   const { harness, textarea } = openCardEditor(true);
   type(textarea);
@@ -112,7 +113,7 @@ test("grid card: a click on the palette keeps the text box focused, then a click
   assertSavedAndClosedByHost(harness, textarea, "outside after the palette");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S5
 test("grid card: the focus in the mode select then a click outside saves", () => {
   const { harness, textarea } = openCardEditor(true);
   type(textarea);
@@ -123,7 +124,7 @@ test("grid card: the focus in the mode select then a click outside saves", () =>
   assertSavedAndClosedByHost(harness, textarea, "mode select blurred outside");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S5
 test("grid card: the focus in an open palette popover then a click outside saves", () => {
   const { harness, textarea } = openCardEditor(true);
   type(textarea);
@@ -136,7 +137,7 @@ test("grid card: the focus in an open palette popover then a click outside saves
   assertSavedAndClosedByHost(harness, textarea, "popover field blurred outside");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S1
 test("grid card: Done saves and closes, whatever the palette covers", () => {
   const { harness, textarea } = openCardEditor(true);
   type(textarea);
@@ -147,7 +148,7 @@ test("grid card: Done saves and closes, whatever the palette covers", () => {
   assertSavedAndClosedByHost(harness, textarea, "Done");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S5
 test("grid card: the window losing the focus saves the card (BLOCK-047 regression guard)", () => {
   const { harness, textarea } = openCardEditor(true);
   type(textarea);
@@ -156,7 +157,8 @@ test("grid card: the window losing the focus saves the card (BLOCK-047 regressio
   assertSavedAndClosedByHost(harness, textarea, "window blur");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S7
 test("grid card: a click outside while the file dialog is open waits, and one after its answer saves", () => {
   for (const answer of [{ ok: true, cancelled: true }, { ok: false, reason: "Outside the workspace." }]) {
     const { harness, textarea } = openCardEditor(true);

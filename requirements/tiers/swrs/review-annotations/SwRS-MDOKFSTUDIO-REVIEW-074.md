@@ -24,6 +24,29 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Reply
+- id: S2
+  title: A reply to an unknown or full thread
+- id: S3
+  title: Resolve and reopen
+- id: S4
+  title: Delete one of two
+- id: S5
+  title: Delete the last thread
+- id: S6
+  title: A resolve or a delete of an unknown thread
+- id: S7
+  title: Valid reply message
+- id: S8
+  title: Invalid reply message
+- id: S9
+  title: Accepted limits of a reply message
+- id: S10
+  title: Valid resolve and delete messages
+- id: S11
+  title: Invalid resolve and delete messages
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,39 +70,39 @@ supersedes:
 
 When the host handles a reply, resolve or delete message for a thread of the review comments file, the extension SHALL append the comment, set the resolved flag or remove the thread of that name only and change no other thread, and refuse with a reason and write nothing when that thread does not exist or already holds 200 comments; a reply, resolve or delete message is dropped without an answer unless it has a non-empty thread id, a reply has a body of 1 to 10 000 characters and a resolve has a boolean resolved flag.
 
-### Scenario (nominal): Reply
+### Scenario S1 (nominal): Reply
 
 - GIVEN two threads and a reply to the first, sent from the thread popover
 - WHEN the host handles it
 - THEN the first thread holds its comment and the reply, listed after the first comment, with author, id and time chosen by the host, and the second thread is unchanged
 
-### Scenario (refusal): A reply to an unknown or full thread
+### Scenario S2 (refusal): A reply to an unknown or full thread
 
 | Input | Outcome |
 | --- | --- |
 | A reply to the thread t_ffffffff | The page is told "the thread no longer exists or has too many comments." and the file is unchanged |
 | A reply to a thread that holds 200 comments | The change is refused with the same reason |
 
-### Scenario (nominal): Resolve and reopen
+### Scenario S3 (nominal): Resolve and reopen
 
 | Input | Outcome |
 | --- | --- |
 | The reader resolves an open thread and then reopens it | The file shows resolved true and then false and the other threads are unchanged |
 | Three threads of which one is resolved, and another one is resolved | Only that one changes |
 
-### Scenario (nominal): Delete one of two
+### Scenario S4 (nominal): Delete one of two
 
 - GIVEN two threads
 - WHEN one is deleted
 - THEN the other stays in the file
 
-### Scenario (boundary): Delete the last thread
+### Scenario S5 (boundary): Delete the last thread
 
 - GIVEN a file with one thread
 - WHEN it is deleted
 - THEN the file stays with an empty threads list (threads []) and the page is told the list is empty
 
-### Scenario (refusal): A resolve or a delete of an unknown thread
+### Scenario S6 (refusal): A resolve or a delete of an unknown thread
 
 | Input | Outcome |
 | --- | --- |
@@ -88,13 +111,13 @@ When the host handles a reply, resolve or delete message for a thread of the rev
 
 The refusals of the host that apply to every comment change (a document that is not a saved file, a comments file with unsaved changes in an editor, the size and thread limits of the file) and the warning shown with them are in SwRS-MDOKFSTUDIO-REVIEW-054.
 
-### Scenario (nominal): Valid reply message
+### Scenario S7 (nominal): Valid reply message
 
 - GIVEN a previewCommentReply message with a thread id and a body of 1 character
 - WHEN the message is validated
 - THEN it is accepted
 
-### Scenario (refusal): Invalid reply message
+### Scenario S8 (refusal): Invalid reply message
 
 | Input | Outcome |
 | --- | --- |
@@ -102,19 +125,19 @@ The refusals of the host that apply to every comment change (a document that is 
 | A body of 0 characters | dropped without an answer |
 | A body of 10 001 characters | dropped without an answer |
 
-### Scenario (boundary): Accepted limits of a reply message
+### Scenario S9 (boundary): Accepted limits of a reply message
 
 | Input | Outcome |
 | --- | --- |
 | A body of 1 character, a body of 10 000 characters | accepted |
 
-### Scenario (nominal): Valid resolve and delete messages
+### Scenario S10 (nominal): Valid resolve and delete messages
 
 - GIVEN a previewCommentResolve message with a thread id and resolved true, and a previewCommentDelete message with a thread id
 - WHEN the messages are validated
 - THEN both are accepted
 
-### Scenario (refusal): Invalid resolve and delete messages
+### Scenario S11 (refusal): Invalid resolve and delete messages
 
 | Input | Outcome |
 | --- | --- |

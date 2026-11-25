@@ -33,14 +33,15 @@ async function openPreview(document: vscode.TextDocument): Promise<NonNullable<R
   return preview;
 }
 
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-025
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-014
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S2
 /** Moving a block from the insert bar: one swap, one undo, and every unsafe request refused. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
@@ -129,8 +130,9 @@ async function renderedRanges(text: string): Promise<Array<{ tag: string; line: 
     .map((match) => ({ tag: match[1], line: Number(match[2]), endLine: Number(match[3]) }));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S6
 /**
  * The ranges the page sends are the ones the renderer maps: a list followed by a blank line is
  * mapped up to that blank line. A document with a frontmatter, headings and a list moves up and
@@ -184,7 +186,7 @@ export async function runMappedRanges(): Promise<void> {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S1
 /** Moving a selection of blocks (T41): the whole span moves, and one undo restores the order. */
 export async function runUndo(): Promise<void> {
   const extensionRoot = path.resolve(__dirname, "../../..");

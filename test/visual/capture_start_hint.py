@@ -5,7 +5,7 @@ from playwright.sync_api import Page
 from capture_support import Failure
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S1
 def check_start_hint(page: Page, page_name: str, failures: list[Failure]) -> None:
   """The hint line is visible under the Start writing button, in the typography of the editor hint."""
   hint = page.locator(".sphinx-preview-insert-point--start [data-sphinx-preview-start-hint]")

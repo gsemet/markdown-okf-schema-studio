@@ -5,7 +5,7 @@ import { carriesFiles, droppedFileUris, nearestPointIndex } from "../../../src/p
 
 const data = (items: Record<string, string>) => ({ types: Object.keys(items), getData: (format: string) => items[format] ?? "" });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("an Explorer drag is recognised and its file addresses read", () => {
   assert.equal(carriesFiles(data({ "text/plain": "x" })), false);
   assert.equal(carriesFiles(data({ "text/uri-list": "file:///a.md" })), true);
@@ -21,7 +21,7 @@ test("an Explorer drag is recognised and its file addresses read", () => {
   assert.equal(droppedFileUris(data({ "text/uri-list": many })).length, 50);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("the insertion bar nearest to the pointer is chosen", () => {
   assert.equal(nearestPointIndex([], 10), -1);
   assert.equal(nearestPointIndex([100, 200, 300], 190), 1);

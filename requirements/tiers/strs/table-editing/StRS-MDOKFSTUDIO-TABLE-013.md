@@ -13,6 +13,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Convert a table to a list-table and back
+- id: S2
+  title: Convert the table being edited
 user_need: As a writer, I convert a table between a Markdown pipe table, a MyST
   list-table and a simple HTML table, and I am told when a conversion is refused
   instead of silently losing content.
@@ -64,7 +69,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Convert a table to a list-table and back
+#### Path S1: Convert a table to a list-table and back
 
 1. The caret is on a pipe table in MyST mode
    - SwRS-MDOKFSTUDIO-TABLE-122: the writer runs List table and the table is replaced by a list-table in one edit
@@ -74,7 +79,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-TABLE-122 (nominal): escaped pipes are kept across forms
 3. The table is a pipe table again
 
-#### Path 2: Convert the table being edited
+#### Path S2: Convert the table being edited
 
 1. A cell editor is open in a pipe table
    - SwRS-MDOKFSTUDIO-TABLE-122: the writer presses List table in the table bar and the table, with the text typed in the current cell, is converted in one final save

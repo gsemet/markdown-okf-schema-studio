@@ -18,6 +18,27 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-008
 depends_on:
 - SwRS-MDOKFSTUDIO-TABLE-119
+scenarios:
+- id: S1
+  title: Render during editing
+- id: S2
+  title: The newest waiting render is delivered when the editor closes
+- id: S3
+  title: Work queued twice and a host lock without page editor
+- id: S4
+  title: Properties update waits for the field editor
+- id: S5
+  title: A content patch closes an open block editor without cancelling
+- id: S6
+  title: A content patch closes an open field editor
+- id: S7
+  title: A content patch without an open editor
+- id: S8
+  title: "An outside change over an open table cell editor's table"
+- id: S9
+  title: A document switch drops the work of the old document
+- id: S10
+  title: A switch while the host still applies an edit
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,58 +66,58 @@ supersedes:
 
 While the page has an inline editor open, the extension SHALL hold back the renders, theme changes, PlantUML work, link refreshes, include changes and properties table updates that would replace the page content, and deliver only the newest render of those that waited once the editor closes.
 
-### Scenario (nominal): Render during editing
+### Scenario S1 (nominal): Render during editing
 - GIVEN an open editor and a document change
 - WHEN a render finishes
 - THEN it waits and the editor keeps its text and caret
 
-### Scenario (nominal): The newest waiting render is delivered when the editor closes
+### Scenario S2 (nominal): The newest waiting render is delivered when the editor closes
 - GIVEN two renders that finished while the editor was open
 - WHEN the editor closes
 - THEN only the newest reaches the page
 
-### Scenario (boundary): Work queued twice and a host lock without page editor
+### Scenario S3 (boundary): Work queued twice and a host lock without page editor
 | Input | Outcome |
 | --- | --- |
 | Work queued twice under the same key | The earlier one is discarded when the second is queued, and its stage is freed |
 | The host holds an edit but the page reports no open editor, and a finished render arrives | The render reaches the page; only an explicit page report of an open editor holds finished renders |
 
-### Scenario (nominal): Properties update waits for the field editor
+### Scenario S4 (nominal): Properties update waits for the field editor
 - GIVEN a field editor open
 - WHEN previewPropertiesTable arrives
 - THEN the table is not replaced and the markup is kept
 - WHEN the editor closes and the deferral ends
 - THEN the kept table is applied
 
-### Scenario (nominal): A content patch closes an open block editor without cancelling
+### Scenario S5 (nominal): A content patch closes an open block editor without cancelling
 - GIVEN an open block editor whose text was autosaved
 - WHEN a content patch is applied
 - THEN the editor is closed, no previewEditCancel is posted and the document keeps the autosaved text
 
-### Scenario (refusal): A content patch closes an open field editor
+### Scenario S6 (refusal): A content patch closes an open field editor
 - GIVEN a field editor with typed text and a waiting properties update
 - WHEN a previewContentPatch arrives
 - THEN the editor closes without a save and the waiting update is dropped
 
-### Scenario (boundary): A content patch without an open editor
+### Scenario S7 (boundary): A content patch without an open editor
 | Input | Outcome |
 | --- | --- |
 | A patch is applied and no block editor is open | Nothing else is closed |
 | A patch arrives and no field editor is open | The patch is applied normally |
 
-### Scenario (boundary): An outside change over an open table cell editor's table
+### Scenario S8 (boundary): An outside change over an open table cell editor's table
 | Input | Outcome |
 | --- | --- |
 | A render of an outside change (undo, redo, revert, another writer) that overlaps the source lines of the table whose cell editor is open | The render is not held: it reaches the page at once and the content patch closes the cell editor (SwRS-MDOKFSTUDIO-TABLE-119) |
 | An outside change elsewhere, text typed in the source, or the preview's own save | The render waits as before |
 | An open editor that is not a table cell editor | The render waits as before |
 
-### Scenario (nominal): A document switch drops the work of the old document
+### Scenario S9 (nominal): A document switch drops the work of the old document
 - GIVEN an editor closed by the flush and a render queued for the old document
 - WHEN the preview switches to another document
 - THEN the open page editor is forgotten, the queued work is discarded and the new document renders at once
 
-### Scenario (boundary): A switch while the host still applies an edit
+### Scenario S10 (boundary): A switch while the host still applies an edit
 - GIVEN a final save still being applied
 - WHEN the switch happens
 - THEN the host's own edit lock is kept

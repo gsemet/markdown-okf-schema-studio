@@ -3,13 +3,14 @@ import { test } from "node:test";
 
 import { commentTagTitle, openingTagTitle, TAG_TITLE_MAX, tocTagTitle, contentsTagTitle } from "../../../src/core/render/blockTagTitle";
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
 test("a comment is titled with its literal opener", () => {
   assert.equal(commentTagTitle(false), "<!-- -->");
   assert.equal(commentTagTitle(true), "<!-- TODO -->");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S4
 test("an HTML element block is titled with its real opening tag, attributes included", () => {
   assert.equal(openingTagTitle('<div align="center">'), '<div align="center">');
   assert.equal(openingTagTitle("<details>\n<summary>S</summary>"), "<details>");
@@ -18,7 +19,8 @@ test("an HTML element block is titled with its real opening tag, attributes incl
   assert.equal(openingTagTitle("<br/>"), "<br/>");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S4
 test("a long opening tag is shortened with an ellipsis and keeps its closing bracket", () => {
   const long = `<div align="center" class="${"x".repeat(80)}" id="top">`;
   const title = openingTagTitle(long)!;
@@ -28,14 +30,15 @@ test("a long opening tag is shortened with an ellipsis and keeps its closing bra
   assert.equal(openingTagTitle(long, 200), long);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S4
 test("text that is not an opening tag has no title", () => {
   assert.equal(openingTagTitle("plain text"), undefined);
   assert.equal(openingTagTitle("</div>"), undefined);
   assert.equal(openingTagTitle("<!-- note -->"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
 test("a table-of-contents block is titled with its marker", () => {
   assert.equal(tocTagTitle("[TOC]"), "[TOC]");
   assert.equal(tocTagTitle(" [[_toc_]] "), "[[_toc_]]");

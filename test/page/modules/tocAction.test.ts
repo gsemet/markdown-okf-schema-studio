@@ -15,7 +15,7 @@ function run(value: string, start: number, end = start): { text: string; caret: 
   return { text, caret: edit.selectionStart };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-003
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-003#S1
 test("the Table of contents action writes [TOC] set apart after the line, the caret after it", () => {
   assert.deepEqual(run("para", 4), { text: "para\n\n[TOC]", caret: 11 });
   const middle = run("one\n\ntwo", 1);
@@ -25,7 +25,7 @@ test("the Table of contents action writes [TOC] set apart after the line, the ca
   assert.equal(run("a\n\n", 3).text, "a\n\n[TOC]");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-003
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-003#S2
 test("the action is a block-scope palette button and a /toc entry in every mode", () => {
   const action = PALETTE_ACTIONS.toc;
   assert.deepEqual(action.modes, ["strict"]);

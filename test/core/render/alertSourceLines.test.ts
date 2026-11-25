@@ -58,7 +58,7 @@ const TWO_ALERTS_BLOCKS: Block[] = [
 ];
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S6
 test("two consecutive alerts and the blocks after them carry the lines of the document", async () => {
   assert.deepEqual(await blocks(TWO_ALERTS), TWO_ALERTS_BLOCKS);
 });
@@ -137,7 +137,7 @@ test("an alert at the end of a file without a final line break ends on the last 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S6
 test("an alert after a frontmatter block carries the absolute lines of the file", async () => {
   assert.deepEqual(await blocks("---\ntitle: x\n---\n\n> [!NOTE]\n> fm body\n\nAfter.\n"), [
     ["aside", 5, 6],
@@ -273,7 +273,8 @@ test("a context tag group re-parsed from raw HTML maps the alert of its body to 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-009#S9
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S2
 test("the document with an important alert then a note alert maps every block to its own lines", async () => {
   const source = fs.readFileSync(LAYOUT_FIXTURE, "utf8");
   const sourceLines = source.split("\n");

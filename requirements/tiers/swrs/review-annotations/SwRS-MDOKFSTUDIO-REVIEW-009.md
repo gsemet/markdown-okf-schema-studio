@@ -33,6 +33,23 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-018
+scenarios:
+- id: S1
+  title: Cards for changed blocks
+- id: S2
+  title: Going back
+- id: S3
+  title: A well-formed baseline message
+- id: S4
+  title: Dropped baseline messages
+- id: S5
+  title: Changed words of a card
+- id: S6
+  title: Word diff size limit
+- id: S7
+  title: Hunks with both sides
+- id: S8
+  title: Hunk size limits and block mapping
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -65,7 +82,7 @@ supersedes:
 
 While the side-by-side diff is on and a baseline for the current render is held, the page SHALL replace each block that changed since the last commit by a card with the rendered block at the last commit on the left and the rendered current block on the right, keep on the left of a block that lies inside one hunk only the block at the last commit that shares the most words with it (each kept by one block at most) and show the other blocks at the last commit of that hunk as removed blocks in their source order, mark the removed words on the left and the added words on the right, leave the left empty for an added block and show a removed block with an empty right side, leave unchanged blocks as they are, and show the original blocks again when the diff goes off or the baseline is stale; the baseline message previewBaselineDiff is accepted only with an html string of at most 20 MiB and at most 100 000 hunks of non-negative integer lines whose ends are not more than one before their starts, for the current render, and any other is dropped; the removed and added words are the character ranges found by comparing the block at the last commit with the current block word by word, consecutive changed words merged into one range, all words of both texts being marked when the comparison would exceed 4 000 000 word pairs; the changed blocks are found from line hunks that give the last-commit lines and the current lines as 1-based inclusive ranges, with an empty side for lines only added or only removed, merged with the hunk next to them when only blank lines separate them, ignoring differences of line endings, and reported as one hunk when more than 20 000 lines differ or more than 2000 edits are needed.
 
-### Scenario (nominal): Cards for changed blocks
+### Scenario S1 (nominal): Cards for changed blocks
 
 | Input | Outcome |
 | --- | --- |
@@ -77,7 +94,7 @@ While the side-by-side diff is on and a baseline for the current render is held,
 | Two blocks inside one hunk that holds one block at the last commit | the block that shares the most words with it keeps it on its left; the other is an added block |
 | An unchanged block | shown as it is, no card |
 
-### Scenario (boundary): Going back
+### Scenario S2 (boundary): Going back
 
 | Input | Outcome |
 | --- | --- |
@@ -85,13 +102,13 @@ While the side-by-side diff is on and a baseline for the current render is held,
 | A baseline of an older render than the page content | no card is made |
 | A baseline whose hunks are empty | no card is made |
 | The page content is patched | the cards are made again from the held baseline when it matches the new content |
-### Scenario (nominal): A well-formed baseline message
+### Scenario S3 (nominal): A well-formed baseline message
 
 | Input | Outcome |
 | --- | --- |
 | previewBaselineDiff with an html string and hunks of non-negative integers whose ends are at least one before their starts | accepted for the current render |
 
-### Scenario (refusal): Dropped baseline messages
+### Scenario S4 (refusal): Dropped baseline messages
 
 | Input | Outcome |
 | --- | --- |
@@ -99,7 +116,7 @@ While the side-by-side diff is on and a baseline for the current render is held,
 | An html of more than 20 MiB, or more than 100 000 hunks | dropped |
 | A baseline message of a stale render | dropped |
 
-### Scenario (nominal): Changed words of a card
+### Scenario S5 (nominal): Changed words of a card
 
 | Input | Outcome |
 | --- | --- |
@@ -110,13 +127,13 @@ While the side-by-side diff is on and a baseline for the current render is held,
 | Words only inserted or only deleted | ranges on one side only |
 | Texts that come in pieces (text nodes) | compared as one text in which a piece boundary separates words, the ranges given inside their piece |
 
-### Scenario (boundary): Word diff size limit
+### Scenario S6 (boundary): Word diff size limit
 
 | Input | Outcome |
 | --- | --- |
 | Texts of more than 4 000 000 word pairs | all words of both texts are marked |
 
-### Scenario (nominal): Hunks with both sides
+### Scenario S7 (nominal): Hunks with both sides
 
 | Input | Outcome |
 | --- | --- |
@@ -130,7 +147,7 @@ While the side-by-side diff is on and a baseline for the current render is held,
 | Lines removed (or added) next to a changed line, a heading or any other non-blank line between them | two hunks |
 | Two changed lines (both sides not empty), only blank lines between them | two hunks |
 
-### Scenario (boundary): Hunk size limits and block mapping
+### Scenario S8 (boundary): Hunk size limits and block mapping
 
 | Input | Outcome |
 | --- | --- |

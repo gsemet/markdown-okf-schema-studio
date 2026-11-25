@@ -122,8 +122,10 @@ const stable = (message: Record<string, unknown>): Record<string, unknown> => {
 };
 
 for (const kind of KINDS) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
-  // @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S12
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S14
   test(`${kind}: a failed detached save reopens the same editor with the typed text and no new open`, () => {
     const { harness, editId, control, first } = detached(kind);
     const before = harness.messages.length;
@@ -139,7 +141,8 @@ for (const kind of KINDS) {
     assert.ok(harness.createdElements.some((element) => element.textContent === "disk full"), "the status shows the error");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
   test(`${kind}: the retry equals the first save in every field but the pin, the anchor and flush, even after a patch`, () => {
     const { harness, editId, first, finish } = detached(kind);
     // A render already in flight arrives between the Cancel and the error.
@@ -154,8 +157,8 @@ for (const kind of KINDS) {
     assert.deepEqual(stable(retry), stable(first));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
   test(`${kind}: Escape in the reopened editor posts previewEditCancel`, () => {
     const { harness, editId, control, first } = detached(kind);
     harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId, error: "disk full", unsavedText: String(first.editedText) });
@@ -169,7 +172,8 @@ for (const kind of KINDS) {
     }
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S6
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
   test(`${kind}: an error without unsavedText reopens the editor with the text of the first save`, () => {
     const { harness, editId, control, first } = detached(kind);
     harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId, error: "disk full" });
@@ -179,7 +183,8 @@ for (const kind of KINDS) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
 test("an error for an edit the page has no record of reopens nothing and answers reopened false", () => {
   const { harness } = detached("paragraph");
   harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId: harness.messages.filter((m) => m.type === "previewEditSave").at(-1)!.editId, done: true });
@@ -192,7 +197,8 @@ test("an error for an edit the page has no record of reopens nothing and answers
   assert.equal(harness.createdElements.filter((element) => element.tagName === "TEXTAREA").length, 1, "no second text box");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S8
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S9
 test("the outside change error reopens the editor with the typed text and that message", () => {
   const { harness, editId, control, first } = detached("paragraph");
   const message = "The file changed outside the preview before your text was saved. Copy your text, then reopen the block.";

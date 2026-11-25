@@ -32,7 +32,7 @@ const WIDE_TABLE_DOCUMENT = [
  * QA replay 271-c5-1 (QA271-08): with a wide table scrolled to its Owner column, Cmd/Ctrl+F then a
  * word of the Description column and Enter scroll the table so the hit text lies inside its box and
  * the pane.
- * @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+ * @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S3
  */
 export async function scenarioFindWideTable(page: Page): Promise<void> {
   await withDocument("realinput-find-wide-table", WIDE_TABLE_DOCUMENT, async (source) => {

@@ -82,8 +82,8 @@ async function noCellEditor(page: Page): Promise<boolean> {
  * Replay 271-c3-2: Col − twice in the table toolbar, then three undos from the source (the third
  * one undoes an earlier edit elsewhere). The buffer goes back to the original and the preview
  * table shows its three columns again, with no cell editor left over the old structure.
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-119
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S8
  */
 export async function scenarioUndoUnderCellEditorRendersTable(page: Page): Promise<void> {
   await withDocument("realinput-stale-undo", ALIGNMENT_DOCUMENT, async (document) => {
@@ -132,9 +132,9 @@ export async function scenarioUndoUnderCellEditorRendersTable(page: Page): Promi
  * Replay 271-c6-1 (both parts): ` X` typed in the `alpha` cell, the file rewritten on disk by another
  * tool, Tab, Escape, then File: Revert File from the source. The buffer equals the disk, a cell
  * shows `alpha` and none shows `alpha X`, and the paragraph shows the external text.
- * @tests_req SwRS-MDOKFSTUDIO-LIFE-069
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-125
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+ * @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S5
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-125#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
  */
 export async function scenarioRevertAfterExternalWriteRendersCell(page: Page): Promise<void> {
   await withDocument("realinput-stale-revert", CONCURRENCY_DOCUMENT, async (document) => {

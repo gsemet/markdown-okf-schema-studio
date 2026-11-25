@@ -17,6 +17,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-021
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
+scenarios:
+- id: S1
+  title: The menu
+- id: S2
+  title: Inline
+- id: S3
+  title: Block
+- id: S4
+  title: Samples with no selection
+- id: S5
+  title: Unknown kind
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,25 +45,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Math and chooses a kind of the menu of `Inline $…$`, `Display $$` and Aligned equations, the extension SHALL write the selection, or a sample, as `$text$`, as a `$$` block or as a `$$` block with a begin and end align environment, and refuse any other kind.
 
-### Scenario (nominal): The menu
+### Scenario S1 (nominal): The menu
 
 - GIVEN the MyST mode
 - WHEN the writer presses Math
 - THEN the menu has the three entries with the values inline, display and aligned, and the tooltip reads Math (choose inline, display or aligned)
 
-### Scenario (nominal): Inline
+### Scenario S2 (nominal): Inline
 
 - GIVEN the text a b c with b selected
 - WHEN Inline is chosen
 - THEN the text is `a $b$ c` with b selected
 
-### Scenario (nominal): Block
+### Scenario S3 (nominal): Block
 
 - GIVEN the caret after Intro
 - WHEN Aligned is chosen
 - THEN a `$$` block with the align environment and the sample a &= b follows Intro after a blank line, with the sample selected
 
-### Scenario (boundary): Samples with no selection
+### Scenario S4 (boundary): Samples with no selection
 
 | Kind | Sample written with no selection |
 | --- | --- |
@@ -60,7 +71,7 @@ When the writer presses Math and chooses a kind of the menu of `Inline $…$`, `
 | Display | E = mc^2 |
 | Aligned | a &= b |
 
-### Scenario (refusal): Unknown kind
+### Scenario S5 (refusal): Unknown kind
 
 - GIVEN the argument bogus
 - WHEN the math action runs

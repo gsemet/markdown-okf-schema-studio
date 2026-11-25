@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Move through the cells with the keyboard
 user_need: As a writer, I move through a table with the keyboard, cell by cell,
   and add a row by pressing Tab in the last cell; I use the keys I know in a
   cell and they edit the cell, not the page or the source document.
@@ -71,7 +74,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Move through the cells with the keyboard
+#### Path S1: Move through the cells with the keyboard
 
 1. A cell editor is open
    - SwRS-MDOKFSTUDIO-TABLE-123: the writer presses Tab, Shift+Tab or an arrow key at the edge of the text and the editor moves to the next, previous or neighbouring cell

@@ -23,10 +23,11 @@ async function waitFor(description: string, predicate: () => boolean, timeoutMs 
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-007
+// @accepts_req StRS-MDOKFSTUDIO-PALETTE-007#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192#S2
 /** The image button's native dialog: relative path of the pick, refusals, cancel (dialog stubbed). */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);

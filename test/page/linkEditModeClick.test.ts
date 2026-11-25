@@ -55,14 +55,15 @@ function assertOpensParagraphOnly(harness: RuntimeHarness, line: number, endLine
   assert.deepEqual(posts(harness, "previewLink"), [], "the link is not followed");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
 test("edit mode: a plain click on a link inside a paragraph opens the paragraph editor and does not follow", () => {
   const { harness, link } = withLink(true);
   click(harness, link);
   assertOpensParagraphOnly(harness, 50, 52);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
 test("edit mode: a plain click on a link-only paragraph opens its editor and does not follow", () => {
   const { harness, link } = withLink(true, 2);
   click(harness, link);
@@ -72,21 +73,24 @@ test("edit mode: a plain click on a link-only paragraph opens its editor and doe
   assert.deepEqual(posts(harness, "previewLink"), [], "the link is not followed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
 test("edit mode: Enter on a focused link inside a paragraph opens the editor and does not follow", () => {
   const { harness, link } = withLink(true);
   press(harness, link, "Enter");
   assertOpensParagraphOnly(harness, 50, 52);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
 test("edit mode: Space on a focused link inside a paragraph opens the editor and does not follow", () => {
   const { harness, link } = withLink(true);
   press(harness, link, " ");
   assertOpensParagraphOnly(harness, 50, 52);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S6
 test("edit mode: Cmd click and Ctrl click on a link follow it and open no editor", () => {
   for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
     const { harness, link } = withLink(true);
@@ -96,7 +100,8 @@ test("edit mode: Cmd click and Ctrl click on a link follow it and open no editor
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S6
 test("edit mode: Cmd+Enter and Ctrl+Enter on a focused link follow it and open no editor", () => {
   for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
     const { harness, link } = withLink(true);
@@ -106,7 +111,8 @@ test("edit mode: Cmd+Enter and Ctrl+Enter on a focused link follow it and open n
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S7
 test("reading mode: a plain click on a link follows it and opens no editor", () => {
   const { harness, link } = withLink(false);
   click(harness, link);
@@ -142,8 +148,9 @@ function linkedCard(harness: RuntimeHarness): { title: RuntimeElement; link: Lin
   return { title, link, body, footer };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
 test("edit mode: a click on a linked card's title, body or footer opens that part's line, never the link", () => {
   for (const [part, line] of [["title", 14], ["body", 19], ["footer", 21]] as const) {
     const harness = createRuntimeHarness();
@@ -157,7 +164,8 @@ test("edit mode: a click on a linked card's title, body or footer opens that par
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S3
 test("edit mode: a Cmd or Ctrl click on a linked card's title follows the card link", () => {
   for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
     const harness = createRuntimeHarness();
@@ -169,7 +177,8 @@ test("edit mode: a Cmd or Ctrl click on a linked card's title follows the card l
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S2
 test("edit mode: a middle click on a link follows it and opens no editor", () => {
   const { harness, link } = withLink(true);
   harness.dispatchDocument("auxclick", { type: "auxclick", button: 1, target: link, preventDefault: () => undefined });
@@ -177,7 +186,8 @@ test("edit mode: a middle click on a link follows it and opens no editor", () =>
   assert.equal(posts(harness, "previewLink").length, 1, "the link is followed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S6
 test("edit mode: a click on a link while another block editor is open saves it first and follows nothing", () => {
   const { harness, link } = withLink(true, 2);
   click(harness, harness.mappings[1]);
@@ -216,7 +226,8 @@ test("edit mode: a link of the properties table keeps its field editor and its C
 
 const HINT_LINE = "\nCtrl+click to follow";
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S7
 test("edit mode: a link carries a Cmd/Ctrl+click to follow tooltip line; reading mode does not", () => {
   const harness = createRuntimeHarness();
   const link = new LinkElement(harness, "related-target.md");
@@ -245,7 +256,7 @@ test("edit mode: a link carries a Cmd/Ctrl+click to follow tooltip line; reading
   assert.equal(macLink.getAttribute("title"), "Cmd+click to follow", "macOS says Cmd");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
 test("edit mode: the follow hint survives a later target hint and a content render", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -268,7 +279,8 @@ test("edit mode: the follow hint survives a later target hint and a content rend
   assert.equal(fresh.getAttribute("title"), "/ws/related-target.md", "leaving edit mode keeps the target only");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S7
 test("edit mode: a content render that rebuilds a hinted link with a known target keeps one hint line", () => {
   const harness = createRuntimeHarness();
   const link = new LinkElement(harness, "related-target.md");
@@ -299,7 +311,7 @@ test("edit mode: a content render that rebuilds a hinted link with a known targe
   assert.equal(current.getAttribute("title"), "/ws/related-target.md", "reading mode gets the bare target back");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
 test("edit mode: a link of the properties table gets no follow hint", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true, propertiesMapped: true });
   const link = new RuntimeElement({ "data-sphinx-preview-navigation": "okf-link:abc", title: "abc" },
@@ -343,7 +355,7 @@ function commentLink(harness: RuntimeHarness): LinkElement {
   return link;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S4
 test("edit mode: hovering a link in a comment-thread body shows no edit outline and keeps the pointer cursor", () => {
   const harness = createRuntimeHarness();
   const link = commentLink(harness);
@@ -353,7 +365,8 @@ test("edit mode: hovering a link in a comment-thread body shows no edit outline 
   assert.equal(link.getAttribute(LINK_EDITS), null, "no text cursor marker: the link keeps its pointer cursor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S4
 test("edit mode: hovering a link of the properties table shows no edit outline and keeps the pointer cursor", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true, propertiesMapped: true });
   const link = new RuntimeElement({ "data-sphinx-preview-navigation": "okf-link:abc", class: "okf-frontmatter-link" },
@@ -366,7 +379,8 @@ test("edit mode: hovering a link of the properties table shows no edit outline a
   assert.equal(link.getAttribute(LINK_EDITS), null, "no text cursor marker on a properties link");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S7
 test("edit mode: hovering a link inside a paragraph outlines the paragraph and gives it the text cursor", () => {
   const harness = createRuntimeHarness();
   const link = new LinkElement(harness, "related-target.md");
@@ -380,7 +394,7 @@ test("edit mode: hovering a link inside a paragraph outlines the paragraph and g
   assert.equal(link.getAttribute(LINK_EDITS), null, "reading mode drops the marker");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S6
 test("edit mode stylesheet: only links a plain click edits get the text cursor; every other link keeps its pointer", () => {
   const linkSelectors = textCursorSelectors().filter((selector) => /(^|\s)a(\[|$|\s|:)/u.test(selector));
   assert.deepEqual(linkSelectors, [`html[data-sphinx-preview-edit-mode="on"] a[${LINK_EDITS}="true"]`],

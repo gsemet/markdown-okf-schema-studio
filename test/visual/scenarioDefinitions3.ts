@@ -29,7 +29,6 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
   },
   // CR 050: an image pasted into a paragraph editor becomes a paragraph of its own.
   {
-    // @tests_req StRS-MDOKFSTUDIO-PALETTE-018
     id: "palette-slash/v22-pasted-image-paragraph-light-900",
     fixture: "52-inline-image",
     theme: "light",
@@ -42,7 +41,7 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
       + "selected. The final frame shows the editor after the paste at the end.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085#S3
     id: `toolbar-navigation/v${35 + index}-link-warning-${theme}-900`,
     fixture: "61-link-warnings",
     theme,
@@ -89,8 +88,8 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
     { name: "cream", theme: "dark", mode: "cream" },
   ] as const).flatMap((variant, index) => [
     {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
       id: `table-editing/v0${6 + index}-row-handles-${variant.name}-900`,
       fixture: "56-table-row-handles",
       theme: variant.theme,
@@ -102,8 +101,8 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
       description: `Edit mode, ${variant.name} preview, 900 px pane: each body row of two pipe tables shows the list editor's handle just left of the table, centred on its row, the header rows show none, and the table that fills the column keeps its handles in the pane, unclipped.`,
     },
     {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
       id: `table-editing/v${String(9 + index).padStart(2, "0")}-row-dragging-${variant.name}-900`,
       fixture: "56-table-row-handles",
       theme: variant.theme,
@@ -125,8 +124,8 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
     { name: "dark", theme: "dark", mode: undefined },
     { name: "cream", theme: "dark", mode: "cream" },
   ] as const).map((variant, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
     id: `table-editing/v${12 + index}-list-table-row-handles-${variant.name}-900`,
     fixture: "57-list-table-row-handles",
     theme: variant.theme,
@@ -143,8 +142,8 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
     { name: "cream", theme: "dark", mode: "cream" },
   ] as const).flatMap((variant, index) => [
     {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
       id: `table-editing/v${15 + index}-row-handles-narrow-${variant.name}-360`,
       fixture: "56-table-row-handles",
       theme: variant.theme,
@@ -157,8 +156,8 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
       description: `Edit mode, ${variant.name} preview, 360 px pane: the tables leave no room on their left, so they are pushed right by a handle's width; the handles stay in the pane, left of the tables and centred on their rows, even where a table scrolls sideways.`,
     },
     {
-      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
       id: `table-editing/v${18 + index}-list-table-row-handles-narrow-${variant.name}-360`,
       fixture: "57-list-table-row-handles",
       theme: variant.theme,
@@ -176,8 +175,8 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
     { name: "dark", theme: "dark", mode: undefined },
     { name: "cream", theme: "dark", mode: "cream" },
   ] as const).map((variant, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TABLE-002
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
     id: `table-editing/v${21 + index}-row-handles-scrolling-table-${variant.name}-900`,
     fixture: "58-wide-table-row-handles",
     theme: variant.theme,
@@ -189,7 +188,8 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
     description: `Edit mode, ${variant.name} preview, 900 px pane: a pipe table of fourteen columns, wider than the pane and scrolled sideways, keeps the handle of each body row left of the table, outside its scrolling box, visible and centred on its row.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S7
     id: `table-editing/v${24 + index}-table-bar-groups-${theme}-360`,
     fixture: "60-table-bar-groups",
     theme,

@@ -25,7 +25,7 @@ async function waitFor(
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-// @tests_req StRS-MDOKFSTUDIO-LIFE-022
+// @accepts_req StRS-MDOKFSTUDIO-LIFE-022#S1
 export async function run(): Promise<void> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   assert.ok(workspaceFolder);
@@ -61,7 +61,7 @@ export async function run(): Promise<void> {
     true,
     "the extension-host workspace folder could not be removed",
   );
-  // @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S5
   await waitFor("the preview with restricted reads after workspace removal", () => {
     const preview = getActivePreviewForTests();
     return preview?.restrictedReads === true && preview.phase === "ready" && preview.status === "success";

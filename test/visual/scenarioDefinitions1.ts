@@ -64,7 +64,6 @@ import { TABLE_TAB_HINT_SCENARIOS } from "./tableTabHintScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   {
-    // @tests_req StRS-MDOKFSTUDIO-CORE-001
     id: "handbook-dark-top",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -85,7 +84,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "list, a fenced Python block, and a titled warning admonition.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-028
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-028#S6
     id: "handbook-dark-bottom",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -270,8 +269,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The same gallery at panel width, to catch wrapping inside tinted panels.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-CORE-003
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-022
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-022#S2
     id: "unresolved-dark-full",
     fixture: "03-unresolved-constructs",
     theme: "dark",
@@ -293,7 +291,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "The same constructs on a light theme, including both rendered Mermaid diagrams.",
   },
   ...["dark", "light"].flatMap((theme) => [{
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
     id: `nested-list-typing-${theme}`,
     fixture: "16-nested-list-editing",
     theme,
@@ -319,7 +318,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   },
   // CR 118: Enter on the selected alt text of a pasted image validates it and moves the caret after the image.
   ...(["cream", "dark"] as const).map((mode, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S9
     id: `palette-slash/v${25 + index}-pasted-image-alt-enter-${mode}-900`,
     fixture: "52-inline-image",
     theme: "dark" as const,
@@ -332,8 +331,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "Enter keeps the alt text and moves the caret just after the image instead of replacing the name by a line break.",
   })),
   ...([["dark", 460], ["light", 900]] as const).map(([theme, width], index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-PALETTE-018
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-213
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-213#S1
     id: `block-editing/v1${index + 5}-paste-rich-text-${theme}-${width}`,
     fixture: "17-wrapped-editing",
     theme,
@@ -856,7 +854,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Whole-page edit mode preserves source layout while a focused paragraph editor shows its caret.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S7
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-033#S10
     id: "edit-paragraph-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -916,7 +915,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits on top of the edit box, outside its border and attached to it, and the clicked text keeps its screen position. The steps `bar`, `menu`, `grid`, `emoji`, `alert`, `colour` and `colour-code` keep the palette after Bold and undo, the heading list, the table grid, the emoji picker, the alert type list, the colour picker and the colour-code swatch.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S4
     id: "edit-palette-tall-light",
     fixture: "05-long-chapter",
     theme: "light",
@@ -962,7 +962,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "460 px preview, light theme, a very tall paragraph editor: the palette sits on top of the box with the box top in view, and with the box top scrolled out it sticks to the top of the viewport inside the pane (wrapping onto several rows), keeps the focus in the box and leaves with the box end. The `top` step shows the palette on top of the box, the `end` step the bottom of the box, the final frame the stuck palette mid-box.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-TABLE-008
     id: "palette-slash/v19-table-toolbar-sticky-tall-table-light-900",
     fixture: "46-tall-table",
     theme: "light",
@@ -1142,7 +1141,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "overflowing it, and its heading list stays inside the box's width.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S1
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S6
     id: "palette-slash/v27-palette-clears-content-cream-1100",
     fixture: "67-toolbar-cover",
     theme: "dark",
@@ -1158,7 +1158,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "a code block taller than the pane, opened scrolled, keeps its first seen row under the bar.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S1
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-153#S3
     id: "palette-slash/v29-edit-figure-button-narrow-cream-420",
     fixture: "68-figure-button-narrow",
     theme: "dark",
@@ -1174,7 +1175,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the figure form opens below the palette.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S2
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S6
     id: "palette-slash/v28-palette-clears-text-rule-cream-900",
     fixture: "64-rule-edit",
     theme: "dark",
@@ -1200,7 +1202,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Edit mode on, light theme. A hovered list is outlined with a dashed line (the `hover` step, which also shows the round + insertion button in the left gutter), then a paragraph editor opens with its frame and Done/Cancel row.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-087
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-087#S5
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-087#S7
     id: "edit-insert-after-final-figure",
     fixture: "18-figure-at-end",
     theme: "light",
@@ -1230,7 +1233,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the image; the insertion message carried the image's line (5).",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-BLOCK-003
     id: "edit-first-block-top-wide",
     fixture: "17-wrapped-editing",
     theme: "light",
@@ -1270,7 +1272,6 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "top edge of the preview, not stuck against it.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-BLOCK-011
     id: "edit-empty-document-enter-opens-editor",
     fixture: "20-empty-document",
     theme: "light",
@@ -1283,7 +1284,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "open with its caret in it, replacing the Start writing button, with at least 20 px above its frame.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S1
     id: `layout-width/v${86 + index}-empty-start-writing-hint-${theme}-700`,
     fixture: "20-empty-document",
     theme,
@@ -1297,8 +1298,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "and the hint line \"Enter to create a new block\" is visible under it, at least 20 px below the top edge.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S6
     id: `toolbar-navigation/v${39 + index}-sticky-running-text-${theme}-900`,
     fixture: "62-cursor-block",
     theme,
@@ -1311,8 +1312,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "so the note's own heading never appears in the band.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S2
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S4
     id: `toolbar-navigation/v${37 + index}-mark-containing-block-${theme}-900`,
     fixture: "62-cursor-block",
     theme,
@@ -1358,13 +1359,13 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the key column fits its keys, no key and not the Names label breaks inside a word, and the values take the rest of the width.",
   })),
   ...([["v23", "cream"], ["v24", undefined], ["v25", "white"]] as const).map(([number, mode]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-002
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-002#S2
     id: `review-annotations/${number}-review-thread-contrast-${mode ?? "dark"}-900`, fixture: "45-review-threads",
     theme: "dark" as const, ...(mode ? { previewThemeMode: mode } : {}), ...WIDE, scroll: { kind: "top" as const }, render: { hostMessages: [THREADS_MESSAGE] }, pageActions: [{ click: 'mark[data-okf-comment-thread="thread-open"]' }],
     contentAssertions: REVIEW_THREAD_CONTRAST_ASSERTIONS, description: `An open review thread popover on the ${mode ?? "dark"} theme with a dark VS Code host: its text reaches 4.5:1 and none is faded.`,
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-002
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-002#S2
     id: "review-annotations/v26-readme-showcase-comment-thread-cream-1000",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -1411,8 +1412,9 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "each shows its opening line as a code block and every section after it renders.",
   })),
   ...(["cream", "dark"] as const).map((mode, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-002#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
     id: `palette-slash/v${23 + index}-edit-bar-tooltip-rule-${mode}-900`,
     fixture: "64-rule-edit",
     theme: mode === "dark" ? "dark" as const : "light" as const,
@@ -1431,7 +1433,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     ["cream", "light", "cream", 18],
     ["dark", "dark", undefined, 19],
   ] as const).map(([name, theme, mode, number]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
     id: `block-editing/v${number}-keyboard-selection-${name}-900`,
     fixture: "01-handbook-overview",
     theme,
@@ -1453,7 +1455,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     ["light", "light", 20],
     ["dark", "dark", 21],
   ] as const).map(([name, theme, number]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
     id: `block-editing/v${number}-keyboard-table-cell-${name}-900`,
     fixture: "26-first-table",
     theme,

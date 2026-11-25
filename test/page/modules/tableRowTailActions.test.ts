@@ -15,13 +15,15 @@ function run(id: string, value: string, caret: number, arg?: string) {
   } as never);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117#S6
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117#S7
 test("the HTML table action gives no edit on a pipe table whose row has a tail", () => {
   assert.equal(run("htmlTable", TABLE, TABLE.indexOf("alpha")), undefined);
   assert.ok(run("htmlTable", TABLE.replace(" ^row-a", ""), TABLE.indexOf("alpha")), "no tail: converted");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-111
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-111#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-111#S3
 test("aligning a column gives no edit with the caret in a tail, and works in a cell", () => {
   assert.equal(run("columnAlign", TABLE, TABLE.indexOf("^row-a"), "right"), undefined);
   assert.ok(run("columnAlign", TABLE, TABLE.indexOf("alpha"), "right"));

@@ -35,10 +35,13 @@ async function openPreview(uri: vscode.Uri): Promise<void> {
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-001
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+// @accepts_req StRS-MDOKFSTUDIO-REVIEW-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S4
 /**
  * T42: a sidecar next to the document is posted to the page (and again when it changes); a
  * document without a sidecar gets no message; an invalid sidecar posts no threads.

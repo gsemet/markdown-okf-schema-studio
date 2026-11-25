@@ -18,6 +18,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-006
 depends_on:
 - SwRS-MDOKFSTUDIO-TOOLBAR-040
+scenarios:
+- id: S1
+  title: Items under their heading
+- id: S2
+  title: Items that are not listed
+- id: S3
+  title: A heading deeper than the items after them
+- id: S4
+  title: The reading line at an item
+- id: S5
+  title: The setting is off, the default
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -50,13 +61,13 @@ Some documents write each requirement, rule or record as a list item, with no he
 
 `markdownOkfSchemaStudio.preview.listItemsInToc` is a boolean of resource scope, off by default. The page reads it once at startup from its boot context: a missing or non-boolean value reads as off, and a change of the setting reloads the page content.
 
-### Scenario (nominal): Items under their heading
+### Scenario S1 (nominal): Items under their heading
 
 - GIVEN the setting on and a content container holding a list with the item `Before any heading`, then `# Braking`, then a list with `[SRS_0001] Brake on demand` (which holds a nested list with `a nested item`), `-` and an item whose first line is 101 characters long, then `## Release` and an ordered list with `Release   on demand`
 - WHEN the column is built
 - THEN it lists `Before any heading` (level 1), `Braking` (1), `[SRS_0001] Brake on demand` (2), the long line cut to 79 characters and `…` (2), `Release` (2) and `Release on demand` (3); the rail holds the two ticks Braking and Release; a click on `[SRS_0001] Brake on demand` scrolls to its list item
 
-### Scenario (boundary): Items that are not listed
+### Scenario S2 (boundary): Items that are not listed
 
 | Item | Listed |
 | --- | --- |
@@ -65,19 +76,19 @@ Some documents write each requirement, rule or record as a list item, with no he
 | an item whose first line is longer than 80 characters | yes, cut to 79 characters and `…` |
 | an item of the `[TOC]` list, of the footnotes, of a table cell or of a hidden tab panel | no |
 
-### Scenario (boundary): A heading deeper than the items after them
+### Scenario S3 (boundary): A heading deeper than the items after them
 
 - GIVEN the setting on and a content container holding the item `Before any heading`, then `## Overview`, `# Top`, a list with `First` and `Second`, then `### Deep`
 - WHEN the column is built, then the writer folds Top
 - THEN no item has a twisty, Top is the only entry with one, and folding Top hides `First`, `Second` and Deep
 
-### Scenario (nominal): The reading line at an item
+### Scenario S4 (nominal): The reading line at an item
 
 - GIVEN the setting on, `# Braking` at 100 px, a list item `Brake on demand` at 300 px and `## Release` at 900 px
 - WHEN the reading line is at 340 px
 - THEN the item `Brake on demand` carries aria-current location and the rail marks the tick of Braking
 
-### Scenario (boundary): The setting is off, the default
+### Scenario S5 (boundary): The setting is off, the default
 
 - GIVEN the chapter of the nominal scenario and the setting off or absent from the boot context
 - WHEN the column is built

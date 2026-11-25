@@ -25,6 +25,35 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Row below inserts an empty row
+- id: S2
+  title: Row − deletes the selected row
+- id: S3
+  title: Col right and Col − insert and delete a column
+- id: S4
+  title: Disabled buttons and model refusals
+- id: S5
+  title: Typed text kept
+- id: S6
+  title: Saved by the button itself
+- id: S7
+  title: A column button keeps the style of every line
+- id: S8
+  title: The open panels belong to the cell they were opened in
+- id: S9
+  title: Row above on a body row
+- id: S10
+  title: Header row
+- id: S11
+  title: Col left on a column
+- id: S12
+  title: Style kept
+- id: S13
+  title: Buttons on a list-table
+- id: S14
+  title: Not a plain list-table
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -49,21 +78,21 @@ supersedes:
 
 When the writer presses a row or column button of the table bar, the extension SHALL insert an empty row or column before (Row above, Col left) or after (Row below, Col right) the selected one, or delete the selected body row or column, store the text typed in the current cell, keep the text of every other cell and the style of every line, select the new or nearest remaining row or column, save the table and reopen the editor at the new position once the page rendered it again, with Row above disabled in the header row and Row − and Col − disabled where the table model refuses the deletion, offer the same buttons on a plain list-table (one header row, one-line cells, no title, label or option other than header-rows) and write its changed grid back as a list-table, change only the lines the operation concerns (a column operation keeps the padding, the indentation and the outer pipes of every line), and close the popover, link panel and slash menu of the cell it leaves.
 
-### Scenario (nominal): Row below inserts an empty row
+### Scenario S1 (nominal): Row below inserts an empty row
 
 | Input | Outcome |
 | --- | --- |
 | Editor in the first body row of a table with two body rows, Row below | An empty body row sits between the first and the second body row, the editor is in the same column of that new row and the status reads "Row 2 of 3" followed by the column |
 | Editor in the header row, Row below | The new row is the first body row and is selected |
 
-### Scenario (nominal): Row − deletes the selected row
+### Scenario S2 (nominal): Row − deletes the selected row
 
 | Input | Outcome |
 | --- | --- |
 | Three body rows, editor in the second, Row − | Two body rows remain and the editor is on the row that took the deleted row's place |
 | Editor in the last of two body rows, Row − | The previous body row is selected |
 
-### Scenario (nominal): Col right and Col − insert and delete a column
+### Scenario S3 (nominal): Col right and Col − insert and delete a column
 
 | Input | Outcome |
 | --- | --- |
@@ -72,7 +101,7 @@ When the writer presses a row or column button of the table bar, the extension S
 | Three-column table, editor in the second column, Col − | Every row loses its second cell and the editor is in the column that took its place |
 | Editor in the last column, Col − | The previous column is selected |
 
-### Scenario (refusal): Disabled buttons and model refusals
+### Scenario S4 (refusal): Disabled buttons and model refusals
 
 | Input | Outcome |
 | --- | --- |
@@ -81,19 +110,19 @@ When the writer presses a row or column button of the table bar, the extension S
 | Table of one column and the editor in it, the bar inspected | Col − is disabled (read from tableCellEditor.ts, untested) |
 | deleteColumn called on the one-column model | It returns no column and removes nothing |
 
-### Scenario (nominal): Typed text kept
+### Scenario S5 (nominal): Typed text kept
 
 - GIVEN "new" typed in the selected cell and Row below pressed
 - WHEN the table is saved
 - THEN the saved text carries "new" in the original cell, and the editor reopens in the new row
 
-### Scenario (nominal): Saved by the button itself
+### Scenario S6 (nominal): Saved by the button itself
 
 - GIVEN a row added with no further typing
 - WHEN Row below is pressed
 - THEN a final previewEditSave is posted at once, the page renders the new table and reopens the editor in the new row (no editor stays in a cell of the rendered table that shows another cell's text)
 
-### Scenario (boundary): A column button keeps the style of every line
+### Scenario S7 (boundary): A column button keeps the style of every line
 
 | Input | Outcome |
 | --- | --- |
@@ -104,7 +133,7 @@ When the writer presses a row or column button of the table bar, the extension S
 | Col right then Col − on the same position | The table is back to its original text |
 | The same table with only Row below pressed, the table saved | The other lines are kept verbatim |
 
-### Scenario (boundary): The open panels belong to the cell they were opened in
+### Scenario S8 (boundary): The open panels belong to the cell they were opened in
 
 | Input | Outcome |
 | --- | --- |
@@ -112,31 +141,31 @@ When the writer presses a row or column button of the table bar, the extension S
 | Link panel open from the cell bar, Tab pressed | The panel is closed and the editor is in the next cell |
 | The cell editor is rendered for another cell after a row or column button or a move | The open popover or panel of the cell formatting group and the slash menu are closed, because they act on the text selected in the cell that was left |
 
-### Scenario (nominal): Row above on a body row
+### Scenario S9 (nominal): Row above on a body row
 
 | Input | Outcome |
 | --- | --- |
 | Editor in the second body row, "qq" typed in the cell, Row above | A final previewEditSave carries an empty body row above that row and "qq" in the original cell; the page reopens the editor in the new row, in the same column |
 
-### Scenario (refusal): Header row
+### Scenario S10 (refusal): Header row
 
 | Input | Outcome |
 | --- | --- |
 | Editor in the header row, the bar inspected | Row above is disabled and nothing is saved |
 
-### Scenario (nominal): Col left on a column
+### Scenario S11 (nominal): Col left on a column
 
 | Input | Outcome |
 | --- | --- |
 | Editor in the header cell "B" of a two-column table, Col left | A final previewEditSave carries a table whose header reads "A", an empty cell, "B", whose delimiter row has a third "---" cell and whose body rows gain an empty cell at the same place; the title "B" is kept; the page reopens the editor in the new column of the same row |
 
-### Scenario (boundary): Style kept
+### Scenario S12 (boundary): Style kept
 
 | Input | Outcome |
 | --- | --- |
 | An indented, padded table, Col left on its first column | Every line keeps its indentation, padding and outer pipes, as for Col right (see SwRS-MDOKFSTUDIO-TABLE-055) |
 
-### Scenario (nominal): Buttons on a list-table
+### Scenario S13 (nominal): Buttons on a list-table
 
 | Input | Outcome |
 | --- | --- |
@@ -144,7 +173,7 @@ When the writer presses a row or column button of the table bar, the extension S
 | The same list-table, a cell edited and committed with no button | Only the cell changes in the saved list-table |
 | The same list-table, nothing changed | The text is saved as it was, character for character |
 
-### Scenario (refusal): Not a plain list-table
+### Scenario S14 (refusal): Not a plain list-table
 
 | Input | Outcome |
 | --- | --- |

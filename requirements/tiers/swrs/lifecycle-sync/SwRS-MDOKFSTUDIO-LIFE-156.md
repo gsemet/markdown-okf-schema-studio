@@ -18,6 +18,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-021
 depends_on: []
+scenarios:
+- id: S1
+  title: Group order and key prefix
+- id: S2
+  title: Descriptions, order and sorting
+- id: S3
+  title: Description limit
+- id: S4
+  title: Generated schema
+- id: S5
+  title: Setting read
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,35 +50,35 @@ default_owner_email: gaetan@xeberon.net
 
 The extension SHALL contribute exactly the settings of its settings registry, with their schema text and defaults generated into package.json, in the groups Preview, Editing, Frontmatter, Comments and PlantUML in that order, each setting with a unique order and a markdownDescription of at most 700 characters, reading a setting with nothing stored, and an absent or wrongly typed boot entry of the page, as its default.
 
-### Scenario (nominal): Group order and key prefix
+### Scenario S1 (nominal): Group order and key prefix
 
 - GIVEN the package manifest
 - WHEN the configuration is read
 - THEN the groups are Preview 1, Editing 2, Frontmatter 3, Comments 4 and PlantUML 5, and no group Opening Files nor any setting whose key starts with markdownOkfSchemaStudio.open.
 - AND a setting named markdownOkfSchemaStudio.comments.authorName sits in the Comments group, because every setting is in the group of its key prefix
 
-### Scenario (nominal): Descriptions, order and sorting
+### Scenario S2 (nominal): Descriptions, order and sorting
 
 - GIVEN the package manifest
 - WHEN each setting is read
 - THEN it has a non-empty markdownDescription and an order no other setting has
 - AND the settings of one group are listed following their order values
 
-### Scenario (boundary): Description limit
+### Scenario S3 (boundary): Description limit
 
 | Setting description | Outcome |
 | --- | --- |
 | A markdownDescription of at most 700 characters and no description key | Accepted |
 | A markdownDescription of 701 characters | The contract test fails |
 
-### Scenario (refusal): Generated schema
+### Scenario S4 (refusal): Generated schema
 
 | Registry and package.json | Outcome |
 | --- | --- |
 | In sync | The generated schema equals the contributed one byte for byte |
 | A setting edited by hand in package.json | The check fails, because the schema differs from the generated one |
 
-### Scenario (nominal): Setting read
+### Scenario S5 (nominal): Setting read
 
 | Stored value | Outcome |
 | --- | --- |

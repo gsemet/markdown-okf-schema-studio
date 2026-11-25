@@ -95,7 +95,8 @@ test("a reply or a delete from a restricted-reads preview is applied like any ot
   assert.deepEqual(writable.results.map((result) => [result.type, result.ok]), [["previewThreadReplyResult", true]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S4
 test("an open Markdown edit on the host side refuses a thread change before the document is read", async () => {
   const open = setup({ editOpen: true });
   await open.handlers.get("previewThreadDelete")!(request(), open.preview);
@@ -130,7 +131,7 @@ test("a thread request that names another revision gets the out-of-date answer",
   assert.equal(current.applied.length, 1, "the current revision is handled");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S6
 test("a document that changes while the author is resolved gets the changed-meanwhile answer", async () => {
   const slow = setup();
   const release = slow.holdAuthor();

@@ -24,6 +24,23 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-006
+scenarios:
+- id: S1
+  title: Start disabled
+- id: S2
+  title: State enables
+- id: S3
+  title: Only true enables
+- id: S4
+  title: Press posts a move
+- id: S5
+  title: Nowhere to go
+- id: S6
+  title: Document cannot be opened
+- id: S7
+  title: A history state of another render is ignored
+- id: S8
+  title: The host accepts only back or forward
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,40 +69,40 @@ supersedes:
 
 When the page starts, the page receives a history state for its render or the reader presses Back or Next, the extension SHALL keep both buttons disabled until the host reports a place to go to, enable each only when its flag in a state for the page's own render is true (a state of another render is ignored), and post one history move per press, which the host accepts only when its direction is back or forward and it names the current render, and answers by moving, by posting the state again when there is nowhere to go, or by a warning when the document cannot be opened.
 
-### Scenario (boundary): Start disabled
+### Scenario S1 (boundary): Start disabled
 - GIVEN a new preview page
 - WHEN the buttons are read before any host message (the toolbar markup carries the disabled attribute on both)
 - THEN both are disabled until the first previewHistoryState
 
-### Scenario (nominal): State enables
+### Scenario S2 (nominal): State enables
 - GIVEN a state with canBack true and canForward false
 - WHEN the page applies the previewHistoryState of its render
 - THEN Back is enabled and Next is disabled
 
-### Scenario (boundary): Only true enables
+### Scenario S3 (boundary): Only true enables
 - GIVEN a state with canBack missing and canForward 1
 - WHEN the page applies it
 - THEN both buttons are disabled, because only the value true enables (disabled = value !== true)
 
-### Scenario (nominal): Press posts a move
+### Scenario S4 (nominal): Press posts a move
 | Input | Outcome |
 | --- | --- |
 | An enabled Back button is pressed | One previewHistoryGo with direction back is posted, with the page's document, revision and request identifiers |
 | An enabled Next button is pressed | One previewHistoryGo with direction forward is posted, with the same identifiers |
 
-### Scenario (refusal): Nowhere to go
+### Scenario S5 (refusal): Nowhere to go
 - GIVEN a history with no previous place
 - WHEN previewHistoryGo back arrives at the host
 - THEN the host posts previewHistoryState with canBack false and opens nothing; with a previous place the move happens
 
-### Scenario (refusal): Document cannot be opened
+### Scenario S6 (refusal): Document cannot be opened
 | Input | Outcome |
 | --- | --- |
 | Back to a place whose file was deleted | The warning "Markdown OKF-Schema Studio could not go back: {reason}" is shown with the reason of the error |
 | Next to a place whose file cannot be opened | The warning "Markdown OKF-Schema Studio could not go forward: {reason}" is shown |
 | Either move that fails | The history position and the list stay as they were, and the state posted afterwards enables Back and Next as before the press |
 
-### Scenario (refusal): A history state of another render is ignored
+### Scenario S7 (refusal): A history state of another render is ignored
 
 | Input | Outcome |
 | --- | --- |
@@ -94,7 +111,7 @@ When the page starts, the page receives a history state for its render or the re
 | a state for another request | ignored in the same way |
 | a state with the page's identifiers (the current render) | the buttons follow it (nominal row) |
 
-### Scenario (refusal): The host accepts only back or forward
+### Scenario S8 (refusal): The host accepts only back or forward
 
 | Input | Outcome |
 | --- | --- |

@@ -61,7 +61,7 @@ async function expectSaved(document: vscode.TextDocument, typed: string): Promis
   assert.ok(bufferText(document).includes(typed), "the saved text still holds what was typed");
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 /**
  * CR 312: Cmd/Ctrl+S with the focus in the side preview saves the document. The key is pressed at
  * once after typing, inside the autosave delay: the text typed so far is written first, the editor

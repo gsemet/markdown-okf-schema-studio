@@ -19,6 +19,33 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-009
 depends_on: []
+scenarios:
+- id: S1
+  title: Link to another Markdown document
+- id: S2
+  title: Unknown line
+- id: S3
+  title: In-page anchor jump
+- id: S4
+  title: Moves that are not recorded
+- id: S5
+  title: Back or Next to another document
+- id: S6
+  title: Line past the end
+- id: S7
+  title: Back or Next within the same document
+- id: S8
+  title: Anchor mode off
+- id: S9
+  title: One history per panel
+- id: S10
+  title: 51st distinct place
+- id: S11
+  title: New place after Back
+- id: S12
+  title: Duplicate of the current place is not added
+- id: S13
+  title: Leaving a place
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,22 +71,22 @@ supersedes:
 
 When the reader follows a link to another Markdown document in a preview that follows the active editor (a Studio tab follows SwRS-MDOKFSTUDIO-LIFE-197 instead: it records the link only when the target opens in a Studio tab), or an anchor of the shown document that resolves to a source line, the extension SHALL record the place in the history of that panel (at most the 50 newest places, no duplicate of the current place, the places after the current one dropped), and when Back or Next leads to a recorded place, open its document with the stored line selected or scroll the preview to the stored line.
 
-### Scenario (nominal): Link to another Markdown document
+### Scenario S1 (nominal): Link to another Markdown document
 - GIVEN a preview of first.md at line 3 and a link to second.md#target
 - WHEN the link is followed
 - THEN the history holds the place being left, first.md at line 3, and then second.md at the first line of its selection (the line of the heading), the current index is the target and Back becomes possible
 
-### Scenario (boundary): Unknown line
+### Scenario S2 (boundary): Unknown line
 - GIVEN a preview that never reported a line
 - WHEN a link is followed
 - THEN the place left is recorded at line 1
 
-### Scenario (nominal): In-page anchor jump
+### Scenario S3 (nominal): In-page anchor jump
 - GIVEN anchors #target (a heading) and #note-label (a MyST label)
 - WHEN each is followed
 - THEN each adds one history entry at its source line (5 and 9 in the fixture)
 
-### Scenario (refusal): Moves that are not recorded
+### Scenario S4 (refusal): Moves that are not recorded
 | Input | Outcome |
 | --- | --- |
 | An anchor whose id has no source line, such as a generated id | The preview still scrolls but no history entry is added (an entry is added only when markdownFragmentRange finds a line) |
@@ -69,45 +96,45 @@ When the reader follows a link to another Markdown document in a preview that fo
 | A link to second.md followed in a Studio tab | The move is recorded only when second.md opens in a Studio tab, per SwRS-MDOKFSTUDIO-LIFE-197; when it opens as a text editor the history is unchanged |
 | An in-page anchor followed in a locked preview | The jump is recorded |
 
-### Scenario (nominal): Back or Next to another document
+### Scenario S5 (nominal): Back or Next to another document
 - GIVEN the history first.md line 3 then second.md
 - WHEN Back is pressed
 - THEN first.md opens with line 3 selected and the preview follows it; Next opens the second document with its line restored
 
-### Scenario (boundary): Line past the end
+### Scenario S6 (boundary): Line past the end
 - GIVEN a stored line larger than the document
 - WHEN Back is pressed
 - THEN the last line is selected (selection line = min(max(stored line, 1), line count) minus 1)
 
-### Scenario (nominal): Back or Next within the same document
+### Scenario S7 (nominal): Back or Next within the same document
 - GIVEN the history holds two places of second.md and an older scroll anchor of the preview
 - WHEN Back is pressed
 - THEN no document is opened, the preview receives a sourceScroll to the stored line, and the preview's scroll anchor becomes the stored line, owned by the editor, so a stale anchor cannot overwrite it
 
-### Scenario (boundary): Anchor mode off
+### Scenario S8 (boundary): Anchor mode off
 - GIVEN a panel whose Anchor mode is off and a history of two places of the same document
 - WHEN Back is pressed
 - THEN the history moves, the buttons update and the preview scrolls to the stored line, because the sourceScroll of a history move carries reveal true, which the page honours when it does not follow the editor
 
-### Scenario (nominal): One history per panel
+### Scenario S9 (nominal): One history per panel
 - GIVEN two preview panels
 - WHEN links are followed in the first
 - THEN the second panel's Back and Next stay disabled; a document switch that recreates the session of a panel keeps the same history object, which lives as long as the panel
 
-### Scenario (boundary): 51st distinct place
+### Scenario S10 (boundary): 51st distinct place
 
 - GIVEN a history of 50 places
 - WHEN another distinct place is pushed
 - THEN it still holds 50 places, the oldest is gone and the newest is current
 
-### Scenario (nominal): New place after Back
+### Scenario S11 (nominal): New place after Back
 
 | Given | When | Then |
 | --- | --- | --- |
 | a history of three places at the second | a new place is pushed | the third place is gone, Next is not possible and the new place is current |
 | a history at its last place | a new place is pushed | nothing is dropped |
 
-### Scenario (refusal): Duplicate of the current place is not added
+### Scenario S12 (refusal): Duplicate of the current place is not added
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -115,7 +142,7 @@ When the reader follows a link to another Markdown document in a preview that fo
 | a current place second.md line 5 | the same document at line 6 is pushed | it is added |
 | a jump inside the current document | it is recorded | the number of places does not grow |
 
-### Scenario (nominal): Leaving a place
+### Scenario S13 (nominal): Leaving a place
 
 | Given | When | Then |
 | --- | --- | --- |

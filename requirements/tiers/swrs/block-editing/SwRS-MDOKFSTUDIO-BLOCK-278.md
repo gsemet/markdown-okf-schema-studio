@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: setting on, inside one construct
+- id: S3
+  title: setting on, boundary crossed at the start
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,19 +45,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer sets markdownOkfSchemaStudio.preview.rawCopy.balanceEdges to true, the page SHALL read it once at startup from the boot context and have the raw copy balance the edges of a selection, and with the setting off, unset or not a boolean the raw copy SHALL cut the source verbatim between the two edges.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off, unset or not a boolean, and the text `Hello **world** again`
 - WHEN the reader selects from the `r` of `world` to the end of the line and copies
 - THEN the clipboard holds `rld** again`, the source verbatim
 
-### Scenario: setting on, inside one construct
+### Scenario S2: setting on, inside one construct
 
 - GIVEN the setting is on in the boot context of the page
 - WHEN the reader selects from the `o` to the `l` of `world` and copies
 - THEN the clipboard holds `orl`
 
-### Scenario: setting on, boundary crossed at the start
+### Scenario S3: setting on, boundary crossed at the start
 
 - GIVEN the setting is on
 - WHEN the reader selects from the `r` of `world` to the end of the line and copies

@@ -15,7 +15,8 @@ test("CR 025: waitForSettled resolves true as soon as the pending save is applie
   assert.ok(Date.now() - started < 500, "it does not wait for the whole timeout");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S7
 test("CR 025: waitForSettled gives up after the timeout, so a stuck save never blocks a navigation", async () => {
   assert.equal(await waitForSettled(() => false, 30, 2), false);
 });
@@ -25,7 +26,7 @@ test("CR 025: waitForAnswer resolves true on the answer and false on silence", a
   assert.equal(await waitForAnswer(new Promise(() => undefined), 30), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-026
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S5
 test("CR 025: LatestRequest applies only the latest request, so A to B to A ends on A", () => {
   const latest = new LatestRequest<string>();
   assert.equal(latest.idle, true);

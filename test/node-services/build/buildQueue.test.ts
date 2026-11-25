@@ -26,7 +26,7 @@ function busyWaitRealMs(ms: number): void {
   while (performance.now() < end) { /* a busy host */ }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S1
 test("lets an in-flight build finish and starts the newest queued edit right after", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const resolvers = new Map<number, (value: string) => void>();
@@ -64,8 +64,8 @@ test("lets an in-flight build finish and starts the newest queued edit right aft
   assert.equal(outcome.request.requestId, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S3
 test("retains a successful result as stale after a failed newer build", async (context) => {
   // The queue's adaptive wait reads Date.now(); the test's debounce runs on the mocked clock.
   context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
@@ -136,7 +136,7 @@ test("still renders a build whose buffer already moved on, and cleans up on disp
   assert.equal(aborted, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S5
 test("tracks referenced dependencies for refresh decisions", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const queue = new BuildQueue<TestDocument, { stage: { dependencies: readonly string[] } }>({
@@ -230,7 +230,8 @@ test("disposal releases the last result once and rejects future requests", async
   assert.equal((await queue.request(document(2, "new"))).status, "canceled");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S8
 test("adapts the debounce to twice the last build time, within its bounds", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const started: number[] = [];
@@ -264,7 +265,8 @@ test("adapts the debounce to twice the last build time, within its bounds", asyn
   assert.equal((await second).status, "ready");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S8
 test("an immediate request skips the adaptive wait, and still lets a running build finish", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const started: number[] = [];
@@ -301,7 +303,7 @@ test("an immediate request skips the adaptive wait, and still lets a running bui
   assert.equal((await later).status, "ready");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S1
 test("aborts a build that overruns twice the last build time once a newer edit is due", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const signals = new Map<number, AbortSignal>();
@@ -354,7 +356,8 @@ test("aborts a build that overruns twice the last build time once a newer edit i
   assert.ok(disposed.includes("late"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S3
 test("the adaptive wait uses the duration the result reports, and keeps its estimate without one", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const durations: Array<number | undefined> = [250, undefined];
@@ -376,7 +379,8 @@ test("the adaptive wait uses the duration the result reports, and keeps its esti
   assert.equal(queue.currentDebounceMs(), 500);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S6
 test("never aborts a build of a small document whose wall time exceeds its reported render time", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
   const signals = new Map<number, AbortSignal>();

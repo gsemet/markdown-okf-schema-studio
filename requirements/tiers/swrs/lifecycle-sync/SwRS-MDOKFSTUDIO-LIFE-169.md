@@ -21,6 +21,31 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: One row per view choice
+- id: S2
+  title: The page keeps its saved state
+- id: S3
+  title: The host stores a preference as one normalized object
+- id: S4
+  title: The host remembers a valid theme, edit mode or palette mode
+- id: S5
+  title: Zoom and own-key rows of a view preference message
+- id: S6
+  title: No change, no message
+- id: S7
+  title: The host refuses a value outside the table
+- id: S8
+  title: A stale message stores nothing where the row says so
+- id: S9
+  title: The storage is missing or rejects the write
+- id: S10
+  title: Stored preferences are normalized field by field
+- id: S11
+  title: A palette mode or a theme mode outside the four is dropped
+- id: S12
+  title: An accepted palette mode or theme mode
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -69,7 +94,7 @@ supersedes:
 
 When the writer changes a view choice on the page, the extension SHALL keep it in the saved state of the panel, post it to the host with the identity of the page, and let the host validate it and store it for the workspace according to the table of view choices.
 
-### Scenario (nominal): One row per view choice
+### Scenario S1 (nominal): One row per view choice
 
 - GIVEN a preview with the identity of its current render
 - WHEN the writer changes one of the view choices of the table
@@ -88,25 +113,25 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 | Incoming changes | Diff button | viewIncomingChanges | previewViewPreferenceChanged, preference incomingChanges | boolean | Refused when not a boolean | markdownOkfSchemaStudio.viewPreferences, field incomingChanges | Stored |
 | Anchor mode | Anchor button | anchorToEditor | previewAnchorModeChanged, anchorToEditor | boolean | Dropped unless the value is a boolean | None: set as scrollPreviewWithEditor in the configuration and the loaded context of that preview only | Applied to that preview |
 
-### Scenario (nominal): The page keeps its saved state
+### Scenario S2 (nominal): The page keeps its saved state
 
 - GIVEN a saved state that already holds scroll fields and other view fields
 - WHEN the writer presses the Theme button, the Edit button, a Zoom button, the Width button, the Table of contents button or the chevron, or the page writes a state snapshot
 - THEN the saved state holds the new value (previewThemeMode dark after Current, editMode true then false on two presses, viewZoom 110 from 100, viewWidthMode auto from margin, viewToc true, viewToolbarCollapsed true then false on a second press with a second message of value false) and keeps its other fields; after a patch to a newer revision the message carries the identity the patch moved the page to (untested for this message); the snapshot keeps previewThemeMode (cream in Cream mode), the TOC visibility and the folded sections
 
-### Scenario (nominal): The host stores a preference as one normalized object
+### Scenario S3 (nominal): The host stores a preference as one normalized object
 
 - GIVEN a workspace storage and a previewViewPreferenceChanged message with preference toc and value true
 - WHEN the host handles the message
 - THEN the session preferences hold toc true and the key markdownOkfSchemaStudio.viewPreferences holds the whole normalized preferences object, not the one field
 
-### Scenario (nominal): The host remembers a valid theme, edit mode or palette mode
+### Scenario S4 (nominal): The host remembers a valid theme, edit mode or palette mode
 
 - GIVEN an open preview whose workspace holds no stored value
 - WHEN the page reports previewThemeModeChanged dark, previewEditModeChanged with editMode true, or previewPaletteModeChanged gfm
 - THEN the value is held for the session where the row says so, written to the workspace storage, and carried by the boot context of the next page of the workspace (the theme mode dark; the palette mode gfm wins over the setting)
 
-### Scenario (boundary): Zoom and own-key rows of a view preference message
+### Scenario S5 (boundary): Zoom and own-key rows of a view preference message
 
 | Input | Outcome |
 | --- | --- |
@@ -116,31 +141,31 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 | toc of the string true, comments of 1, widthMode wide or the number 1 | each message is refused and the host does not change a preference |
 | an unknown preference name, or a name that is not an own key of the validators | refused |
 
-### Scenario (boundary): No change, no message
+### Scenario S6 (boundary): No change, no message
 
 - GIVEN a page at 200 percent zoom, or a page that has just started
 - WHEN Zoom in is clicked at 200 percent, or nothing is clicked, or the page calls setMode on the palette
 - THEN no zoom message and no previewPaletteModeChanged message is posted; a chosen palette mode in the select posts exactly one previewPaletteModeChanged (from the GFM mode choosing MyST: one message with mode myst, saved state paletteMode myst)
 
-### Scenario (refusal): The host refuses a value outside the table
+### Scenario S7 (refusal): The host refuses a value outside the table
 
 - GIVEN an open preview
 - WHEN a message arrives with the width mode wide, a zoom outside 70 to 200, a preference name that is not in the table, a theme mode that is not one of the four, a palette mode that is not strict, gfm, myst or full, or an editMode or anchorToEditor that is not a boolean
 - THEN the message is refused or ignored by the validator of its type and the stored value is unchanged
 
-### Scenario (refusal): A stale message stores nothing where the row says so
+### Scenario S8 (refusal): A stale message stores nothing where the row says so
 
 - GIVEN a message that names an older render than the page now holds, or an edit mode or palette mode report whose value is invalid
 - WHEN the host receives it
 - THEN the stale message is dropped before its handler (by the page-state gate for previewThemeModeChanged, previewEditModeChanged and previewAnchorModeChanged, by the render gate for previewViewPreferenceChanged and previewPaletteModeChanged), an invalid edit mode or palette mode is not stored, and no preference changes
 
-### Scenario (boundary): The storage is missing or rejects the write
+### Scenario S9 (boundary): The storage is missing or rejects the write
 
 - GIVEN workspace storage whose update fails, or choices whose storage is not loaded or was released at deactivation
 - WHEN the host stores a theme mode or a view preference picked by the reader
 - THEN the value is held for the session, a rejected write is logged to the output channel of the extension as "Failed to persist the Markdown preview theme mode." or "Failed to persist the Markdown preview view preferences." and shows the reader one warning, "The Markdown preview could not save your display choice; it holds until VS Code closes.", repeated only after a write succeeded in between, and with no storage nothing is written and nothing is logged
 
-### Scenario (boundary): Stored preferences are normalized field by field
+### Scenario S10 (boundary): Stored preferences are normalized field by field
 
 | Stored value | Outcome |
 | --- | --- |
@@ -148,7 +173,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 | A list, or missing | Every field has its default: zoom 100, widthMode margin, toc off, incomingChanges on, comments on, toolbarCollapsed on |
 | Any applied preference | The whole object is normalized again (applyViewPreference), so the stored object is always valid |
 
-### Scenario (refusal): A palette mode or a theme mode outside the four is dropped
+### Scenario S11 (refusal): A palette mode or a theme mode outside the four is dropped
 
 - GIVEN a workspace whose stored palette mode is gfm and an open preview
 - WHEN the page posts previewPaletteModeChanged with a mode of the table, or previewThemeModeChanged with a theme mode of the table
@@ -163,7 +188,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 | previewThemeModeChanged | sepia (or neon) | rejected |
 | previewThemeModeChanged | missing previewThemeMode | rejected |
 
-### Scenario (nominal): An accepted palette mode or theme mode
+### Scenario S12 (nominal): An accepted palette mode or theme mode
 
 - GIVEN a palette whose select changes to another of the modes strict, gfm, myst or full, or the Theme button pressed (any of current, dark, white and cream)
 - WHEN the page posts the message once, with the identity fields documentId, revision and requestId (the envelope is checked first, see SwRS-MDOKFSTUDIO-TRUST-052) and the field mode or previewThemeMode

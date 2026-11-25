@@ -20,7 +20,8 @@ import { createCommentStore, formatId, hashText } from "../../../src/core/commen
 const anchor = { line: 3, endLine: 4, quote: "hello", prefix: "say ", suffix: " world" };
 const NOW = new Date("2026-10-21T10:00:00.000Z");
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S2
 test("T43: addThread appends a thread with its first comment and does not touch the input", () => {
   const before: CommentThread[] = [];
   const after = addThread(before, { threadId: "t_00000001", commentId: "c_00000001", anchor, author: "Ada", body: "Why?", now: NOW });
@@ -44,7 +45,8 @@ test("T43: addThread refuses a full file and a repeated id", () => {
   assert.equal(addThread(full, { threadId: "tn", commentId: "cn", anchor, author: "A", body: "y", now: NOW }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S2
 test("T43: addReply appends to the named thread only", () => {
   const base = addThread([], { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW })!;
   const two = addThread(base, { threadId: "t2", commentId: "c2", anchor, author: "A", body: "y", now: NOW })!;
@@ -58,7 +60,8 @@ test("T43: addReply appends to the named thread only", () => {
   assert.equal(addReply(crowded, "t1", { commentId: "cx", author: "B", body: "z", now: NOW }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S9
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S11
 test("T43: isValidAnchor enforces lines and the 500 / 32 / 32 limits", () => {
   assert.equal(isValidAnchor(anchor), true);
   assert.equal(isValidAnchor({ ...anchor, quote: "" }), true);
@@ -75,7 +78,7 @@ test("T43: isValidAnchor enforces lines and the 500 / 32 / 32 limits", () => {
   assert.equal(isValidAnchor({ line: 1, endLine: 1 }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044#S1
 test("T43: normalizeBody trims and enforces 1 to 10000 characters", () => {
   assert.equal(normalizeBody("  hi \n"), "hi");
   assert.equal(normalizeBody(""), undefined);
@@ -85,7 +88,8 @@ test("T43: normalizeBody trims and enforces 1 to 10000 characters", () => {
   assert.equal(normalizeBody("x".repeat(10_001)), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S5
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S6
 test("T43: resolveAuthor uses the setting, then Git, then the OS user, then Anonymous", async () => {
   const none = () => undefined;
   assert.equal(await resolveAuthor({ setting: " Ada ", gitName: async () => "Git", osUserName: () => "os" }), "Ada");
@@ -149,7 +153,8 @@ test("T43: a create and a reply queued together both land", async () => {
   assert.deepEqual(threads[0].comments.map((comment) => comment.id), ["c1", "c3"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S4
 test("T43: an invalid existing file is never overwritten, and a refusal does not stop the queue", async () => {
   const io = memoryIo("{ not json");
   const store = createCommentStore(io);
@@ -182,7 +187,8 @@ test("T43: the result carries the written text and its hash (the host ignores th
   assert.equal(result.hash, hashText(result.text));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S6
 test("T44: setResolved resolves and reopens the named thread only, without touching the input", () => {
   const base = addThread([], { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW })!;
   const two = addThread(base, { threadId: "t2", commentId: "c2", anchor, author: "A", body: "y", now: NOW })!;
@@ -196,7 +202,8 @@ test("T44: setResolved resolves and reopens the named thread only, without touch
   assert.deepEqual(parseSidecar(serializeSidecar({ document: "a.md", threads: resolved })).errors, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S5
 test("T44: deleteThread removes the named thread only; the last one leaves an empty list", () => {
   const base = addThread([], { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW })!;
   const two = addThread(base, { threadId: "t2", commentId: "c2", anchor, author: "A", body: "y", now: NOW })!;
@@ -247,7 +254,8 @@ function linkedIo(links: Map<string, string | undefined>, files: Map<string, str
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S5
 test("S-04: a comments file that is a symbolic link is refused and its target is never written", async () => {
   const files = new Map<string, string>();
   const links = new Map<string, string | undefined>([["/d/notes.comments.json", "/outside/target.txt"]]);
@@ -261,7 +269,8 @@ test("S-04: a comments file that is a symbolic link is refused and its target is
   assert.deepEqual([...files.keys()], []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S6
 test("S-04: a write goes to a temporary file and is renamed onto the comments file; a failed rename leaves no temporary file", async () => {
   const files = new Map<string, string>();
   const calls: string[] = [];

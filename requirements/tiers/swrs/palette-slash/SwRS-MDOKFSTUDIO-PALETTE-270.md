@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-021
+scenarios:
+- id: S1
+  title: Open the form and insert
+- id: S2
+  title: Cancel, empty title and line breaks
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,13 +41,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer chooses Card from the MyST palette or the slash menu, the extension SHALL open a form for the card title, header, footer and link and, on Insert, write a {card} directive with the filled options after the selection.
 
-### Scenario (nominal): Open the form and insert
+### Scenario S1 (nominal): Open the form and insert
 
 - GIVEN a block editor in the MyST palette mode
 - WHEN the writer presses the Card button, or chooses Card in the slash menu (the typed /query is removed first)
 - THEN a form opens under the palette with the fields Title, Header, Footer and Link; Insert writes a {card} directive after the selection, with a :header:, :footer: and :link: option for each filled field, an empty field leaving its option out, and selects the body placeholder
 
-### Scenario (boundary): Cancel, empty title and line breaks
+### Scenario S2 (boundary): Cancel, empty title and line breaks
 
 | Input | Outcome |
 | --- | --- |

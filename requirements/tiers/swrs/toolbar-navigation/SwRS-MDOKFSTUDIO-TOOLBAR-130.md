@@ -17,6 +17,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-001
+scenarios:
+- id: S1
+  title: Rows 2 to 4 unroll and roll up as one block
+- id: S2
+  title: Load hint
+- id: S3
+  title: Reduced motion
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,13 +45,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader expands or collapses the toolbar, the extension SHALL unroll or roll up rows 2 to 4 as one block over 160 ms (height and fade), and when a panel opens its preview with the toolbar saved as collapsed, the extension SHALL unroll the rows once for 700 ms and roll them up again without changing the saved choice, cancelled by any pointer or key press, and with no motion when the user prefers reduced motion.
 
-### Scenario (nominal): Rows 2 to 4 unroll and roll up as one block
+### Scenario S1 (nominal): Rows 2 to 4 unroll and roll up as one block
 - GIVEN a preview with the toolbar
 - WHEN the reader presses the chevron
 - THEN rows 2 to 4 get the animating mark before the hidden attribute changes, unroll (from zero height, fading in) or roll up (height and opacity to zero) together over 160 ms, and lose the mark at the end
 - AND the layout is measured again when the mark goes, 200 ms after the last change, also after the load hint
 
-### Scenario (nominal): Load hint
+### Scenario S2 (nominal): Load hint
 | Input | Outcome |
 | --- | --- |
 | a panel opens its preview, the saved choice is collapsed, no hint was shown yet for this panel | two frames after the page starts (the collapsed toolbar is painted first) the rows unroll, stay open 700 ms, and roll up; the root carries data-sphinx-preview-toolbar-hint meanwhile |
@@ -54,7 +61,7 @@ When the reader expands or collapses the toolbar, the extension SHALL unroll or 
 | the pending overlay while the hint runs | it stays below the four open rows |
 | the toolbar is saved as expanded | no hint and no animation at page start |
 
-### Scenario (refusal): Reduced motion
+### Scenario S3 (refusal): Reduced motion
 - GIVEN the user prefers reduced motion
 - WHEN the page starts or the chevron is pressed
 - THEN the rows are shown or hidden without animation and without the hint

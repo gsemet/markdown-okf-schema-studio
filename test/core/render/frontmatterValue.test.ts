@@ -27,7 +27,8 @@ function paragraphText(html: string): string {
   return paragraph ? textContent(paragraph) : "";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("`= this.title` shows the string value of the front matter, without the code element", async () => {
   const { html, diagnostics } = await render(["title: Hello"], "Title: `= this.title`.");
   assert.equal(paragraphText(html), "Title: Hello.");
@@ -37,33 +38,33 @@ test("`= this.title` shows the string value of the front matter, without the cod
   assert.deepEqual(diagnostics, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("the form without the space after the equals sign shows the value too", async () => {
   const { html } = await render(["title: Hello"], "`=this.title`");
   assert.equal(paragraphText(html), "Hello");
   assert.equal(values(html).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
 test("numbers and booleans show as text", async () => {
   const { html } = await render(["count: 42", "ratio: 1.5", "done: true", "open: false"],
     "`= this.count` `= this.ratio` `= this.done` `= this.open`");
   assert.equal(paragraphText(html), "42 1.5 true false");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
 test("a list shows its items joined with commas", async () => {
   const { html } = await render(["tags: [alpha, beta, 3, true]"], "Tags: `= this.tags`");
   assert.equal(paragraphText(html), "Tags: alpha, beta, 3, true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
 test("an object shows as its YAML on one line", async () => {
   const { html } = await render(["owner:", "  name: Ada", "  team: core"], "`= this.owner`");
   assert.equal(paragraphText(html), "{ name: Ada, team: core }");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S2
 test("a dotted path follows the nested objects", async () => {
   const { html, diagnostics } = await render(["owner:", "  name: Ada", "  team:", "    id: 7"],
     "`= this.owner.name` `= this.owner.team.id`");
@@ -71,7 +72,7 @@ test("a dotted path follows the nested objects", async () => {
   assert.deepEqual(diagnostics, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S5
 test("a missing key keeps the raw inline code with a warning style and reports a warning", async () => {
   const { html, diagnostics } = await render(["title: Hello"], "Owner: `= this.owner`");
   assert.equal(values(html).length, 0);
@@ -86,7 +87,7 @@ test("a missing key keeps the raw inline code with a warning style and reports a
   assert.equal(diagnostics[0]!.line, 5);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("a key without a value, a path through a scalar and an inherited name count as missing", async () => {
   const { html, diagnostics } = await render(["empty:", "title: Hello"],
     "`= this.empty` `= this.title.x` `= this.toString` `= this.__proto__` `= this.owner.name`");
@@ -95,7 +96,8 @@ test("a key without a value, a path through a scalar and an inherited name count
   assert.equal(diagnostics.length, 5);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S2
 test("a document without front matter, or with an invalid one, shows the raw code with a warning", async () => {
   const none = await render([], "`= this.title`");
   assert.equal(missing(none.html).length, 1);
@@ -105,7 +107,8 @@ test("a document without front matter, or with an invalid one, shows the raw cod
   assert.equal(broken.diagnostics.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("a value is text: HTML and Markdown in it are never interpreted", async () => {
   const { html } = await render(
     ['title: "<script>alert(1)</script> **bold** [x](http://e.test) <b>b</b>"'],
@@ -115,7 +118,7 @@ test("a value is text: HTML and Markdown in it are never interpreted", async () 
   assert.match(html, /&#x3C;script>alert/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S5
 test("inline code that only looks close, and code blocks, stay as they are", async () => {
   const body = [
     "`= this.title x` `==this.title` `= that.title` `= this.` `this.title` `= this .title`",
@@ -133,7 +136,7 @@ test("inline code that only looks close, and code blocks, stay as they are", asy
   assert.doesNotMatch(html, /Hello/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S2
 test("the value follows the front matter: the next render shows the new value", async () => {
   const body = "Title: `= this.title`";
   const before = await render(["title: First"], body);
@@ -145,14 +148,16 @@ test("the value follows the front matter: the next render shows the new value", 
   assert.equal(removed.diagnostics.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("the value shows inside headings, lists, tables and links", async () => {
   const body = ["# About `= this.title`", "", "- item `= this.title`", "", "| a |", "|---|", "| `= this.title` |"].join("\n");
   const { html } = await render(["title: Hello"], body);
   assert.equal(values(html).length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("the value, the warning class and the hostile text survive the page sanitizer as text", async () => {
   const { html } = await render(['title: "<img src=x onerror=alert(1)>"'], "`= this.title` `= this.owner`");
   const { html: page } = rewriteSphinxHtml(html, {
@@ -168,7 +173,8 @@ test("the value, the warning class and the hostile text survive the page sanitiz
   assert.equal(textContent(values(page)[0]!), "<img src=x onerror=alert(1)>");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("an empty object counts as missing, like an empty list", async () => {
   const { html, diagnostics } = await render(["owner: {}", "tags: []"], "`= this.owner` `= this.tags`");
   assert.equal(values(html).length, 0);
@@ -176,7 +182,8 @@ test("an empty object counts as missing, like an empty list", async () => {
   assert.equal(diagnostics.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("a table of contents entry reads the value, not the expression", async () => {
   const { html } = await render(["title: Hello"], "[TOC]\n\n# About `= this.title`");
   const links = findElements(parseHtml(html), (element) => element.tagName === "a")
@@ -185,7 +192,8 @@ test("a table of contents entry reads the value, not the expression", async () =
   assert.ok(!links.some((text) => text.includes("this.title")), "no entry shows the expression");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S2
 test("the expression of an included file reads the front matter of the including document", async () => {
   const files: Record<string, string> = { "/virtual/part.md": "Owner: `= this.owner`\n" };
   const context: MystRenderContext = {
@@ -201,7 +209,8 @@ test("the expression of an included file reads the front matter of the including
   assert.equal(textContent(values(html)[0]!), "Ada");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S4
 test("the heading anchor and the table of contents link are both built from the value", async () => {
   const { html } = await render(["title: Hello"], "[TOC]\n\n# About `= this.title`");
   const document = parseHtml(html);
@@ -211,7 +220,7 @@ test("the heading anchor and the table of contents link are both built from the 
   assert.ok(hrefs.includes("#about-hello"), `links: ${JSON.stringify(hrefs)}`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-079
+// @tests_req SwRS-MDOKFSTUDIO-CORE-079#S5
 test("more backticks do not escape the form; a backtick kept inside the code does", async () => {
   const doubled = await render(["title: Hello"], "A ``= this.title`` B");
   assert.equal(values(doubled.html).length, 1, "a double-backtick span holds the same text as a single one");

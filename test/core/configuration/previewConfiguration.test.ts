@@ -7,8 +7,9 @@ import {
   readPreviewConfiguration,
 } from "../../../src/core/configuration/previewConfiguration";
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-278#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S5
 test("reads independent studio preview settings without stock configuration keys", () => {
   const values = new Map<string, boolean | number>([
     ["scrollPreviewWithEditor", false],
@@ -83,8 +84,9 @@ test("comment chips are shown by default and can be turned off", () => {
   assert.equal(read(false), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S2
 test("incremental updates can be turned off and default to on", () => {
   const read = (value?: boolean): boolean => readPreviewConfiguration({
     get<T>(section: string, defaultValue: T): T {
@@ -121,7 +123,8 @@ test("normalizes preview content width and reserves zero for unlimited", () => {
   }).maxContentWidth, DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S4
 test("normalizes sticky heading depth to one through six levels", () => {
   const readDepth = (value: number): number => readPreviewConfiguration({
     get<T>(section: string, defaultValue: T): T {

@@ -22,14 +22,14 @@ function frontmatter(file: string): Record<string, unknown> {
 }
 
 test("plainText removes the backticks and the link syntax and nothing else", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S5
   assert.equal(plainText("Use `code` and  `x.y`\n now"), "Use code and x.y now");
   assert.equal(plainText("See [the guide](https://example.com/a_b) here"), "See the guide here");
   assert.equal(plainText("  *x* snake_case <b>y</b> {role}`name` "), "*x* snake_case <b>y</b> {role}name");
 });
 
 test("shareDescription keeps a short text whole and cuts a long one at a word", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S5
   const exact = `${"a".repeat(100)} ${"b".repeat(99)}`;
   assert.equal(exact.length, 200);
   assert.equal(shareDescription(exact), exact);
@@ -41,7 +41,7 @@ test("shareDescription keeps a short text whole and cuts a long one at a word", 
 });
 
 test("no real requirement loses a word in its share text", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S5
   let checked = 0;
   for (const tier of ["strs", "swrs"]) {
     for (const file of files(path.join(ROOT, "requirements", "tiers", tier))) {

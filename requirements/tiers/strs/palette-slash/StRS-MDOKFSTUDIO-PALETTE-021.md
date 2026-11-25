@@ -18,6 +18,9 @@ tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-039
+scenarios:
+- id: S1
+  title: Wrap lines in an admonition
 user_need: As a writer of Sphinx and MyST documents, I insert an admonition, a
   definition list, a formula, a role, a figure or a tab set from a button or the
   slash menu without remembering the syntax, and take the insertion back with a
@@ -90,7 +93,7 @@ An admonition is one undoable edit around the touched lines.
 
 ### Main paths
 
-#### Path 1: Wrap lines in an admonition
+#### Path S1: Wrap lines in an admonition
 
 1. The palette is shown above the text box in the MyST mode
    - SwRS-MDOKFSTUDIO-PALETTE-127: the writer presses Admonition and chooses a type, and the touched lines are wrapped in a colon fence of that type

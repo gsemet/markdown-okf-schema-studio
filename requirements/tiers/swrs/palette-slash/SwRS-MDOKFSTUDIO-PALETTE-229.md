@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-018
+scenarios:
+- id: S1
+  title: Scripts, styles, comments and hidden content are dropped
+- id: S2
+  title: Only a few attributes are read
+- id: S3
+  title: An unsafe address keeps only the text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,7 +39,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the clipboard HTML of a paste is converted, the extension SHALL drop script, style, embedded, form control, media and template elements, comments and hidden content, read only a short list of attributes, and keep only the text of a link or image whose address is not safe.
 
-### Scenario (nominal): Scripts, styles, comments and hidden content are dropped
+### Scenario S1 (nominal): Scripts, styles, comments and hidden content are dropped
 - GIVEN a script, a style and a paragraph with an onclick attribute, and a span with display none
 - WHEN the HTML is converted
 - THEN only the text of the paragraph is kept and the text of the hidden span is dropped
@@ -44,7 +51,7 @@ When the clipboard HTML of a paste is converted, the extension SHALL drop script
 | content hidden by the hidden attribute | dropped from the Markdown |
 | content hidden by the style display none, visibility hidden or mso-hide all | dropped from the Markdown |
 
-### Scenario (nominal): Only a few attributes are read
+### Scenario S2 (nominal): Only a few attributes are read
 - GIVEN a link with an href and a title, and a paragraph with an onclick attribute
 - WHEN the HTML is converted
 - THEN the href is used, the title is dropped and the onclick attribute has no effect on the Markdown
@@ -54,7 +61,7 @@ When the clipboard HTML of a paste is converted, the extension SHALL drop script
 | attribute href, src, alt, class, style, colspan, rowspan, type, checked or start | read |
 | any other attribute (an event attribute such as onclick, title) | dropped; no other attribute reaches the output |
 
-### Scenario (refusal): An unsafe address keeps only the text
+### Scenario S3 (refusal): An unsafe address keeps only the text
 - GIVEN a link to javascript:alert(1) with the text click, and an image with a data: address and alt text pic
 - WHEN the HTML is converted
 - THEN the text is click without a link, and the text is pic

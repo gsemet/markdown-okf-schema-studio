@@ -14,6 +14,9 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-006
+scenarios:
+- id: S1
+  title: The cell left shows its new text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,7 +38,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the editor leaves a cell whose text was typed or changed (by Tab, Shift+Tab or an arrow key), the extension SHALL show in that cell the text just typed, rendered as inline Markdown (code, strong, emphasis, strikethrough, links, line breaks), without waiting for a re-render and without requesting a render or posting a save.
 
-### Scenario (nominal): The cell left shows its new text
+### Scenario S1 (nominal): The cell left shows its new text
 
 - GIVEN the editor in a cell whose text was typed or changed (the first cell of a row just added, or a cell with an older rendering), the cell holding no re-rendered content
 - WHEN the writer presses Tab, Shift+Tab or an arrow key that moves the editor to another cell

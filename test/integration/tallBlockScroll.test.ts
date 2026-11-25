@@ -133,7 +133,8 @@ const SAMPLE = (): Sample | null => {
  * user's "scroll jumps to the top" report): the page follows the caret to the end of the paste.
  * Each case then scrolls down step by step with the mouse wheel over the text box.
  */
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S4
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();

@@ -18,6 +18,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A user setting is turned into the association
+- id: S2
+  title: What is written and what is not
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,13 +47,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension activates and the user or the workspace settings hold the retired setting open.markdownFilesInStudio turned on, the extension SHALL write the workbench.editorAssociations entry *.md naming the Studio editor in that scope before it removes the retired setting from that scope, leave every other entry untouched, remove the leftover retired settings, and show nothing to the reader.
 
-### Scenario (nominal): A user setting is turned into the association
+### Scenario S1 (nominal): A user setting is turned into the association
 
 - GIVEN the user settings hold open.markdownFilesInStudio on and open.searchResultsInStudio, and workbench.editorAssociations with *.png naming another editor
 - WHEN the extension activates
 - THEN the user settings hold workbench.editorAssociations with *.png kept and *.md naming the Studio editor, neither retired setting is left, and nothing is shown to the reader
 
-### Scenario (boundary): What is written and what is not
+### Scenario S2 (boundary): What is written and what is not
 
 | Input | Outcome |
 | --- | --- |

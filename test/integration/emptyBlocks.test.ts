@@ -78,8 +78,9 @@ async function withFixture(
  * An emptied block committed after an autosave, and Delete block, on a real file in LF and CRLF:
  * the block goes with one separator, the line endings stay, and one undo brings it back.
  */
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
 export async function run(): Promise<void> {
   for (const [name, eol] of [["lf", "\n"], ["crlf", "\r\n"]] as const) {
     const original = LINES.join(eol);

@@ -71,8 +71,10 @@ const ON: string[][] = [
   ],
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-280#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S4
 test("the nesting grid: an admonition, a list item and an admonition, every start level by every end level", async () => {
   for (const [row, start] of STARTS.entries()) {
     for (const [column, end] of ENDS.entries()) {
@@ -85,7 +87,8 @@ test("the nesting grid: an admonition, a list item and an admonition, every star
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-286
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-286#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-286#S2
 test("an unplaced edge snaps to its whole element, setting off or on", async () => {
   const source = ":::{note}\nPlain text here.\n:::\n\nAfter.\n";
   const page = pageOf(source, (await previewHtml(source)).replace("Plain text here.", "Quite another words."));

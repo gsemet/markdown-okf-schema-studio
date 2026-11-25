@@ -16,6 +16,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-012
 depends_on: []
+scenarios:
+- id: S1
+  title: Caret in a line
+- id: S2
+  title: Selection of two lines
+- id: S3
+  title: Unwrap when every touched line is wrapped
+- id: S4
+  title: Mixed selection and selection ending at a line start
+- id: S5
+  title: Blank line
+- id: S6
+  title: A line holding a comment end is never wrapped
+- id: S7
+  title: The TODO action has no shortcut
+- id: S8
+  title: The slash menu finds the action by three names
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,47 +52,47 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer runs the TODO action in a block editor on lines that are not wrapped, the page SHALL wrap each non-blank line touched by the caret or the selection in a TODO comment, after its indentation, and unwrap them when every non-blank touched line is already wrapped.
 
-### Scenario (nominal): Caret in a line
+### Scenario S1 (nominal): Caret in a line
 - GIVEN the text "abc" with the caret inside
 - WHEN the TODO action runs
 - THEN the line reads "`<!-- TODO: abc -->`" and the caret stays on the same letter
 
-### Scenario (nominal): Selection of two lines
+### Scenario S2 (nominal): Selection of two lines
 - GIVEN the lines "a" and "b" selected, partly or fully
 - WHEN the TODO action runs
 - THEN both lines are wrapped, each after its own indentation, and the whole block stays selected
 
-### Scenario (nominal): Unwrap when every touched line is wrapped
+### Scenario S3 (nominal): Unwrap when every touched line is wrapped
 - GIVEN the lines "`<!-- TODO: a -->`" and "`<!-- TODO: b -->`" selected
 - WHEN the TODO action runs
 - THEN the lines read a and b; and the lines "- one" and "- two" wrapped by the action come back as the original lines when the action runs again (wrap then unwrap restores the text)
 
-### Scenario (boundary): Mixed selection and selection ending at a line start
+### Scenario S4 (boundary): Mixed selection and selection ending at a line start
 | Input | Outcome |
 | --- | --- |
 | The lines "a" and "`<!-- TODO: b -->`" selected | Both lines are wrapped once |
 | A selection that ends at the start of a line | That last line is left alone |
 
-### Scenario (boundary): Blank line
+### Scenario S5 (boundary): Blank line
 | Input | Outcome |
 | --- | --- |
 | An empty line with the caret | The line reads "`<!-- TODO:  -->`" with the caret between the spaces |
 | A line of two spaces with the caret | The comment keeps the two spaces of indentation |
 | An empty TODO comment with the caret inside it | The comment is removed, the line is empty with the caret |
 
-### Scenario (refusal): A line holding a comment end is never wrapped
+### Scenario S6 (refusal): A line holding a comment end is never wrapped
 | Input | Outcome |
 | --- | --- |
 | The line "a --> b" with the caret | No edit is made |
 | The lines "a" and "b --> c" selected | Only the first line is wrapped |
 
-### Scenario (boundary): The TODO action has no shortcut
+### Scenario S7 (boundary): The TODO action has no shortcut
 | Input | Outcome |
 | --- | --- |
 | Ctrl+/ or Cmd+/ in the text box of a block editor | The TODO action does not run: the shortcut toggles a plain comment, see SwRS-MDOKFSTUDIO-PALETTE-266 |
 | The tooltip of the TODO button | Toggle TODO comment, with no shortcut in parentheses |
 
-### Scenario (nominal): The slash menu finds the action by three names
+### Scenario S8 (nominal): The slash menu finds the action by three names
 | Typed after the slash in a block editor | Outcome |
 | --- | --- |
 | /todo | The slash menu lists the TODO action, titled Toggle TODO comment |

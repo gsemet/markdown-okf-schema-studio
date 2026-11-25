@@ -15,6 +15,19 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
+scenarios:
+- id: S1
+  title: The numbered title of a grid card
+- id: S2
+  title: The header and footer options of a card
+- id: S3
+  title: A card with a link
+- id: S4
+  title: The one-line card parts are marked
+- id: S5
+  title: A grid card inside a quote
+- id: S6
+  title: A grid card inside a list item
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,38 +53,38 @@ When the writer clicks the title of a grid card or of a card, with or without a 
 
 The renderer SHALL mark the title (a linked title too), the `:header:` text and the `:footer:` text as one-line card parts with `data-single-line`, never the body or a block found one-line by its line range, and the sanitizer SHALL keep that marker next to the source mapping.
 
-### Scenario (nominal): The numbered title of a grid card
+### Scenario S1 (nominal): The numbered title of a grid card
 
 - GIVEN edit mode on a document whose line 8 is `:::{grid-item-card} 2. Status projection`
 - WHEN the writer clicks the title of that card
 - THEN the title shows the text "2. Status projection" (the number is not turned into a list), the editor opens inside the card on line 8 and holds that directive line, and Done replaces line 8 only, never line 1 of the document; a plain title such as `Plain *title*` opens its directive line in the same way
 
-### Scenario (nominal): The header and footer options of a card
+### Scenario S2 (nominal): The header and footer options of a card
 
 - GIVEN a `{card}` whose options are `:class-card: x` on line 4, `:header: 4. H` on line 5 and `:footer: 5. F` on line 6
 - WHEN the writer clicks the header text, then the footer text
 - THEN the header "4. H" opens the editor on line 5 only and the footer "5. F" on line 6 only, each shown as literal inline text with its number
 
-### Scenario (boundary): A card with a link
+### Scenario S3 (boundary): A card with a link
 
 - GIVEN a `{card}` titled `3. Linked` with the option `:link: https://example.com`, or the grid card `:::{grid-item-card} Linked card` on line 14 with `:link: targets/alpha.md`, a header section, a body on line 19 and a footer on line 21
 - WHEN the writer clicks the title, the header, the body or the footer in edit mode
 - THEN the title is a link mapped to the directive line, like a plain title: a click on it opens the editor on line 3 (line 14 for the grid card) and does not follow the link; a click on the header, the body or the footer opens the editor on that part's own lines, because in edit mode the stretched link of the card no longer covers the card (SwRS-MDOKFSTUDIO-BLOCK-014)
 - AND a Cmd or Ctrl click on the title follows the link and opens no editor; in reading mode a click anywhere on the card follows the link
 
-### Scenario (nominal): The one-line card parts are marked
+### Scenario S4 (nominal): The one-line card parts are marked
 
 - GIVEN a `{card}` with a title, `:header:` and `:footer:` options and a body, and the same card with a `:link:` option
 - WHEN the renderer maps it and the sanitizer cleans the result
 - THEN the title (linked or not), the header text and the footer text carry `data-single-line`, the body does not, and the sanitizer keeps the marker next to `data-line`
 
-### Scenario (boundary): A grid card inside a quote
+### Scenario S5 (boundary): A grid card inside a quote
 
 - GIVEN a `{grid}` written inside a quote (`> ::::{grid} 2`) whose body starts with a blank `>` line, then `> :::{grid-item-card} A` and `> Body.`
 - WHEN the writer clicks the card title or the card body in edit mode
 - THEN the editor opens on that card's own directive line or body line, as for the same grid outside a quote, never on the line above
 
-### Scenario (boundary): A grid card inside a list item
+### Scenario S6 (boundary): A grid card inside a list item
 
 - GIVEN a `{grid}` opened on a bullet or numbered list item line whose marker is followed by spaces or a tab (`- ::::{grid} 2`, `-<TAB>::::{grid} 2`) and whose body starts with a blank line, then the cards indented to the item's content column with spaces or tabs
 - WHEN the writer clicks a card title or body in edit mode

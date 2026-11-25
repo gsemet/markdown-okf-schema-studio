@@ -8,7 +8,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 
 export const TABLE_GRID_PASTE_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S2
     id: "table-editing/v32-grid-paste-light-900",
     fixture: "08-okf-schema",
     theme: "light",

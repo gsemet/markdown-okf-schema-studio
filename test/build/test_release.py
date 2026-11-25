@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-075
+# @tests_req SwRS-MDOKFSTUDIO-CORE-075#S1
 
 ROOT = Path(__file__).resolve().parents[2]
 PLUGIN_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
@@ -52,7 +52,8 @@ def run_notes(cwd: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_check_accepts_the_notes_of_the_package_version(tmp_path: Path) -> None:
     (tmp_path / "package.json").write_text(json.dumps({"version": "0.2.0"}))
     write_notes(tmp_path)
@@ -60,7 +61,8 @@ def test_check_accepts_the_notes_of_the_package_version(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_check_refuses_a_version_without_notes(tmp_path: Path) -> None:
     (tmp_path / "package.json").write_text(json.dumps({"version": "0.3.0"}))
     write_notes(tmp_path)
@@ -69,7 +71,8 @@ def test_check_refuses_a_version_without_notes(tmp_path: Path) -> None:
     assert "2026" not in result.stderr and "v0.3.0" in result.stderr
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_check_refuses_two_folders_for_a_version(tmp_path: Path) -> None:
     (tmp_path / "package.json").write_text(json.dumps({"version": "0.2.0"}))
     folder = write_notes(tmp_path)
@@ -77,7 +80,8 @@ def test_check_refuses_two_folders_for_a_version(tmp_path: Path) -> None:
     assert run_notes(tmp_path, "--check").returncode == 1
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 @pytest.mark.parametrize(
     "markdown",
     [
@@ -97,7 +101,8 @@ def test_check_refuses_invalid_notes(tmp_path: Path, markdown: str) -> None:
     assert run_notes(tmp_path, "--check").returncode == 1
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 def test_prepare_points_the_images_to_the_release_assets(tmp_path: Path) -> None:
     write_notes(tmp_path)
     assets = tmp_path / "assets"
@@ -110,7 +115,8 @@ def test_prepare_points_the_images_to_the_release_assets(tmp_path: Path) -> None
     assert sorted(path.name for path in assets.iterdir()) == ["dark.png", "table.png"]
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-078
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-078#S3
 @pytest.mark.parametrize("tag", ["0.2.0", "v0.2", "v0.2.0-rc1", "v0.3.0"])
 def test_prepare_refuses_a_tag_without_notes(tmp_path: Path, tag: str) -> None:
     write_notes(tmp_path)
@@ -319,7 +325,7 @@ def test_invalid_version_is_non_mutating(repository: Path, version: str) -> None
     ] == before
 
 
-# @tests_req StRS-MDOKFSTUDIO-CORE-007
+# @accepts_req StRS-MDOKFSTUDIO-CORE-007#S1
 def test_tag_bump_and_rerun(repository: Path, tmp_path: Path) -> None:
     """Tag only an increased version, and never move an existing remote tag."""
     remote = tmp_path / "remote.git"
@@ -380,7 +386,8 @@ def test_tag_rejects_inconsistent_versions(repository: Path) -> None:
 
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_bump_since_reports_whether_the_push_changed_the_version(repository: Path, tmp_path: Path) -> None:
     """CI runs the heavy jobs on the push that tag-release would tag, and only on it."""
     before = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository, text=True).strip()

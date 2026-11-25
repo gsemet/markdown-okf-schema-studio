@@ -9,7 +9,7 @@ from capture_support import Failure
 from capture_toc_rail import check_toc_overlay, check_toc_rail
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S1
 def check_toc_follows_toolbar(page: Page) -> list[str]:
   """The open column or rail stays 8px below the toolbar each time the toolbar opens or closes."""
   chevron = page.locator("[data-sphinx-preview-toolbar-collapse]")
@@ -70,7 +70,8 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
     closed = page.evaluate(measure)
     if closed["state"] != "closed" or closed["shown"]:
       failures.append(Failure(page_name, f"the TOC must start closed: {closed['state']}"))
-    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033#S1
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033#S3
     toggle.click()
     page.wait_for_timeout(300)
     opened = page.evaluate(measure)
@@ -92,7 +93,8 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
       failures.append(Failure(page_name, "the TOC column is not shown on a wide pane"))
       return
     nav = opened["nav"]
-    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S1
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
     if nav["top"] < opened["toolbar"]["bottom"] + 7:
       failures.append(Failure(page_name, f"the TOC column starts at {nav['top']:.0f}px, under the toolbar bottom {opened['toolbar']['bottom']:.0f}px"))
     if nav["right"] > opened["pane"] + 1 or nav["left"] < opened["columnRight"]:
@@ -104,7 +106,8 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
       failures.append(Failure(page_name, "the sticky heading band runs under the TOC column"))
     if opened["overflowX"] > 1:
       failures.append(Failure(page_name, f"horizontal page scroll of {opened['overflowX']}px with the TOC open"))
-    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S1
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
     levels = sorted({entry["level"] for entry in opened["entries"]})
     if levels != ["1", "2", "3", "4"]:
       failures.append(Failure(page_name, f"the TOC lists levels {levels}, expected 1 to 4"))
@@ -156,7 +159,8 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
       zoom_in.click()
     page.wait_for_timeout(200)
     page.evaluate("window.scrollTo(0, 0)")
-    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S4
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S5
     before = page.evaluate("window.scrollY")
     page.locator("nav[data-sphinx-preview-toc] li[data-level] button:not([data-sphinx-preview-toc-twisty])").nth(8).click()
     page.wait_for_timeout(400)
@@ -190,7 +194,8 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
         failures.append(Failure(page_name, f"the current TOC entry contrast is {current['contrast']:.2f}, expected at least 4.5"))
       if not current["visible"]:
         failures.append(Failure(page_name, "the current TOC entry is scrolled out of the TOC column"))
-    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
+    # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S7
     twisty = page.locator("nav[data-sphinx-preview-toc] button[data-sphinx-preview-toc-twisty]").first
     if twisty.count():
       twisty.click()

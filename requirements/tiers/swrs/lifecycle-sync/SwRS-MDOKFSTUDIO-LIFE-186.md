@@ -17,6 +17,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A search click is a jump
+- id: S2
+  title: Moves that are not jumps
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,13 +43,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a text editor of an eligible Markdown file, or a side of a text diff whose real file is one, reports a selection change of kind Command with one selection that Studio did not expect, the host SHALL read it as a jump to the line of that selection in the real file, and SHALL never read a Keyboard, a Mouse or a no-kind change, or a change with several selections, as a jump.
 
-### Scenario (nominal): A search click is a jump
+### Scenario S1 (nominal): A search click is a jump
 
 - GIVEN a saved Markdown file open in a text editor
 - WHEN VS Code reports a selection change of kind Command with one selection on line 40
 - THEN the host fires a jump to line 40 of that file, once
 
-### Scenario (boundary): Moves that are not jumps
+### Scenario S2 (boundary): Moves that are not jumps
 
 | Input | Outcome |
 | --- | --- |

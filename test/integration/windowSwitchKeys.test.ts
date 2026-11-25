@@ -91,7 +91,8 @@ async function leaveTabAndReturn(
     frame.evaluate(() => window.document.hasFocus())), 5_000);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S3
 /**
  * CR 129: in edit mode the page itself can hold the focus (a click on its margin, a window that comes
  * back); plain ArrowDown then still moves the block selection and the page never shows a focus ring.

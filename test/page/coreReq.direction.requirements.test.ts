@@ -20,7 +20,7 @@ import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const MARKDOWN = "שלום עולם, זו פסקה בעברית.\n\nHello world, an English paragraph.\n";
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-041
+// @tests_req SwRS-MDOKFSTUDIO-CORE-041#S1
 test("a Hebrew paragraph ends at the right edge of the column and an English one starts at the left", async (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "core-direction-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));

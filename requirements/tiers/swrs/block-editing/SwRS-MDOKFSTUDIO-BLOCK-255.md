@@ -17,6 +17,13 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
 - StRS-MDOKFSTUDIO-TABLE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: The find field keeps the focus
+- id: S2
+  title: The editor stays open
+- id: S3
+  title: "Table cell editor: The find field keeps the focus"
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,7 +47,7 @@ supersedes:
 
 When the source of a block editor or of a table cell editor reaches the page after another text field outside the editor took the focus (the find field opened with Cmd/Ctrl+F right after the click), the page SHALL build the editor without moving the focus, so text typed in that field never reaches the Markdown source.
 
-### Scenario (nominal): The find field keeps the focus
+### Scenario S1 (nominal): The find field keeps the focus
 
 - GIVEN edit mode on and a click on a block, whose editor waits for its source from the host
 - WHEN the find bar opens before the source arrives (Cmd/Ctrl+F) and the source then arrives
@@ -52,13 +59,13 @@ When the source of a block editor or of a table cell editor reaches the page aft
 | The focus is where it was when the editor opened (the page, the clicked block) | The text box takes the focus as in BLOCK-014 |
 | The focus moved into the editor frame itself | The text box takes the focus |
 
-### Scenario (boundary): The editor stays open
+### Scenario S2 (boundary): The editor stays open
 
 - GIVEN an editor built without the focus because another field held it
 - WHEN the writer looks at the find bar or clicks into the text box
 - THEN the editor is an open edit like any other: replace in the find bar is refused until it is saved or cancelled, and a click in the text box edits it
 
-### Scenario (nominal): Table cell editor: The find field keeps the focus
+### Scenario S3 (nominal): Table cell editor: The find field keeps the focus
 
 - GIVEN edit mode on and a click on a pipe table cell, whose editor waits for its source from the host
 - WHEN the find bar opens before the source arrives (Cmd/Ctrl+F) and the source then arrives

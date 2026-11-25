@@ -19,6 +19,25 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-001
 - StRS-MDOKFSTUDIO-TOOLBAR-009
 depends_on: []
+scenarios:
+- id: S1
+  title: Hiding the page posts the pending autosave
+- id: S2
+  title: The host asks the page to save its editors before it switches document
+- id: S3
+  title: The page saves its open editors and then answers the flush
+- id: S4
+  title: Answers and flags of the flush
+- id: S5
+  title: Link and Back right after typing save first
+- id: S6
+  title: The host applies pending saves before it moves
+- id: S7
+  title: The host never waits long
+- id: S8
+  title: A save refused during a flush warns that the text was not saved
+- id: S9
+  title: Turning edit mode off saves an open cell
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,7 +67,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the page hides, closes or leaves the document (a followed link, Back, another document) or the writer turns edit mode off, the extension SHALL post the text typed in every open editor as a save before the page goes away, bounded by a wait of at most 1.5 seconds for the page's answer and 1.5 seconds for the saves to reach the document.
 
-### Scenario (nominal): Hiding the page posts the pending autosave
+### Scenario S1 (nominal): Hiding the page posts the pending autosave
 | Input | Outcome |
 | --- | --- |
 | A block editor with an autosave timer pending, and pagehide fires | The autosave is posted at once, without waiting for its 400 ms timer; no final save is posted and the editor stays open |
@@ -57,18 +76,18 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 | No pending edit, or a page that stays visible, and a hide event fires | Nothing is posted |
 | A cell editor whose last text is already posted, and the page is hidden | No previewEditSave is posted |
 
-### Scenario (nominal): The host asks the page to save its editors before it switches document
+### Scenario S2 (nominal): The host asks the page to save its editors before it switches document
 - GIVEN an open editor with typed text and a click on a link to another file
 - WHEN the host starts the switch
 - THEN previewFlushEdit is posted before the new document renders and the host waits for the answer
 - The same holds for Back and for a tab switch
 
-### Scenario (nominal): The page saves its open editors and then answers the flush
+### Scenario S3 (nominal): The page saves its open editors and then answers the flush
 - GIVEN an open block editor with typed text, or an open cell editor with text in its text box that the table model has not yet received
 - WHEN previewFlushEdit arrives
 - THEN the extension copies the text of the cell text box into the table model, posts the final save of every open editor with flush true and then posts previewEditFlushed with the flush id and flushed true
 
-### Scenario (boundary): Answers and flags of the flush
+### Scenario S4 (boundary): Answers and flags of the flush
 | Input | Outcome |
 | --- | --- |
 | previewFlushEdit arrives and no editor is open | previewEditFlushed with flushed false is posted |
@@ -76,7 +95,7 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 | A save by Done | The previewEditSave has no flush field |
 | A page that has not reported ready (or a disposed preview) and a switch starts | No flush is posted and the switch goes on |
 
-### Scenario (nominal): Link and Back right after typing save first
+### Scenario S5 (nominal): Link and Back right after typing save first
 | Input | Outcome |
 | --- | --- |
 | An editor with typed text and a click on a link to another file | The final save is posted first, then previewLink |
@@ -84,25 +103,25 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 | A link to an anchor in the same page is clicked | The open editor is kept and no save is posted |
 | An open editor without changes and Back is pressed | Only the navigation is posted |
 
-### Scenario (nominal): The host applies pending saves before it moves
+### Scenario S6 (nominal): The host applies pending saves before it moves
 - GIVEN a final save posted just before Back or just before a link to another file
 - WHEN the host handles previewHistoryGo or previewLink
 - THEN the document holds the saved text before the other document or file opens
 - With no edit in flight the host moves or resolves the link at once
 
-### Scenario (boundary): The host never waits long
+### Scenario S7 (boundary): The host never waits long
 | Input | Outcome |
 | --- | --- |
 | A page that never answers the flush | The switch continues after 1.5 seconds (FLUSH_WAIT_MS is 1500) |
 | A save that stays pending while the host waits for settling | The switch continues after a further 1.5 seconds |
 
-### Scenario (refusal): A save refused during a flush warns that the text was not saved
+### Scenario S8 (refusal): A save refused during a flush warns that the text was not saved
 - GIVEN a flushed save of the block at lines 5-7 that the host refuses
 - WHEN the refusal is posted
 - THEN a warning starts with "Markdown OKF-Schema Studio could not save the text you typed in the block at lines 5-7", gives the refusal reason and ends with "That text was not saved."
 - A refused save that is not a flush shows no warning; the editor shows the reason
 
-### Scenario (nominal): Turning edit mode off saves an open cell
+### Scenario S9 (nominal): Turning edit mode off saves an open cell
 | Input | Outcome |
 | --- | --- |
 | A cell edited and the edit mode button pressed | A final previewEditSave with the edited table is posted |

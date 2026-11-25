@@ -10,7 +10,7 @@ import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
 const MOTION_ON = 'html[data-sphinx-preview-motion="on"]';
 const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-050
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S3
 test("a popover or the slash menu starts transparent 3 px above its place and fades in over 120 ms", () => {
   const starting = /@starting-style \{([\s\S]*?)\n\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   const menus = ":is(.sphinx-preview-edit-palette-menu, .sphinx-preview-slash-menu, .sphinx-preview-frontmatter-picker)";

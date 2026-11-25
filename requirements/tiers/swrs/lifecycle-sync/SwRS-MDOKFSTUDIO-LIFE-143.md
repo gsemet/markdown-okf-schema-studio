@@ -19,6 +19,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-022
 depends_on: []
+scenarios:
+- id: S1
+  title: Closed while rendering
+- id: S2
+  title: Closed idle
+- id: S3
+  title: Watchers removed
+- id: S4
+  title: Problems entries cleared
+- id: S5
+  title: Folder removed
+- id: S6
+  title: Deactivation
+- id: S7
+  title: What stays after a close
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,44 +58,44 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview panel is closed, a document is closed, a workspace folder is removed or the extension is deactivated, the extension SHALL cancel the render queue and dispose the pending render stages, file watchers, subscriptions and Problems entries of the preview concerned, so that no late result reaches the panel, keeping every shared resource that another live preview still uses. A preview whose workspace folder is removed keeps its panel and shows its file with restricted reads.
 
-### Scenario (nominal): Closed while rendering
+### Scenario S1 (nominal): Closed while rendering
 
 - GIVEN a preview debouncing, building or awaiting a patch acknowledgement
 - WHEN the panel is closed
 - THEN the preview stays silent: no message, no status and no stage is kept
 
-### Scenario (nominal): Closed idle
+### Scenario S2 (nominal): Closed idle
 
 - GIVEN an idle preview
 - WHEN the panel is closed
 - THEN the session is removed from the live set and getActivePreviewForTests returns undefined
 
-### Scenario (nominal): Watchers removed
+### Scenario S3 (nominal): Watchers removed
 
 - GIVEN a preview that watches the files below its root
 - WHEN the panel is closed
 - THEN the preview's hold on the watcher and its change, create and delete subscriptions are released, and the watcher itself is disposed with the last preview of that root (previews of one root share one watcher)
 
-### Scenario (nominal): Problems entries cleared
+### Scenario S4 (nominal): Problems entries cleared
 
 - GIVEN Problems entries for a.md published by its only preview
 - WHEN the preview is closed, switches document or a.md is closed
 - THEN the entries of a.md are deleted
 
-### Scenario (nominal): Folder removed
+### Scenario S5 (nominal): Folder removed
 
 - GIVEN a preview with full reads of a file in a workspace folder (in the Agents window, the folder of the active agent session, which a session switch removes)
 - WHEN the folder is removed from the workspace
 - THEN the preview's session, with its render queue, watchers and Problems entries, is disposed; the same panel stays open and shows the file in a new session with restricted reads (resource root = the directory of the file, no session roots) that keeps the reading state; the folder's files still exist
 - AND when a folder that holds the file is added later, the preview gets full reads again on the same panel (see SwRS-MDOKFSTUDIO-TRUST-001)
 
-### Scenario (nominal): Deactivation
+### Scenario S6 (nominal): Deactivation
 
 - GIVEN two open previews
 - WHEN the extension host stops the extension
 - THEN the preview sessions, watchers and the Problems collection are disposed, the panels stay and the serializer restores them at the next start
 
-### Scenario (boundary): What stays after a close
+### Scenario S7 (boundary): What stays after a close
 
 | Case | Outcome |
 | --- | --- |

@@ -23,6 +23,21 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Middle block
+- id: S2
+  title: Where the cut span sits in the document
+- id: S3
+  title: Line breaks of what remains
+- id: S4
+  title: The block after a cut keeps its place on the screen
+- id: S5
+  title: The document changed during the clipboard write
+- id: S6
+  title: A successful cut clears the block selection
+- id: S7
+  title: A refused cut keeps the block selection
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,13 +61,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer cuts selected blocks, the host SHALL put their Markdown on the clipboard and delete them together with their blank separator in the line breaks of the document, after the range's trailing blank lines (spaces and tabs only) are dropped, so that no gap of two blank lines and no glued blocks are left, and answering that nothing was removed when the document changed during the clipboard write.
 
-### Scenario (nominal): Middle block
+### Scenario S1 (nominal): Middle block
 
 - GIVEN a list between two paragraphs
 - WHEN the list is cut
 - THEN the Markdown of the list is on the clipboard, the list and one blank separator are gone and the paragraphs stay one blank line apart
 
-### Scenario (boundary): Where the cut span sits in the document
+### Scenario S2 (boundary): Where the cut span sits in the document
 
 | Input | Outcome |
 | --- | --- |
@@ -65,34 +80,34 @@ When a writer cuts selected blocks, the host SHALL put their Markdown on the cli
 
 A cut never leaves three line breaks in a row and never merges two paragraphs.
 
-### Scenario (boundary): Line breaks of what remains
+### Scenario S3 (boundary): Line breaks of what remains
 
 | Input | Outcome |
 | --- | --- |
 | A document with CR LF line breaks, a block is cut | No bare LF appears in the remaining text |
 | A document with LF line breaks, a block is cut | No CR appears |
 
-### Scenario (nominal): The block after a cut keeps its place on the screen
+### Scenario S4 (nominal): The block after a cut keeps its place on the screen
 
 | Input | Outcome |
 | --- | --- |
 | A cut with pinViewportTop 200 and a block after the span | The host stores a pin for the first line of the cut span with that viewport top, and the next render puts the line of the span at viewport top 200 |
 | A cut of the last block, no block follows the span | No pin is stored |
 
-### Scenario (refusal): The document changed during the clipboard write
+### Scenario S5 (refusal): The document changed during the clipboard write
 
 | Input | Outcome |
 | --- | --- |
 | A cut whose clipboard write is pending while the document is edited | When the write completes, the answer is ok false with "The document changed while cutting. The blocks are on the clipboard, nothing was removed." and the document is unchanged |
 | No change during the write | When the write completes, the blocks are removed |
 
-### Scenario (nominal): A successful cut clears the block selection
+### Scenario S6 (nominal): A successful cut clears the block selection
 
 - GIVEN a block selection and a cut or a paste answered ok true
 - WHEN the answer arrives
 - THEN the page clears the selection and its announcement
 
-### Scenario (refusal): A refused cut keeps the block selection
+### Scenario S7 (refusal): A refused cut keeps the block selection
 
 - GIVEN a selection and a cut answered ok false
 - WHEN the answer arrives

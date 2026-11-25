@@ -48,7 +48,7 @@ async function dragFiles(page: Page, uris: string[], x: number, y: number, drop:
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 /**
  * CR 146: in a real VS Code window, files dragged from the Explorer onto the preview in edit mode
  * show a drop marker at the nearest insertion point and, dropped, write a relative Markdown link

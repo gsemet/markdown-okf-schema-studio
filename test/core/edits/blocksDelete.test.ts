@@ -19,7 +19,8 @@ function deleted(text: string, line: number, endLine: number): string {
 for (const [name, eol] of EOLS) {
   const join = (...lines: string[]): string => lines.join(eol);
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
   test(`${name}: planBlocksDelete takes the separator like a cut (middle, first, last)`, () => {
     const doc = join("# T", "", "First.", "", "Second.", "");
     assert.equal(deleted(doc, 3, 3), join("# T", "", "Second.", ""));
@@ -29,14 +30,14 @@ for (const [name, eol] of EOLS) {
     assert.equal(deleted(join("Only.", ""), 1, 1), "");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
   test(`${name}: planBlocksDelete drops the trailing blank lines of the span`, () => {
     const doc = join("- a", "- b", "", "Para", "");
     assert.equal(deleted(doc, 1, 3), join("Para", ""));
     assert.equal(deleted(join("Para", "", "- a", "", ""), 3, 5), join("Para", ""));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
   test(`${name}: planBlocksDelete refuses an include, the frontmatter and stale lines`, () => {
     const include = join(":::{include} other.md", ":::", "", "Para", "");
     assert.deepEqual(planBlocksDelete(include, 1, 2), { refused: DELETE_INCLUDED });
@@ -47,7 +48,8 @@ for (const [name, eol] of EOLS) {
     assert.ok("refused" in planBlocksDelete(join("A", "", "B", ""), 3, 9));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S4
   test(`${name}: an emptied block is removed whether or not the autosave wrote the placeholder`, () => {
     const doc = join("# Title", "", "First.", "", "Second paragraph.", "");
     const start = doc.indexOf("First.");
@@ -61,7 +63,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(applyTextEdits(autosaved, [afterAutosave]), expected);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S4
   test(`${name}: an emptied first, last, tight and loose list item leave no blank line`, () => {
     const remove = (doc: string, saved: string, original: string, line: number, endLine: number): string => {
       const start = doc.indexOf(saved);
@@ -80,7 +82,7 @@ for (const [name, eol] of EOLS) {
     );
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S1
   test(`${name}: stale lines give no removal`, () => {
     const doc = join("A", "", "B", "");
     assert.equal(planEmptiedBlockRemoval(doc, 0, "A", "A", 3, 3), undefined);

@@ -16,6 +16,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TRUST-014
+scenarios:
+- id: S1
+  title: Every diagram parses
+- id: S2
+  title: No diagram
+- id: S3
+  title: A fence that does not parse
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,19 +39,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer runs the requirements lint, it SHALL parse the Mermaid fence of the Use case diagram section of every StRS with the project's Mermaid, using the same section and fence as the site, and SHALL fail naming the file, the line, the StRS id and Mermaid's message for each fence that does not parse.
 
-### Scenario (nominal): Every diagram parses
+### Scenario S1 (nominal): Every diagram parses
 
 - GIVEN a requirements bundle whose StRS use case diagrams all parse with the project's Mermaid
 - WHEN the maintainer runs the requirements lint
 - THEN the lint passes and prints `use case diagrams: <n> StRS checked, all parse (Mermaid <version>)`, where `<n>` counts the StRS that have a diagram
 
-### Scenario (boundary): No diagram
+### Scenario S2 (boundary): No diagram
 
 - GIVEN a StRS with no `### Use case diagram` section, a section with no Mermaid fence, or an empty fence
 - WHEN the maintainer runs the requirements lint
 - THEN that StRS is not counted and no error is reported for it
 
-### Scenario (refusal): A fence that does not parse
+### Scenario S3 (refusal): A fence that does not parse
 
 - GIVEN one or more StRS whose Mermaid fence does not parse, for example a `sequenceDiagram` with a participant `Box` used in a message, or a `stateDiagram-v2` with a state named `state`
 - WHEN the maintainer runs the requirements lint

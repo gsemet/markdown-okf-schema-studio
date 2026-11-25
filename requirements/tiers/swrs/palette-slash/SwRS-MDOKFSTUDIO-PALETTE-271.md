@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-021
+scenarios:
+- id: S1
+  title: Open the form and insert
+- id: S2
+  title: Refusals and cancel
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +42,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer chooses Grid from the MyST palette or the slash menu, the extension SHALL open a form for the grid columns, gutter, number of cards and the header, footer and link of each card and, on Insert, write a {grid} directive holding that many {grid-item-card} directives after the selection.
 
-### Scenario (nominal): Open the form and insert
+### Scenario S1 (nominal): Open the form and insert
 
 - GIVEN a block editor in the MyST palette mode
 - WHEN the writer presses the Grid button, or chooses Grid in the slash menu (the typed /query is removed first)
 - THEN a form opens under the palette with the fields Columns, Gutter, Cards, Headers, Footers and Links; Insert writes a {grid} directive after the selection, with the columns as its argument, a :gutter: option when the gutter is filled, and one {grid-item-card} per requested card, and selects the title of the first card. Headers, Footers and Links hold one entry per card, separated by |: entry N of Links becomes the :link: option of card N, entry N of Headers its header line above a ^^^ separator and entry N of Footers its footer line under a +++ separator after the body (a grid card takes no :header: or :footer: option, unlike the Card form of SwRS-MDOKFSTUDIO-PALETTE-270), and an empty or missing entry leaves the option, line or separator out
 
-### Scenario (boundary): Refusals and cancel
+### Scenario S2 (boundary): Refusals and cancel
 
 | Input | Outcome |
 | --- | --- |

@@ -80,7 +80,8 @@ const SOURCE = [
  * adds a column with an empty header; in edit mode that column and the selected cell stay usable
  * (empty column at least 8em, the edited cell at least 300 px, the editor not clipped).
  */
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S7
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();

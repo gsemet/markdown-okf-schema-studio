@@ -24,7 +24,8 @@ function saved(text: string, block: { line: number; endLine: number; editedText:
   return { start: original.start, end: original.start + original.text.length, after: applyTextEdits(text, [edit]) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S4
 test("saving one block of each fixture changes that block only and keeps every other byte", () => {
   for (const name of LINE_ENDING_FIXTURE_NAMES) {
     const text = readLineEndingFixture(name);
@@ -42,7 +43,7 @@ test("saving one block of each fixture changes that block only and keeps every o
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S4
 test("a save never adds a bare LF to a CRLF file nor a CR to an LF file", () => {
   for (const name of LINE_ENDING_FIXTURE_NAMES.filter((fixture) => !fixture.includes("mixed"))) {
     const text = readLineEndingFixture(name);

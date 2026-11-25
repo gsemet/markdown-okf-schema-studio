@@ -18,6 +18,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-001
 - StRS-MDOKFSTUDIO-REVIEW-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Small edit
+- id: S2
+  title: Large edit
+- id: S3
+  title: Where the fuzzy search gives up
+- id: S4
+  title: Numbers and negation words must agree
+- id: S5
+  title: Ambiguous fuzzy matches
+- id: S6
+  title: Single fuzzy match
+- id: S7
+  title: Large document
+- id: S8
+  title: Budget exhausted
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,19 +51,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a review thread quote has no exact copy, the extension SHALL move the thread to the one place of the document that differs from the quote by at most 20 percent of its length and agrees on numbers and negation words, searching only around the rarest word of the quote within a fixed cost bound, and orphan the thread when there is no such place or the places are ambiguous.
 
-### Scenario (nominal): Small edit
+### Scenario S1 (nominal): Small edit
 
 - GIVEN a quote "the scheduler retries the failed upload twice" and the sentence now reading "uploads"
 - WHEN the thread is checked
 - THEN the thread moves to the line of the sentence
 
-### Scenario (boundary): Large edit
+### Scenario S2 (boundary): Large edit
 
 - GIVEN a sentence that differs by more than 20 percent
 - WHEN the thread is checked
 - THEN the thread is orphaned
 
-### Scenario (boundary): Where the fuzzy search gives up
+### Scenario S3 (boundary): Where the fuzzy search gives up
 
 | Input | Outcome |
 | --- | --- |
@@ -55,7 +72,7 @@ When a review thread quote has no exact copy, the extension SHALL move the threa
 | A short quote of under 12 characters with no exact copy | No fuzzy search is made |
 | A text of over 2 million characters | The fuzzy search is skipped |
 
-### Scenario (refusal): Numbers and negation words must agree
+### Scenario S4 (refusal): Numbers and negation words must agree
 
 | Input | Outcome |
 | --- | --- |
@@ -64,25 +81,25 @@ When a review thread quote has no exact copy, the extension SHALL move the threa
 
 The negation words are not, no, never, without, cannot, nor, none, ne, pas, non and words ending in n't. Numbers and these words must be the same in the quote and in the match.
 
-### Scenario (refusal): Ambiguous fuzzy matches
+### Scenario S5 (refusal): Ambiguous fuzzy matches
 
 - GIVEN two sentences each one letter away from the quote, both more than 50 lines from the old lines
 - WHEN the thread is checked
 - THEN the thread is orphaned, because the decision used for exact copies (surroundings, the 50 line window, a strictly nearest place) picks none
 
-### Scenario (nominal): Single fuzzy match
+### Scenario S6 (nominal): Single fuzzy match
 
 - GIVEN only one such sentence
 - WHEN the thread is checked
 - THEN the thread moves to it
 
-### Scenario (boundary): Large document
+### Scenario S7 (boundary): Large document
 
 - GIVEN a document of 20 000 lines and 200 threads without exact copies
 - WHEN the threads are checked
 - THEN the work ends in under 5 seconds and no thread is lost
 
-### Scenario (boundary): Budget exhausted
+### Scenario S8 (boundary): Budget exhausted
 
 - GIVEN a budget of 20 million edit distance cells already used up by earlier threads
 - WHEN a further thread needs a fuzzy search

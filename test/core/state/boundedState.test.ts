@@ -28,7 +28,7 @@ class FakeStorage implements KeyValueStorage {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014#S6
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-125
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125#S6
 test("evicts the least recently set entry once the cap is exceeded", () => {
   const map = new BoundedMap<number>(3);
   for (const [i, key] of ["a", "b", "c", "d"].entries()) map.set(key, i);

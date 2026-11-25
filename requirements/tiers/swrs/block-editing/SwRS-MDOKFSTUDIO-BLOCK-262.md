@@ -16,6 +16,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-014
+scenarios:
+- id: S1
+  title: Dragging the handle of an item
+- id: S2
+  title: Keyboard move with Alt+Up and Alt+Down
+- id: S3
+  title: The handle beside its item
+- id: S4
+  title: Nesting, numbering and markers
+- id: S5
+  title: Lists in a quote, an alert or an admonition
+- id: S6
+  title: One edit, one undo
+- id: S7
+  title: Lists and states without a move
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +58,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer drags the handle of a list item in edit mode onto another item of the same list, or presses Alt+Up or Alt+Down on that handle, the extension SHALL move that item, with its sub-items and blocks, to the new position among its sibling items as one source edit and keep the numbers of an ordered list in order.
 
-### Scenario (nominal): Dragging the handle of an item
+### Scenario S1 (nominal): Dragging the handle of an item
 
 | Input | Outcome |
 | --- | --- |
@@ -54,7 +69,7 @@ When the writer drags the handle of a list item in edit mode onto another item o
 | Dropped on the lower half of the item before it, or on the upper half of the item after it | The item keeps its place: no line shows, nothing is requested from the host and the document is not edited |
 | The pointer is held over another list, or outside the list and its handle strip | No line shows; a drop there requests nothing and the document is not edited |
 
-### Scenario (nominal): Keyboard move with Alt+Up and Alt+Down
+### Scenario S2 (nominal): Keyboard move with Alt+Up and Alt+Down
 
 | Input | Outcome |
 | --- | --- |
@@ -64,7 +79,7 @@ When the writer drags the handle of a list item in edit mode onto another item o
 
 The chord on a handle is not also read as the move of the whole list block. In an open list item editor, the Cmd/Ctrl+Alt chord still moves the whole list (SwRS-MDOKFSTUDIO-BLOCK-130).
 
-### Scenario (nominal): The handle beside its item
+### Scenario S3 (nominal): The handle beside its item
 
 | Input | Outcome |
 | --- | --- |
@@ -75,7 +90,7 @@ The chord on a handle is not also read as the move of the whole list block. In a
 | Edit mode switched off | The handles are gone and a pushed block returns to its place |
 | A click on a handle | No editor opens; the pointer over a handle outlines the item it moves |
 
-### Scenario (nominal): Nesting, numbering and markers
+### Scenario S4 (nominal): Nesting, numbering and markers
 
 | Input | Outcome |
 | --- | --- |
@@ -86,20 +101,20 @@ The chord on a handle is not also read as the move of the whole list block. In a
 | Bullet items with `-`, `*` or `+`, and task items | Each item keeps its marker and its checkbox text |
 | CRLF line endings, or no final line break | The line endings and the end of the source are kept |
 
-### Scenario (boundary): Lists in a quote, an alert or an admonition
+### Scenario S5 (boundary): Lists in a quote, an alert or an admonition
 
 | Input | Outcome |
 | --- | --- |
 | A list in a quote, a GitHub alert, a MyST admonition or two nested admonitions | The handles sit left of the outermost box; a move saves only the list's lines, each with its quote prefix kept, blank quote lines included |
 | A click on an item of a list in an alert or an admonition | The whole container opens in its editor, as before (SwRS-MDOKFSTUDIO-BLOCK-014) |
 
-### Scenario (boundary): One edit, one undo
+### Scenario S6 (boundary): One edit, one undo
 
 - GIVEN an item moved by drag or by key
 - WHEN the move is saved
 - THEN the page posts one `previewEditOpen`, then one final `previewEditSave` of the list's lines, opens no editor, and the editor's undo restores the previous order in one step
 
-### Scenario (refusal): Lists and states without a move
+### Scenario S7 (refusal): Lists and states without a move
 
 | Input | Outcome |
 | --- | --- |

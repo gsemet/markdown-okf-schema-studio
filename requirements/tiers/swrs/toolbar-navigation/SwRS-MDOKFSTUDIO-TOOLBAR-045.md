@@ -17,6 +17,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Reading
+- id: S2
+  title: Fractional top
+- id: S3
+  title: Folded parent
+- id: S4
+  title: The column scrolls itself
+- id: S5
+  title: The current entry is readable
+- id: S6
+  title: Click
+- id: S7
+  title: Click right after a content update
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,39 +51,39 @@ default_owner_email: gaetan@xeberon.net
 
 When the reading line passes a heading, the extension SHALL mark the entry of the last heading at or above the reading line (one pixel tolerance) with aria-current location and a tint with a bar, keep that entry visible by scrolling the column, and scroll the heading of a clicked entry to the reading line below the sticky band without navigating.
 
-### Scenario (nominal): Reading
+### Scenario S1 (nominal): Reading
 - GIVEN an open column and a reading line inside the second section
 - WHEN the page scrolls
 - THEN exactly one entry, the second, has aria-current location (and data-sphinx-preview-toc-current), and the mark is removed from the previous entry
 
-### Scenario (boundary): Fractional top
+### Scenario S2 (boundary): Fractional top
 - GIVEN a heading revealed at the reading line with a fractional top
 - WHEN the column tracks the reading line
 - THEN that heading is the current entry
 
-### Scenario (boundary): Folded parent
+### Scenario S3 (boundary): Folded parent
 | Input | Outcome |
 | --- | --- |
 | A folded parent whose child is the current section | The parent entry carries the mark (a hidden entry is represented by its nearest shown ancestor) |
 | The same parent unfolded | The child carries the mark |
 
-### Scenario (nominal): The column scrolls itself
+### Scenario S4 (nominal): The column scrolls itself
 | Input | Outcome |
 | --- | --- |
 | A current entry below the visible part of the column | The column scrolls down so the entry bottom is inside it and the page scroll does not change |
 | A current entry above the visible part | The column scrolls up |
 
-### Scenario (nominal): The current entry is readable
+### Scenario S5 (nominal): The current entry is readable
 - GIVEN scenarios in a light 900 px and a dark 1600 px pane
 - WHEN the current entry is measured
 - THEN it has square corners (border radius 0), a 3 px bar on its start edge, and its text against the tinted background has a contrast of at least 4.5 to 1; exactly one entry carries the mark while the page is scrolled
 
-### Scenario (nominal): Click
+### Scenario S6 (nominal): Click
 - GIVEN an open column and a heading far below
 - WHEN the reader clicks its entry
 - THEN the page scrolls so the heading is at the reading line below the sticky band, the default action of the click is cancelled and no navigation message (previewLink) is posted
 
-### Scenario (boundary): Click right after a content update
+### Scenario S7 (boundary): Click right after a content update
 | Input | Outcome |
 | --- | --- |
 | An entry built before a content update, clicked right after the update | The page scrolls to the live heading element found again by its key, not the replaced one |

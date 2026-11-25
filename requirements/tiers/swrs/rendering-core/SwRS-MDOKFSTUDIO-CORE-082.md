@@ -15,6 +15,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-008
+scenarios:
+- id: S1
+  title: Behaviour page
+- id: S2
+  title: Exempt behaviour
+- id: S3
+  title: A table scenario shows its table
+- id: S4
+  title: A scenario with steps, a note and a table
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,25 +43,25 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer builds the Pages site, the viewer SHALL write one page per active SwRS that shows its rule, where it sits in the paths of its use case (naming the use case by its full ID), its scenarios, and the files that implement and test it at the commit of the build.
 
-### Scenario (nominal): Behaviour page
+### Scenario S1 (nominal): Behaviour page
 
 - GIVEN an active SwRS with 2 scenarios, one source file and 2 test files
 - WHEN the site is built
 - THEN its page shows the rule, where it sits in the paths ("Step 1 of path 1 in StRS-MDOKFSTUDIO-GFM-001", the full ID of the use case being a link), the scenarios, and the files as links to the repository at the commit of the build, each test file tagged with its kind
 
-### Scenario (boundary): Exempt behaviour
+### Scenario S2 (boundary): Exempt behaviour
 
 - GIVEN a SwRS exempt from markers
 - WHEN its page is written
 - THEN the page says it is exempt, with the reason, instead of listing files
 
-### Scenario (nominal): A table scenario shows its table
+### Scenario S3 (nominal): A table scenario shows its table
 
 - GIVEN an active SwRS whose scenario is written as a table with its own headers
 - WHEN its page is written
 - THEN the scenario card shows that table with the same headers and one row per source row, and no empty Given / When / Then columns
 
-### Scenario (boundary): A scenario with steps, a note and a table
+### Scenario S4 (boundary): A scenario with steps, a note and a table
 
 - GIVEN a scenario with GIVEN / WHEN / THEN lines, a note line and a table
 - WHEN its page is written

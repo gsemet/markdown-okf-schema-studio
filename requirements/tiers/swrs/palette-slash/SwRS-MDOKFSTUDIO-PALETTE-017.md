@@ -18,6 +18,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-002
 depends_on: []
+scenarios:
+- id: S1
+  title: Platform key
+- id: S2
+  title: Tooltip of the select
+- id: S3
+  title: Wrong modifier
+- id: S4
+  title: Return to the text box
+- id: S5
+  title: Composition
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +46,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Cmd+Shift+M on macOS or Ctrl+Shift+M elsewhere in the block text box, the extension SHALL close any open picker and move the focus to the mode select, whose tooltip names that key, and give the focus back to the text box without changing the mode when the writer presses Escape or Enter, or clicks a second time, on the select.
 
-### Scenario (nominal): Platform key
+### Scenario S1 (nominal): Platform key
 
 - GIVEN a block editor with the focus in the text box
 - WHEN the writer presses the key combination of the platform
 - THEN any open picker is closed, the focus is on the mode select and the editor stays open
 
-### Scenario (nominal): Tooltip of the select
+### Scenario S2 (nominal): Tooltip of the select
 
 - GIVEN a block editor
 - WHEN the writer hovers the select
@@ -52,13 +63,13 @@ When the writer presses Cmd+Shift+M on macOS or Ctrl+Shift+M elsewhere in the bl
 | macOS | Palette buttons (Cmd+Shift+M) |
 | Windows or Linux | Palette buttons (Ctrl+Shift+M) |
 
-### Scenario (refusal): Wrong modifier
+### Scenario S3 (refusal): Wrong modifier
 
 - GIVEN the same editor on macOS
 - WHEN the writer presses Ctrl+Shift+M
 - THEN nothing happens
 
-### Scenario (nominal): Return to the text box
+### Scenario S4 (nominal): Return to the text box
 
 - GIVEN the focus on the select
 - WHEN the writer presses the key or clicks as in the table
@@ -70,7 +81,7 @@ When the writer presses Cmd+Shift+M on macOS or Ctrl+Shift+M elsewhere in the bl
 | Enter | the focus is in the text box and the mode is unchanged |
 | a second click (opening and dismissing the select without a change) | the focus is handed back to the text box |
 
-### Scenario (boundary): Composition
+### Scenario S5 (boundary): Composition
 
 - GIVEN an IME composition in progress
 - WHEN a key is pressed on the select

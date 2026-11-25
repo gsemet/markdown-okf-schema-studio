@@ -16,6 +16,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
 depends_on: []
+scenarios:
+- id: S1
+  title: Open menu
+- id: S2
+  title: Closed menu
+- id: S3
+  title: Live region count
+- id: S4
+  title: Entry text is never markup
+- id: S5
+  title: Forced colours
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,31 +45,31 @@ default_owner_email: gaetan@xeberon.net
 
 While the slash menu is open, the extension SHALL expose it as a listbox named Commands with option rows, announce the number of commands in a polite live region, set every entry as text, and keep the lit command readable when the system forces colours.
 
-### Scenario (nominal): Open menu
+### Scenario S1 (nominal): Open menu
 - GIVEN an open menu
 - WHEN the accessibility state is read
 - THEN the list has the role listbox and the name Commands, the rows have the role option and the text box points at the lit row with aria-activedescendant, aria-expanded and aria-controls
 
-### Scenario (boundary): Closed menu
+### Scenario S2 (boundary): Closed menu
 - GIVEN the menu closes
 - WHEN the text box is read
 - THEN the three attributes are gone
 
-### Scenario (boundary): Live region count
+### Scenario S3 (boundary): Live region count
 | Matches | Live region text |
 | --- | --- |
 | 3 | 3 commands available |
 | 1 | 1 command available |
 | none | No command |
 
-### Scenario (refusal): Entry text is never markup
+### Scenario S4 (refusal): Entry text is never markup
 | Given | When | Outcome |
 | --- | --- | --- |
 | a command label that contains a tag | the menu renders | the tag is shown as text |
 | a command with an icon | the menu renders | the icon is the static SVG of the palette button, the only markup |
 | a command with a shortcut and a category | the menu renders | both are set as text |
 
-### Scenario (boundary): Forced colours
+### Scenario S5 (boundary): Forced colours
 | Mode | Colours |
 | --- | --- |
 | system in forced-colours mode | the menu is drawn with Canvas and CanvasText; the lit command has background Highlight, text HighlightText and its category and shortcut HighlightText |

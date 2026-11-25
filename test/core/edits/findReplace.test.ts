@@ -29,7 +29,7 @@ function plan(items: FindReplaceItem[]) {
   return result;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S3
 test("a match is replaced at its own span and the rest of the file is byte-identical", () => {
   const result = plan([item(1, 1, "Studio", 0, 1, "Atelier")]);
   assert.equal(result.replaced, 1);
@@ -38,7 +38,8 @@ test("a match is replaced at its own span and the rest of the file is byte-ident
   assert.deepEqual(result.edits, [{ start: 2, end: 8, text: "Atelier" }]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("the occurrence picks the right one among several in a block, markup around it kept", () => {
   const result = plan([
     item(3, 4, "Studio", 0, 2, "S1"), // inside the bold markup
@@ -49,14 +50,14 @@ test("the occurrence picks the right one among several in a block, markup around
     "The **S1** keeps the s source,\nwrapped over two lines of S2 text.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("a white space of the matched text stands for a wrapped line break of the source", () => {
   const result = plan([item(3, 4, "source, wrapped", 0, 1, "text; folded")]);
   assert.equal(applyTextEdits(SOURCE, result.edits).split("\n")[2],
     "The **Studio** keeps the studio text; folded over two lines of Studio text.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("a match that does not map one-to-one to the source is skipped and counted", () => {
   const result = plan([
     item(3, 3, "The Studio", 0, 1, "never"), // markup inside the match: the source has no such text
@@ -88,7 +89,8 @@ const planIn = (source: string, items: FindReplaceItem[]) => {
   return { ...result, text: applyTextEdits(source, result.edits) };
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("a link target that repeats the text is left out: the visible matches are replaced, the target kept", () => {
   const result = planIn(LIST, [
     item(3, 3, "needle", 0, 1, "PIN"),
@@ -103,7 +105,8 @@ test("a link target that repeats the text is left out: the visible matches are r
   assert.match(result.text, /\(https:\/\/example\.com\/needle\)/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("link titles, angle-bracket targets and targets with parentheses are left out too", () => {
   const source = 'A needle [needle](<x needle> "a needle") and [b](u/(needle)) [c](needle \'needle\') [needle][r]\n';
   const result = planIn(source, [item(1, 1, "needle", 0, 3, "PIN"), item(1, 1, "needle", 1, 3, "PIN"), item(1, 1, "needle", 2, 3, "PIN")]);
@@ -111,7 +114,7 @@ test("link titles, angle-bracket targets and targets with parentheses are left o
   assert.equal(result.text, 'A PIN [PIN](<x needle> "a needle") and [b](u/(needle)) [c](needle \'needle\') [PIN][r]\n');
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 test("an inline image is left out as a whole: its alt text is neither counted nor replaced", () => {
   const source = "One needle ![alt needle](img/needle.png \"needle\") [![needle](a.png)](needle) two needle.\n";
   const result = planIn(source, [item(1, 1, "needle", 0, 2, "PIN"), item(1, 1, "needle", 1, 2, "PIN")]);
@@ -119,7 +122,7 @@ test("an inline image is left out as a whole: its alt text is neither counted no
   assert.equal(result.text, "One PIN ![alt needle](img/needle.png \"needle\") [![needle](a.png)](needle) two PIN.\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("a reference definition is left out; a footnote definition stays counted", () => {
   const source = ["See [needle][ref] here.", "", "[ref]: https://example.com/needle \"needle\"", "[^n]: a needle note", ""].join("\n");
   const result = planIn(source, [item(1, 4, "needle", 0, 2, "PIN"), item(1, 4, "needle", 1, 2, "PIN")]);
@@ -127,7 +130,7 @@ test("a reference definition is left out; a footnote definition stays counted", 
   assert.equal(result.text, ["See [PIN][ref] here.", "", "[ref]: https://example.com/needle \"needle\"", "[^n]: a PIN note", ""].join("\n"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("an autolink and a link written in a code span stay counted: the reader sees their text", () => {
   const source = "Go <https://example.com/needle> or `[x](needle)` now.\n";
   const result = planIn(source, [item(1, 1, "needle", 0, 2, "PIN"), item(1, 1, "needle", 1, 2, "PIN")]);
@@ -137,7 +140,7 @@ test("an autolink and a link written in a code span stay counted: the reader see
   assert.deepEqual(skipped, { refused: FIND_REPLACE_NOTHING }, "one rendered occurrence against two visible ones is skipped");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("a link or a definition in a fenced code block stays counted: the reader sees it as code", () => {
   const backticks = ["```text", "[x]: https://needle.example", "See [a](needle).", "```", ""].join("\n");
   const result = planIn(backticks, [item(1, 4, "needle", 0, 2, "PIN"), item(1, 4, "needle", 1, 2, "PIN")]);
@@ -147,7 +150,7 @@ test("a link or a definition in a fenced code block stays counted: the reader se
   assert.equal(planIn(tildes, [item(1, 3, "needle", 0, 1, "PIN")]).text, ["> ~~~~", "> [x]: PIN", "> ~~~~", ""].join("\n"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("the info string of a fence is not taken for the visible match of a definition or link in it", () => {
   // The page shows one `foo` (the info string is not rendered); the source has two visible ones.
   for (const source of ["```foo\n[x]: foo\n```\n", "~~~foo\n[a](foo)\n~~~\n"]) {
@@ -155,7 +158,7 @@ test("the info string of a fence is not taken for the visible match of a definit
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("a definition indented by four spaces or a tab is code and stays counted", () => {
   for (const indent of ["    ", "\t"]) {
     const source = `${indent}[x]: needle\n`;
@@ -164,14 +167,15 @@ test("a definition indented by four spaces or a tab is code and stays counted", 
   assert.equal(planIn("   [x]: needle\nA needle.\n", [item(1, 2, "needle", 0, 1, "PIN")]).text, "   [x]: needle\nA PIN.\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("no link inside a link: the outer target after an inner link is visible text", () => {
   const source = "[one [two](needle) three](needle) needle\n";
   const result = planIn(source, [item(1, 1, "needle", 0, 2, "PIN"), item(1, 1, "needle", 1, 2, "PIN")]);
   assert.equal(result.text, "[one [two](needle) three](PIN) PIN\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S5
 test("lines that are gone and overlapping spans are skipped; nothing to replace is refused", () => {
   const result = plan([item(1, 1, "Studio", 0, 1, "A"), item(1, 1, "Studio notes", 0, 1, "B"), item(99, 99, "x", 0, 1, "y")]);
   assert.equal(result.replaced, 1);
@@ -179,7 +183,7 @@ test("lines that are gone and overlapping spans are skipped; nothing to replace 
   assert.deepEqual(planFindReplace(SOURCE, [item(99, 99, "x", 0, 1, "y")]), { refused: FIND_REPLACE_NOTHING });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 test("a replacement with a dollar sign or regex characters is inserted as given", () => {
   const result = plan([item(1, 1, "notes", 0, 1, "$1 (a|b) \\n")]);
   assert.equal(applyTextEdits(SOURCE, result.edits).split("\n")[0], "# Studio $1 (a|b) \\n");

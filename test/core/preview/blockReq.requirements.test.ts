@@ -35,7 +35,7 @@ function rulesFor(selector: string): Rule[] {
 
 const BAR_BUTTON = ".sphinx-preview-insert-point button";
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-087
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-087#S4
 test("the plus button is transparent and becomes opaque on hover of a block, of the button and on focus", () => {
   const idle = rulesFor(BAR_BUTTON);
   assert.equal(idle.length, 1);
@@ -54,7 +54,7 @@ test("the plus button is transparent and becomes opaque on hover of a block, of 
   assert.equal(rules().some((rule) => rule.selectors.includes(BAR_BUTTON) && rule.declarations.get("visibility") === "hidden"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S5
 test("the move arrows are hidden only while a block editor is open", () => {
   const hiding = rulesFor('html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sphinx-preview-move');
   assert.equal(hiding.length, 1);
@@ -64,7 +64,7 @@ test("the move arrows are hidden only while a block editor is open", () => {
   assert.equal(otherHiders.length, 1, "no other rule hides the arrows");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S7
 test("mapped blocks show the text cursor in edit mode only", () => {
   const edit = rulesFor('html[data-sphinx-preview-edit-mode="on"] [data-sphinx-source-file][data-sphinx-source-line]');
   assert.equal(edit.length, 1);
@@ -74,7 +74,8 @@ test("mapped blocks show the text cursor in edit mode only", () => {
   assert.deepEqual(textCursors, edit, "no rule gives a mapped block the text cursor outside edit mode");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S9
 test("the block actions of a hovered block yield to the keyboard selection, which shows its own bar", () => {
   const keyboard = 'html[data-sphinx-preview-actions-owner="keyboard"]';
   const yielding = rules().filter((rule) => rule.selectors.some((selector) =>
@@ -89,8 +90,9 @@ test("the block actions of a hovered block yield to the keyboard selection, whic
   assert.equal(ring[0]!.declarations.get("outline"), "none");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S4
 test("the Delete block button touches the down arrow, the move status never overlaps it, and it hides while editing", () => {
   const arrow = rulesFor(".sphinx-preview-insert-point button.sphinx-preview-move--down")[0]!;
   const remove = rulesFor(".sphinx-preview-insert-point button.sphinx-preview-delete")[0]!;

@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
+scenarios:
+- id: S1
+  title: Insertion
+- id: S2
+  title: Listing
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the user runs the Table of contents action from the edition palette or the /toc entry of the slash menu in a block editor, the editor SHALL insert a [TOC] line set apart by blank lines after the line the selection ends on and place the caret after it, in every palette mode.
 
-### Scenario (nominal): Insertion
+### Scenario S1 (nominal): Insertion
 
 - GIVEN a block editor with the caret in a paragraph
 - WHEN the Table of contents button is pressed, or `/toc` is chosen in the slash menu
 - THEN a `[TOC]` line is written after the paragraph, set apart by one blank line before and after, and the caret is placed after the marker
 
-### Scenario (boundary): Listing
+### Scenario S2 (boundary): Listing
 
 | Mode | Palette button and `/toc` entry |
 | --- | --- |

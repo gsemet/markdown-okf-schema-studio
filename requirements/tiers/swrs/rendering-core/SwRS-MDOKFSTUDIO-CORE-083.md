@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-008
+scenarios:
+- id: S1
+  title: Retired behaviour
+- id: S2
+  title: History off
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a requirement is superseded, deprecated or archived, the viewer SHALL list it on the page of its parent with a link to its replacement, hide it until the History button is on, and write no page for it; the link to its replacement shows the full ID of the replacement.
 
-### Scenario (nominal): Retired behaviour
+### Scenario S1 (nominal): Retired behaviour
 
 - GIVEN a SwRS superseded by an active one
 - WHEN the use case page is written
 - THEN the row of the retired SwRS names "superseded by" with a link to its replacement showing the replacement full ID, carries the retired class and has no page of its own
 
-### Scenario (refusal): History off
+### Scenario S2 (refusal): History off
 
 - GIVEN a page with retired rows
 - WHEN the History box is not checked

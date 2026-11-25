@@ -17,6 +17,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-008
+scenarios:
+- id: S1
+  title: A main page
+- id: S2
+  title: A requirements page
+- id: S3
+  title: A social card
+- id: S4
+  title: A token drifts from the extension
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,25 +45,25 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer builds the Pages site, every page and every social picture SHALL use the cream palette of the extension, every page SHALL carry the one site header (the logo and the links Home, Contributing, How we ship, Gallery and Requirements, plus the breadcrumb on the requirements pages), and no page SHALL have a dark palette, a prefers-color-scheme dark rule or a theme switch.
 
-### Scenario (nominal): A main page
+### Scenario S1 (nominal): A main page
 
 - GIVEN a page of the site written from Markdown (home, Contributing, How we ship), the Gallery or the Reports index
 - WHEN the page is written
 - THEN it takes the cream tokens (background #f5f1e8, text #2b2a27, link #a14e32, border #d6cdbd), carries the site header with the logo and the five links Home, Contributing, How we ship, Gallery and Requirements in that order, and has no dark palette, no prefers-color-scheme dark rule and no theme attribute
 
-### Scenario (nominal): A requirements page
+### Scenario S2 (nominal): A requirements page
 
 - GIVEN a page of the requirements viewer
 - WHEN the page is written
 - THEN its stylesheet starts with the same cream tokens as the main pages, its header holds the same logo and five links followed by the breadcrumb, the History checkbox and the Search button, and it has no Theme button, no theme script and no stored theme choice
 
-### Scenario (nominal): A social card
+### Scenario S3 (nominal): A social card
 
 - GIVEN a social picture of a main page, or of the index or of a category of the viewer
 - WHEN the picture is drawn
 - THEN its page uses the cream tokens, the headline is in the serif font, and none of the former teal values appears
 
-### Scenario (boundary): A token drifts from the extension
+### Scenario S4 (boundary): A token drifts from the extension
 
 - GIVEN a site token whose value differs from its variable in the cream block of the extension's page chrome
 - WHEN the unit tests run

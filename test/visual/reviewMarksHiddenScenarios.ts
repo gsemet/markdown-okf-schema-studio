@@ -24,7 +24,8 @@ const ALL_THREADS_MESSAGE = {
 };
 
 export const REVIEW_MARKS_HIDDEN_SCENARIOS: ScenarioDefinition[] = (["light", "dark"] as const).map((theme, index) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S6
+  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S7
   id: `review-annotations/v${29 + index}-comments-button-hides-review-marks-${theme}-900`,
   fixture: "45-review-threads",
   theme,

@@ -48,14 +48,15 @@ async function openPreview(uri: vscode.Uri): Promise<void> {
  * Mermaid diagram, a PNG and a relative link is written as one file with the image and the diagram
  * embedded and the link as text, after the warning; and a cancelled warning writes no file.
  */
-// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-014
+// @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-014#S1
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");
   const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: { commands: { command: string; title: string }[]; menus: { commandPalette: { command: string }[] } };
   };
-  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
   assert.equal(manifest.contributes.commands.find((entry) => entry.command === EXPORT_HTML_COMMAND_ID)?.title, "Export to HTML");
   assert.ok(manifest.contributes.menus.commandPalette.some((entry) => entry.command === EXPORT_HTML_COMMAND_ID));
   assert.ok((await vscode.commands.getCommands(true)).includes(EXPORT_HTML_COMMAND_ID));
@@ -70,7 +71,7 @@ export async function run(): Promise<void> {
   try {
     await openPreview(uri);
 
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S3
     // Cancel the warning: no save dialog and no file.
     const cancelled = stubExportDialogsForTests({ confirm: false, savePath: outputPath });
     await vscode.commands.executeCommand(EXPORT_HTML_COMMAND_ID);
@@ -93,7 +94,7 @@ export async function run(): Promise<void> {
     assert.match(html, /<img[^>]+src="data:image\/png;base64,/u);
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
     assert.match(html, /<img[^>]+class="myst-mermaid-image"[^>]+src="data:image\/svg\+xml/u);
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
     assert.match(html, /href="https:\/\/example\.com\/guide"/u);
     assert.doesNotMatch(html, /href="other\.md"/u);
     assert.match(html, /other file/u);

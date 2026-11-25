@@ -63,7 +63,8 @@ function linkHarness(requests: string[], withObserver: boolean) {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S8
 test("Enter or Space on a link is routed to the host and another key is not", () => {
   const runtime = linkHarness(["other.md"], true);
   let prevented = 0;
@@ -82,7 +83,8 @@ test("Enter or Space on a link is routed to the host and another key is not", ()
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S4
 test("without an intersection observer no link is looked up and clicks still reach the host", () => {
   const without = linkHarness(["other.md"], false);
   without.flush();
@@ -100,7 +102,7 @@ function filesBelow(directory: string): string[] {
     entry.isDirectory() ? filesBelow(path.join(directory, entry.name)) : [path.join(directory, entry.name)]);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085#S3
 test("a missing or blocked target keeps the link and adds a warning icon", () => {
   const runtime = linkHarness(["gone.md", "here.md"], true);
   runtime.installed.applyTargets({ targets: [
@@ -163,7 +165,7 @@ function bandHarness(options: BandOptions) {
   return { band, sticky, selectors };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S4
 test("the sticky band follows every heading from h1 to h6 of the running text", () => {
   const { band, sticky, selectors } = bandHarness({
     width: 800, bandHeight: 60, scrollY: 250, policyOffset: 30,
@@ -180,7 +182,7 @@ test("the sticky band follows every heading from h1 to h6 of the running text", 
   assert.equal(band.hidden, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S5
 test("a heading without height is not a parent line of the band", () => {
   const { band, sticky } = bandHarness({
     width: 800, bandHeight: 60, scrollY: 250, policyOffset: 30,
@@ -194,7 +196,8 @@ test("a heading without height is not a parent line of the band", () => {
   assert.equal(band.textContent, "# Title\n### Part");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S6
 test("a heading inside an admonition or the properties table never enters the band", () => {
   const { band, sticky } = bandHarness({
     width: 800, bandHeight: 60, scrollY: 250, policyOffset: 30,
@@ -209,7 +212,7 @@ test("a heading inside an admonition or the properties table never enters the ba
   assert.equal(band.textContent, "# Title\n### Part");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030#S2
 test("the reading offset only grows for a width and starts again when the width changes", () => {
   const options: BandOptions = { width: 800, bandHeight: 100, scrollY: 0, policyOffset: 30, headings: [] };
   const { band, sticky } = bandHarness(options);

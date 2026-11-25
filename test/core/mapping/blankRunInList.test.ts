@@ -57,7 +57,7 @@ for (const [name, eol] of EOLS) {
   const inItem = join(eol, ["- a", "", "", "", "  more", ""]);
   const nested = join(eol, ["- top", "  - a1", "", "", "", "  - a2", ""]);
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "More" between two items goes into the item above, indented to its content`, async () => {
     const written = writeInRun(between, 1, "More");
     assert.equal(written, join(eol, ["- a", "", "  More", "", "- b", ""]));
@@ -67,7 +67,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(items, [[1, "a|More"], [5, "b"]]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "More" between two paragraphs of an item is indented with the item`, async () => {
     const written = writeInRun(join(eol, ["- a", "", "  p1", "", "", "", "  p2", "", "- b"]), 1, "More");
     assert.equal(written, join(eol, ["- a", "", "  p1", "", "  More", "", "  p2", "", "- b"]));
@@ -76,7 +76,8 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(items, [[1, "a|p1|More|p2"], [9, "b"]]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: a two-line block with a blank line between keeps both lines in the item`, async () => {
     const written = writeInRun(between, 1, join(eol, ["More", "", "Text"]));
     assert.equal(written, join(eol, ["- a", "", "  More", "", "  Text", "", "- b", ""]));
@@ -85,7 +86,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(items, [[1, "a|More|Text"], [7, "b"]]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "- c" between items adds an item at the item level, between nested items at theirs`, async () => {
     const top = writeInRun(between, 1, "- c");
     assert.equal(top, join(eol, ["- a", "", "- c", "", "- b", ""]));
@@ -97,7 +98,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(items.map(([, text]) => text), ["top", "a1", "c", "a2"]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: "- c" inside an item becomes a nested list of that item`, async () => {
     const written = writeInRun(inItem, 1, "- c");
     assert.equal(written, join(eol, ["- a", "", "  - c", "", "  more", ""]));
@@ -109,13 +110,13 @@ for (const [name, eol] of EOLS) {
     assert.equal(findElements(outer, (e) => e.tagName === "li").length, 2, "the item holds the nested item");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: "More" after a tab marker and after a second marker takes four spaces`, async () => {
     assert.equal(writeInRun(join(eol, ["-\ta", "", "", "", "- b"]), 1, "More"), join(eol, ["-\ta", "", "    More", "", "- b"]));
     assert.equal(writeInRun(join(eol, ["- - a", "", "", "", "- b"]), 1, "More"), join(eol, ["- - a", "", "    More", "", "- b"]));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: a marker typed after two spaces between items takes the item indent and keeps the two spaces`, async () => {
     const written = writeInRun(between, 1, "  - sub");
     assert.equal(written, join(eol, ["- a", "", "  - sub", "", "- b", ""]));
@@ -124,13 +125,14 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(items.map(([, text]) => text), ["a", "sub", "b"]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: without an item line the block is written as before, and a thematic break stays a content line`, () => {
     assert.equal(writeInRun(between, undefined, "More"), join(eol, ["- a", "", "More", "", "- b", ""]));
     assert.equal(writeInRun(between, 1, "---"), join(eol, ["- a", "", "  ---", "", "- b", ""]));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: the blank lines of a typed block get no indent, and the line endings are the document's`, () => {
     const written = writeInRun(between, 1, join(eol, ["P", "", "  ", "Q"]));
     assert.equal(written, join(eol, ["- a", "", "  P", "", "  ", "  Q", "", "- b", ""]));
@@ -140,7 +142,8 @@ for (const [name, eol] of EOLS) {
     noBareLineBreak(typedWithLf, eol);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
   test(`${name}: a paste takes the same indent as typing, and refuses a line that is no list item`, async () => {
     const run = firstShown(between);
     const paste = (clipboard: string, itemLine?: number) =>
@@ -165,7 +168,8 @@ for (const [name, eol] of EOLS) {
     assert.equal((await listsOf(pasted)).lists, 1);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S3
   test(`${name}: removing a blank line between items or inside an item removes that line only and keeps one list`, async () => {
     for (const text of [between, inItem, nested]) {
       const run = firstShown(text);

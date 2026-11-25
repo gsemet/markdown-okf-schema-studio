@@ -5,7 +5,8 @@ import { lineDelta } from "../../shared/lineDelta";
 import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S12
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S13
 test("pipe tables round-trip escaped cells and CRLF line endings", () => {
   const tools = createMarkdownTableTools();
   const source = "| Name | Detail |\r\n| :--- | ---: |\r\n| Brake | `a\\|b` and x\\|y |\r\n";
@@ -17,7 +18,7 @@ test("pipe tables round-trip escaped cells and CRLF line endings", () => {
   assert.equal(tools.serialize(table), source);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055#S3
 test("inserting and deleting table rows and columns preserves the remaining cells", () => {
   const tools = createMarkdownTableTools();
   const source = "| A | B |\n| --- | :---: |\n| x | y |\n| p | q |\n";
@@ -45,7 +46,7 @@ test("table tools cannot delete the header, final body row, or final column", ()
   assert.equal(tools.serialize(table), source);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
 test("non-table blocks and malformed separator rows cannot be edited as pipe tables", () => {
   const tools = createMarkdownTableTools();
   for (const source of ["", "Ordinary paragraph\n", "| A |\n", "| A |\n| invalid |\n"]) {
@@ -53,7 +54,7 @@ test("non-table blocks and malformed separator rows cannot be edited as pipe tab
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
 test("a delimiter row of one or two dashes, with or without colons, is an editable pipe table", () => {
   const tools = createMarkdownTableTools();
   const cases: Array<[string, string[][]]> = [
@@ -70,7 +71,8 @@ test("a delimiter row of one or two dashes, with or without colons, is an editab
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S8
 test("a cell edit in a short-delimiter table leaves the delimiter row as written, LF and CRLF", () => {
   const tools = createMarkdownTableTools();
   for (const ending of ["\n", "\r\n"]) {
@@ -84,7 +86,8 @@ test("a cell edit in a short-delimiter table leaves the delimiter row as written
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S8
 test("a new column in a short-delimiter table gets a three-dash cell and keeps the others verbatim", () => {
   const tools = createMarkdownTableTools();
   const source = "| A | B |\n| :-- | --: |\n| a1 | b1 |";
@@ -95,7 +98,7 @@ test("a new column in a short-delimiter table gets a three-dash cell and keeps t
   assert.equal(delimiter, "| :-- | --- | --: |");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
 test("a heading over a dash line with no pipe is no table, a piped block still needs a valid delimiter", () => {
   const tools = createMarkdownTableTools();
   for (const source of ["Title\n--\n", "Title\n-\n", "| A |\n| invalid |\n", "| A |\n| -x |\n"]) {
@@ -103,7 +106,7 @@ test("a heading over a dash line with no pipe is no table, a piped block still n
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-111
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-111#S3
 test("Column alignment on a short delimiter cell grows it to three dashes and changes only that line", () => {
   const align = (value: string, at: number, arg: string): string => {
     const edit = createEditActions([], createMarkdownTableTools()).byId.get("columnAlign")!.apply({
@@ -168,7 +171,7 @@ test("inserting a column re-serializes the table with one more column", () => {
   assert.equal(reparsed.rows[2].length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 test("a row inserted into a CRLF table keeps CRLF line endings", () => {
   const tools = createMarkdownTableTools();
   const table = tools.parse("| A | B |\r\n|---|---|\r\n| 1 | 2 |\r\n");
@@ -179,7 +182,8 @@ test("a row inserted into a CRLF table keeps CRLF line endings", () => {
   assert.equal(output.replace(/\r\n/gu, "").includes("\n"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S10
 test("rows without outer pipes stay parseable when an edge cell is emptied", () => {
   const tools = createMarkdownTableTools();
   const source = "a | b\n--- | ---\nc | d";
@@ -306,7 +310,8 @@ test("T24: the table inserted by the palette parses back with its header and emp
   assert.equal(tools.serialize({ rows: model.rows, lineEnding: model.lineEnding, trailingLineEnding: model.trailingLineEnding }), edit.text);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117#S6
 test("T25: toHtmlTable writes thead and tbody with escaped text and alignment attributes", () => {
   const tools = createMarkdownTableTools();
   const model = tools.parse("| A & B | <C> |\n| :--- | :---: |\n| 1 \\| 2 | **bold** |")!;
@@ -343,7 +348,8 @@ test("T25: toHtmlTable keeps a model's unicode and empty cells", () => {
   assert.equal(html.includes("<td>\u2705</td>"), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
 test("moving a body row reorders the source lines and keeps each line as written", () => {
   const tools = createMarkdownTableTools();
   const source = "  | Name  | N |\n  | :---- | ---: |\n  | a     | 1 |\n  |b|2|\n  | c     | 3 |\n";
@@ -355,7 +361,8 @@ test("moving a body row reorders the source lines and keeps each line as written
   assert.equal(tools.serialize(table), source);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("the table model refuses a move of the header, past the ends or onto the same place", () => {
   const tools = createMarkdownTableTools();
   const source = "| A | B |\r\n| --- | --- |\r\n| x | y |\r\n| p | q |\r\n";
@@ -369,7 +376,7 @@ test("the table model refuses a move of the header, past the ends or onto the sa
   assert.equal(tools.serialize(table), "| A | B |\r\n| --- | --- |\r\n| p | q |\r\n| x | y |\r\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055#S7
 test("a column operation keeps the padding, indentation and outer pipes of every line", () => {
   const tools = createMarkdownTableTools();
   const source = "  | Name   | Qty  |\n  | :----- | ---: |\n  | brake  | 1    |\n  | pedal  | 22   |\n";
@@ -400,7 +407,7 @@ test("a column operation keeps the padding, indentation and outer pipes of every
   assert.equal(tools.parse(tools.serialize(bare))?.rows[0]?.length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S14
 test("an unescaped pipe inside a code span splits the cell as the preview does", () => {
   const tools = createMarkdownTableTools();
   assert.deepEqual(tools.parse("| a | b |\n| --- | --- |\n| x | `y` |")?.rows[2], ["x", "`y`"]);
@@ -419,7 +426,8 @@ test("an unescaped pipe inside a code span splits the cell as the preview does",
 const TAILED = (tail: string): string =>
   `| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | first |${tail}\n| beta | 2 | second |\n`;
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S5
 test("a body row with text after its closing pipe is a row of the header's columns with a tail", () => {
   const tools = createMarkdownTableTools();
   for (const tail of [" ^row-a", " {#row-c}", " <!-- keep -->", " d |"]) {
@@ -437,7 +445,8 @@ test("a body row with text after its closing pipe is a row of the header's colum
   assert.equal(tools.parse("| A | B |\n| --- | --- |\n| x |\n"), undefined, "a short row is still refused");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S4
 test("a cell edit of a row with a tail changes only that cell and keeps the tail", () => {
   const tools = createMarkdownTableTools();
   const table = tools.parse(TAILED(" ^row-a"))!;
@@ -446,7 +455,8 @@ test("a cell edit of a row with a tail changes only that cell and keeps the tail
     "| Name | Value | Note |\n| --- | --- | --- |\n| alpha | 1 | changed | ^row-a\n| beta | 2 | second |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
 test("a row move takes the tail along and a new row after a tailed row has no tail", () => {
   const tools = createMarkdownTableTools();
   const table = tools.parse(TAILED(" ^row-a"))!;
@@ -461,7 +471,8 @@ test("a row move takes the tail along and a new row after a tailed row has no ta
   assert.doesNotMatch(tools.serialize(inserted), /\^row-a/u, "a deleted row takes its tail");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S15
 test("converting a pipe table whose row has a tail is refused, nothing changes", () => {
   const tools = createMarkdownTableTools();
   const result = tools.convertTable(TAILED(" ^row-a"), "list-table");

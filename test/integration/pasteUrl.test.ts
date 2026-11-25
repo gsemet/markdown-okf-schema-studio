@@ -60,7 +60,8 @@ async function pasteAt(
   await press(page, chord);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-264
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-264#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-264#S2
 /**
  * CR 145: in a real VS Code window a URL on the real clipboard pasted into the block text box makes
  * a link over a selection, an autolink alone and an image for a picture address; the autosave writes only the

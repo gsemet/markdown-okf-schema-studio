@@ -5,7 +5,8 @@ from __future__ import annotations
 from playwright.sync_api import Page
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S7
 def check_toc_rail(page: Page) -> list[str]:
   """Narrow pane, TOC on: a rail at the right edge with one tick per heading; hover opens the overlay, Escape closes it."""
   problems: list[str] = []
@@ -37,8 +38,10 @@ def check_toc_rail(page: Page) -> list[str]:
   return problems
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S8
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S8
 def check_toc_overlay(page: Page, shown_at_rest: bool) -> list[str]:
   """Hovers the rail and leaves the overlay open for the screenshot; it must stay inside the pane."""
   if shown_at_rest:

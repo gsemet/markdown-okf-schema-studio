@@ -14,6 +14,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-007
+scenarios:
+- id: S1
+  title: A version pull request carries its notes
+- id: S2
+  title: The release publishes the reviewed notes
+- id: S3
+  title: Notes that block the check or the release
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,19 +38,19 @@ default_owner_email: gaetan@xeberon.net
 
 The repository check SHALL fail when the package version has no valid notes file under docs/releases-notes/, and the release job SHALL publish that file as the GitHub release notes with its images attached to the release.
 
-### Scenario (nominal): A version pull request carries its notes
+### Scenario S1 (nominal): A version pull request carries its notes
 
 - GIVEN a `package.json` version X.Y.Z and one folder `docs/releases-notes/YYYY-MM-DD-vX.Y.Z/` with `release-notes.md`, whose first line is a title naming X.Y and whose images are files of that folder
 - WHEN `just check` runs (`scripts/release_notes.py --check`), locally or in the `static` job of the pull request
 - THEN the check passes
 
-### Scenario (nominal): The release publishes the reviewed notes
+### Scenario S2 (nominal): The release publishes the reviewed notes
 
 - GIVEN a tag vX.Y.Z whose commit holds its notes folder
 - WHEN the **Release VSIX** workflow runs
 - THEN the notes are prepared before the Marketplace publication, the GitHub release body is the file with each image pointing to `releases/download/vX.Y.Z/{file}`, and the images are attached to the release next to the VSIX
 
-### Scenario (boundary): Notes that block the check or the release
+### Scenario S3 (boundary): Notes that block the check or the release
 
 | Input | Outcome |
 | --- | --- |

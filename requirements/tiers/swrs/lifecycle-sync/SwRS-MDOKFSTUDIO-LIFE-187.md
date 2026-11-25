@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A search click in a file the side preview shows
+- id: S2
+  title: Routing
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,13 +41,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a jump moves a Markdown text editor to a line, the side preview that follows the active editor SHALL show the line marker on that line of the jump's document, posting it only to a visible page that shows that document within five seconds and dropping it after that, whichever of the jump and the switch of document comes first.
 
-### Scenario (nominal): A search click in a file the side preview shows
+### Scenario S1 (nominal): A search click in a file the side preview shows
 
 - GIVEN a side preview that follows the editor and shows `doc.md`, whose page is ready and visible
 - WHEN a jump to line 40 of `doc.md` arrives
 - THEN the session posts previewRevealLine for line 40 and the page draws the line marker there
 
-### Scenario (boundary): Routing
+### Scenario S2 (boundary): Routing
 
 | Input | Outcome |
 | --- | --- |

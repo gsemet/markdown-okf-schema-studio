@@ -22,6 +22,19 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+scenarios:
+- id: S1
+  title: Move ranges that do not match the document
+- id: S2
+  title: Copy, cut and paste ranges that do not match the document
+- id: S3
+  title: Moves into or out of the frontmatter
+- id: S4
+  title: Copy, cut and paste in the frontmatter
+- id: S5
+  title: Text between the two blocks of a move
+- id: S6
+  title: Ranges that match the document
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,7 +56,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the ranges of a block move, the range of a copy or a cut, or the line of a paste do not match the document, or a move or a clipboard edit reaches into the frontmatter, or text lies between the two blocks of a move, the host SHALL answer with the reason of that case and change nothing.
 
-### Scenario (refusal): Move ranges that do not match the document
+### Scenario S1 (refusal): Move ranges that do not match the document
 
 | Input | Outcome |
 | --- | --- |
@@ -52,7 +65,7 @@ When the ranges of a block move, the range of a copy or a cut, or the line of a 
 | A range outside the text | Refused with the same reason |
 | A range whose first line is blank, or a range of blank lines only | Refused with the same reason (blank lines at the end of a range are dropped before the check, see SwRS-MDOKFSTUDIO-BLOCK-117) |
 
-### Scenario (refusal): Copy, cut and paste ranges that do not match the document
+### Scenario S2 (refusal): Copy, cut and paste ranges that do not match the document
 
 | Input | Outcome |
 | --- | --- |
@@ -61,27 +74,27 @@ When the ranges of a block move, the range of a copy or a cut, or the line of a 
 | A copy or cut that starts on a blank line, covers blank lines only, or ends on a line holding only a no-break space | The same refusal (spaces-and-tabs lines at the end of a copy or cut range are dropped before the check, see SwRS-MDOKFSTUDIO-BLOCK-166 and SwRS-MDOKFSTUDIO-BLOCK-169) |
 | A paste after a line that does not exist, a line holding only a no-break space, or a blank line with no body line above it (the start of the text, right under the frontmatter) | The same refusal (a blank line that ends a block is accepted, see SwRS-MDOKFSTUDIO-BLOCK-174) |
 
-### Scenario (refusal): Moves into or out of the frontmatter
+### Scenario S3 (refusal): Moves into or out of the frontmatter
 
 | Input | Outcome |
 | --- | --- |
 | A first range inside the frontmatter lines | The move is refused with "A block cannot be moved into or out of the frontmatter." |
 | A move across the frontmatter, also a span next to it | Refused with the same reason |
 
-### Scenario (refusal): Copy, cut and paste in the frontmatter
+### Scenario S4 (refusal): Copy, cut and paste in the frontmatter
 
 | Input | Outcome |
 | --- | --- |
 | A copy of lines 1 to 3 of a document that starts with frontmatter | The answer is ok false with "Blocks of the frontmatter cannot be cut, copied or pasted into." |
 | A cut or a paste that names a line inside the frontmatter | The same refusal |
 
-### Scenario (refusal): Text between the two blocks of a move
+### Scenario S5 (refusal): Text between the two blocks of a move
 
 - GIVEN two blocks with an HTML comment between them
 - WHEN the move is planned
 - THEN it is refused with "Text between the two blocks (a comment or a link definition) prevents the move." and nothing changes
 
-### Scenario (nominal): Ranges that match the document
+### Scenario S6 (nominal): Ranges that match the document
 
 | Input | Outcome |
 | --- | --- |

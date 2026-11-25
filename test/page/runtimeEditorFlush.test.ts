@@ -78,7 +78,7 @@ function messageTypesSince(harness: RuntimeHarness, count: number): string[] {
   return harness.messages.slice(count).map((message) => message.type as string);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S5
 test("CR 025: following a link right after typing posts the final save before the link", () => {
   const harness = createRuntimeHarness();
   const link = addOkfLink(harness);

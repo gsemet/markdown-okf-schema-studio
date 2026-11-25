@@ -4,7 +4,7 @@ import { test } from "node:test";
 import type { HostServices } from "../../src/host-api/index";
 import { WorkspaceChoices } from "../../src/session/workspaceChoices";
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S6
 test("the comment author setting is read for the resource of the document, so a folder can override it", async () => {
   const resources: Array<string | undefined> = [];
   const host = {

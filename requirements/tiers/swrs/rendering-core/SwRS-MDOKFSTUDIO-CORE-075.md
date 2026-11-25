@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-007
+scenarios:
+- id: S1
+  title: The version commit updates every manifest
+- id: S2
+  title: Drift and dirty manifests
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,13 +38,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a release version is set, the version script SHALL write the same version to package.json, package-lock.json, every plugin manifest and the plugin entry of the GitHub Copilot marketplace catalog in one commit `chore: version X.Y.Z` with no `Signed-off-by` trailer, and the repository check SHALL fail when any of these versions differs from package.json.
 
-### Scenario (nominal): The version commit updates every manifest
+### Scenario S1 (nominal): The version commit updates every manifest
 
 - GIVEN a repository whose `package.json`, `package-lock.json`, `plugin.json`, `.claude-plugin/plugin.json` and the plugin entry of `.github/plugin/marketplace.json` hold the same version and have no uncommitted edit
 - WHEN `scripts/version.py` sets or computes the next version
 - THEN the five files hold the new version with LF line endings, on Windows too, and one commit `chore: version X.Y.Z` with no `Signed-off-by` trailer contains exactly those five files, without a tag
 
-### Scenario (boundary): Drift and dirty manifests
+### Scenario S2 (boundary): Drift and dirty manifests
 
 | Input | Outcome |
 | --- | --- |

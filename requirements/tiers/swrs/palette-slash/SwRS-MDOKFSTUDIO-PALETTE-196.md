@@ -25,6 +25,21 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: The host chooses the name
+- id: S2
+  title: The name appears complete
+- id: S3
+  title: A leftover of an interrupted save is removed
+- id: S4
+  title: The numbering stops after 1000 suffixes
+- id: S5
+  title: A check fails
+- id: S6
+  title: The write fails
+- id: S7
+  title: The message shape
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,7 +62,7 @@ default_owner_email: gaetan@xeberon.net
 
 When previewPasteImage is accepted, the extension SHALL check the request and the image bytes, save the image in the folder of the document as image.png, image.jpg, image.gif or image.webp, or with the suffix -1, -2 and so on up to -1000 when the name is taken, comparing names without case, never showing the name before all its bytes are written, remove first the hidden partial files of its own naming that are older than 10 minutes, and answer the file name, or write nothing and answer a refusal with its reason when a check or the write fails.
 
-### Scenario (nominal): The host chooses the name
+### Scenario S1 (nominal): The host chooses the name
 The name never comes from the page. The handler answers ok true and the file name (previewPasteImageResult). The envelope, the render gate and the answer correlation are those of SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-065, SwRS-MDOKFSTUDIO-TRUST-005 and SwRS-MDOKFSTUDIO-TRUST-090.
 
 | GIVEN the folder of the document | WHEN the bytes are | THEN the file and the answer are |
@@ -60,7 +75,7 @@ The name never comes from the page. The handler answers ok true and the file nam
 | holds image.png and image-1.png | a png | image-2.png |
 | holds a name that differs from image.png only by case | a png | image-1.png (the name counts as taken) |
 
-### Scenario (nominal): The name appears complete
+### Scenario S2 (nominal): The name appears complete
 - GIVEN a reader that looks at the folder during the write
 - WHEN the image is being saved
 - THEN the bytes go to a hidden partial file of the same folder (named dot, the file name, a random suffix and .partial) that is renamed to the chosen name without overwriting, so the chosen name is never seen empty or partial
@@ -68,18 +83,18 @@ The name never comes from the page. The handler answers ok true and the file nam
 - WHEN the rename runs
 - THEN that file is kept and not overwritten, and the image is saved under the next free name (image-1.png when image.png was taken), chosen again from a fresh listing of the folder, up to 5 attempts in all; the answer is then ok true with that name, or ok false with the error message when the rename keeps failing for another reason than a taken name
 
-### Scenario (nominal): A leftover of an interrupted save is removed
+### Scenario S3 (nominal): A leftover of an interrupted save is removed
 - GIVEN a folder holding a hidden file named dot, image (with an optional -number), a png, jpg, gif or webp extension, a random suffix of 1 to 8 lowercase letters or digits and .partial, last modified more than 10 minutes ago (left by a save that ended before its rename)
 - WHEN an image is pasted into that folder
 - THEN that file is deleted before the name is chosen; a file that matches the form but is newer, any file of another form and every other file of the folder are kept, and a file that cannot be removed does not stop the paste
 
-### Scenario (boundary): The numbering stops after 1000 suffixes
+### Scenario S4 (boundary): The numbering stops after 1000 suffixes
 | Folder | Outcome |
 | --- | --- |
 | image-1000.png free, all smaller names taken | the file is written under image-1000.png |
 | image.png and image-1.png to image-1000.png taken (1001 taken names) | ok false with the reason Too many pasted images next to this document. and nothing is written |
 
-### Scenario (refusal): A check fails
+### Scenario S5 (refusal): A check fails
 Each refusal answers ok false with the reason below and writes nothing; the folder is unchanged. The checks run in this order.
 
 | Case | Reason |
@@ -94,7 +109,7 @@ Each refusal answers ok false with the reason below and writes nothing; the fold
 
 A saved .md document in a folder inside the workspace, reached through a symbolic link or not, is accepted and the image is saved. This handler does not check the render revision.
 
-### Scenario (refusal): The write fails
+### Scenario S6 (refusal): The write fails
 - GIVEN a write that fails
 - WHEN the save ends
 - THEN no file, empty or partial, is left under the chosen name or the partial name, the partial file is deleted in every failing case, and the answer is ok false with the message of the error as the reason
@@ -102,7 +117,7 @@ A saved .md document in a folder inside the workspace, reached through a symboli
 - WHEN the save ends
 - THEN only the chosen name remains
 
-### Scenario (boundary): The message shape
+### Scenario S7 (boundary): The message shape
 | previewPasteImage field | Accepted | Otherwise |
 | --- | --- | --- |
 | mime | image/png, image/jpeg, image/gif or image/webp (SVG is not accepted because it can carry script) | the protocol rejects the message and the handler does not run |

@@ -21,6 +21,11 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Add a comment on selected text
+- id: S2
+  title: Reply to a thread and resolve it
 user_need: As a reviewer, I attach a comment to the exact words I am talking
   about, answer a discussion and close it or remove it from the thread itself,
   see my name on my comments without extra work, and never lose a long comment
@@ -98,7 +103,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Add a comment on selected text
+#### Path S1: Add a comment on selected text
 
 1. A reader has selected text in a body block
    - SwRS-MDOKFSTUDIO-REVIEW-038: a Comment button appears near the selection
@@ -116,7 +121,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-REVIEW-065 (nominal): the author is the comments.authorName setting, else the Git user name
 6. The comment is in the review comments file
 
-#### Path 2: Reply to a thread and resolve it
+#### Path S2: Reply to a thread and resolve it
 
 1. The thread popover is open
    - SwRS-MDOKFSTUDIO-REVIEW-044: the reader sends a reply and the thread id and the trimmed text go to the host

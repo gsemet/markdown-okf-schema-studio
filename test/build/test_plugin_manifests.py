@@ -15,8 +15,8 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-074
-# @tests_req SwRS-MDOKFSTUDIO-CORE-075
+# @tests_req SwRS-MDOKFSTUDIO-CORE-074#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-075#S1
 
 ROOT = Path(__file__).resolve().parents[2]
 SKILL = "writing-for-markdown-okf-schema-studio"
@@ -90,7 +90,6 @@ def test_agent_plugins_schema_rejects_unknown_keys() -> None:
         jsonschema.Draft202012Validator(json.loads(SCHEMA.read_text())).validate(manifest)
 
 
-# @tests_req StRS-MDOKFSTUDIO-CORE-006
 def test_hosts_share_one_names_and_one_skill_tree() -> None:
     """All manifests name the same plugin and point at the repository root; one SKILL.md exists."""
     assert load(Path(".claude-plugin/plugin.json"))["name"] == PLUGIN

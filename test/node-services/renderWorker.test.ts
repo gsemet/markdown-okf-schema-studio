@@ -45,7 +45,8 @@ function watchEventLoop(): () => number {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S3
 test("renders in a worker thread, with the output of the in-process render", async (context) => {
   const root = workspace(context);
   fs.writeFileSync(path.join(root, "part.md"), "Included *text*.\n");
@@ -64,7 +65,7 @@ test("renders in a worker thread, with the output of the in-process render", asy
   assert.notEqual(stats.lastThreadId, threadId);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S1
 test("the host thread stays free while a worker renders", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer();
@@ -87,7 +88,7 @@ test("the host thread stays free while a worker renders", async (context) => {
   assert.ok(workerBlocked < workerMs / 2, `worker render blocked the host ${workerBlocked} ms of ${workerMs} ms`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("an abort stops the render at once, and the next render gets a fresh worker", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer();
@@ -110,7 +111,7 @@ test("an abort stops the render at once, and the next render gets a fresh worker
   assert.equal(renderer.stats().workerRenders, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("a render given up before it starts never reaches a worker", async (context) => {
   const renderer = createWorkerRenderer();
   context.after(() => renderer.dispose());
@@ -120,7 +121,7 @@ test("a render given up before it starts never reaches a worker", async (context
   assert.equal(renderer.stats().started, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("a worker that cannot start falls back to the in-process render", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer({ scriptPath: path.join(root, "missing-worker.js") });
@@ -135,7 +136,8 @@ test("a worker that cannot start falls back to the in-process render", async (co
   assert.match(stats.disabledReason ?? "", /could not start/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("disposing the renderer cancels the render in flight", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer();
@@ -148,7 +150,8 @@ test("disposing the renderer cancels the render in flight", async (context) => {
   void context;
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("the extension bundle ships the worker next to extension.js, where the renderer looks for it", () => {
   const repositoryRoot = path.resolve(__dirname, "../../..");
   const esbuild = fs.readFileSync(path.join(repositoryRoot, "esbuild.mjs"), "utf8");
@@ -160,7 +163,8 @@ test("the extension bundle ships the worker next to extension.js, where the rend
   assert.match(source, /path\.join\(__dirname, "renderWorker\.js"\)/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S3
 test("warming starts one thread that the first render then uses", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer();
@@ -204,7 +208,7 @@ setTimeout(() => parentPort.postMessage({ type: "ready" }), ${readyMs});
 
 const inProcessStub = async (source: SourceRenderInput) => ({ html: `in-process:${source.text}`, diagnostics: [], dependencies: [] });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("a ready worker that dies during a render fails that render; three deaths in a row fall back", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer({ scriptPath: stubWorker(root), fallback: inProcessStub });
@@ -220,7 +224,8 @@ test("a ready worker that dies during a render fails that render; three deaths i
   assert.equal(renderer.stats().fallbackRenders, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S3
 test("a render waits for the busy worker instead of starting a second thread", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer({ scriptPath: stubWorker(root), fallback: inProcessStub });
@@ -235,7 +240,7 @@ test("a render waits for the busy worker instead of starting a second thread", a
   assert.equal(renderer.stats().workerRenders, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("a waiting render that is given up never reaches the worker", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer({ scriptPath: stubWorker(root), fallback: inProcessStub });
@@ -253,7 +258,8 @@ test("a waiting render that is given up never reaches the worker", async (contex
   assert.equal(stats.aborted, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S3
 test("a render aborted while its thread still starts keeps that thread for the next render", async (context) => {
   const root = workspace(context);
   const renderer = createWorkerRenderer({ scriptPath: stubWorker(root, 200), fallback: inProcessStub });
@@ -271,7 +277,7 @@ test("a render aborted while its thread still starts keeps that thread for the n
   assert.equal(stats.workerRenders, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
 test("an idle worker stops after the idle time, so the next render starts a new thread; within it the thread is reused", async (context) => {
   const root = workspace(context);
   const kept = createWorkerRenderer({ idleMs: 60_000 });

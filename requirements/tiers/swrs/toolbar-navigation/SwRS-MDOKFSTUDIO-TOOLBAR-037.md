@@ -23,6 +23,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Top edge follows the toolbar
+- id: S2
+  title: Wide pane
+- id: S3
+  title: Pane width
+- id: S4
+  title: Narrow pane rail and overlay
+- id: S5
+  title: Text and tables stay clear in Margin and Full width
+- id: S6
+  title: Zoom 200
+- id: S7
+  title: Content padded for the rail
+- id: S8
+  title: Overlay clear of the tooltip
+- id: S9
+  title: Escape belongs to its owner
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,7 +65,7 @@ supersedes:
 
 When the column is open, the extension SHALL place it eight pixels below the toolbar and, on a pane of at least 760 pixels, show it as a fixed 240 pixel column 16 pixels from the right edge with 256 pixels reserved from the content so that the text and the tables stay clear of it, and on a narrower pane show a rail on the right with one tick per heading instead, the tick of the section at the reading line being highlighted. While the pointer or the keyboard focus is on the rail or on the overlay, the extension SHALL show the column as an overlay above the text without reserving width; it SHALL close the overlay 300 ms after both have left, or at once on Escape (the focus returns to the rail; the key is taken only when it comes from the overlay, the rail or no focused element), or when an entry of the overlay is clicked or the TOC is turned off. The rail is focusable, the overlay stays the navigation landmark Table of contents, a click on a tick goes to its heading, and the overlay appears without animation. On a pane narrower than 760 pixels the content reserves 16 pixels at its end for the rail, and the overlay sits 40 pixels lower than the column top so that it stays clear of the open toolbar tooltip.
 
-### Scenario (nominal): Top edge follows the toolbar
+### Scenario S1 (nominal): Top edge follows the toolbar
 | Input | Outcome |
 | --- | --- |
 | An open column and a toolbar whose bottom edge is at 92 px | Its top variable (--sphinx-preview-toc-top) is 100 px, which is the toolbar bottom plus 8 px |
@@ -54,12 +73,12 @@ When the column is open, the extension SHALL place it eight pixels below the too
 | The toolbar is expanded or collapsed, even with quick clicks | The column is placed again below the toolbar when the animation of the rows ends |
 | A toolbar bounds value that is not finite | The top is 8 px |
 
-### Scenario (nominal): Wide pane
+### Scenario S2 (nominal): Wide pane
 - GIVEN a 900 px pane with the column open
 - WHEN the page is measured
 - THEN the column is 240 px wide with a 16 px gap on the right, the content area is 256 px narrower and the column stays inside the viewport
 
-### Scenario (boundary): Pane width
+### Scenario S3 (boundary): Pane width
 | Input | Outcome |
 | --- | --- |
 | Exactly 760 px with the column open | The column is shown |
@@ -67,7 +86,7 @@ When the column is open, the extension SHALL place it eight pixels below the too
 | 460 px with the button pressed | The root attribute is open, the button is pressed, the rail is displayed, the column is not displayed until the rail is hovered or focused and the content right edge moved in by the 16 px of the rail only |
 | The 460 px pane resized to 900 px | The column shows without a new press and the rail goes |
 
-### Scenario (nominal): Narrow pane rail and overlay
+### Scenario S4 (nominal): Narrow pane rail and overlay
 | Input | Outcome |
 | --- | --- |
 | 460 px, TOC on, a document with three headings of h1 to h4 | The rail holds three ticks, each labelled with its heading, and the tick of the section at the reading line is marked current |
@@ -77,29 +96,29 @@ When the column is open, the extension SHALL place it eight pixels below the too
 | A click on a tick | The page goes to that heading |
 | A click on an entry of the overlay, or the TOC turned off | The overlay closes |
 
-### Scenario (nominal): Text and tables stay clear in Margin and Full width
+### Scenario S5 (nominal): Text and tables stay clear in Margin and Full width
 - GIVEN a 900 px pane with a 10-column table and the column open
 - WHEN the width mode is Margin, then Full width
 - THEN the content column and every table end at or before the column's left edge and the page has at most 1 px of horizontal overflow
 
-### Scenario (boundary): Zoom 200
+### Scenario S6 (boundary): Zoom 200
 - GIVEN zoom 200 percent with the column open on a wide pane
 - WHEN the page is measured
 - THEN the content still ends before the column and does not scroll sideways
 
-### Scenario (nominal): Content padded for the rail
+### Scenario S7 (nominal): Content padded for the rail
 
 - GIVEN a 460 px pane with the table of contents on
 - WHEN the page is measured
 - THEN the content column ends 16 px before the pane edge, so the rail never covers text, and a 900 px pane keeps its 256 px reserve
 
-### Scenario (nominal): Overlay clear of the tooltip
+### Scenario S8 (nominal): Overlay clear of the tooltip
 
 - GIVEN a 460 px pane, the rail hovered, and the toolbar tooltip of the TOC button open
 - WHEN the overlay is placed
 - THEN the overlay top is 40 px below the column top variable and lies below the bottom of the tooltip
 
-### Scenario (boundary): Escape belongs to its owner
+### Scenario S9 (boundary): Escape belongs to its owner
 
 | Input | Outcome |
 | --- | --- |

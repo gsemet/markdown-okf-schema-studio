@@ -10,7 +10,8 @@ import { renderMyst } from "../../../src/core/render/mystRenderer";
 import { findElement, findElements, parseHtml, textContent } from "./dom";
 import { isTag } from "./mystFeaturesSupport";
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S6
 test("a div block and an inline marquee element are absent from the HTML, while kbd stays", async () => {
   const unsupported = await renderMyst('<div class="x">Block text</div>\n\nA <marquee>moving</marquee> word.\n');
   const dom = parseHtml(unsupported.html);

@@ -18,6 +18,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
 - StRS-MDOKFSTUDIO-CORE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Body text
+- id: S2
+  title: Headings
+- id: S3
+  title: List spacing
+- id: S4
+  title: Block quote tint
+- id: S5
+  title: Code blocks do not take the link colour in the forced themes
+- id: S6
+  title: Reach the end of the document
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,13 +60,13 @@ supersedes:
 
 When the preview shows paragraphs, list items, table cells, quotes, captions, headings or lists, the extension SHALL use the preview font, the zoomed font size and the VS Code Markdown preview line height for the body text, and typeset headings, list spacing, block quotes and the end of the document by the rules of the scenarios.
 
-### Scenario (nominal): Body text
+### Scenario S1 (nominal): Body text
 - GIVEN a zoom of 120 percent
 - WHEN a paragraph is shown
 - THEN its font size is the zoomed size and its line height the Markdown preview value
 - AND a table cell shown in the same page uses the same font and line height
 
-### Scenario (nominal): Headings
+### Scenario S2 (nominal): Headings
 | Input | Outcome |
 | --- | --- |
 | any heading | weight 600 |
@@ -63,26 +76,26 @@ When the preview shows paragraphs, list items, table cells, quotes, captions, he
 | h4 | 1em |
 | a top-level heading after a floating figure | starts below the figure |
 
-### Scenario (nominal): List spacing
+### Scenario S3 (nominal): List spacing
 - GIVEN a loose list
 - WHEN it is shown
 - THEN paragraph margins inside items are reduced
 - AND a nested list indents each level by 2em
 
-### Scenario (nominal): Block quote tint
+### Scenario S4 (nominal): Block quote tint
 - GIVEN a block quote in the Cream theme, in another forced theme or in the host theme
 - WHEN it is shown
 - THEN it keeps its left rule and takes the block quote background token of that theme as its background
 - AND in the Cream theme that background is a step darker than the page
 
-### Scenario (boundary): Code blocks do not take the link colour in the forced themes
+### Scenario S5 (boundary): Code blocks do not take the link colour in the forced themes
 | Input | Outcome |
 | --- | --- |
 | cream theme forced, YAML block | its tokens use the Dark+ colours like every language; the link colour no longer applies to code blocks (SwRS-MDOKFSTUDIO-CODE-040) |
 | white theme forced, YAML block | its tokens use the Dark+ colours like every language |
 | white theme forced, Python block | the Python text does not use the link colour |
 
-### Scenario (boundary): Reach the end of the document
+### Scenario S6 (boundary): Reach the end of the document
 - GIVEN a long document scrolled to its end, or a short document
 - WHEN the last block is shown
 - THEN a bottom padding keeps it at least 30 px above the frame bottom

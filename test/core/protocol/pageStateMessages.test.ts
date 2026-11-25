@@ -217,12 +217,12 @@ function variantsOf(base: Record<string, unknown>): Record<string, unknown>[] {
   return out;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S1
 // @tests_req SwRS-MDOKFSTUDIO-GFM-021#S4
 // @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S7
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S2
 test("the page-state validators accept exactly what the frozen validator accepted", () => {
   let checked = 0;
   let accepted = 0;
@@ -269,7 +269,7 @@ test("non-objects and inherited keys are not page messages", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
 test("the open of a table cell editor says so with cellEditor true, and no other message may", () => {
   const open = { type: "previewEditOpen", ...envelope, editId: "e1", line: 3, endLine: 5 };
   assert.equal(isPageToHostMessage({ ...open, cellEditor: true }), true);

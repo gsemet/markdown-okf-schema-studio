@@ -17,6 +17,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-001
 - StRS-MDOKFSTUDIO-REVIEW-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Name of the comments file
+- id: S2
+  title: Valid file
+- id: S3
+  title: Unknown fields
+- id: S4
+  title: Text that looks like markup
+- id: S5
+  title: Stable written form
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,28 +48,28 @@ default_owner_email: gaetan@xeberon.net
 
 When a document is shown, the extension SHALL look for its review threads in a file with the name of the document, its extension replaced by .comments.json, in the same folder, read them as plain data with only the fields of the format, and write them back in one stable form.
 
-### Scenario (nominal): Name of the comments file
+### Scenario S1 (nominal): Name of the comments file
 - GIVEN documents named notes.md, notes and a.b.md in a folder
 - WHEN the extension looks for their review threads
 - THEN it reads notes.comments.json, notes.comments.json and a.b.comments.json in the same folder
 
-### Scenario (nominal): Valid file
+### Scenario S2 (nominal): Valid file
 - GIVEN a file with version 1, the document name notes.md and one thread with an anchor, a resolved flag, an ISO creation date and one comment
 - WHEN the file is read
 - THEN one thread is returned with its quote, its author and its body
 
-### Scenario (boundary): Unknown fields
+### Scenario S3 (boundary): Unknown fields
 - GIVEN a file whose thread, anchor and comments carry fields the format does not name
 - WHEN the file is read
 - THEN the threads are returned without those fields and the unknown top-level fields are not kept
 
-### Scenario (boundary): Text that looks like markup
+### Scenario S4 (boundary): Text that looks like markup
 | Input | Outcome |
 | --- | --- |
 | A comment body and an author name that contain an img tag with an onerror attribute, a control character and a template expression | The strings are returned unchanged as data; a polluting __proto__ key does not reach other objects |
 | A thread whose comment body is an HTML tag, shown in the thread popover | The tag is shown as text and no element is created from it |
 
-### Scenario (nominal): Stable written form
+### Scenario S5 (nominal): Stable written form
 | Input | Outcome |
 | --- | --- |
 | A file whose keys come in another order, read and written again | The text equals the one written from the canonical order, starting with version, document and threads, with a 2-space indent and a trailing newline |

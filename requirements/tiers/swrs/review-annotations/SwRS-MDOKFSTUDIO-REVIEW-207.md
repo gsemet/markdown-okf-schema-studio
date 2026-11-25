@@ -20,6 +20,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-017
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Marking the innermost blocks
+- id: S2
+  title: Blocks that are never marked
+- id: S3
+  title: Size of one bar
+- id: S4
+  title: One column and no layout shift
+- id: S5
+  title: Laid out again
+- id: S6
+  title: Valid ranges
+- id: S7
+  title: Bad ranges
+- id: S8
+  title: Not a list
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,7 +59,7 @@ supersedes:
 
 When the page receives line ranges, the extension SHALL mark the innermost mapped element whose lines meet a range with data-sphinx-preview-changed and draw, for each marked block, a green bar 3 px wide with square ends, as high as the box of the block, in one column at the left margin of the page, without moving any block or text edge; a range that is not a pair of integers with 1 <= start <= end is ignored, as is a range list that is not a list.
 
-### Scenario (nominal): Marking the innermost blocks
+### Scenario S1 (nominal): Marking the innermost blocks
 
 | Input | Outcome |
 | --- | --- |
@@ -52,27 +69,27 @@ When the page receives line ranges, the extension SHALL mark the innermost mappe
 | A content patch on a page that holds marks | the last received ranges are applied to the new content and the new blocks that meet them are marked |
 | A content patch on a page that never received ranges | nothing is marked |
 
-### Scenario (boundary): Blocks that are never marked
+### Scenario S2 (boundary): Blocks that are never marked
 
 | Input | Outcome |
 | --- | --- |
 | A changed range over a block that is being edited, or under an open editor | that block is not marked |
 | A changed range that meets a block rendered from an include directive | the block is not marked, while a distinct wrapper of the directive can be |
 
-### Scenario (nominal): Size of one bar
+### Scenario S3 (nominal): Size of one bar
 
 | Input | Outcome |
 | --- | --- |
 | A marked paragraph | one bar has the top and the height of the paragraph |
 | A marked code block | the bar spans the whole box of the code block, not only its text |
 
-### Scenario (nominal): One column and no layout shift
+### Scenario S4 (nominal): One column and no layout shift
 
 - GIVEN marked blocks at several indentation levels, in the light, dark and cream themes
 - WHEN the bars are drawn
 - THEN all bars sit in one layer after the content with one left position at the left margin, no block or text position changes, no ancestor clips a bar, no bar touches an anchor icon, and the bars are visible in each theme
 
-### Scenario (nominal): Laid out again
+### Scenario S5 (nominal): Laid out again
 
 | Input | Outcome |
 | --- | --- |
@@ -80,19 +97,19 @@ When the page receives line ranges, the extension SHALL mark the innermost mappe
 | A content patch that moves a marked block | the bar moves with the block |
 | A change of content size, or an image load | the bars are placed again (stabilizeLayout of the scroll core) |
 
-### Scenario (nominal): Valid ranges
+### Scenario S6 (nominal): Valid ranges
 
 - GIVEN a previewIncomingChanges message whose ranges are pairs of integers with 1 <= start <= end
 - WHEN it is received
 - THEN the blocks that meet them are marked and the enabled value is reported
 
-### Scenario (refusal): Bad ranges
+### Scenario S7 (refusal): Bad ranges
 
 - GIVEN ranges with a zero, a negative number, a fraction or an end before the start
 - WHEN they are received
 - THEN no block is marked from them
 
-### Scenario (refusal): Not a list
+### Scenario S8 (refusal): Not a list
 
 - GIVEN a previewIncomingChanges message whose ranges are not a list
 - WHEN it is received

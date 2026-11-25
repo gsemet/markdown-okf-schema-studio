@@ -13,6 +13,9 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
+scenarios:
+- id: S1
+  title: The rule icon
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -29,7 +32,7 @@ default_owner_email: gaetan@xeberon.net
 
 While a block editor is open, the extension SHALL draw the icon of the Horizontal rule button of its edit bar as three separate short dashes on one line.
 
-### Scenario (nominal): The rule icon
+### Scenario S1 (nominal): The rule icon
 
 - GIVEN the edit bar of a paragraph editor
 - WHEN the buttons are built

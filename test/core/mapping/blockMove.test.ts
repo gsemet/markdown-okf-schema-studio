@@ -19,7 +19,7 @@ function plan(text: string, first: [number, number], second: [number, number]): 
   return result;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S3
 test("swaps two blocks and keeps the separator and the final line break", () => {
   assert.equal(move("A\n\nB\n", [1, 1], [3, 3]), "B\n\nA\n");
   assert.equal(move("A\n\nB", [1, 1], [3, 3]), "B\n\nA", "no final newline stays absent");
@@ -82,7 +82,8 @@ test("refuses non-blank text between the blocks", () => {
   assert.ok("refused" in (move("A\n\n[ref]: http://x\n\nB\n", [1, 1], [5, 5]) as object));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S3
 test("refuses overlapping, unordered, out-of-range and blank-edged ranges", () => {
   const text = "A\n\nB\n\nC\n";
   for (const [first, second] of [
@@ -95,7 +96,7 @@ test("refuses overlapping, unordered, out-of-range and blank-edged ranges", () =
   assert.ok("refused" in planBlockMove(text, { line: Number.NaN, endLine: 1 }, { line: 3, endLine: 3 }));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S8
 test("detects the line that opens an include directive", () => {
   for (const line of ["```{include} other.md", ":::{include} other.md", "  ~~~{include} x.md"]) {
     assert.equal(opensIncludeDirective(line), true, line);
@@ -105,7 +106,8 @@ test("detects the line that opens an include directive", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S7
 // A selection of blocks moves as one range: its inner separators travel with it, untouched.
 test("a span of blocks moves past one block, inner separators untouched", () => {
   const text = "# T\n\nA\n\n\nB\n\nC\n\nD\n";

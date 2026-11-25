@@ -81,8 +81,8 @@ const CASES: Array<{ name: string; html: string; markdown: string }> = [
 ];
 
 for (const { name, html, markdown } of CASES) {
-  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-217
-  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-229
+  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-217#S8
+  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-229#S1
   test("T1: htmlToMarkdown, " + name, () => {
     assert.equal(htmlToMarkdown(html), markdown);
   });

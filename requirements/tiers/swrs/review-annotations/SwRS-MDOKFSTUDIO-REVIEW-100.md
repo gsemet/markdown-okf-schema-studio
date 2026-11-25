@@ -18,6 +18,33 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-008
 - StRS-MDOKFSTUDIO-REVIEW-001
 depends_on: []
+scenarios:
+- id: S1
+  title: A thread follows its quote to the line where it moved
+- id: S2
+  title: Unchanged threads are kept
+- id: S3
+  title: Several copies are narrowed by the prefix and suffix of the thread
+- id: S4
+  title: Without usable context only the nearest copy within 50 lines counts
+- id: S5
+  title: Distance allowed for a short and for a long quote
+- id: S6
+  title: The quote is searched in the plain text of the document
+- id: S7
+  title: Code fences and front matter are never searched
+- id: S8
+  title: A quote spanning several lines, also in a CRLF document
+- id: S9
+  title: A deleted quote orphans the thread
+- id: S10
+  title: An orphan among several threads is untouched
+- id: S11
+  title: The old lines are checked before the cap of 200 candidates
+- id: S12
+  title: Surroundings that disagree prevent a move
+- id: S13
+  title: Old lines that still resemble the quote keep the thread
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,26 +63,26 @@ supersedes:
 
 When the quote of a review thread is no longer in its old lines but occurs in the document at one place, the extension SHALL move the thread to the lines of that place, and, when the quote cannot be found and its old lines do not resemble it, mark the thread as orphaned and keep its stored lines and comments
 
-### Scenario (nominal): A thread follows its quote to the line where it moved
+### Scenario S1 (nominal): A thread follows its quote to the line where it moved
 
 - GIVEN a thread on line 3 and lines inserted above, so that the quote is now on line 9
 - WHEN the thread is checked
 - THEN the thread moves to line 9
 
-### Scenario (nominal): Unchanged threads are kept
+### Scenario S2 (nominal): Unchanged threads are kept
 
 - GIVEN a list of threads of which one moved, one is orphaned and one is in place
 - WHEN the threads are checked
 - THEN only the moved thread gets new lines and no thread is lost
 
-### Scenario (nominal): Several copies are narrowed by the prefix and suffix of the thread
+### Scenario S3 (nominal): Several copies are narrowed by the prefix and suffix of the thread
 
 - GIVEN two copies of "fix the login flow" and a thread with prefix "Do not " and suffix " today."
 - WHEN the thread is checked
 - THEN the thread moves to the copy with that surrounding
 - AND a second thread with prefix "Please " and suffix " soon." moves to the other copy
 
-### Scenario (boundary): Without usable context only the nearest copy within 50 lines counts
+### Scenario S4 (boundary): Without usable context only the nearest copy within 50 lines counts
 
 When several copies remain and the surroundings do not decide, the thread moves to the nearest copy only if it lies within 50 lines (WINDOW_LINES) of the old lines and is strictly nearer than the next copy.
 
@@ -65,7 +92,7 @@ When several copies remain and the surroundings do not decide, the thread moves 
 | copies only outside the window | the thread is orphaned |
 | two copies at the same distance | the thread is orphaned |
 
-### Scenario (boundary): Distance allowed for a short and for a long quote
+### Scenario S5 (boundary): Distance allowed for a short and for a long quote
 
 | Input | Outcome |
 | --- | --- |
@@ -74,7 +101,7 @@ When several copies remain and the surroundings do not decide, the thread moves 
 | a thread on line 4 and a long quote (at least 12 characters) occurring exactly once, now on line 301 | the thread moves to line 301, however far it is |
 | a long quote occurring twice, far from the old lines | the thread is orphaned |
 
-### Scenario (nominal): The quote is searched in the plain text of the document
+### Scenario S6 (nominal): The quote is searched in the plain text of the document
 
 The searched text has block markers, link targets, emphasis marks, table pipes and rules, HTML tags and comments and footnote markers removed, entities decoded and whitespace collapsed. A MyST role is read as the text it renders: the content of a role such as {kbd}`Ctrl`, and nothing for a role that renders a label the source does not hold, such as {cite} and {ref} without text.
 
@@ -85,47 +112,47 @@ The searched text has block markers, link targets, emphasis marks, table pipes a
 | the source "Press {kbd}`Ctrl` to continue." and the quote "Press Ctrl to continue." | the thread stays anchored |
 | the source "As shown in {cite}`smith2020` the result holds." and the quote "As shown in Smith, 2020 the result holds." | the thread stays anchored at its original line |
 
-### Scenario (refusal): Code fences and front matter are never searched
+### Scenario S7 (refusal): Code fences and front matter are never searched
 
 - GIVEN a quote that occurs only in a fenced code block and in the front matter
 - WHEN the thread is checked
 - THEN the thread is orphaned
 - AND when the quote also occurs in a paragraph, the thread is found in the paragraph
 
-### Scenario (boundary): A quote spanning several lines, also in a CRLF document
+### Scenario S8 (boundary): A quote spanning several lines, also in a CRLF document
 
 | Input | Outcome |
 | --- | --- |
 | the quote "brown fox jumps over the lazy" over lines 3 to 5 | the thread moves to lines 3 to 5 |
 | the same document with CRLF line ends | the result is the same |
 
-### Scenario (nominal): A deleted quote orphans the thread
+### Scenario S9 (nominal): A deleted quote orphans the thread
 
 - GIVEN a thread on line 3 and a document without the quote
 - WHEN the thread is checked
 - THEN the state is orphaned and the lines are still 3 to 3
 
-### Scenario (nominal): An orphan among several threads is untouched
+### Scenario S10 (nominal): An orphan among several threads is untouched
 
 - GIVEN a thread list with one orphan
 - WHEN the threads are checked
 - THEN the orphan keeps its lines 4 to 6 and its comments, the orphan set holds the thread id and the thread object is unchanged
 
-### Scenario (boundary): The old lines are checked before the cap of 200 candidates
+### Scenario S11 (boundary): The old lines are checked before the cap of 200 candidates
 
 - GIVEN 300 lines holding the word item and a thread on line 301
 - WHEN the thread is checked
 - THEN the thread stays anchored on line 301, because a quote that occurs in more than 200 places is still looked for in the old lines first
 - AND for a quote with more than 200 copies and no copy in the old lines, at most 200 copies are examined (MAX_CANDIDATES)
 
-### Scenario (refusal): Surroundings that disagree prevent a move
+### Scenario S12 (refusal): Surroundings that disagree prevent a move
 
 | Input | Outcome |
 | --- | --- |
 | a thread quoting Overview (a short quote) with prefix "Intro: " and a document where the word has other surroundings | the thread is orphaned |
 | two copies of the quote and none that matches the stored prefix and suffix | the thread is orphaned |
 
-### Scenario (boundary): Old lines that still resemble the quote keep the thread
+### Scenario S13 (boundary): Old lines that still resemble the quote keep the thread
 
 When the quote has no acceptable place but at least 60 percent of its words occur in order in the old lines (RESEMBLANCE = 0.6), or the old lines hold a role that renders text the source lacks, the thread stays on those lines.
 

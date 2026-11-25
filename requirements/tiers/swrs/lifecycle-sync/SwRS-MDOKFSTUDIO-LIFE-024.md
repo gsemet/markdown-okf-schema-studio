@@ -17,6 +17,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Side preview
+- id: S2
+  title: Fixed preview and panel without a document
+- id: S3
+  title: Switch
+- id: S4
+  title: Render finished
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,13 +45,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview panel is created, restored, switched to another document or finishes a render, the extension SHALL title the side preview Studio · {file name}, a fixed preview with the bare file name, and a panel with no known document Studio, using the title of the document the panel shows.
 
-### Scenario (nominal): Side preview
+### Scenario S1 (nominal): Side preview
 
 - GIVEN the side preview following the editor on notes.md
 - WHEN the panel is created
 - THEN its title is Studio · notes.md (integration test test/integration/lifecycle.test.ts)
 
-### Scenario (boundary): Fixed preview and panel without a document
+### Scenario S2 (boundary): Fixed preview and panel without a document
 
 | Input | Outcome |
 | --- | --- |
@@ -50,13 +59,13 @@ When a preview panel is created, restored, switched to another document or finis
 | an older restored panel on notes.md | title notes.md, without the Studio prefix (integration test test/integration/serializer.test.ts, older panel does not match /^Studio/) |
 | a panel with no document | title Studio |
 
-### Scenario (nominal): Switch
+### Scenario S3 (nominal): Switch
 
 - GIVEN a side preview titled Studio · preview.md
 - WHEN the reader makes preview-other.md the active editor
 - THEN the title becomes Studio · preview-other.md
 
-### Scenario (nominal): Render finished
+### Scenario S4 (nominal): Render finished
 
 - GIVEN a preview whose title was set before its first render
 - WHEN a render of the shown document finishes

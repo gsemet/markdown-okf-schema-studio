@@ -11,8 +11,9 @@ import {
 
 const thread = ["<!-- THREAD", "Ada (2026-10-21 10:00):", "  Why?", "-->"];
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S5
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S8
 test("a reply is accepted at exactly 10,000 characters and refused at 10,001", () => {
   assert.equal(MAX_THREAD_REPLY_LENGTH, 10000);
   const edit = threadReplyEdit(thread, "Bob", "2026-10-22 09:30", "x".repeat(10000));
@@ -23,7 +24,8 @@ test("a reply is accepted at exactly 10,000 characters and refused at 10,001", (
   assert.equal(threadReplyEdit(["not", "a thread"], "Bob", "2026-10-22 09:30", "hi"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S3
 test("a thread body opens with THREAD alone on its line, and indents of one or two spaces or a tab are removed", () => {
   assert.equal(parseThreadBody("THREAD extra\nAda (2026-10-21 10:00):\n  Hi"), undefined, "text after THREAD on its line");
   assert.deepEqual(parseThreadBody("THREAD\nAda (2026-10-21 10:00):\n  Hi"), [{ author: "Ada", date: "2026-10-21 10:00", text: "Hi" }]);

@@ -21,6 +21,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 - SwRS-MDOKFSTUDIO-PALETTE-036
+scenarios:
+- id: S1
+  title: Picker contents and focus
+- id: S2
+  title: The filter matches the words of the English names
+- id: S3
+  title: A click inserts the emoji and closes the picker
+- id: S4
+  title: Enter and arrow keys in the picker
+- id: S5
+  title: The emoji action inserts a pictograph
+- id: S6
+  title: Other text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,7 +53,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Emoji, the extension SHALL open a picker with a field named Filter emoji and about 150 emoji in six named categories, none of them a flag, each button with its English name as title and accessible name, show only the emoji whose English name contains every typed word, case-insensitively, and insert a chosen emoji at the caret, replacing a selection, only when it is one run of at most 16 UTF-16 code units made of pictographs, joiners and variation selectors.
 
-### Scenario (nominal): Picker contents and focus
+### Scenario S1 (nominal): Picker contents and focus
 
 - GIVEN an open block editor
 - WHEN the writer presses Emoji
@@ -49,7 +62,7 @@ When the writer presses Emoji, the extension SHALL open a picker with a field na
 
 The categories are Smileys, People and hands, Nature, Food and drink, Objects and Symbols and status; every emoji has a unique character and a name (lower-case letters, digits, blanks and hyphens).
 
-### Scenario (nominal): The filter matches the words of the English names
+### Scenario S2 (nominal): The filter matches the words of the English names
 
 - GIVEN the picker open
 - WHEN warning is typed in the filter
@@ -62,7 +75,7 @@ The categories are Smileys, People and hands, Nature, Food and drink, Objects an
 | an empty filter | everything is shown |
 | several words | only the emoji whose lower-cased name contains each typed word, split on blanks, or that is the typed character |
 
-### Scenario (nominal): A click inserts the emoji and closes the picker
+### Scenario S3 (nominal): A click inserts the emoji and closes the picker
 
 - GIVEN a selection and the picker open
 - WHEN the writer clicks an emoji
@@ -74,7 +87,7 @@ The categories are Smileys, People and hands, Nature, Food and drink, Objects an
 
 The insertion uses the live selection of the text box at the moment of the click: an emoji chosen after the text changed is inserted at the live caret, never a stale one.
 
-### Scenario (nominal): Enter and arrow keys in the picker
+### Scenario S4 (nominal): Enter and arrow keys in the picker
 
 - GIVEN the filter typed with a match
 - WHEN the writer presses Enter
@@ -91,7 +104,7 @@ The insertion uses the live selection of the text box at the moment of the click
 | Escape | the picker closes and the focus returns to the text box |
 | Cmd or Ctrl with Enter in the filter | the picker closes and the edit is finished |
 
-### Scenario (nominal): The emoji action inserts a pictograph
+### Scenario S5 (nominal): The emoji action inserts a pictograph
 
 - GIVEN the argument of a check mark emoji
 - WHEN the action runs
@@ -104,7 +117,7 @@ The insertion uses the live selection of the text box at the moment of the click
 
 The emoji action is available in the block and cell scopes.
 
-### Scenario (refusal): Other text
+### Scenario S6 (refusal): Other text
 
 - GIVEN the argument abc, or an empty argument
 - WHEN the action runs

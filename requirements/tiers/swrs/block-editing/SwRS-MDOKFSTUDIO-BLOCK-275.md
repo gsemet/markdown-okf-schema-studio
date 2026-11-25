@@ -14,6 +14,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: nominal
+- id: S2
+  title: boundary
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer selects the whole page and copies, the page SHALL put on the clipboard the whole source text exactly, including the frontmatter, trailing link definitions and comments and the final line break.
 
-### Scenario: nominal
+### Scenario S1: nominal
 
 - GIVEN a Select all of the page
 - WHEN the copy is taken
 - THEN the text/plain is the whole source text
 
-### Scenario: boundary
+### Scenario S2: boundary
 
 - GIVEN a range that ends at the start of the next block
 - WHEN the copy is taken

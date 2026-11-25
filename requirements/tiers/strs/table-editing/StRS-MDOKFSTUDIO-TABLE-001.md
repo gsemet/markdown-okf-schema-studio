@@ -21,6 +21,11 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Edit one cell
+- id: S2
+  title: Edit a cell of a quoted table
 user_need: As a writer, I click a table cell in edit mode and edit its Markdown
   right where it is, without the table moving or the other columns changing
   width; I move between cells without losing a change; I finish a cell with
@@ -108,7 +113,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Edit one cell
+#### Path S1: Edit one cell
 
 1. A pipe table is shown in edit mode
    - SwRS-MDOKFSTUDIO-TABLE-001: the writer clicks a body cell and an editor named Markdown table cell editor opens in the cell with its raw Markdown
@@ -123,7 +128,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-TABLE-025 (nominal): Escape closes the editor and drops the text typed in that cell
 4. The cell is committed and the editor is closed
 
-#### Path 2: Edit a cell of a quoted table
+#### Path S2: Edit a cell of a quoted table
 
 1. A pipe table inside a blockquote, a GFM alert or a MyST admonition is shown in edit mode
    - SwRS-MDOKFSTUDIO-TABLE-121: the writer clicks a cell and the cell editor opens, the prefix of the table kept

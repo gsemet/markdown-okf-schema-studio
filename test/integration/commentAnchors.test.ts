@@ -29,13 +29,17 @@ const lines = (file: string): Record<string, number> =>
 const liveLines = (): Record<string, number> =>
   Object.fromEntries((getActivePreviewForTests()?.comments.last ?? []).map((t) => [t.id, t.anchor.line]));
 
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-008
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-001
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219
+// @accepts_req StRS-MDOKFSTUDIO-REVIEW-008#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-125#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-219#S4
 /**
  * T45: threads follow the text. Edits shift them in memory without any write; the save of the
  * document writes the moved lines; an orphan keeps its line; no sidecar is created; an invalid or

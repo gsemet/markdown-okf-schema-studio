@@ -34,15 +34,18 @@ function send(preview: PreviewForTests, type: string, fields: Record<string, unk
 const anchorOf = (line: number, quote: string) => ({ line, endLine: line, quote, prefix: "a ", suffix: " b" });
 const readThreads = (file: string): any[] => JSON.parse(fs.readFileSync(file, "utf8")).threads;
 
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-001
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-003
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @accepts_req StRS-MDOKFSTUDIO-REVIEW-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S11
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 /**
  * T43: creating a thread and replying write the sidecar next to the document through the host

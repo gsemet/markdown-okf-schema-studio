@@ -17,6 +17,24 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
+scenarios:
+- id: S1
+  title: The arrows move the highlight and wrap
+- id: S2
+  title: Enter or Tab runs the lit command in one edit
+- id: S3
+  title: A click runs a command and a hover lights it
+- id: S4
+  title: A command with a picker removes the query and then opens like its
+    button
+- id: S5
+  title: Escape closes the menu and keeps the typed text
+- id: S6
+  title: Backspace narrows the query or closes the menu
+- id: S7
+  title: Leaving the query closes the menu and keeps the text
+- id: S8
+  title: Chords, compositions and other keys are not taken by the menu
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +53,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the slash menu is open, the extension SHALL take ArrowDown, ArrowUp, Enter, Tab, Escape, Backspace, a click and a hover for the menu, running the lit command in one edit and leaving every other key and the text to the text box.
 
-### Scenario (nominal): The arrows move the highlight and wrap
+### Scenario S1 (nominal): The arrows move the highlight and wrap
 | Given | When | Then |
 | --- | --- | --- |
 | an open menu with the first entry lit | the writer presses ArrowUp | the last entry is lit |
 | the last entry lit | the writer presses ArrowDown | the first entry is lit |
 
-### Scenario (nominal): Enter or Tab runs the lit command in one edit
+### Scenario S2 (nominal): Enter or Tab runs the lit command in one edit
 - GIVEN the text before /bold and a selection-free caret
 - WHEN the writer presses Enter or Tab
 - THEN the slash and the query are removed, Bold is applied as its button does and one undo restores /bold
@@ -49,7 +67,7 @@ When the slash menu is open, the extension SHALL take ArrowDown, ArrowUp, Enter,
 - WHEN Enter is pressed
 - THEN only the query is removed and the rest of the text stays
 
-### Scenario (nominal): A click runs a command and a hover lights it
+### Scenario S3 (nominal): A click runs a command and a hover lights it
 - GIVEN an open menu
 - WHEN the writer clicks Bold
 - THEN Bold runs and the query is removed
@@ -57,33 +75,33 @@ When the slash menu is open, the extension SHALL take ArrowDown, ArrowUp, Enter,
 - WHEN the pointer moves over the third command
 - THEN the third command is lit and the text box keeps the focus
 
-### Scenario (nominal): A command with a picker removes the query and then opens like its button
+### Scenario S4 (nominal): A command with a picker removes the query and then opens like its button
 | Query | When the command is chosen | Outcome |
 | --- | --- | --- |
 | /link or /table | the writer chooses it | the query is removed, then the link panel or the size grid opens as the button opens it |
 | /bold | the writer chooses it | the query is removed and Bold is applied in the same edit, as the Enter scenario states |
 | the list entries | the writer chooses one | the list prefix is written as one edit |
 
-### Scenario (boundary): Escape closes the menu and keeps the typed text
+### Scenario S5 (boundary): Escape closes the menu and keeps the typed text
 | Given | When | Outcome |
 | --- | --- | --- |
 | an open menu with the query /ta | the writer presses Escape | the menu closes, /ta stays and the editor is still open |
 | the same state, menu closed | the writer presses Escape again | the editor is cancelled |
 
-### Scenario (boundary): Backspace narrows the query or closes the menu
+### Scenario S6 (boundary): Backspace narrows the query or closes the menu
 | Given | When | Outcome |
 | --- | --- | --- |
 | the menu open with the query ta | the writer presses Backspace | the query is t and the list is longer |
 | the menu open with an empty query | the writer presses Backspace | the slash is removed and the menu closes |
 
-### Scenario (refusal): Leaving the query closes the menu and keeps the text
+### Scenario S7 (refusal): Leaving the query closes the menu and keeps the text
 | Given | When | Outcome |
 | --- | --- | --- |
 | an open menu | the caret is moved before the slash | the menu closes |
 | an open menu | a selection appears | the menu closes and the text is as typed |
 | an open menu | the text box loses the focus or the editor finishes | the menu closes and the text is unchanged |
 
-### Scenario (refusal): Chords, compositions and other keys are not taken by the menu
+### Scenario S8 (refusal): Chords, compositions and other keys are not taken by the menu
 | Given | When | Outcome |
 | --- | --- | --- |
 | an open menu | the writer presses Ctrl+B (or another chord with Cmd, Ctrl or Alt) | the menu closes and the key reaches the shortcut handler |

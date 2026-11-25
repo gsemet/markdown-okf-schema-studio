@@ -18,6 +18,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Nominal case
+- id: S2
+  title: Boundary cases
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,13 +45,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader follows a link to a Markdown file, or Back or Next to a place in another Markdown file, in a Studio tab, the extension SHALL hand the target's line or anchor to the Studio tab that shows the target: it SHALL reveal a Studio tab of the target already open in any group in its own group instead of opening a second one, and SHALL hand a pending line to a new Studio tab once, removing it as soon as it is delivered.
 
-### Scenario (nominal): Nominal case
+### Scenario S1 (nominal): Nominal case
 
 - GIVEN a Studio tab of a.md and a link to b.md#heading, where the heading is on line 5
 - WHEN the reader follows the link, or Back or Next to that place
 - THEN the host is asked to open b.md with line 5; a Studio tab of b.md open in any group is revealed in its own group and given the line, and otherwise the new Studio tab takes the pending line once when it opens
 
-### Scenario (boundary): Boundary cases
+### Scenario S2 (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

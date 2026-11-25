@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { createRuntimeHarness } from "./runtimeHarness";
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S2
 test("CR 162: the toolbar load hint plays once per panel and survives the state snapshots", () => {
   const first = createRuntimeHarness();
   first.flushFrames();

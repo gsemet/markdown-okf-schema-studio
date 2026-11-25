@@ -23,7 +23,8 @@ import {
  * paragraph, a list item with nested items or the last item of a list; the editor is left with
  * Done, Cmd/Ctrl+Enter, a click on another block, an arrow past the edge, or a letter typed then
  * deleted. A real change in a CR LF file keeps CR LF everywhere.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-263
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S1
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-263#S3
  */
 
 const LINES = [

@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-008
+scenarios:
+- id: S1
+  title: Active areas and use cases
+- id: S2
+  title: Retired use case
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a maintainer builds the Pages site from the okfreq report, the build SHALL write the Requirements home with the three layers, the areas and the figures, and one page per active area that lists the use cases of the area, each with its full ID, without a page for a retired requirement.
 
-### Scenario (nominal): Active areas and use cases
+### Scenario S1 (nominal): Active areas and use cases
 
 - GIVEN a report with an active area holding 2 active use cases and 1 superseded one
 - WHEN the site is built
 - THEN requirements/ holds the home with the 3 layers and the areas, requirements/{area}/ lists the 2 use cases, each link showing the full ID of the use case (StRS-MDOKFSTUDIO-GFM-001, not GFM-001), requirements/{area}/{StRS}/ exists for each active use case and no folder exists for the superseded one; every link is relative and resolves from every depth
 
-### Scenario (refusal): Retired use case
+### Scenario S2 (refusal): Retired use case
 
 - GIVEN a superseded use case of an area
 - WHEN the History button is off

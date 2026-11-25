@@ -40,9 +40,10 @@ function renderedTable(harness: RuntimeHarness): { table: RuntimeElement; cells:
   return { table, cells };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-125
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S10
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-125#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S3
 test("a table whose cell was left with Tab is rebuilt by a patch that carries the first render again", () => {
   const harness = createRuntimeHarness();
   const content = harness.previewContent;
@@ -93,7 +94,8 @@ test("a table whose cell was left with Tab is rebuilt by a patch that carries th
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S6
 test("a table the page did not write into is kept by a patch with the same HTML", () => {
   const harness = createRuntimeHarness();
   const content = harness.previewContent;

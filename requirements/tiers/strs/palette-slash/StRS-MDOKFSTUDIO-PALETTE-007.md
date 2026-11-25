@@ -16,6 +16,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Insert an image
+- id: S2
+  title: Colour a selection
 user_need: As a writer, I create or fix a link by filling two fields, add
   pictures from the file system, adjust a figure without hand-editing its
   options, highlight text with a colour, add emoji from a picker and create a
@@ -88,7 +93,7 @@ The editor stays open while the native dialog is shown.
 
 ### Main paths
 
-#### Path 1: Insert an image
+#### Path S1: Insert an image
 
 1. The palette is shown above the text box
    - SwRS-MDOKFSTUDIO-PALETTE-109: the writer presses Image, the host opens a native image file dialog and the editor stays open
@@ -100,7 +105,7 @@ The editor stays open while the native dialog is shown.
    - SwRS-MDOKFSTUDIO-PALETTE-109: an image reference is inserted or replaces the one under the caret
 4. An image reference is in the text
 
-#### Path 2: Colour a selection
+#### Path S2: Colour a selection
 
 1. The palette is shown above the text box
    - SwRS-MDOKFSTUDIO-PALETTE-058: the writer presses Colour and a picker opens with the tabs Text and Background, sixteen swatches, a colour code field and a Remove button

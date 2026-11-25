@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A body row of a pipe table
+- id: S2
+  title: Rows, containers and fallbacks
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +40,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the line marker is requested on a line of a pipe table, the page SHALL mark the row of that line, the header row for the delimiter line, wherever the table sits (top level, quote, alert, admonition, list item or tab item), and SHALL mark the top of the enclosing block for a line of a list-table, a captioned table, a raw HTML table or a line past the last row.
 
-### Scenario (nominal): A body row of a pipe table
+### Scenario S1 (nominal): A body row of a pipe table
 
 - GIVEN a page with a pipe table whose second body row is on source line 43
 - WHEN the page receives previewRevealLine for line 43
 - THEN one arrow and band are drawn on that row (its top and its height), and no row or cell gets a click target of its own
 
-### Scenario (boundary): Rows, containers and fallbacks
+### Scenario S2 (boundary): Rows, containers and fallbacks
 
 | Input | Outcome |
 | --- | --- |

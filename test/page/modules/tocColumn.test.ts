@@ -155,8 +155,9 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
   return { key, advance, rail, ticks, toc, window, twisties, content, body, root, button, posted, scrolled, flush, nav, entries, getState: () => state, changes: () => changes, frames };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S7
 test("the TOC is off by default and the page is marked closed", () => {
   const { root, button, nav } = setup();
   assert.equal(root.getAttribute("data-sphinx-preview-toc"), "closed");
@@ -164,14 +165,14 @@ test("the TOC is off by default and the page is marked closed", () => {
   assert.equal(nav().getAttribute("aria-label"), "Table of contents");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S2
 test("the workspace preference opens the TOC and the saved webview state wins", () => {
   assert.equal(setup({ toc: true }).root.getAttribute("data-sphinx-preview-toc"), "open");
   assert.equal(setup({ toc: true, saved: { viewToc: false } }).root.getAttribute("data-sphinx-preview-toc"), "closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S1
 test("the entries list h1 to h4 with their level and without the permalink glyph", () => {
   const { content, toc, flush, entries } = setup({ toc: true });
   const permalink = new FakeElement("a", ["headerlink"]);
@@ -190,7 +191,7 @@ test("the entries list h1 to h4 with their level and without the permalink glyph
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S3
 test("headings in properties, admonitions, block editors and the sticky band are left out", () => {
   const { content, toc, flush, entries } = setup({ toc: true });
   const properties = new FakeElement("div");
@@ -210,7 +211,7 @@ test("headings in properties, admonitions, block editors and the sticky band are
   assert.deepEqual(entries().map((entry) => entry.textContent), ["Kept"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S3
 test("an empty document shows No headings", () => {
   const { toc, flush, nav, entries } = setup({ toc: true });
   toc.refresh();
@@ -219,7 +220,8 @@ test("an empty document shows No headings", () => {
   assert.match(nav().textContent, /No headings/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S3
 test("the TOC is rebuilt after the content is replaced, once per frame", () => {
   const { content, toc, flush, entries, frames } = setup({ toc: true });
   content.appendChild(heading("h1", "Old"));
@@ -235,7 +237,7 @@ test("the TOC is rebuilt after the content is replaced, once per frame", () => {
   assert.deepEqual(entries().map((entry) => entry.textContent), ["New one", "New two"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S6
 test("clicking an entry scrolls to its heading and does not navigate", () => {
   const { content, toc, flush, entries, scrolled } = setup({ toc: true });
   const first = content.appendChild(heading("h1", "One"));
@@ -249,8 +251,10 @@ test("clicking an entry scrolls to its heading and does not navigate", () => {
   assert.equal(scrolled[1], first);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S10
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033#S3
 test("the toggle opens the TOC, posts the preference, remembers it and builds the entries", () => {
   const { content, button, root, posted, flush, entries, getState, changes } = setup();
   content.appendChild(heading("h1", "Title"));
@@ -274,7 +278,7 @@ test("the toggle opens the TOC, posts the preference, remembers it and builds th
   assert.equal(posted[1].value, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S1
 test("the column starts 8 px below the toolbar", () => {
   const { nav } = setup({ toc: true });
   assert.equal(nav().styles.get("--sphinx-preview-toc-top"), "92px");
@@ -292,7 +296,7 @@ function outline(content: FakeElement) {
 }
 const hiddenOf = (entry: FakeElement) => entry.parent!.hasAttribute("hidden");
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
 test("only parent entries get a twisty with aria-expanded", () => {
   const { content, toc, flush, twisties } = setup({ toc: true });
   outline(content);
@@ -302,7 +306,8 @@ test("only parent entries get a twisty with aria-expanded", () => {
   assert.deepEqual(twisties().map((twisty) => twisty.getAttribute("aria-expanded")), ["true", "true"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
 test("the twisty name says Fold when open and Unfold when folded", () => {
   const { content, toc, flush, twisties } = setup({ toc: true });
   outline(content);
@@ -317,7 +322,7 @@ test("the twisty name says Fold when open and Unfold when folded", () => {
   assert.equal(twisties()[0].getAttribute("aria-label"), open);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
 test("collapsing a parent hides its descendants, and a rebuild keeps it collapsed", () => {
   const { content, toc, flush, twisties, entries, getState } = setup({ toc: true });
   outline(content);
@@ -337,7 +342,7 @@ test("collapsing a parent hides its descendants, and a rebuild keeps it collapse
   assert.deepEqual(entries().map(hiddenOf), [false, false, false, false, false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
 test("collapsing a middle parent hides only its own subtree", () => {
   const { content, toc, flush, twisties, entries } = setup({ toc: true });
   outline(content);
@@ -347,7 +352,8 @@ test("collapsing a middle parent hides only its own subtree", () => {
   assert.deepEqual(entries().map(hiddenOf), [false, false, true, false, false]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S5
 test("the current entry follows the reading line and is marked aria-current", () => {
   const { content, toc, window, flush, entries } = setup({ toc: true });
   outline(content);
@@ -365,7 +371,8 @@ test("the current entry follows the reading line and is marked aria-current", ()
   assert.deepEqual(current(), [null, null, null, null, "location"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S5
 test("a collapsed parent carries the highlight of a hidden current section", () => {
   const { content, toc, window, flush, entries, twisties } = setup({ toc: true });
   outline(content);
@@ -379,7 +386,7 @@ test("a collapsed parent carries the highlight of a hidden current section", () 
   assert.equal(entries()[2].getAttribute("aria-current"), "location");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S4
 test("the scroll tracking reads no layout: tops are cached until remeasure", () => {
   const { content, toc, window, flush, entries } = setup({ toc: true });
   const headings = outline(content);
@@ -404,7 +411,8 @@ test("the scroll tracking reads no layout: tops are cached until remeasure", () 
   assert.equal(entries()[3].getAttribute("aria-current"), "location");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S5
 test("the TOC scrolls itself, not the page, to keep the current entry visible", () => {
   const { content, toc, window, flush, nav, entries } = setup({ toc: true });
   outline(content);
@@ -418,7 +426,7 @@ test("the TOC scrolls itself, not the page, to keep the current entry visible", 
   assert.equal((nav() as any).scrollTop, 90);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S7
 test("a click right after a content patch scrolls to the live heading", () => {
   const { content, toc, flush, entries, scrolled } = setup({ toc: true });
   outline(content);
@@ -433,7 +441,8 @@ test("a click right after a content patch scrolls to the live heading", () => {
   assert.notEqual(scrolled[0], old[1]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S3
 test("a repeated heading text is told apart by its occurrence", () => {
   const { content, toc, flush, entries, scrolled } = setup({ toc: true });
   const first = content.appendChild(heading("h2", "Notes"));
@@ -449,7 +458,8 @@ test("a repeated heading text is told apart by its occurrence", () => {
   assert.notEqual(freshFirst, first);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S2
 test("a heading revealed at the reading line becomes current despite a fractional top", () => {
   const { content, toc, window, flush, entries } = setup({ toc: true });
   const headings = outline(content);
@@ -464,7 +474,7 @@ test("a heading revealed at the reading line becomes current despite a fractiona
   assert.equal(entries()[3].getAttribute("aria-current"), "location");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S6
 test("a comment chip and its hidden body stay out of the entry label, a TODO word chip stays in", () => {
   const { content, toc, flush, entries } = setup({ toc: true });
   const comment = new FakeElement("span", ["okf-comment"]);
@@ -483,7 +493,7 @@ test("a comment chip and its hidden body stay out of the entry label, a TODO wor
   assert.deepEqual(entries().map((entry) => entry.textContent), ["Plan", "Ship TODO"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S7
 test("with the TOC on, the rail has one tick per heading and marks the section at the reading line", () => {
   const { content, toc, flush, rail, ticks, root } = setup({ toc: true });
   for (const [tag, text] of [["h1", "Title"], ["h2", "Part"], ["h4", "Deep"], ["h5", "Too deep"]]) {
@@ -499,7 +509,8 @@ test("with the TOC on, the rail has one tick per heading and marks the section a
   assert.ok(ticks()[0].hasAttribute("data-sphinx-preview-toc-tick-current"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S7
 test("hover or focus on the rail opens the overlay, which closes 300 ms after the pointer left", () => {
   const { content, toc, flush, rail, nav, advance } = setup({ toc: true });
   content.appendChild(heading("h1", "Title"));
@@ -525,7 +536,8 @@ test("hover or focus on the rail opens the overlay, which closes 300 ms after th
   assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S7
 test("Escape closes the overlay at once and puts the focus back on the rail", () => {
   const { content, toc, flush, rail, nav, key } = setup({ toc: true });
   content.appendChild(heading("h1", "Title"));
@@ -548,7 +560,8 @@ test("Escape closes the overlay at once and puts the focus back on the rail", ()
   assert.equal(rail().focused, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S9
 test("Escape typed elsewhere than on the overlay is left to the handler that owns it", () => {
   const { content, toc, flush, rail, nav, key, body } = setup({ toc: true });
   const field = new FakeElement("textarea");
@@ -574,7 +587,7 @@ test("Escape typed elsewhere than on the overlay is left to the handler that own
   assert.equal(nav().hasAttribute("data-sphinx-preview-toc-overlay"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S7
 test("a click on a tick goes to that heading", () => {
   const { content, toc, flush, ticks, scrolled } = setup({ toc: true });
   const first = heading("h1", "Title");
@@ -588,7 +601,8 @@ test("a click on a tick goes to that heading", () => {
   assert.deepEqual(scrolled, [second]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S8
 test("closing the TOC closes the overlay and an entry click in the overlay closes it", () => {
   const { content, toc, flush, rail, nav, entries, button } = setup({ toc: true });
   content.appendChild(heading("h1", "Title"));
@@ -637,7 +651,8 @@ function listChapter(content: FakeElement): void {
   content.appendChild(second);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S2
 test("with listItemsInToc on, top-level list items are listed one level below their heading, without a tick", () => {
   const { content, toc, flush, entries, ticks, scrolled } = setup({ toc: true, listItemsInToc: true });
   listChapter(content);
@@ -660,7 +675,7 @@ test("with listItemsInToc on, top-level list items are listed one level below th
   assert.equal(scrolled.at(-1)?.tagName, "li", "a click goes to the item");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S3
 test("a list item is a leaf: a deeper heading after it belongs to the heading before the item", () => {
   const { content, toc, flush, entries, twisties } = setup({ toc: true, listItemsInToc: true });
   const before = new FakeElement("ul");
@@ -689,7 +704,7 @@ test("a list item is a leaf: a deeper heading after it belongs to the heading be
   assert.deepEqual(entries().map(hiddenOf), [false, false, false, true, true, true]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S2
 test("the generated [TOC] list, footnotes, table cells and hidden panels are not listed", () => {
   const { content, toc, flush, entries } = setup({ toc: true, listItemsInToc: true });
   content.appendChild(heading("h1", "Top"));
@@ -726,7 +741,7 @@ function fakeOf(element: MappedElement): FakeElement {
   return copy;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S2
 test("on a rendered page, the items of the [TOC] list, of the footnotes and of a table cell are not listed", async () => {
   const source = [
     "# Top", "", "[TOC]", "", "## Second", "",
@@ -750,8 +765,9 @@ test("on a rendered page, the items of the [TOC] list, of the footnotes and of a
     "the headings and the items of the document's own list only");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040#S3
 test("with listItemsInToc off or absent, the default, the TOC lists the headings only", () => {
   for (const options of [{ toc: true, listItemsInToc: false }, { toc: true }]) {
     const { content, toc, flush, entries } = setup(options);
@@ -762,7 +778,7 @@ test("with listItemsInToc off or absent, the default, the TOC lists the headings
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-138#S4
 test("at a list item, the TOC marks the item and the rail marks the tick of its section", () => {
   const { content, toc, window, flush, entries, ticks } = setup({ toc: true, listItemsInToc: true });
   content.appendChild(heading("h1", "Braking"));

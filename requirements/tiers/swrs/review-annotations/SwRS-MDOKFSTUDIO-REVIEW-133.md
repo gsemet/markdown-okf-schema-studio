@@ -16,6 +16,25 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-012
 depends_on: []
+scenarios:
+- id: S1
+  title: One-line block comment
+- id: S2
+  title: Multi-line block comment
+- id: S3
+  title: Inline comment
+- id: S4
+  title: Comment text is never rendered as HTML
+- id: S5
+  title: Several comments and comments next to lists
+- id: S6
+  title: Tool comments get no chip
+- id: S7
+  title: Context tags with a comment inside
+- id: S8
+  title: Chips after the sanitizer
+- id: S9
+  title: An HTML comment inside a tab item keeps its own source lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,19 +53,19 @@ default_owner_email: gaetan@xeberon.net
 
 When a document holds an HTML comment that is not a tool comment, the renderer SHALL write a gray chip labelled comment at the place of the comment, with the comment text kept as a text node in a hidden body and never written as HTML.
 
-### Scenario (nominal): One-line block comment
+### Scenario S1 (nominal): One-line block comment
 
 - GIVEN a comment on line 3 between two paragraphs
 - WHEN the document is rendered
 - THEN a block wrapper with data-line 3 and data-end-line 3 holds a chip reading comment, with role button, tabindex 0 and the comment text as title, and a hidden body with the same text
 
-### Scenario (nominal): Multi-line block comment
+### Scenario S2 (nominal): Multi-line block comment
 
 - GIVEN a comment from line 1 to line 4
 - WHEN the document is rendered
 - THEN the wrapper spans lines 1 to 4 and the chip title keeps both text lines
 
-### Scenario (nominal): Inline comment
+### Scenario S3 (nominal): Inline comment
 
 | Input | Outcome |
 | --- | --- |
@@ -54,14 +73,14 @@ When a document holds an HTML comment that is not a tool comment, the renderer S
 | A heading "## Plan `<!-- TODO fix later -->`" | The heading holds the chip and its attributes are those of the heading without the comment |
 | A comment in a table cell | A gray chip is written inside the cell (untested) |
 
-### Scenario (refusal): Comment text is never rendered as HTML
+### Scenario S4 (refusal): Comment text is never rendered as HTML
 
 | Input | Outcome |
 | --- | --- |
 | A comment holding an img tag with an onerror attribute | The hidden body holds the tag as text and no element is created from it |
 | A comment directly followed by a paragraph with markup | The markup is rendered as usual and not inside the comment |
 
-### Scenario (nominal): Several comments and comments next to lists
+### Scenario S5 (nominal): Several comments and comments next to lists
 
 | Input | Outcome |
 | --- | --- |
@@ -69,7 +88,7 @@ When a document holds an HTML comment that is not a tool comment, the renderer S
 | Comments before a list, between two items and after the list | Each comment is a chip labelled comment, and the TODO comment is a green TODO chip, never a chip labelled with the comment opener |
 | A raw HTML table next to comments | The table is unchanged |
 
-### Scenario (refusal): Tool comments get no chip
+### Scenario S6 (refusal): Tool comments get no chip
 
 | Input | Outcome |
 | --- | --- |
@@ -77,21 +96,21 @@ When a document holds an HTML comment that is not a tool comment, the renderer S
 | A markdownlint comment and a note on one line | Only the note gets a chip (untested) |
 | A comment starting with another word | A chip is written |
 
-### Scenario (boundary): Context tags with a comment inside
+### Scenario S7 (boundary): Context tags with a comment inside
 
 | Input | Outcome |
 | --- | --- |
 | A context block holding inner TODO text | The admonition is produced and holds one chip |
 | A context block holding a comment | The admonition holds the comment wrapper |
 
-### Scenario (boundary): Chips after the sanitizer
+### Scenario S8 (boundary): Chips after the sanitizer
 
 | Input | Outcome |
 | --- | --- |
 | A rendered comment chip is sanitized | The chip keeps role button, tabindex 0 and its title |
 | A chip with an onclick attribute is sanitized | The attribute is removed (deduced from the test name, not asserted separately) |
 
-### Scenario (boundary): An HTML comment inside a tab item keeps its own source lines
+### Scenario S9 (boundary): An HTML comment inside a tab item keeps its own source lines
 
 - GIVEN a tab item that holds a paragraph and the comment `<!-- review: inner -->` on line 5
 - WHEN the document is rendered

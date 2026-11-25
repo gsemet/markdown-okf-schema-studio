@@ -13,20 +13,20 @@ function runsAttribute(html: string): string | undefined {
   return /<div hidden data-okf-blank-runs="([^"]*)"><\/div>$/u.exec(html)?.[1];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("the rendered content ends with a hidden list of the blank runs of the source", async () => {
   const { html } = await render("# Title\n\nA\n\n\n\nB\n\n\nC\n");
   assert.equal(runsAttribute(html), "5-6 9-9");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a source with no run has the list element with an empty value, and every render carries it", async () => {
   assert.equal(runsAttribute((await render("A\n\nB\n")).html), "");
   assert.equal(runsAttribute((await render("")).html), "");
   assert.equal(runsAttribute((await render("---\ntitle: x\n---\n\n\nbody\n")).html), "5-5");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("an edit changes the list: the next render of the content patch carries the new runs", async () => {
   const before = await render("A\n\n\nB\n");
   const after = await render("A\n\nB\n");
@@ -34,26 +34,29 @@ test("an edit changes the list: the next render of the content patch carries the
   assert.equal(runsAttribute(after.html), "");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("the list names the shown blank lines: a line of text then six blank lines gives 2-7, a single shown line L-L", async () => {
   assert.equal(runsAttribute((await render("Text.\n\n\n\n\n\n\n")).html), "2-7");
   assert.equal(runsAttribute((await render("a\n\n\nb\n")).html), "3-3");
   assert.equal(runsAttribute((await render("\n\na\n")).html), "1-2", "at the top of a file every blank line shows");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
 test("a blank run in a code fence is not a run of the source's blocks", async () => {
   const { html } = await render("```\na\n\n\nb\n```\n");
   assert.ok(runsAttribute(html) !== undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("a quote run and a plain run are in the list, sorted by line", async () => {
   const { html } = await render("> a\n>\n>\n> b\n\n\nc\n");
   assert.equal(runsAttribute(html), "3-3 6-6");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("a definition and a footnote carry their page-only line, and a quote directive its end line", async () => {
   const { html } = await render("Term\n: one\n\n\n: two\n\nA[^x]\n\n[^x]: note\n");
   assert.match(html, /<dd[^>]*data-okf-definition-line="2"/u);
@@ -77,7 +80,8 @@ const holds = (element: HtmlElement | undefined, line: number, endLine: number, 
   return edges ? first <= line && endLine <= last : first < line && endLine < last;
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("a quote holds its run up to its edges: in its middle, at its start and at the end of the text", async () => {
   const { html } = await render("> a\n>\n>\n> b\n\n>\n>\n> c\n\nx\n>\n>\n");
   assert.equal(runsAttribute(html), "3-3 7-7 12-12");
@@ -96,7 +100,7 @@ async function containerOf(text: string, selector: (e: HtmlElement) => boolean):
   return element;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
 test("an alert holds its run up to its edges", async () => {
   const alert = await containerOf("> [!NOTE]\n>\n>\n> x\n", (e) => e.tagName === "aside");
   assert.ok(attribute(alert, "data-okf-github-alert"));
@@ -104,7 +108,7 @@ test("an alert holds its run up to its edges", async () => {
   assert.ok(holds(alert, 2, 3, true));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("an admonition, a closed dropdown and a context-tag panel hold their run, with their mapped paragraphs", async () => {
   const note = await containerOf("```{note}\na\n\n\nb\n```\n", (e) => e.tagName === "aside");
   assert.deepEqual(rangeOf(note), [1, 6]);
@@ -123,7 +127,7 @@ test("an admonition, a closed dropdown and a context-tag panel hold their run, w
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S4
 test("a quote directive, a figure and a card hold their run", async () => {
   const quote = await containerOf("```{epigraph}\nq1\n\n\nq2\n```\n", (e) => e.tagName === "blockquote");
   assert.deepEqual(rangeOf(quote), [1, 6]);
@@ -136,7 +140,8 @@ test("a quote directive, a figure and a card hold their run", async () => {
   assert.ok(holds(card, 3, 4, false));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S5
 test("footnote paragraphs are mapped blocks inside the footnotes section, which carries no line", async () => {
   const { html } = await render("A[^a] B[^b] C[^c]\n\n[^a]: f1\n\n\n    f2\n\n[^b]:\n\n\n    body\n\n[^c]: f3\n");
   assert.equal(runsAttribute(html), "5-5 10-10");

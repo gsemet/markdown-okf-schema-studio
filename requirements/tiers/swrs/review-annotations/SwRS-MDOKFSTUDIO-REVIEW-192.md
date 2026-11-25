@@ -24,6 +24,17 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Blank neighbours
+- id: S2
+  title: Position of the thread in the file
+- id: S3
+  title: Lines that are not exactly one thread
+- id: S4
+  title: Valid delete message
+- id: S5
+  title: Invalid delete message
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,13 +57,13 @@ supersedes:
 
 When the host applies a delete of an inline thread, the extension SHALL remove the lines of the thread and one surrounding blank line when both neighbours are blank or missing, remove the line break before a thread that ends the file, and change nothing else; a previewThreadDelete message is dropped unless it has an edit id and integer lines with 1 <= line <= endLine.
 
-### Scenario (nominal): Blank neighbours
+### Scenario S1 (nominal): Blank neighbours
 
 - GIVEN a thread between two blank lines
 - WHEN it is deleted
 - THEN the thread and one blank line go and no double gap is left
 
-### Scenario (boundary): Position of the thread in the file
+### Scenario S2 (boundary): Position of the thread in the file
 
 | Input | Outcome |
 | --- | --- |
@@ -60,19 +71,19 @@ When the host applies a delete of an inline thread, the extension SHALL remove t
 | A thread on the last lines of the file | the line break before it goes: the file ends with the text before it and no trailing blank line is left (the edit range ends at the end of the file and starts at the end of the previous line) |
 | A thread on the first lines of the file | the thread and the blank line after it go |
 
-### Scenario (refusal): Lines that are not exactly one thread
+### Scenario S3 (refusal): Lines that are not exactly one thread
 
 - GIVEN lines that hold ordinary text, a part of the thread, or the thread and more
 - WHEN a delete is asked
 - THEN the answer is "The thread is no longer in the source. Refresh the preview." and the document is unchanged, as for a reply (see SwRS-MDOKFSTUDIO-REVIEW-186)
 
-### Scenario (nominal): Valid delete message
+### Scenario S4 (nominal): Valid delete message
 
 - GIVEN a previewThreadDelete message with an edit id and lines 5 and 8
 - WHEN the message is validated
 - THEN it is accepted
 
-### Scenario (refusal): Invalid delete message
+### Scenario S5 (refusal): Invalid delete message
 
 | Input | Outcome |
 | --- | --- |

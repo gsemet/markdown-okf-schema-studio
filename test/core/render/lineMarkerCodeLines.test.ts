@@ -59,7 +59,7 @@ function assertSpansMatchSource(source: string, block: CodeBlock, firstLine: num
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a backtick fence and a tilde fence map their lines to spans, and a code-block with options has no end line", async () => {
   const source = [
     "# Title", // 1
@@ -95,7 +95,7 @@ test("a backtick fence and a tilde fence map their lines to spans, and a code-bl
   assert.equal(blocks[2]!.spans.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a fence line and a line before the first span have no span", () => {
   assert.equal(codeSpanIndex(2, 7, 7), undefined);
   assert.equal(codeSpanIndex(2, 7, 4), undefined);

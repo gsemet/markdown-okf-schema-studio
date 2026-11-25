@@ -16,6 +16,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-016
 depends_on: []
+scenarios:
+- id: S1
+  title: Centre a column
+- id: S2
+  title: Same alignment
+- id: S3
+  title: Width of the delimiter cell and replacing an alignment
+- id: S4
+  title: Caret in any row, with or without edge pipes
+- id: S5
+  title: Outside a pipe table or without a valid choice
+- id: S6
+  title: "Caret in the text after a row's closing pipe"
+- id: S7
+  title: The menu of Left, Center and Right
+- id: S8
+  title: Strict mode
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,17 +54,17 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer runs Column alignment with left, center or right, the extension SHALL rewrite only the cell of the delimiter row that belongs to the caret's column, with a colon on the left (left), on both sides (center) or on the right (right) of its dashes, keeping at least three dashes.
 
-### Scenario (nominal): Centre a column
+### Scenario S1 (nominal): Centre a column
 - GIVEN the caret in the second column of a pipe table whose delimiter cell is ---
 - WHEN Column alignment center is run
 - THEN only the second delimiter cell changes to :---: and the other lines are unchanged
 
-### Scenario (boundary): Same alignment
+### Scenario S2 (boundary): Same alignment
 - GIVEN a column already aligned left
 - WHEN left is run again
 - THEN no edit is produced
 
-### Scenario (boundary): Width of the delimiter cell and replacing an alignment
+### Scenario S3 (boundary): Width of the delimiter cell and replacing an alignment
 | Delimiter cell and choice | Outcome |
 | --- | --- |
 | a longer cell "\|----------\|", left | "\|:---------\|" (a dash is given up, never below three dashes) |
@@ -55,7 +72,7 @@ When the writer runs Column alignment with left, center or right, the extension 
 | a column aligned right, left | the marker becomes :--- with no leftover colon |
 | a short cell ":--", right | "---:" (the cell grows to three dashes) |
 
-### Scenario (nominal): Caret in any row, with or without edge pipes
+### Scenario S4 (nominal): Caret in any row, with or without edge pipes
 - GIVEN the caret in a body cell, and in another run in the delimiter row
 - WHEN Column alignment is run
 - THEN the column of the caret is aligned
@@ -63,24 +80,24 @@ When the writer runs Column alignment with left, center or right, the extension 
 - WHEN Column alignment is run
 - THEN the second delimiter cell becomes ---:
 
-### Scenario (refusal): Outside a pipe table or without a valid choice
+### Scenario S5 (refusal): Outside a pipe table or without a valid choice
 | Input | Outcome |
 | --- | --- |
 | the caret in a paragraph | no edit is produced |
 | the caret in a table and the choice "justify" | no edit is produced |
 | the caret in a table and no choice | no edit is produced |
 
-### Scenario (boundary): Caret in the text after a row's closing pipe
+### Scenario S6 (boundary): Caret in the text after a row's closing pipe
 - GIVEN the caret in the tail of a row, the text after the closing pipe of its last column (see SwRS-MDOKFSTUDIO-TABLE-094)
 - WHEN a column alignment is chosen
 - THEN no edit is produced: no column is under the caret
 
-### Scenario (nominal): The menu of Left, Center and Right
+### Scenario S7 (nominal): The menu of Left, Center and Right
 - GIVEN the caret in a pipe table
 - WHEN the writer presses Column alignment and chooses Center
 - THEN the menu lists Left, Center and Right (option values left, center and right) and the delimiter cell of the caret's column is rewritten as in the "Centre a column" scenario
 
-### Scenario (boundary): Strict mode
+### Scenario S8 (boundary): Strict mode
 - GIVEN the strict mode
 - WHEN the buttons are listed
 - THEN there is no Column alignment button

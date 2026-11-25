@@ -18,6 +18,23 @@ depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-TRUST-005
+scenarios:
+- id: S1
+  title: Alt+Up and Alt+Down move the whole selection
+- id: S2
+  title: The arrows under the last selected block move the whole selection
+- id: S3
+  title: A block outside the selection moves alone
+- id: S4
+  title: The moved selection is selected again at its new place
+- id: S5
+  title: At the ends of the document the selection does not move
+- id: S6
+  title: A repeated key moves once and a refusal keeps the selection
+- id: S7
+  title: The host swaps a span of blocks with the neighbouring block
+- id: S8
+  title: The host refuses a span that cannot move
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,13 +55,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks selected and the focus on the selection, a bar of it or the page, the page SHALL post one previewBlockMove with the line span of the selection and the neighbouring block.
 
-### Scenario (nominal): Alt+Up and Alt+Down move the whole selection
+### Scenario S1 (nominal): Alt+Up and Alt+Down move the whole selection
 
 - GIVEN two selected blocks with a block below and a block above
 - WHEN the writer presses Alt+ArrowDown, or Alt+ArrowUp
 - THEN previewBlockMove carries the first line of the first selected block, the last line of the last one, the neighbouring block and the direction (down, or up); one message is posted with the span as the moving range
 
-### Scenario (nominal): The arrows under the last selected block move the whole selection
+### Scenario S2 (nominal): The arrows under the last selected block move the whole selection
 
 | Input | Outcome |
 | --- | --- |
@@ -53,14 +70,14 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks selected and the 
 | Blocks are selected | The two arrows of the bar under the last selected block are labelled "Move the selected blocks up" and "Move the selected blocks down" and carry the same text as a tooltip |
 | The selection is cleared | The arrows carry "Move the block above up" and "Move the block above down" again, without titles |
 
-### Scenario (nominal): A block outside the selection moves alone
+### Scenario S3 (nominal): A block outside the selection moves alone
 
 | Input | Outcome |
 | --- | --- |
 | Two blocks selected and a third, not selected, block focused; Alt+ArrowDown | Only the third block is moved |
 | Nothing selected; Alt+ArrowDown on a focused block | That block moves as with its arrow button |
 
-### Scenario (boundary): The moved selection is selected again at its new place
+### Scenario S4 (boundary): The moved selection is selected again at its new place
 
 | Input | Outcome |
 | --- | --- |
@@ -69,14 +86,14 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks selected and the 
 | A full reload replaces the page after the move, the new page renders a newer revision than the saved one, and the saved state (pendingMoveSelection) is less than five seconds old (5000 ms) | The moved blocks are selected |
 | A saved selection with the same revision, or older than five seconds | Nothing is selected and the saved entry is dropped |
 
-### Scenario (refusal): At the ends of the document the selection does not move
+### Scenario S5 (refusal): At the ends of the document the selection does not move
 
 | Input | Outcome |
 | --- | --- |
 | A selection that starts at the first block; Alt+ArrowUp | Nothing is posted and the selection stays |
 | An included block below the selection; Alt+ArrowDown | Nothing is posted |
 
-### Scenario (refusal): A repeated key moves once and a refusal keeps the selection
+### Scenario S6 (refusal): A repeated key moves once and a refusal keeps the selection
 
 | Input | Outcome |
 | --- | --- |
@@ -85,13 +102,13 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks selected and the 
 | The host answers the selection move with ok false and a reason | The selection is kept and the chord can be pressed again |
 | The request of a selection move was dropped and the flight is forgotten | No pending mark is left on the bar |
 
-### Scenario (nominal): The host swaps a span of blocks with the neighbouring block
+### Scenario S7 (nominal): The host swaps a span of blocks with the neighbouring block
 
 - GIVEN blocks A, B and C with A and B as the moving span
 - WHEN the host receives the block move down and plans it
 - THEN C comes first, then A and B with their inner blank line unchanged; the whole span is swapped with the neighbouring block, the separators inside the span stay untouched and a span keeps CRLF line breaks inside and around it
 
-### Scenario (refusal): The host refuses a span that cannot move
+### Scenario S8 (refusal): The host refuses a span that cannot move
 
 | Input | Outcome |
 | --- | --- |

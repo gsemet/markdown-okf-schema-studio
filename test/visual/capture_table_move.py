@@ -53,8 +53,8 @@ PATCH = """() => {
 }"""
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 def check_table_move(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """A body row dragged below the last one is saved in the new order; when the host renders the
   page again, the table breaks out of the margin anew and every handle sits on its real edges."""

@@ -15,6 +15,27 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-002
+scenarios:
+- id: S1
+  title: Dragging the handle of a body row
+- id: S2
+  title: Keyboard move with Alt+Up and Alt+Down
+- id: S3
+  title: "Moving a row of a `{list-table}`"
+- id: S4
+  title: A row with text after its closing pipe
+- id: S5
+  title: The handle beside its row
+- id: S6
+  title: Tables and states without a row move
+- id: S7
+  title: A cell editor of the table is open
+- id: S8
+  title: The source of the table is refused or is not a pipe table or list-table
+- id: S9
+  title: One edit, one undo
+- id: S10
+  title: A table inside a quote or an admonition
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,7 +60,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer drags the handle of a body row of a pipe table or a list-table in edit mode onto another row, or presses Alt+Up or Alt+Down on that handle, the extension SHALL move that row to the new position as one source edit and keep the header rows in place.
 
-### Scenario (nominal): Dragging the handle of a body row
+### Scenario S1 (nominal): Dragging the handle of a body row
 
 | Input | Outcome |
 | --- | --- |
@@ -50,7 +71,7 @@ When the writer drags the handle of a body row of a pipe table or a list-table i
 | The pointer is held anywhere over the body rows of the table or over the strip of the handles left of the table (over another row's handle too) | The marker shows on the nearest gap: the line above the row when the pointer is on its upper half, below it on its lower half; it follows the pointer from row to row and a drop there moves the row |
 | The pointer is held over a header row, or leaves the table and its handle strip | No marker shows; a drop there requests nothing and the document is not edited |
 
-### Scenario (nominal): Keyboard move with Alt+Up and Alt+Down
+### Scenario S2 (nominal): Keyboard move with Alt+Up and Alt+Down
 
 | Input | Outcome |
 | --- | --- |
@@ -61,7 +82,7 @@ When the writer drags the handle of a body row of a pipe table or a list-table i
 
 The chord is not also read as the move of the whole table block.
 
-### Scenario (nominal): Moving a row of a `{list-table}`
+### Scenario S3 (nominal): Moving a row of a `{list-table}`
 
 | Input | Outcome |
 | --- | --- |
@@ -70,14 +91,14 @@ The chord is not also read as the move of the whole table block.
 | A list-table in a container (indented, or fenced with colons or backticks) | The move keeps the indentation, the fence style and the line endings of the source |
 | A list-table written with an option block that is not readable (a non-numeric `:header-rows:`), or text between the options and the first item | The move is refused and the document is not edited |
 
-### Scenario (nominal): A row with text after its closing pipe
+### Scenario S4 (nominal): A row with text after its closing pipe
 
 | Input | Outcome |
 | --- | --- |
 | A pipe table row with a token after its closing pipe (`\| alpha \| 1 \| ^row-a`), moved by its handle or by Alt+Up or Alt+Down | The row moves with its tail as one line; the handles of such a table work as those of any pipe table |
 | A new row inserted after that row, or a row deleted | The new row has no tail; a deleted row takes its tail with it |
 
-### Scenario (nominal): The handle beside its row
+### Scenario S5 (nominal): The handle beside its row
 
 | Input | Outcome |
 | --- | --- |
@@ -90,7 +111,7 @@ The chord is not also read as the move of the whole table block.
 | Edit mode switched off | The handles are gone and a pushed table returns to its place |
 | A click on a handle | No cell editor opens |
 
-### Scenario (refusal): Tables and states without a row move
+### Scenario S6 (refusal): Tables and states without a row move
 
 | Input | Outcome |
 | --- | --- |
@@ -100,27 +121,27 @@ The chord is not also read as the move of the whole table block.
 | Edit mode off | No handle exists, so neither a drag nor a key moves a row |
 | A drop on the header row, or a drag that ends outside the body rows | Nothing is requested from the host and the document is not edited |
 
-### Scenario (nominal): A cell editor of the table is open
+### Scenario S7 (nominal): A cell editor of the table is open
 
 | Input | Outcome |
 | --- | --- |
 | A cell editor of the pipe table is open (its source has arrived) and the handle of a body row is dragged, or Alt+Up or Alt+Down is pressed on it | The text of the open cell is part of the table that moves; the row is moved in the editor's table model and the editor is saved and closed as one edit, with no request for the table source |
 | The same drag on the handle of a row of a table the open editor does not belong to | The drag is cancelled |
 
-### Scenario (refusal): The source of the table is refused or is not a pipe table or list-table
+### Scenario S8 (refusal): The source of the table is refused or is not a pipe table or list-table
 
 | Input | Outcome |
 | --- | --- |
 | The host answers the request for the table source with an error (a stale preview, another block being edited) | No edit is saved and the page tells the host the move is closed |
 | The source the host returns is neither a pipe table nor a `{list-table}` that can be read as rows, or the move is refused by the table model (header row, index outside the body rows, same place) | No edit is saved and the page tells the host the move is closed |
 
-### Scenario (boundary): One edit, one undo
+### Scenario S9 (boundary): One edit, one undo
 
 - GIVEN a body row moved by drag or by key
 - WHEN the move is saved
 - THEN the page posts one `previewEditSave` of the whole table text (final) after one `previewEditOpen`, opens no cell editor, and the editor's undo restores the previous order in one step
 
-### Scenario (boundary): A table inside a quote or an admonition
+### Scenario S10 (boundary): A table inside a quote or an admonition
 
 | Input | Outcome |
 | --- | --- |

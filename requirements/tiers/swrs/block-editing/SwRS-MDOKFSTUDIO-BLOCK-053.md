@@ -19,6 +19,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-006
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Nothing autosaved
+- id: S2
+  title: After an autosave
+- id: S3
+  title: The host restores the original text
+- id: S4
+  title: Cancel during a final save closes the editor and the save completes
+- id: S5
+  title: The host ends a detached save with an answer
+- id: S6
+  title: Escape during an IME composition
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,23 +61,23 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses Cancel or Escape in a block editor, the page SHALL close the editor, posting previewEditCancel only when an autosave already reached the document, after which the host writes the original text of the block back in one edit. While the final save of the editor is in flight, the page SHALL close the editor with previewEditClosed and no previewEditCancel, and the save SHALL complete: the text the writer finished stays in the document.
 
-### Scenario (nominal): Nothing autosaved
+### Scenario S1 (nominal): Nothing autosaved
 - GIVEN an editor with typed text that no autosave has posted
 - WHEN the writer presses Escape
 - THEN the editor closes, no save and no cancel is posted and a later blur sends nothing
 
-### Scenario (nominal): After an autosave
+### Scenario S2 (nominal): After an autosave
 - GIVEN an editor whose text was autosaved
 - WHEN the writer presses Cancel
 - THEN the editor closes and previewEditCancel is posted with the editor id and its lines
 
-### Scenario (nominal): The host restores the original text
+### Scenario S3 (nominal): The host restores the original text
 | Input | Outcome |
 | --- | --- |
 | A matching previewEditCancel for a held block edit whose autosave changed the block | The block text in the document equals the original text and the host edit ends |
 | A matching previewEditCancel for a held insertion whose autosave inserted a new block | The inserted text is removed again |
 
-### Scenario (nominal): Cancel during a final save closes the editor and the save completes
+### Scenario S4 (nominal): Cancel during a final save closes the editor and the save completes
 - GIVEN an editor that posted its final save and has not been answered
 - WHEN the writer presses Cancel or Escape
 - THEN the editor closes, previewEditClosed is posted with the editor id, no previewEditCancel and no second final save are posted, and the text finished stays in the document
@@ -73,14 +86,14 @@ When a writer presses Cancel or Escape in a block editor, the page SHALL close t
 - WHEN the writer presses Cancel
 - THEN the editor cancels as usual
 
-### Scenario (nominal): The host ends a detached save with an answer
+### Scenario S5 (nominal): The host ends a detached save with an answer
 | Input | Outcome |
 | --- | --- |
 | A previewEditClosed with detached for the editor of a held edit whose final save is being written | The edit is marked detached, the page editor lock is cleared and the write goes on |
 | The write of that save lands | previewEditSource with done and renderFollows is posted when a render follows, and with done alone when nothing renders |
 | A detached edit with nothing being written | The edit completes at once and answers with done |
 
-### Scenario (boundary): Escape during an IME composition
+### Scenario S6 (boundary): Escape during an IME composition
 | Input | Outcome |
 | --- | --- |
 | Escape while an input method composition is running in the text box | The editor stays open and no save or cancel is posted |

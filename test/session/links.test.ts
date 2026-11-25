@@ -16,7 +16,8 @@ import type { PreviewSession } from "../../src/session/previewSession";
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073#S1
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073#S4
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S6
 test("a frontmatter link finds its marker with the identity of the text it was analysed from", async () => {
   const root = path.join(os.tmpdir(), "okf-links-snapshot");
   const documentPath = path.join(root, "doc.md");

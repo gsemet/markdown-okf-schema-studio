@@ -21,27 +21,29 @@ function pattern(query: string, options: Partial<FindOptions> = {}): RegExp {
 const spans = (text: string, regex: RegExp): Array<[number, number]> =>
   findInText(text, regex).map((match) => [match.start, match.end]);
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S7
 test("a literal query finds every occurrence, ignoring case unless asked", () => {
   assert.deepEqual(spans("Studio studio STUDIO", pattern("studio")), [[0, 6], [7, 13], [14, 20]]);
   assert.deepEqual(spans("Studio studio STUDIO", pattern("studio", { matchCase: true })), [[7, 13]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S6
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S7
 test("regular expression characters of a literal query are plain text", () => {
   assert.deepEqual(spans("a.b axb (a.b)", pattern("a.b")), [[0, 3], [9, 12]]);
   assert.deepEqual(spans("1+1=2 and 1/1", pattern("1+1")), [[0, 3]]);
   assert.deepEqual(spans("a-b", pattern("a-b")), [[0, 3]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S2
 test("whole word does not match inside a longer word", () => {
   const word = pattern("art", { wholeWord: true });
   assert.deepEqual(spans("part arts art", word), [[10, 13]]);
   assert.deepEqual(spans("éart art2 art", word), [[10, 13]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S6
 test("a regular expression query is used as written, and an invalid one answers with the reason", () => {
   assert.deepEqual(spans("v1 v22 vx", pattern("v\\d+", { regex: true })), [[0, 2], [3, 6]]);
   const broken = compileFind("(unclosed", { ...plain, regex: true });
@@ -50,13 +52,15 @@ test("a regular expression query is used as written, and an invalid one answers 
   assert.equal(compileFind("", plain), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S2
 test("empty matches are skipped and the number of matches is capped", () => {
   assert.deepEqual(spans("baab", pattern("a*", { regex: true })), [[1, 3]]);
   assert.equal(findInText("aaaaaa", pattern("a"), 3).length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("a regular expression replacement expands groups, the match and the dollar sign", () => {
   const [match] = findInText("2026-10-27", pattern("(\\d+)-(\\d+)-(?<day>\\d+)", { regex: true }));
   assert.ok(match);
@@ -65,7 +69,7 @@ test("a regular expression replacement expands groups, the match and the dollar 
   assert.equal(expandReplacement("$4 $<nope>", match, true), "$4 $<nope>");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
 test("a literal replacement is inserted as typed, and a two-digit group falls back to one digit", () => {
   const [match] = findInText("ab", pattern("(a)(b)", { regex: true }));
   assert.ok(match);

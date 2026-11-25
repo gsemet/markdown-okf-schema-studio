@@ -33,7 +33,7 @@ function top(overlay: RuntimeElement | undefined): string {
   return overlay?.style.getPropertyValue("top") ?? "";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a requested line gets one decorative overlay at its block and the page scrolls to it silently", () => {
   const harness = createRuntimeHarness();
   const before = harness.messages.length;
@@ -56,7 +56,8 @@ test("a requested line gets one decorative overlay at its block and the page scr
   assert.equal(harness.messages.slice(before).some((message) => message.type === "previewScroll"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a line outside every block takes the nearest block, and a later line of a block takes the block top", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 75);
@@ -67,7 +68,7 @@ test("a line outside every block takes the nearest block, and a later line of a 
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a code line takes its span, counted back from the closing fence", () => {
   const harness = createRuntimeHarness();
   const block = harness.mappings[1]!;
@@ -84,7 +85,7 @@ test("a code line takes its span, counted back from the closing fence", () => {
   assert.equal(top(overlays(harness)[0]), "560px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a closed details block holding the line is opened first", () => {
   const harness = createRuntimeHarness();
   const details = new RuntimeElement({}, harness.windowState, 400, 40, "details");
@@ -96,7 +97,7 @@ test("a closed details block holding the line is opened first", () => {
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S2
 test("the marker stays when the reader scrolls and is placed again after a layout change", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);
@@ -111,7 +112,7 @@ test("the marker stays when the reader scrolls and is placed again after a layou
   assert.equal(top(overlays(harness)[0]), "640px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("a pointer press, an edit or a new line removes or moves the marker", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);
@@ -127,7 +128,7 @@ test("a pointer press, an edit or a new line removes or moves the marker", () =>
   assert.equal(harness.mappings[2]!.getAttribute("aria-current"), "location");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-180
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-180#S2
 test("in edit mode the marker opens no editor and the overlay is never an edit target", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -140,14 +141,14 @@ test("in edit mode the marker opens no editor and the overlay is never an edit t
   assert.equal(overlays(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a page with no mapped block draws nothing", () => {
   const harness = createRuntimeHarness({ emptyBody: true });
   reveal(harness, 5);
   assert.equal(overlays(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a code block with no end line (a code-block directive) takes the block top, not a span", () => {
   const harness = createRuntimeHarness({ secondBlockEndLine: 50 });
   const block = harness.mappings[1]!;
@@ -161,7 +162,7 @@ test("a code block with no end line (a code-block directive) takes the block top
   assert.equal(top(overlays(harness)[0]), "500px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a table line marks the top of the table", () => {
   const harness = createRuntimeHarness();
   const table = new RuntimeElement({
@@ -177,7 +178,7 @@ test("a table line marks the top of the table", () => {
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a front matter line marks the top of the front matter block", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 120, firstMappedSourceLine: 8 });
   reveal(harness, 4);
@@ -191,7 +192,7 @@ function child(harness: RuntimeHarness, parent: RuntimeElement, attributes: Reco
   return element;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a pipe table row line marks that row, and the delimiter line marks the header row", () => {
   const harness = createRuntimeHarness({ secondBlockEndLine: 60 });
   const table = harness.mappings[1]!;
@@ -205,7 +206,7 @@ test("a pipe table row line marks that row, and the delimiter line marks the hea
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a front matter line marks its property row, a fence or a comment line the section top", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 120, firstMappedSourceLine: 8 });
   const section = harness.mappings[0]!;
@@ -222,7 +223,7 @@ test("a front matter line marks its property row, a fence or a comment line the 
   assert.equal(top(overlays(harness)[0]), "0px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("a re-render of the content places the marker again on its line", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);
@@ -233,7 +234,7 @@ test("a re-render of the content places the marker again on its line", () => {
   assert.equal(top(overlays(harness)[0]), "700px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S2
 test("opening a block editor removes the marker", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);
@@ -244,7 +245,7 @@ test("opening a block editor removes the marker", () => {
   assert.equal(harness.mappings[1]!.getAttribute("aria-current"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("opening a table cell editor removes the marker", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);
@@ -254,7 +255,7 @@ test("opening a table cell editor removes the marker", () => {
   assert.equal(overlays(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("a source edit the page posts removes the marker", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);
@@ -265,7 +266,7 @@ test("a source edit the page posts removes the marker", () => {
   assert.equal(harness.mappings[1]!.getAttribute("aria-current"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("the editor selection mark and the line marker each keep their own aria-current", () => {
   const harness = createRuntimeHarness({ markEditorSelection: true });
   reveal(harness, 50);
@@ -282,7 +283,7 @@ test("the editor selection mark and the line marker each keep their own aria-cur
   assert.equal(harness.mappings[1]!.getAttribute("data-sphinx-line-marker"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a line under a folded heading unfolds the section first, then the marker is drawn", () => {
   const harness = createRuntimeHarness();
   const block = harness.mappings[1]!;
@@ -326,7 +327,7 @@ test("a line under a folded heading unfolds the section first, then the marker i
   assert.equal(created.filter((element) => element.className === "sphinx-preview-line-marker" && !element.removed).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
 test("if-off-screen draws the marker and leaves the page where it is when the line is on screen", () => {
   const harness = createRuntimeHarness({ viewportHeight: 900 });
   const before = harness.messages.length;
@@ -338,7 +339,7 @@ test("if-off-screen draws the marker and leaves the page where it is when the li
   assert.equal(harness.messages.slice(before).some((message) => message.type === "previewScroll"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
 test("if-off-screen scrolls the line to the reading line when it is off screen, as reading-line does", () => {
   const harness = createRuntimeHarness();
   const before = harness.messages.length;
@@ -352,7 +353,8 @@ test("if-off-screen scrolls the line to the reading line when it is off screen, 
   assert.equal(harness.messages.slice(before).some((message) => message.type === "previewScroll"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S2
 test("a message with no scroll field scrolls to the reading line like reading-line", () => {
   const absent = createRuntimeHarness();
   reveal(absent, 100);
@@ -362,7 +364,8 @@ test("a message with no scroll field scrolls to the reading line like reading-li
   assert.ok(absent.windowState.scrollY > 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S2
 test("if-off-screen unfolds a closed details block holding the line in both modes", () => {
   for (const scroll of ["reading-line", "if-off-screen"]) {
     const harness = createRuntimeHarness({ viewportHeight: 900 });
@@ -376,7 +379,7 @@ test("if-off-screen unfolds a closed details block holding the line in both mode
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189#S1
 test("previewLineMarkerClear removes the marker and a later reveal draws it again", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);

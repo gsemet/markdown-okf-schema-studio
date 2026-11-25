@@ -21,7 +21,7 @@ for (const [name, eol] of EOLS) {
   const text = lines(eol, "# Title", "", "A", "", "", "", "B", "");
   const withX = lines(eol, "# Title", "", "A", "", "X", "", "B", "");
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
   test(`${name}: a block written in a blank line takes its place in one block, and typing on keeps one block`, async () => {
     const host = fixture({ text });
     await host.send("previewEditSave", { ...open(eol), editedText: "X", final: false });
@@ -31,7 +31,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(host.of("previewEditSource"), []);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
   test(`${name}: an editor emptied before any autosave changes nothing`, async () => {
     const host = fixture({ text });
     await host.send("previewEditSave", { ...open(eol), editedText: "", final: true });
@@ -39,7 +39,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.applyCalls.length, 0);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S4
   test(`${name}: a final save that writes text asks for a render and posts no done: the patch closes the editor`, async () => {
     const host = fixture({ text });
     host.manager.sourceAvailable = () => true;
@@ -55,7 +55,7 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(host.of("previewEditSource").filter((entry) => entry.done === true), [], "no done answer");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a block erased after an autosave puts the run back`, async () => {
     const host = fixture({ text });
     await host.send("previewEditSave", { ...open(eol), editedText: "X", final: false });
@@ -63,7 +63,8 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.document.getText(), text);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
   test(`${name}: a cancel after an autosave puts the run back`, async () => {
     const host = fixture({ text });
     await host.send("previewEditSave", { ...open(eol), editedText: "X", final: false });
@@ -74,7 +75,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.document.getText(), text);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
   test(`${name}: a paste in place of a blank line leaves a blank line on each side`, async () => {
     const host = fixture({ text });
     await host.send("previewBlocksPaste", { insertAfterLine: 4, replaceBlankRun: run });
@@ -82,7 +83,8 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(result(host), [{ op: "paste", ok: true, reason: undefined }]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: previewBlankRunDelete removes that one line, answers op delete-blank-lines and pins the run`, async () => {
     const host = fixture({ text });
     await host.send("previewBlankRunDelete", { line: 5, endLine: 5, pinViewportTop: 120 });
@@ -92,7 +94,8 @@ for (const [name, eol] of EOLS) {
     assert.equal(host.preview.scroll.pendingPin?.line, 5);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
   test(`${name}: previewBlankRunDelete of the last blank line at the end of the body removes that line`, async () => {
     const host = fixture({ text: lines(eol, "A", "", "", "", "") });
     await host.send("previewBlankRunDelete", { line: 4, endLine: 4 });
@@ -101,7 +104,8 @@ for (const [name, eol] of EOLS) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 test("previewBlankRunDelete is refused for a separator or a line the text no longer has, a failed edit and a held edit", async () => {
   const text = "# Title\n\nA\n\n\n\nB\n";
   const stale = fixture({ text });
@@ -125,7 +129,7 @@ test("previewBlankRunDelete is refused for a separator or a line the text no lon
   assert.equal(held.document.getText(), before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("an editor of a line that is the separator, or that is not the line of its run, is refused as stale", async () => {
   const text = "# Title\n\nA\n\n\n\nB\n";
   const partial = fixture({ text });
@@ -150,7 +154,7 @@ test("an editor of a line that is the separator, or that is not the line of its 
   assert.equal(save.document.getText(), text);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a save or cancel whose blank run differs from the held edit's is refused as stale", async () => {
   const text = "# Title\n\nA\n\n\n\nB\n";
   const host = fixture({ text });

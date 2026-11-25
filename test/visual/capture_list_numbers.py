@@ -23,7 +23,8 @@ def rendered_list_numbers(page: Page) -> list[str]:
   ]
 
 
-# @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S6
+# @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S8
 def check_ordered_item_keeps_numbers(page: Page, page_name: str, failures: list[Failure]) -> None:
   """A click on the second item of a four-item ordered list opens its editor; the items left in
   the list keep their source numbers 1, 3 and 4 in the rendered page, then Escape closes the

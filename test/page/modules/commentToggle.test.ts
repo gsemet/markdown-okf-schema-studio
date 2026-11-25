@@ -44,13 +44,13 @@ const commentCases: [string, string | undefined][] = [
 ];
 
 for (const [input, expected] of commentCases) {
-  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-266
+  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-266#S3
   test("editActions comment " + JSON.stringify(input), () => {
     assert.equal(run("comment", input), expected);
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-266
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-266#S3
 test("the comment toggle is its own inverse and never wraps a line holding -->", () => {
   const original = "- one\n- two";
   const wrapped = run("comment", "[" + original + "]")!;

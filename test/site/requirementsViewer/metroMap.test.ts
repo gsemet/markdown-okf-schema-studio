@@ -70,7 +70,7 @@ const node = (map: ReturnType<typeof buildMetroMap>, key: string) => {
 };
 
 test("buildMetroMap draws a state shared by two paths once, and a step of both paths once with both step indexes", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S2
   const map = buildMetroMap(SHARED);
   assert.equal(map.nodes.length, 5, "A, B, C, D and X: C and D are drawn once");
   assert.deepEqual([...node(map, "C").paths], [0, 1]);
@@ -91,7 +91,7 @@ test("buildMetroMap draws a state shared by two paths once, and a step of both p
 });
 
 test("buildMetroMap puts a path that shares nothing on the right of an earlier row, one free column after its climb", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S4
   const map = buildMetroMap(ALONE);
   assert.equal(map.rows, 2, "path 3 does not get a row of its own");
   assert.deepEqual([node(map, "X").row, node(map, "X").col], [1, 0]);
@@ -106,7 +106,8 @@ const groups = (svg: string): Array<{ attributes: string; inner: string }> =>
   [...svg.matchAll(/<(?:a|g) class="tr"([^>]*)>(.*?)<\/(?:a|g)>/gsu)].map((match) => ({ attributes: match[1] ?? "", inner: match[2] ?? "" }));
 
 test("metroSvg gives every step its paths and step indexes, one stroke per path, and a natural size", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S2
   const model = load();
   const svg = metroSvg(model, model.paths.get(FULL_USE_CASE)!, "requirements/gfm/x");
   const steps = groups(svg);
@@ -134,7 +135,7 @@ test("metroSvg gives every step its paths and step indexes, one stroke per path,
 });
 
 test("metroSvg shows the full ID and the test count on two lines of every pill, and a start disc", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S2
   const model = load();
   const svg = metroSvg(model, model.paths.get(FULL_USE_CASE)!, "requirements/gfm/x");
   const pill = new RegExp(`<text class="pt"[^>]*><tspan[^>]*>${FULL_BEHAVIOUR(102)}</tspan><tspan[^>]*>2 tests</tspan></text>`, "u");
@@ -159,7 +160,7 @@ test("metroSvg shows the full ID and the test count on two lines of every pill, 
 });
 
 test("metroSvg draws the backtick spans of a caption in monospace, without the backticks", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
   const model = load();
   const svg = metroSvg(model, paths(`#### Path 1: Code
 1. A
@@ -171,7 +172,8 @@ test("metroSvg draws the backtick spans of a caption in monospace, without the b
 });
 
 test("metroSvg draws a fourth path in the third colour", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S4
   const model = load();
   const four = paths([1, 2, 3, 4].map((index) => `#### Path ${index}: P${index}\n1. S${index}\n   - SwRS-X-01${index}: go ${index}\n2. T${index}\n`).join("\n"));
   const svg = metroSvg(model, four, "requirements/gfm/x");
@@ -180,7 +182,7 @@ test("metroSvg draws a fourth path in the third colour", () => {
 });
 
 test("metroSvg keeps a 66-character caption inside the map when the text is wider than estimated", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S4
   const model = load();
   const word = "x".repeat(66);
   const svg = metroSvg(model, paths(`#### Path 1: Wide

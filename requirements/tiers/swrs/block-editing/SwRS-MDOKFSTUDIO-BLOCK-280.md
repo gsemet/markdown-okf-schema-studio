@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: both edges inside one container
+- id: S3
+  title: boundary crossed at the start
+- id: S4
+  title: boundary crossed at the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,25 +46,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the balance-edges setting is on and a selection starts or ends inside a fenced container, an alert, a blockquote or a tab item it does not entirely contain, the raw copy SHALL add that container's opening lines at the start or its closing line at the end, and when both edges lie inside one container it SHALL copy its content with the container's line prefix removed.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off and a note admonition holding two paragraphs
 - WHEN the selection starts inside the admonition and ends after it
 - THEN the copy is the source verbatim, with no opening line
 
-### Scenario: both edges inside one container
+### Scenario S2: both edges inside one container
 
 - GIVEN the setting is on and both edges lie inside the same admonition, quote or alert
 - WHEN the reader copies
 - THEN the clipboard holds its content with the container's line prefix removed and no fence line added
 
-### Scenario: boundary crossed at the start
+### Scenario S3: boundary crossed at the start
 
 - GIVEN the setting is on
 - WHEN the selection starts inside a container and ends after it
 - THEN the container's opening lines are added before the text
 
-### Scenario: boundary crossed at the end
+### Scenario S4: boundary crossed at the end
 
 - GIVEN the setting is on
 - WHEN the selection starts before a container and ends inside it

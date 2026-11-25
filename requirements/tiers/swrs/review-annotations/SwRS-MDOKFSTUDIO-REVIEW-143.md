@@ -17,6 +17,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-012
 - StRS-MDOKFSTUDIO-REVIEW-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Click opens and closes the box
+- id: S2
+  title: Enter and Space toggle the box
+- id: S3
+  title: Targets and keys that change nothing
+- id: S4
+  title: Title and accent follow the comment kind
+- id: S5
+  title: Open boxes are kept for the panel
+- id: S6
+  title: Keys of comments that no longer exist
+- id: S7
+  title: Opening or closing a box keeps the reading position
+- id: S8
+  title: Square corners
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,24 +54,24 @@ default_owner_email: gaetan@xeberon.net
 
 When a reader clicks a comment chip, or presses Enter or Space on a focused one, the page SHALL toggle the box that shows the comment text under the line, with the title and shape of its comment kind, and keep which boxes are open for the panel.
 
-### Scenario (nominal): Click opens and closes the box
+### Scenario S1 (nominal): Click opens and closes the box
 - GIVEN a gray chip
 - WHEN the reader clicks it twice
 - THEN the box opens with the comment text and then closes, and the chip aria-expanded and the box hidden attribute follow the clicks
 
-### Scenario (nominal): Enter and Space toggle the box
+### Scenario S2 (nominal): Enter and Space toggle the box
 - GIVEN a focused chip that has a box
 - WHEN the reader presses Enter and then Space
 - THEN the box opens and closes
 
-### Scenario (refusal): Targets and keys that change nothing
+### Scenario S3 (refusal): Targets and keys that change nothing
 | Input | Outcome |
 | --- | --- |
 | A click on text that is not a chip | No box changes |
 | Another key than Enter or Space on a focused chip | Nothing changes |
 | A click on a TODO chip that comes from the word TODO in prose (a chip without a box) | No box opens, aria-expanded stays false and the layout is not re-measured |
 
-### Scenario (nominal): Title and accent follow the comment kind
+### Scenario S4 (nominal): Title and accent follow the comment kind
 | Open box | Title | Accent bar on the inline start |
 | --- | --- | --- |
 | A comment | Comment | gray |
@@ -63,23 +80,23 @@ When a reader clicks a comment chip, or presses Enter or Space on a focused one,
 
 The boxes are drawn with an admonition-like shape; v04 asserts the contrast of 4.5:1 on the cream page.
 
-### Scenario (nominal): Open boxes are kept for the panel
+### Scenario S5 (nominal): Open boxes are kept for the panel
 - GIVEN two open comments, or two inline comments in one paragraph with one open
 - WHEN the content is replaced in the same panel (a content patch) or the page is reloaded
 - THEN the same boxes are open, and only the open one of the paragraph stays open; the webview state holds the keys of the open boxes in the form {line}:{number}, the source line and the number of the comment on that line
 
-### Scenario (boundary): Keys of comments that no longer exist
+### Scenario S6 (boundary): Keys of comments that no longer exist
 | Input | Outcome |
 | --- | --- |
 | A saved key 5:0 and a document without a comment at line 5 | The key is removed from the saved state when the state is applied |
 | A saved key whose comment exists | The key stays |
 
-### Scenario (nominal): Opening or closing a box keeps the reading position
+### Scenario S7 (nominal): Opening or closing a box keeps the reading position
 - GIVEN a comment above the reading line
 - WHEN the reader opens its box, and then closes it
 - THEN the text being read does not move either time
 
-### Scenario (boundary): Square corners
+### Scenario S8 (boundary): Square corners
 | Shown element | Corners |
 | --- | --- |
 | An open comment box | square (border radius 0) |

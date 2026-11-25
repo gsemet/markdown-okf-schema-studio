@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Type a list
+- id: S2
+  title: Move on to the next block
 user_need: "As a writer, I type Markdown in the block editor and the keys do what
   I expect: lists continue, Tab indents, selected text gets wrapped, Home and End
   jump, undo stays in the editor, and I keep writing in the next or previous block
@@ -69,7 +74,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Type a list
+#### Path S1: Type a list
 
 1. A block editor is open on a list
    - SwRS-MDOKFSTUDIO-BLOCK-061: Enter continues the list marker
@@ -78,7 +83,7 @@ stateDiagram-v2
    - Option SwRS-MDOKFSTUDIO-BLOCK-003 (nominal): the VS Code key bindings of undo and redo run on the text box
 2. The next item starts with its marker
 
-#### Path 2: Move on to the next block
+#### Path S2: Move on to the next block
 
 1. A block editor is open with the caret on its last line
    - SwRS-MDOKFSTUDIO-BLOCK-079: ArrowDown saves a changed text and opens the editor of the next block with the caret at its start

@@ -18,6 +18,15 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Open Studio at a line
+- id: S2
+  title: Keep the raw text one command away
+- id: S3
+  title: Jump while the side preview is open
+- id: S4
+  title: Get the association back from the old setting
 user_need: As a reader, I jump to a line of a Markdown file from a search, a
   problem or a link and see that line marked in the side preview; I can always
   ask for the raw text and it stays text; the editor association I set for
@@ -82,18 +91,18 @@ flowchart LR
 
 ### Main paths
 
-#### Path 0: Open Studio at a line
+#### Path S1: Open Studio at a line
 
 The reader runs Open in Studio at This Line on a Markdown text editor, or follows a link in a Studio tab; the Studio tab opens at the line and the text tab stays.
 
-#### Path 1: Keep the raw text one command away
+#### Path S2: Keep the raw text one command away
 
 1. A Markdown file shows in a Studio tab
    - SwRS-MDOKFSTUDIO-LIFE-177: the reader runs Open as Text and the text editor of the same file opens in the same group, at the line shown, and stays
    - Option SwRS-MDOKFSTUDIO-LIFE-177 (refusal): when the active tab is not a Studio tab, a message says so and nothing opens
 2. The reader reads and edits the raw text
 
-#### Path 2: Jump while the side preview is open
+#### Path S3: Jump while the side preview is open
 
 1. A search result, a problem or a link takes a text editor to a line while the side preview follows the editor
    - SwRS-MDOKFSTUDIO-LIFE-186: the host tells the jump from a cursor move
@@ -109,7 +118,7 @@ The reader runs Open in Studio at This Line on a Markdown text editor, or follow
    - Option SwRS-MDOKFSTUDIO-LIFE-179 (nominal): the marker stays through layout changes and goes on a pointer press or a new line
    - Option SwRS-MDOKFSTUDIO-LIFE-191 (nominal): a link or Back or Next followed in the side preview marks its target line the same way
 
-#### Path 3: Get the association back from the old setting
+#### Path S4: Get the association back from the old setting
 
 1. The reader's user or workspace settings hold the retired setting Open Markdown files in Studio, on
    - SwRS-MDOKFSTUDIO-LIFE-195: the extension writes the `*.md` association in that scope, then removes the retired settings, and shows nothing

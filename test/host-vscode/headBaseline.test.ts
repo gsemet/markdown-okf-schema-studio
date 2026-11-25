@@ -33,7 +33,7 @@ function fakeGit(options: { commit?: string; blob?: string | Error; repo?: boole
   return { extension, shows, listeners, state, activations: () => activations };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S9
 test("T16: no Git extension, no repository or a failing show give undefined", async () => {
   assert.equal(await createHeadBaseline<FakeUri>(() => undefined).read(file("/w/a.md"), 10), undefined);
   const noRepo = fakeGit({ commit: "c1", repo: false });
@@ -44,7 +44,7 @@ test("T16: no Git extension, no repository or a failing show give undefined", as
   assert.equal(await createHeadBaseline(() => noHead.extension).read(file("/w/a.md"), 10), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S10
 test("T16: only file documents under 1 MB are compared, big blobs are skipped", async () => {
   const git = fakeGit({ commit: "c1" });
   const baseline = createHeadBaseline(() => git.extension);
@@ -55,7 +55,7 @@ test("T16: only file documents under 1 MB are compared, big blobs are skipped", 
   assert.equal(await createHeadBaseline(() => big.extension).read(file("/w/a.md"), 10), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S11
 test("T16: the base is cached by path and commit, a new commit fetches again", async () => {
   const git = fakeGit({ commit: "c1", blob: "one\n" });
   const baseline = createHeadBaseline(() => git.extension);
@@ -70,7 +70,7 @@ test("T16: the base is cached by path and commit, a new commit fetches again", a
   assert.equal(git.shows.length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S11
 test("T16: a state change with the same commit id does not notify, a new commit does", () => {
   const git = fakeGit({ commit: "c1" });
   git.extension.isActive = true;
@@ -88,7 +88,7 @@ test("T16: a state change with the same commit id does not notify, a new commit 
   assert.equal(git.listeners.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S4
 test("T16: watch gives nothing without the extension, a repository or an active API", () => {
   assert.equal(createHeadBaseline<FakeUri>(() => undefined).watch(file("/w/a.md"), () => undefined), undefined);
   const noRepo = fakeGit({ repo: false });

@@ -15,7 +15,7 @@ const links = (nav: Parameters<typeof findElements>[0]) =>
 
 const SOURCE = "[TOC]\n\n# A\n\n## B\n\n## C\n\n### D\n\ntext\n";
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
 test("[TOC] renders the headings as a nested list of links to their ids", async () => {
   const doc = await render(SOURCE);
   const [nav] = navs(doc);
@@ -36,14 +36,14 @@ test("[TOC] renders the headings as a nested list of links to their ids", async 
   assert.equal(textContent(findElement(doc, (e) => e.tagName === "p")!), "text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S2
 test("the marker is replaced by the list and is not rendered as a wiki link", async () => {
   const { html } = await renderMyst(SOURCE);
   assert.doesNotMatch(html, /wiki:toc/u);
   assert.doesNotMatch(html, /<p[^>]*>\s*\[\[toc\]\]/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
 test("[[_TOC_]] and any case of both markers render the same list, titled as written", async () => {
   const doc = await render("[[_TOC_]]\n\n[toc]\n\n[[_toc_]]\n\n# A\n\n## B\n");
   const found = navs(doc);
@@ -54,7 +54,8 @@ test("[[_TOC_]] and any case of both markers render the same list, titled as wri
   assert.doesNotMatch(html, /<em>|wiki:/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S2
 test("{contents} renders the list, :depth: limits the levels, the title is the opening line", async () => {
   const doc = await render("```{contents}\n```\n\n```{contents} Outline\n:depth: 2\n```\n\n```{contents}\n:depth: 1\n```\n\n# A\n\n## B\n\n### C\n");
   const [all, two, one] = navs(doc);
@@ -65,7 +66,7 @@ test("{contents} renders the list, :depth: limits the levels, the title is the o
   assert.equal(attribute(all, "data-line"), "1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
 test("{contents} with :local: lists only the section it sits in", async () => {
   const doc = await render("# A\n\n## A1\n\n## A2\n\n```{contents}\n:local:\n```\n\n### A2a\n\n## A3\n\n# B\n");
   assert.deepEqual(links(navs(doc)[0]), [["#a2a", "A2a"]]);
@@ -73,13 +74,13 @@ test("{contents} with :local: lists only the section it sits in", async () => {
   assert.deepEqual(links(navs(top)[0]), [["#a", "A"], ["#b", "B"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S2
 test("a bracket marker takes no depth option and [[toc]] is not a marker", async () => {
   const doc = await render("[TOC depth=1]\n\n[[toc]]\n\n[[toc depth=2]]\n\n# A\n\n## B\n");
   assert.equal(navs(doc).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S2
 test("repeated heading text gets distinct ids and a skipped level nests under the previous heading", async () => {
   const doc = await render("[TOC]\n\n# Top\n\n### Deep\n\n## Same\n\n## Same\n\n## Same\n");
   const [nav] = navs(doc);
@@ -90,7 +91,7 @@ test("repeated heading text gets distinct ids and a skipped level nests under th
   assert.deepEqual(ids, ["top", "deep", "same", "same-1", "same-2"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
 test("headings are collected as plain text and the list follows the headings of the source", async () => {
   const first = await render("[TOC]\n\n# One *em* `code`\n");
   assert.deepEqual(links(navs(first)[0]), [["#one-em-code", "One em code"]]);
@@ -98,13 +99,13 @@ test("headings are collected as plain text and the list follows the headings of 
   assert.deepEqual(links(navs(second)[0]).map((l) => l[1]), ["One em code", "Added"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
 test("a marker inside code, inline code or a longer paragraph is not a table of contents", async () => {
   const doc = await render("# A\n\n```\n[TOC]\n```\n\n`[TOC]`\n\nsee [TOC] here\n\n```\n[[_TOC_]]\n```\n");
   assert.equal(navs(doc).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S3
 test("a document without headings renders an empty marker that read mode hides", async () => {
   const doc = await render("[TOC]\n\ntext only\n");
   const [nav] = navs(doc);
@@ -113,7 +114,7 @@ test("a document without headings renders an empty marker that read mode hides",
   assert.match(PREVIEW_THEME_CSS, /nav\.okf-toc\.okf-toc--empty \{ display: none; \}/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S3
 test("edit mode titles the block with the marker and hides the list, read mode paints no frame", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /html\[data-sphinx-preview-edit-mode="on"\] #sphinx-myst-preview-content nav\.okf-toc\[data-okf-tag\]::before \{\s*content: attr\(data-okf-tag\);/u);

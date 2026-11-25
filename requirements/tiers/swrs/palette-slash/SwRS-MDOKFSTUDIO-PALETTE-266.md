@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
+scenarios:
+- id: S1
+  title: Caret in a line
+- id: S2
+  title: Selection of lines, and unwrap
+- id: S3
+  title: Blank line and TODO comments
+- id: S4
+  title: Keys and lines that do nothing
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +44,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Cmd+/ or Ctrl+/, with or without Shift, in a block text box, the extension SHALL wrap each non-blank touched line in a plain HTML comment, or unwrap them when every non-blank touched line is already a plain comment, as one undo step.
 
-### Scenario (nominal): Caret in a line
+### Scenario S1 (nominal): Caret in a line
 
 - GIVEN the text "abc" with the caret inside, in a block editor
 - WHEN the writer presses Ctrl+/ (Cmd+/ on macOS)
 - THEN the line reads "`<!-- abc -->`", the caret stays on the same letter, and one undo restores "abc"
 
-### Scenario (nominal): Selection of lines, and unwrap
+### Scenario S2 (nominal): Selection of lines, and unwrap
 
 | Input | Outcome |
 | --- | --- |
@@ -49,7 +58,7 @@ When the writer presses Cmd+/ or Ctrl+/, with or without Shift, in a block text 
 | The lines "`<!-- a -->`" and "`<!-- b -->`" selected | The lines read a and b |
 | The lines "a" and "`<!-- b -->`" selected | The first line is wrapped and the second stays a single comment |
 
-### Scenario (boundary): Blank line and TODO comments
+### Scenario S3 (boundary): Blank line and TODO comments
 
 | Input | Outcome |
 | --- | --- |
@@ -57,7 +66,7 @@ When the writer presses Cmd+/ or Ctrl+/, with or without Shift, in a block text 
 | An empty comment with the caret inside it | The comment is removed |
 | The line "`<!-- TODO: a -->`" | No edit is made: the shortcut removes only the plain comments it adds, and the TODO action unwraps TODO comments |
 
-### Scenario (refusal): Keys and lines that do nothing
+### Scenario S4 (refusal): Keys and lines that do nothing
 
 | Input | Outcome |
 | --- | --- |

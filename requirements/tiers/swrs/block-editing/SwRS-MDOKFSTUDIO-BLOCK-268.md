@@ -28,6 +28,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
 - StRS-MDOKFSTUDIO-BLOCK-025
+scenarios:
+- id: S1
+  title: Typing writes the text in place of that blank line
+- id: S2
+  title: A separator only where needed
+- id: S3
+  title: Empty Done, Cancel and a paste
+- id: S4
+  title: Done closes the editor
+- id: S5
+  title: A block typed inside a list item stays in the item
+- id: S6
+  title: A stale run
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -71,37 +84,37 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer types a block in a blank-line block, or pastes in it, the extension SHALL write the text in place of that one blank line and keep the other blank lines, adding a blank line before or after the text only where the neighbouring line exists and is not blank, in one text edit, write nothing for an empty Done, restore the line on Cancel, keep the editor open across an autosave re-render and close it on the render that follows its final save, and refuse a stale line. A text written in place of a blank line inside a list takes the content indent of the item (CommonMark's content column), or the item's own indent when the line is between two items and the first line of the text starts with a list marker; the host checks the item line and refuses it as stale when it is not a list item line. A text written in place of a blank line inside a quote keeps the quote markers of the line, and one inside a directive, a panel, a definition or a footnote takes the indent of that container; the host checks the container line and refuses it as stale when it is not a line of that shape.
 
-### Scenario: Typing writes the text in place of that blank line
+### Scenario S1: Typing writes the text in place of that blank line
 
 - GIVEN three blank lines between two blocks, whose second and third are blank-line blocks, and the editor of the second open
 - WHEN the writer types a block, then keeps typing across an autosave
 - THEN the host replaces that one line with the text in one text edit and keeps the other blank lines, and later saves replace that same text
 
-### Scenario: A separator only where needed
+### Scenario S2: A separator only where needed
 
 - GIVEN a blank-line block whose line is next to a block, at the end of the body, or at line 1 of a file without frontmatter
 - WHEN the writer types in it
 - THEN a blank line is added before or after the text only on the side where a neighbouring line exists and is not blank
 
-### Scenario: Empty Done, Cancel and a paste
+### Scenario S3: Empty Done, Cancel and a paste
 
 - GIVEN the same editor, or a paste on the blank-line block
 - WHEN Done is pressed with no text, Cancel is pressed after an autosave, or a block is pasted
 - THEN an empty Done changes nothing, Cancel puts the line back, and the paste replaces that one line, with a blank line added only where the neighbour is not blank
 
-### Scenario: Done closes the editor
+### Scenario S4: Done closes the editor
 
 - GIVEN a blank-line block's editor with typed text
 - WHEN the writer presses Done and the host writes the text and renders it
 - THEN the editor closes, "Saving Markdown…" is gone and the text shows in place of that blank line
 
-### Scenario: A block typed inside a list item stays in the item
+### Scenario S5: A block typed inside a list item stays in the item
 
 - GIVEN a blank line between two list items, or inside a list item, and its editor open
 - WHEN the writer types "More" or "- c" and the host saves or pastes it
 - THEN "More" is indented to the item and stays in it, "- c" between two items is an item at the item level, "- c" inside an item is a nested list of that item, and the blank lines around the text get no indent
 
-### Scenario: A stale run
+### Scenario S6: A stale run
 
 - GIVEN a line that changed or never was a blank line, or an item line that is not a list item line
 - WHEN the editor is opened or saved

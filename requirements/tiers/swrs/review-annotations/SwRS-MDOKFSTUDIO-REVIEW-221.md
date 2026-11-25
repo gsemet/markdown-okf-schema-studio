@@ -18,6 +18,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-017
+scenarios:
+- id: S1
+  title: A removed span between two blocks
+- id: S2
+  title: Where the marker sits
+- id: S3
+  title: No marker with Diff off, in edit mode, or for malformed data
 annotation_exemption: false
 exemption_reason:
 relates_to:
@@ -42,13 +49,13 @@ default_owner_email: gaetan@xeberon.net
 
 When lines were removed since the last commit with no line left in their place, the page SHALL show a red removed-lines marker in the change column between the blocks around the removal, with a tooltip in the page's tooltip style reading Removed lines 12–14 since last commit, or Removed line 12 since last commit for a single line, from the line numbers of the last commit, and SHALL show no marker while the Diff button is off or in edit mode.
 
-### Scenario (nominal): A removed span between two blocks
+### Scenario S1 (nominal): A removed span between two blocks
 
 - GIVEN the Diff button on, a tracked file where the last commit had lines 12 to 14 that the shown text no longer has, and no line in their place
 - WHEN the preview renders
 - THEN a red marker sits in the change column between the blocks around the removal, and its tooltip reads Removed lines 12–14 since last commit (Removed line 12 since last commit for one line), from the line numbers of the last commit
 
-### Scenario (boundary): Where the marker sits
+### Scenario S2 (boundary): Where the marker sits
 
 | Input | Outcome |
 | --- | --- |
@@ -57,7 +64,7 @@ When lines were removed since the last commit with no line left in their place, 
 | A removal of one line | the singular form, Removed line N since last commit |
 | A removal that also replaces lines | no removed marker: the replacing block carries a green bar |
 
-### Scenario (refusal): No marker with Diff off, in edit mode, or for malformed data
+### Scenario S3 (refusal): No marker with Diff off, in edit mode, or for malformed data
 
 - GIVEN the Diff button pressed off, edit mode on, or a removed entry that is not made of whole numbers with an end before its start
 - WHEN the preview renders

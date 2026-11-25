@@ -64,7 +64,7 @@ function tabIntoNewRow(harness: RuntimeHarness, typed?: string) {
   return { ...opened, table, row, newCells };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-124
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-124#S2
 test("the Tab hint shows in the last cell only, follows the editor and is described by the text box", () => {
   const harness = createRuntimeHarness();
   const { cells, click, input } = openTableCellEditorForTab(harness, { start: [1, 0] });
@@ -83,7 +83,8 @@ test("the Tab hint shows in the last cell only, follows the editor and is descri
   assert.equal(hintsOf(harness).length, 0, "no hint in the last column of another row");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-124
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-124#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-124#S2
 test("the Tab hint appears after Tab into the last cell and goes after Shift+Tab out of it", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness, { start: [2, 0] });
@@ -94,7 +95,8 @@ test("the Tab hint appears after Tab into the last cell and goes after Shift+Tab
   assert.equal(hintsOf(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S6
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S7
 test("Escape in the empty row that Tab added removes it with one final save", () => {
   const harness = createRuntimeHarness();
   const { input } = tabIntoNewRow(harness);
@@ -106,7 +108,8 @@ test("Escape in the empty row that Tab added removes it with one final save", ()
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S6
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S7
 test("Cancel in the empty row that Tab added removes it like Escape", () => {
   const harness = createRuntimeHarness();
   tabIntoNewRow(harness);
@@ -118,7 +121,8 @@ test("Cancel in the empty row that Tab added removes it like Escape", () => {
   assert.equal(saves.at(-1)?.editedText, TABLE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S8
 test("Escape after typing in the first cell of the added row drops the text and removes the row", () => {
   const harness = createRuntimeHarness();
   const { input } = tabIntoNewRow(harness);
@@ -127,7 +131,7 @@ test("Escape after typing in the first cell of the added row drops the text and 
   assert.equal(finalSaves(harness).at(-1)?.editedText, TABLE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S9
 test("a cell of the added row left holding text keeps the row on Escape", () => {
   const harness = createRuntimeHarness();
   const { input } = tabIntoNewRow(harness);
@@ -139,7 +143,8 @@ test("a cell of the added row left holding text keeps the row on Escape", () => 
   assert.match(String(last?.editedText), /\| p \| q \|\n\| x/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S10
 test("a row added with the Row below button is not removed by Escape", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness, { mapped: true, start: [2, 1] });

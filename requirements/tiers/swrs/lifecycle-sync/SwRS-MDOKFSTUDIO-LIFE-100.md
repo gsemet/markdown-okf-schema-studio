@@ -19,6 +19,27 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-010
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: "Host records the editor's first visible line"
+- id: S2
+  title: Page scrolls to the editor line
+- id: S3
+  title: Scroll that is not followed
+- id: S4
+  title: "The page's own scroll is not reported"
+- id: S5
+  title: The host ignores the editor scroll that its own reveal caused
+- id: S6
+  title: The pane the reader moved owns the anchor
+- id: S7
+  title: Which preview knows whether a text editor shows its file
+- id: S8
+  title: Reading, edit and block-editor modes, with and without a text editor
+- id: S9
+  title: The side of a text diff
+- id: S10
+  title: Defaults and the setting off
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -51,17 +72,17 @@ supersedes:
 
 When the text editor of a previewed document, or the side of a text diff that is that document's file, scrolls while the anchor mode is on, the extension SHALL record the editor's first visible line as the anchor of each preview of that document, owned by the editor, and scroll the preview so that this line sits at its reading line, without reporting that scroll back to the editor.
 
-### Scenario (nominal): Host records the editor's first visible line
+### Scenario S1 (nominal): Host records the editor's first visible line
 - GIVEN a side preview of the file and the anchor mode on
 - WHEN the text editor scrolls to its line 40 and the visible range changes
 - THEN the preview's anchor is line 40 with the editor as owner and the host posts sourceScroll to the page
 
-### Scenario (nominal): Page scrolls to the editor line
+### Scenario S2 (nominal): Page scrolls to the editor line
 - GIVEN a preview and a text editor of the same file, anchor mode on, the editor scrolled to line 120
 - WHEN the page receives sourceScroll with line 120
 - THEN the page takes line 120 as its anchor, owned by the editor, and the preview scrolls so that line 120 starts at its reading line below the sticky heading band
 
-### Scenario (refusal): Scroll that is not followed
+### Scenario S3 (refusal): Scroll that is not followed
 | Input | Outcome |
 | --- | --- |
 | the anchor mode off and the editor-selection mark off, and the editor scrolls | the anchor is not recorded and nothing is posted |
@@ -69,27 +90,27 @@ When the text editor of a previewed document, or the side of a text diff that is
 | sourceScroll whose line is not a finite number | the anchor and the scroll position are unchanged |
 | sourceScroll that names another render | refused by the host message acceptance rule, see SwRS-MDOKFSTUDIO-TRUST-059 |
 
-### Scenario (nominal): The page's own scroll is not reported
+### Scenario S4 (nominal): The page's own scroll is not reported
 - GIVEN a page that scrolled to line 120 for a sourceScroll
 - WHEN the resulting scroll event arrives within 500 ms and within 2 px of the target
 - THEN no previewScroll is posted, so the editor is not scrolled back
 - WHEN the reader scrolls the preview afterwards
 - THEN the page takes the anchor as owner preview and reports it
 
-### Scenario (boundary): The host ignores the editor scroll that its own reveal caused
+### Scenario S5 (boundary): The host ignores the editor scroll that its own reveal caused
 | Input | Outcome |
 | --- | --- |
 | the host revealed line 80 while the editor top was line 10, and the editor reports first visible lines 40 and 80 within 0.5 seconds | both are echoes and do not move the preview (they lie between the start and the target line) |
 | a reveal that leaves the editor top outside the range, and the editor reports one event with the revealed line visible | that single event is accepted as an echo; further scrolling counts as the reader's |
 | an editor report after the 0.5 second window | not an echo; it moves the preview |
 
-### Scenario (nominal): The pane the reader moved owns the anchor
+### Scenario S6 (nominal): The pane the reader moved owns the anchor
 | Input | Outcome |
 | --- | --- |
 | the editor scrolled, then the reader scrolls the preview | the preview is the owner of the anchor and the owner changes without the preview jumping; the source wheel moves independently of the drag |
 | the editor scrolled elsewhere after the preview reported line 30, then the reader scrolls the preview to line 30 again | the preview reports line 30 again |
 
-### Scenario (boundary): Which preview knows whether a text editor shows its file
+### Scenario S7 (boundary): Which preview knows whether a text editor shows its file
 | Input | Outcome |
 | --- | --- |
 | a solo preview and the reader opens the file in a text editor (the visible editors change) | the page receives previewPairing with pairedTextEditor true (see SwRS-MDOKFSTUDIO-TOOLBAR-120 for the Anchor button) |
@@ -100,13 +121,13 @@ When the text editor of a previewed document, or the side of a text diff that is
 | a host whose capabilities say editorPairing is false looks for the editor of a preview | none is found, no preview is paired and the Anchor button stays disabled |
 | VS Code looks for the editor of a preview | visible editors whose document id equals the preview's document are paired |
 
-### Scenario (nominal): Reading, edit and block-editor modes, with and without a text editor
+### Scenario S8 (nominal): Reading, edit and block-editor modes, with and without a text editor
 | Input | Outcome |
 | --- | --- |
 | a 4000 line document, the preview and a text editor side by side, anchor mode on; the reader scrolls either pane down and up in reading mode, edit mode or with a block editor open | the other pane follows to the same place |
 | anchor mode off, or no text editor of the file; the reader scrolls either pane | the other pane stays still, the document is not edited and a block editor stays open |
 
-### Scenario (nominal): The side of a text diff
+### Scenario S9 (nominal): The side of a text diff
 
 | Input | Outcome |
 | --- | --- |
@@ -114,7 +135,7 @@ When the text editor of a previewed document, or the side of a text diff that is
 | the other side of the diff (a git or virtual document at the same path) scrolls | the preview does not move |
 | a diff with no side of the file scheme | the preview does not move |
 
-### Scenario (boundary): Defaults and the setting off
+### Scenario S10 (boundary): Defaults and the setting off
 
 | Input | Outcome |
 | --- | --- |

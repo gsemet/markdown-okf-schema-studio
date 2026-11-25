@@ -24,6 +24,29 @@ depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Setting value at start
+- id: S2
+  title: The setting changes in an open preview
+- id: S3
+  title: The Comments button follows the setting
+- id: S4
+  title: The host tells the page the value
+- id: S5
+  title: The Comments button shows its state
+- id: S6
+  title: The Comments button hides the gray and the thread chips
+- id: S7
+  title: Hiding comments hides every review mark
+- id: S8
+  title: A former highlight behaves as plain text
+- id: S9
+  title: Popovers and new threads while comments are hidden
+- id: S10
+  title: Current show-comments message
+- id: S11
+  title: Stale show-comments message
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -59,42 +82,42 @@ When the setting markdownOkfSchemaStudio.preview.showComments is read, the exten
 
 Comments are hidden while either trigger is off: the setting (master switch, which also removes the button) or the Comments button (a view choice stored for the workspace). The TODO chips and the text-selection Comment button (SwRS-MDOKFSTUDIO-REVIEW-038) stay.
 
-### Scenario (boundary): Setting value at start
+### Scenario S1 (boundary): Setting value at start
 | Input | Outcome |
 | --- | --- |
 | The setting not set | The gray comment chips show |
 | The setting set to true or to any value other than false | The gray comment chips show |
 | The setting set to false | The gray and the thread chips and every review mark are hidden |
 
-### Scenario (nominal): The setting changes in an open preview
+### Scenario S2 (nominal): The setting changes in an open preview
 - GIVEN an open preview with a gray chip, a thread chip, a TODO chip, a thread highlight and an open thread popover
 - WHEN the setting is set to false, and then to true
 - THEN the gray and the thread chips and the review marks are hidden at once and the popover closes, the TODO chip stays, without a new render; with true the chips and the marks show again
 
-### Scenario (nominal): The Comments button follows the setting
+### Scenario S3 (nominal): The Comments button follows the setting
 | Setting | Toolbar |
 | --- | --- |
 | false | No Comments button is visible |
 | true | The Comments button is visible |
 
-### Scenario (nominal): The host tells the page the value
+### Scenario S4 (nominal): The host tells the page the value
 | Trigger | Outcome |
 | --- | --- |
 | The settings change (true to false, for example) | The page receives showComments false, without a new render |
 | A page has just loaded | The page receives the current value |
 
-### Scenario (nominal): The Comments button shows its state
+### Scenario S5 (nominal): The Comments button shows its state
 | Comments | aria-pressed | aria-label, title and tooltip |
 | --- | --- | --- |
 | Shown | true | Hide comments |
 | Hidden | false | Show comments |
 
-### Scenario (nominal): The Comments button hides the gray and the thread chips
+### Scenario S6 (nominal): The Comments button hides the gray and the thread chips
 - GIVEN gray chips shown, a TODO chip and an inline thread chip on the page, in preview or in edit mode
 - WHEN the reader presses the Comments button
 - THEN the gray chips and the thread chip are hidden at once, the preference false is posted to the host and the state is saved in the webview (the preference is stored for the workspace and decides the start state, see SwRS-MDOKFSTUDIO-LIFE-169 and SwRS-MDOKFSTUDIO-LIFE-170), while the TODO chip stays visible
 
-### Scenario (nominal): Hiding comments hides every review mark
+### Scenario S7 (nominal): Hiding comments hides every review mark
 
 | Review mark | Comments hidden (button off or setting false) | Comments shown again |
 | --- | --- | --- |
@@ -103,7 +126,7 @@ Comments are hidden while either trigger is off: the setting (master switch, whi
 | Thread badge | not displayed | displayed |
 | Orphaned comments box | not displayed | displayed |
 
-### Scenario (nominal): A former highlight behaves as plain text
+### Scenario S8 (nominal): A former highlight behaves as plain text
 
 | Input while comments are hidden | Outcome |
 | --- | --- |
@@ -113,7 +136,7 @@ Comments are hidden while either trigger is off: the setting (master switch, whi
 | Tab through the page | the former highlights are skipped (no tabindex, no button role) |
 | Comments shown again | the highlights are back in the Tab order and open their popover again |
 
-### Scenario (boundary): Popovers and new threads while comments are hidden
+### Scenario S9 (boundary): Popovers and new threads while comments are hidden
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -122,13 +145,13 @@ Comments are hidden while either trigger is off: the setting (master switch, whi
 | comments hidden after a closed popover | comments are shown again | no popover opens by itself |
 | comments hidden | the layout moves because a badge after a block is no longer displayed | the reading line is kept by the same layout callback as the chips |
 
-### Scenario (nominal): Current show-comments message
+### Scenario S10 (nominal): Current show-comments message
 
 - GIVEN a previewShowComments message that names the page's render
 - WHEN it reaches the page
 - THEN the data-okf-show-comments attribute follows its value
 
-### Scenario (refusal): Stale show-comments message
+### Scenario S11 (refusal): Stale show-comments message
 
 - GIVEN a previewShowComments message that names another document, revision or request
 - WHEN it reaches the page

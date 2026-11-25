@@ -62,7 +62,8 @@ function messagesOf(harness: ReturnType<typeof createRuntimeHarness>, type: stri
   return harness.messages.filter((message) => message.type === type);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
 test("edit mode shows a handle on each body row of a pipe table and not on the header", () => {
   const harness = createRuntimeHarness();
   const { table, cells } = pipeTable(harness);
@@ -92,7 +93,8 @@ test("edit mode shows a handle on each body row of a pipe table and not on the h
   assert.equal(table.getAttribute("data-okf-row-handles"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
 test("a captioned pipe table, paragraph cells outside a figure and a table with one body row get no handle", () => {
   const harness = createRuntimeHarness();
   const listTable = pipeTable(harness);
@@ -110,7 +112,8 @@ test("a captioned pipe table, paragraph cells outside a figure and a table with 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S7
 test("dragging a handle onto a row moves it with one save and opens no cell editor", () => {
   const harness = createRuntimeHarness();
   const { rows, cells } = pipeTable(harness);
@@ -148,7 +151,8 @@ test("dragging a handle onto a row moves it with one save and opens no cell edit
     element.getAttribute("data-sphinx-preview-table-cell-editor") === null));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a row of a table inside a quote moves with the quote prefix kept on every line", () => {
   const quoted = "> | H1 | H2 |\n> | --- | --- |\n> | a | 1 |\n> | b | 2 |\n> | c | 3 |\n";
   const harness = createRuntimeHarness();
@@ -167,7 +171,7 @@ test("a row of a table inside a quote moves with the quote prefix kept on every 
   assert.equal(save.editedText, "> | H1 | H2 |\n> | --- | --- |\n> | b | 2 |\n> | c | 3 |\n> | a | 1 |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a column of a table inside a quote moves with the quote prefix kept on every line", () => {
   const quoted = "> | H1 | H2 |\n> | --- | --- |\n> | a | 1 |\n> | b | 2 |\n> | c | 3 |\n";
   const harness = createRuntimeHarness();
@@ -180,7 +184,8 @@ test("a column of a table inside a quote moves with the quote prefix kept on eve
   assert.equal(save.editedText, "> | H2 | H1 |\n> | --- | --- |\n> | 1 | a |\n> | 2 | b |\n> | 3 | c |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
 test("dropping a row on the half of its neighbour that leaves it in place requests nothing", () => {
   const harness = createRuntimeHarness();
   const { rows, cells } = pipeTable(harness);
@@ -195,7 +200,7 @@ test("dropping a row on the half of its neighbour that leaves it in place reques
   assert.equal(messagesOf(harness, "previewEditOpen").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("a drop on the header row is refused and no source is requested", () => {
   const harness = createRuntimeHarness();
   const { rows, cells } = pipeTable(harness);
@@ -211,7 +216,8 @@ test("a drop on the header row is refused and no source is requested", () => {
   assert.equal(messagesOf(harness, "previewEditOpen").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S2
 test("Alt+Down and Alt+Up on a handle move the row by one and Alt+Up on the first body row does nothing", () => {
   const harness = createRuntimeHarness();
   const { cells } = pipeTable(harness);
@@ -241,7 +247,7 @@ test("Alt+Down and Alt+Up on a handle move the row by one and Alt+Up on the firs
     "| H1 | H2 |\n| --- | --- |\n| a | 1 |\n| c | 3 |\n| b | 2 |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("a refused source or a source that is not a pipe table leaves the document alone", () => {
   const harness = createRuntimeHarness();
   const { cells } = pipeTable(harness);
@@ -257,7 +263,7 @@ test("a refused source or a source that is not a pipe table leaves the document 
   assert.equal(harness.messages.at(-1)?.type, "previewEditClosed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S7
 test("a click on a handle opens no editor and a drag is refused while a cell editor is open", () => {
   const harness = createRuntimeHarness();
   const { cells } = pipeTable(harness);
@@ -277,7 +283,8 @@ test("a click on a handle opens no editor and a drag is refused while a cell edi
   assert.ok(handleOf(cells[2]!), "the handle of the row being edited stays");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("a list-table shows handles under its header rows and a drag moves the whole item", () => {
   const harness = createRuntimeHarness();
   const { table, rows, cells } = pipeTable(harness, 4);
@@ -335,7 +342,8 @@ function listTable(harness: ReturnType<typeof createRuntimeHarness>, bodyRows = 
   return entry;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("edit mode shows a handle above each column of a pipe table, outside its cells", () => {
   const harness = createRuntimeHarness();
   const { table, rows, cells } = pipeTable(harness);
@@ -362,7 +370,8 @@ test("edit mode shows a handle above each column of a pipe table, outside its ce
   assert.equal(table.getAttribute("data-okf-col-handles"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("a table with one body row has column handles and no row handle; one column has none", () => {
   const harness = createRuntimeHarness();
   const single = pipeTable(harness, 1);
@@ -378,7 +387,8 @@ test("a table with one body row has column handles and no row handle; one column
   assert.equal(columnHandle(0), undefined, "nothing to reorder in a one-column table");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
 test("a list-table, a captioned table and the properties table: column handles on the first only", () => {
   const harness = createRuntimeHarness();
   const list = listTable(harness);
@@ -391,7 +401,8 @@ test("a list-table, a captioned table and the properties table: column handles o
   assert.equal(list.table.getAttribute("data-okf-row-handles"), "true", "the list-table keeps its row handles");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S6
 test("dragging a column handle onto another column moves it with one save and no cell editor", () => {
   const harness = createRuntimeHarness();
   const { rows, cells } = pipeTable(harness);
@@ -428,7 +439,8 @@ test("dragging a column handle onto another column moves it with one save and no
   assert.ok(cells.length > 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("a drop of a column on its own place requests nothing; a row drag does not drop on a column", () => {
   const harness = createRuntimeHarness();
   const { rows, cells } = pipeTable(harness);
@@ -451,7 +463,7 @@ test("a drop of a column on its own place requests nothing; a row drag does not 
   handle.dispatch("dragend");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S2
 test("Alt+Right and Alt+Left on a column handle move the column by one, at the edges nothing", () => {
   const harness = createRuntimeHarness();
   pipeTable(harness);
@@ -479,7 +491,7 @@ test("Alt+Right and Alt+Left on a column handle move the column by one, at the e
   assert.equal(columnHandle(1)!.focusOptions?.preventScroll, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S5
 test("a column of a list-table moves on the directive source, keeping its syntax", () => {
   const harness = createRuntimeHarness();
   const { rows } = listTable(harness);
@@ -498,7 +510,7 @@ test("a column of a list-table moves on the directive source, keeping its syntax
   ].join("\n"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S7
 test("a source that cannot move a column leaves the document alone", () => {
   const harness = createRuntimeHarness();
   pipeTable(harness);
@@ -514,7 +526,8 @@ test("a source that cannot move a column leaves the document alone", () => {
   assert.equal(harness.messages.at(-1)?.type, "previewEditClosed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("a click on a column handle opens no editor", () => {
   const harness = createRuntimeHarness();
   pipeTable(harness);
@@ -537,7 +550,7 @@ function openCellEditor(harness: ReturnType<typeof createRuntimeHarness>, cell: 
   return input;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S7
 test("a row handle moves its row while a cell editor of the table is open, saving the typed text with it", () => {
   const harness = createRuntimeHarness();
   const { rows, cells } = pipeTable(harness);
@@ -561,7 +574,7 @@ test("a row handle moves its row while a cell editor of the table is open, savin
   assert.equal(saves[0]!.originalText, SOURCE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S6
 test("a column handle and Alt+Right move a column while a cell editor of the table is open", () => {
   const harness = createRuntimeHarness();
   const { cells } = pipeTable(harness);
@@ -574,7 +587,8 @@ test("a column handle and Alt+Right move a column while a cell editor of the tab
   assert.equal(saves[0]!.editedText, "| H2 | H1 |\n| --- | --- |\n| 1 | a |\n| 2 | b-typed |\n| 3 | c |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S7
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("a drag is still refused while the source of a cell editor has not arrived", () => {
   const harness = createRuntimeHarness();
   const { cells } = pipeTable(harness);
@@ -587,7 +601,8 @@ test("a drag is still refused while the source of a cell editor has not arrived"
   assert.equal(prevented, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("a column handle drags over the handle strip: the marker is on the nearest gap, a drop moves", () => {
   const harness = createRuntimeHarness();
   const { rows } = pipeTable(harness);
@@ -625,7 +640,8 @@ test("a column handle drags over the handle strip: the marker is on the nearest 
   assert.equal(save.editedText, "| H2 | H1 |\n| --- | --- |\n| 1 | a |\n| 2 | b |\n| 3 | c |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
 test("a row handle drags over the handle strip: the marker is on the nearest gap, a drop moves", () => {
   const harness = createRuntimeHarness();
   const { rows, cells } = pipeTable(harness);
@@ -686,8 +702,10 @@ function breakoutTable(harness: ReturnType<typeof createRuntimeHarness>, bodyRow
   return fake;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("the handles of a table that breaks out of the column follow its real edges", () => {
   const harness = createRuntimeHarness();
   const { table, cells, rows } = breakoutTable(harness);
@@ -723,7 +741,8 @@ test("the handles of a table that breaks out of the column follow its real edges
   assert.equal(handleOf(cells[2]!)!.style.getPropertyValue("top"), (100 + 46 * 2 + 23) + "px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S8
 test("the handles of a table that stays in the column sit on its edge in Auto", () => {
   const harness = createRuntimeHarness();
   const { table, cells } = pipeTable(harness);
@@ -741,7 +760,8 @@ test("the handles of a table that stays in the column sit on its edge in Auto", 
   assert.equal(handleOf(cells[1]!)!.style.getPropertyValue("top"), "145px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007#S4
 test("Alt+Left on a column handle moves the column of a table whose row has a block id after its pipe", () => {
   const harness = createRuntimeHarness();
   pipeTable(harness);
@@ -753,7 +773,8 @@ test("Alt+Left on a column handle moves the column of a table whose row has a bl
   assert.equal(saves[0]?.editedText, "| H2 | H1 |\n| --- | --- |\n| 1 | a | ^row-a\n| 2 | b |\n| 3 | c |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S6
 test("placing the handles reads the box of a table once per pass, not once per handle", () => {
   const harness = createRuntimeHarness();
   const { table } = pipeTable(harness, 12);

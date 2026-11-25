@@ -17,6 +17,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
 depends_on: []
+scenarios:
+- id: S1
+  title: Room below
+- id: S2
+  title: No room below
+- id: S3
+  title: The left edge stays while the query grows
+- id: S4
+  title: Pane edge
+- id: S5
+  title: The menu follows the caret
+- id: S6
+  title: The caret scrolls out of the viewport
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,33 +46,33 @@ default_owner_email: gaetan@xeberon.net
 
 When the slash menu opens, the extension SHALL place it under the caret line inside the viewport, uncovered by the floating toolbar, with a maximum height of 320 px and an edge of 8 px, above the caret when there is no room below, and keep it next to the caret while the writer types, scrolls or resizes.
 
-### Scenario (nominal): Room below
+### Scenario S1 (nominal): Room below
 - GIVEN a caret with room below
 - WHEN the menu opens
 - THEN it sits under the caret line, inside the viewport and clear of the floating toolbar, no taller than 320 px
 
-### Scenario (boundary): No room below
+### Scenario S2 (boundary): No room below
 - GIVEN a caret near the bottom of the viewport
 - WHEN the menu opens
 - THEN it sits above the caret line
 
-### Scenario (nominal): The left edge stays while the query grows
+### Scenario S3 (nominal): The left edge stays while the query grows
 - GIVEN an open menu
 - WHEN the writer types more letters
 - THEN the left edge of the menu, relative to the text box, does not move
 
-### Scenario (boundary): Pane edge
+### Scenario S4 (boundary): Pane edge
 - GIVEN a caret close to the right edge of a pane
 - WHEN the menu opens
 - THEN the menu is pulled left to stay inside the viewport, at least 8 px from the viewport edge
 
-### Scenario (nominal): The menu follows the caret
+### Scenario S5 (nominal): The menu follows the caret
 | Given | When | Outcome |
 | --- | --- | --- |
 | an open menu | the page scrolls or the window resizes | the menu moves with the caret |
 | an open menu with a long list | the list inside the menu scrolls | the menu does not move |
 
-### Scenario (boundary): The caret scrolls out of the viewport
+### Scenario S6 (boundary): The caret scrolls out of the viewport
 | Given | When | Outcome |
 | --- | --- | --- |
 | the caret scrolled above or below the viewport | the page scrolls | the menu closes |

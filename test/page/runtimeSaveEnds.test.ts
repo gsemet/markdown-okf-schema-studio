@@ -23,9 +23,9 @@ function finishingCell(): { harness: RuntimeHarness; input: ReturnType<typeof op
   return { harness, input, editId };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S12
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S12
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S1
 test("Escape in the cell input closes a cell editor whose final save is in flight", () => {
   const { harness, input, editId } = finishingCell();
   const before = harness.messages.length;
@@ -35,9 +35,11 @@ test("Escape in the cell input closes a cell editor whose final save is in fligh
   assert.equal(posts(harness, "previewEditCancel").length, 0, "the save is not cancelled");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S12
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S13
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S12
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S13
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-270#S1
 test("Escape outside the cell editor closes a cell editor whose final save is in flight", () => {
   const { harness } = finishingCell();
   const before = harness.messages.length;
@@ -89,7 +91,7 @@ const finalSaves = (harness: RuntimeHarness): number =>
   posts(harness, "previewEditSave").filter((message) => message.final === true).length;
 
 for (const editor of EDITORS) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
   test(`${editor.name}: the patch of the save closes the editor`, () => {
     const { harness } = editor.start();
     assert.equal(editing(harness), true, "open while the save is in flight");
@@ -97,7 +99,8 @@ for (const editor of EDITORS) {
     assert.equal(editing(harness), false);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
   test(`${editor.name}: an answer done closes the editor`, () => {
     const { harness, editId } = editor.start();
     harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId, done: true });
@@ -105,8 +108,10 @@ for (const editor of EDITORS) {
   });
 
   for (const answer of ERRORS) {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S4
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-216#S5
     test(`${editor.name}: the error "${answer.error.slice(0, 40)}" leaves it open to retry, with no reopen`, () => {
       const { harness, editId, again } = editor.start();
       harness.dispatchMessage({ type: "previewEditSource", ...IDENTITY, editId, ...answer });
@@ -146,7 +151,8 @@ const NAVIGATIONS: Array<{ name: string; ask: (harness: RuntimeHarness, box: Run
 
 for (const navigation of NAVIGATIONS) {
   for (const ending of ["an answer done", "a patch"] as const) {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S2
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
     test(`${navigation.name} asked during the save is carried out after ${ending}`, () => {
       const harness = createRuntimeHarness();
       const box = openBlockEditorWithSource(harness);
@@ -163,7 +169,8 @@ for (const navigation of NAVIGATIONS) {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S12
 test("a Tab at the last cell during the save adds the row after the answer", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness, { mapped: true, start: [2, 1] });

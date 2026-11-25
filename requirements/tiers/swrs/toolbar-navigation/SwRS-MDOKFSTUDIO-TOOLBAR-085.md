@@ -18,6 +18,15 @@ derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Kind and tooltip
+- id: S2
+  title: The hint never replaces the target
+- id: S3
+  title: A missing or blocked target keeps its link and gains a warning icon
+- id: S4
+  title: Hints survive an in-place content update
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,7 +46,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the page receives previewLinkTargets, the extension SHALL set on every link with a matching request the attribute data-sphinx-preview-link-state to the kind and the title to the path, else the reason, else the request, follow a link to a blocked target with a warning icon that carries the reason, and keep the original navigation request and the look of the link unchanged.
 
-### Scenario (nominal): Kind and tooltip
+### Scenario S1 (nominal): Kind and tooltip
 
 | Given | Outcome |
 | --- | --- |
@@ -46,14 +55,14 @@ When the page receives previewLinkTargets, the extension SHALL set on every link
 | a target with neither path nor reason | the link has the request as its title |
 | two links with the same request | both are marked |
 
-### Scenario (boundary): The hint never replaces the target
+### Scenario S2 (boundary): The hint never replaces the target
 
 | Given | When | Then |
 | --- | --- | --- |
 | a link with request ../x.md and a hint with another path | the hint is applied, then the link is clicked | the navigation request is still ../x.md and the click posts it |
 | a link with a blocked hint | the link is clicked | the original request is posted and the host shows the refusal |
 
-### Scenario (boundary): A missing or blocked target keeps its link and gains a warning icon
+### Scenario S3 (boundary): A missing or blocked target keeps its link and gains a warning icon
 
 - GIVEN a link to a missing file whose hint is blocked with the reason "File not found: docs/guid.md", and a link to an existing file
 - WHEN the links are rendered
@@ -66,7 +75,7 @@ When the page receives previewLinkTargets, the extension SHALL set on every link
 | File not found: {path of the link} | the file does not exist or cannot be read |
 | the refusal text | any other blocked target (outside the workspace, not a regular file, scheme not allowed) |
 
-### Scenario (nominal): Hints survive an in-place content update
+### Scenario S4 (nominal): Hints survive an in-place content update
 
 | Given | When | Then |
 | --- | --- | --- |

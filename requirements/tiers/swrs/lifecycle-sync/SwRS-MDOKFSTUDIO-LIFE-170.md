@@ -19,6 +19,22 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-001
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
+scenarios:
+- id: S1
+  title: Order of sources for each view choice
+- id: S2
+  title: The saved panel state wins
+- id: S3
+  title: The stored value or the setting applies without a saved state
+- id: S4
+  title: A fresh workspace opens on the defaults
+- id: S5
+  title: An invalid value is ignored and the next source is used
+- id: S6
+  title: Zoom is rounded to the grid and clamped
+- id: S7
+  title: Starting on a default posts nothing, and a saved anchor mode that
+    differs is posted once
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -62,7 +78,7 @@ supersedes:
 
 When a page opens, the extension SHALL start each view choice from the saved panel state, else the stored workspace value, else the default of that choice, except the theme mode, which starts from the stored workspace value before the saved panel state.
 
-### Scenario (nominal): Order of sources for each view choice
+### Scenario S1 (nominal): Order of sources for each view choice
 
 The panel state is the state the webview saved with the panel (restored panel or rebuilt page). The stored value is the choice kept for the workspace (see SwRS-MDOKFSTUDIO-LIFE-169). A value of the wrong type or outside the accepted set is skipped and the next source is used.
 
@@ -78,7 +94,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 | Anchor mode | saved anchorToEditor, a boolean | no stored value: the setting markdownOkfSchemaStudio.preview.scrollPreviewWithEditor | the setting value | a saved non-boolean is ignored |
 | Theme mode (exception) | saved previewThemeMode (second) | stored previewThemeMode (first) | cream | only current, dark, white and cream |
 
-### Scenario (nominal): The saved panel state wins
+### Scenario S2 (nominal): The saved panel state wins
 
 | Input | Outcome |
 | --- | --- |
@@ -92,7 +108,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 | Saved viewComments false | the gray chips are hidden and the Comments button is not pressed |
 | Saved anchor mode off and setting on | the anchor mode is off |
 
-### Scenario (nominal): The stored value or the setting applies without a saved state
+### Scenario S3 (nominal): The stored value or the setting applies without a saved state
 
 | Input | Outcome |
 | --- | --- |
@@ -108,7 +124,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 | Restored panel whose saved state holds white and a workspace without a stored mode | the theme mode is white |
 | Restored panel whose saved state holds white and a workspace that stored dark | the theme mode is dark: the stored workspace mode wins over the saved state |
 
-### Scenario (nominal): A fresh workspace opens on the defaults
+### Scenario S4 (nominal): A fresh workspace opens on the defaults
 
 - GIVEN a fresh workspace that stored no choice, a page with no saved state and no setting changed
 - WHEN the preview page starts and nothing is clicked
@@ -121,7 +137,7 @@ The Cream start is the same on a light and on a dark host theme:
 | Fresh workspace, light VS Code theme, 900 px pane (visual scenario theme-zoom/v12) | the html attribute data-sphinx-preview-theme-mode is cream, the Theme button label is "Preview theme: Cream theme", its tooltip is "Cream theme (click for current theme)", the body background is rgb(245, 241, 232) and the text colour is rgb(43, 42, 39) |
 | Fresh workspace, dark VS Code theme, 460 px pane (visual scenario theme-zoom/v13) | the page is the same light cream paper; the host theme is not visible |
 
-### Scenario (refusal): An invalid value is ignored and the next source is used
+### Scenario S5 (refusal): An invalid value is ignored and the next source is used
 
 | Input | Outcome |
 | --- | --- |
@@ -135,7 +151,7 @@ The Cream start is the same on a light and on a dark host theme:
 | Saved zoom of the text big and initial zoom 150 | the saved value is ignored and the zoom is 150 |
 | Boot context whose toolbarCollapsed is missing | the toolbar is collapsed, because only the value false expands it |
 
-### Scenario (boundary): Zoom is rounded to the grid and clamped
+### Scenario S6 (boundary): Zoom is rounded to the grid and clamped
 
 | Input | Outcome |
 | --- | --- |
@@ -144,7 +160,7 @@ The Cream start is the same on a light and on a dark host theme:
 | Host: stored zoom of the text big or NaN, or stored preferences that are not an object | the zoom is 100 |
 | Neither saved state nor initial preference | the zoom is 100 |
 
-### Scenario (boundary): Starting on a default posts nothing, and a saved anchor mode that differs is posted once
+### Scenario S7 (boundary): Starting on a default posts nothing, and a saved anchor mode that differs is posted once
 
 | Input | Outcome |
 | --- | --- |

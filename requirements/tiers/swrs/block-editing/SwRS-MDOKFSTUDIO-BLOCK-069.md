@@ -20,6 +20,27 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
 - StRS-MDOKFSTUDIO-TABLE-006
 depends_on: []
+scenarios:
+- id: S1
+  title: Typing * _ backtick or ~ over a selection wraps it
+- id: S2
+  title: Marker keys stay native
+- id: S3
+  title: Editor key edits keep the browser undo stack
+- id: S4
+  title: No native editing command
+- id: S5
+  title: Home, End and their Shift forms
+- id: S6
+  title: Undo and redo stay in the text box
+- id: S7
+  title: Repeated spaces and Enter are typed as they are
+- id: S8
+  title: Handled keys stop at the document
+- id: S9
+  title: Enter in the alt text of an image validates it
+- id: S10
+  title: Keys that go on to VS Code
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,12 +69,12 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses a key in the text box of an open editor, the page SHALL give it the text-box behaviour of its row in the scenarios (wrap a selection, caret to the start or the end, select-all, undo, repeated spaces and Enter typed as they are), apply every text change as a native undoable edit and keep a key the editor handled from reaching VS Code.
 
-### Scenario (nominal): Typing * _ backtick or ~ over a selection wraps it
+### Scenario S1 (nominal): Typing * _ backtick or ~ over a selection wraps it
 - GIVEN the word `foo` selected in `a foo b`
 - WHEN the writer types * and then * again
 - THEN the text becomes `a *foo* b` and then `a **foo** b`, with `foo` still selected each time (the selection start and the selection end each move by one after every wrap), and the same holds for _, a backtick and ~
 
-### Scenario (refusal): Marker keys stay native
+### Scenario S2 (refusal): Marker keys stay native
 | Input | Outcome |
 | --- | --- |
 | The caret in the text box with nothing selected, the writer types * | A single * is typed |
@@ -62,18 +83,18 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 | A keyboard layout whose AltGr reports ctrlKey and altKey, ~ or a backtick typed with AltGr over a selection | The selection is wrapped |
 | Plain Ctrl+Alt with a marker over a selection | The selection is not wrapped |
 
-### Scenario (nominal): Editor key edits keep the browser undo stack
+### Scenario S3 (nominal): Editor key edits keep the browser undo stack
 - GIVEN a list item continued with Enter, or an indentation by Tab, a marker wrap or a palette shortcut
 - WHEN the writer undoes in the text box
 - THEN the new line or the change disappears and the editor stays open, because the page applied the change through the native insertText or delete command first
 
-### Scenario (boundary): No native editing command
+### Scenario S4 (boundary): No native editing command
 | Input | Outcome |
 | --- | --- |
 | A browser where the editing command is unavailable, the writer types * over a selection | The page splices the text directly, keeps the selection and autosaves |
 | A browser without the editing command, an editor key changes the text | The page splices the value and still posts the autosave |
 
-### Scenario (boundary): Home, End and their Shift forms
+### Scenario S5 (boundary): Home, End and their Shift forms
 | Input | Outcome |
 | --- | --- |
 | End in a text box whose text ends with a line break | The caret sits after the last visible character, before the line break, and the preview does not scroll |
@@ -82,27 +103,27 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 | Shift+Home with a backward selection | The selection keeps its anchor and extends backward to the start |
 | Home with Cmd, Ctrl or Alt held, or during a composition | The key stays native |
 
-### Scenario (nominal): Undo and redo stay in the text box
+### Scenario S6 (nominal): Undo and redo stay in the text box
 | Input | Outcome |
 | --- | --- |
 | An editor with typed text, the writer presses Cmd+Z or Ctrl+Z | The typing is undone in the text box only and the editor stays open and focused; in a block or table-cell text box the undo runs through VS Code's key binding (SwRS-MDOKFSTUDIO-BLOCK-003), in a frontmatter field the key stops at the page and the text box undoes natively |
 | The same keys with Shift+Z or Y | The same for redo: through the key binding in a block or table-cell text box, natively in a frontmatter field |
 | The preview opened through Open With, and then side by side, the same keys | The result is the same in both |
 
-### Scenario (boundary): Repeated spaces and Enter are typed as they are
+### Scenario S7 (boundary): Repeated spaces and Enter are typed as they are
 | Input | Outcome |
 | --- | --- |
 | A nested list editor in the dark theme at 460 px, the writer types six spaces, Enter and a word | The text holds exactly those characters, the focus and the caret stay at the end and the autosave carries the exact text with its newline |
 | The same editor in the light theme at 900 px, the same keys | The same exact text is saved |
 
-### Scenario (nominal): Handled keys stop at the document
+### Scenario S8 (nominal): Handled keys stop at the document
 | Input | Outcome |
 | --- | --- |
 | A keydown of Enter in an editor whose listener prevented the default (Tab, Escape and the arrow keys likewise) | It stops at the document and the default stays prevented, so VS Code runs no shortcut for it |
 | Cmd+A on macOS or Ctrl+A elsewhere in a frontmatter field | The propagation stops, the default is not prevented and the control selects its own text |
 | Cmd+A on macOS or Ctrl+A elsewhere in a block or table-cell text box | The page cancels the native action, the document does not stop the key and VS Code's key binding selects the text of the text box (SwRS-MDOKFSTUDIO-BLOCK-003) |
 
-### Scenario (nominal): Enter in the alt text of an image validates it
+### Scenario S9 (nominal): Enter in the alt text of an image validates it
 | Input | Outcome |
 | --- | --- |
 | An image pasted or picked, so that its alt text is selected, as in `![image.png](image.png)`, the writer presses Enter | The text is unchanged and the caret sits just after the closing parenthesis of the image; no line break is typed |
@@ -110,7 +131,7 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 | Shift+Enter, Cmd+Enter or Ctrl+Enter in the alt text | Not this rule: Shift+Enter stays native, Cmd/Ctrl+Enter is Done |
 | Enter with the caret outside the alt text of an image (in the path, before the image or in other text) | Enter keeps its other behaviour in the row above |
 
-### Scenario (refusal): Keys that go on to VS Code
+### Scenario S10 (refusal): Keys that go on to VS Code
 | Input | Outcome |
 | --- | --- |
 | A keydown of Ctrl+Tab | The page does not stop it, so Ctrl+Tab still switches tabs in VS Code |

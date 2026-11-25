@@ -53,7 +53,8 @@ test("a rename in a standalone file or in Restricted Mode is not refused for the
   assert.equal(t.applied.length, 1, "the label line is renamed in the document");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S8
 test("a rename while a block edit is open changes nothing and answers Save or cancel the open Markdown edit", () => {
   const t = setup({ restrictedReads: false, blockEditOpen: true });
   t.run();

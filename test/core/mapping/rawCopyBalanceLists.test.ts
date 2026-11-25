@@ -4,7 +4,7 @@ import { assertCopy, at } from "./rawCopyBalanceSupport";
 
 const NESTED = ["- parent", "  - child **world**", "  - sibling", "- next", ""].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S3
 test("a nested list crossed at the start keeps the start item's marker and the shift is the shallowest copied marker", async () => {
   await assertCopy(
     NESTED,
@@ -15,7 +15,8 @@ test("a nested list crossed at the start keeps the start item's marker and the s
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S4
 test("a nested list with the end in the same parent item is shifted by the parent's content column", async () => {
   await assertCopy(
     NESTED,
@@ -26,13 +27,14 @@ test("a nested list with the end in the same parent item is shifted by the paren
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S2
 test("both edges in one list item copy its content without the marker or the indentation", async () => {
   const source = ["- first para", "", "  second para", "- next", ""].join("\n");
   await assertCopy(source, at("first para", 6), at("second para", 6), "para\n\n  second", "para\n\nsecond");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S3
 test("the start item deeper than column 3 is moved to column 3, the other lines keep the shift", async () => {
   const source = ["- aaa", "  - bbb", "    - ccc", "      - delta deep", "- echo", ""].join("\n");
   await assertCopy(
@@ -44,7 +46,7 @@ test("the start item deeper than column 3 is moved to column 3, the other lines 
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S2
 test("an ordered list keeps its own number and a task item its box", async () => {
   const ordered = ["3. alpha", "4. bravo word", "5. charlie", ""].join("\n");
   await assertCopy(ordered, at("bravo word", 6), at("charlie", 3), "word\n5. cha", "4. word\n5. cha");
@@ -52,7 +54,7 @@ test("an ordered list keeps its own number and a task item its box", async () =>
   await assertCopy(tasks, at("thing", 1), at("other", 3), "hing\n- [ ] oth", "- [x] hing\n- [ ] oth");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S1
 test("a list in a blockquote: the shift is counted after the quote prefix", async () => {
   const source = ["> - alpha", ">   - bravo word", "> - charlie", "", "after", ""].join("\n");
   await assertCopy(
@@ -64,7 +66,8 @@ test("a list in a blockquote: the shift is counted after the quote prefix", asyn
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S3
 test("a list in an admonition, start in the second item: the opening line and the marker at column 0", async () => {
   const source = [":::{note}", "- item one", "- item two", ":::", "", "After.", ""].join("\n");
   await assertCopy(
@@ -76,7 +79,8 @@ test("a list in an admonition, start in the second item: the opening line and th
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-283#S4
 test("an admonition in a list item, start in its paragraph, end in the next item", async () => {
   const source = ["- item", "", "  :::{note}", "  Note body text.", "  :::", "", "- next", ""].join("\n");
   await assertCopy(

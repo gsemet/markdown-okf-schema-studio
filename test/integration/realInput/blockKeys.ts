@@ -136,8 +136,8 @@ export async function scenarioReviewComments(page: Page, evidence: Evidence): Pr
  * The toolbar Comments button hides every review mark: the former highlight is plain text, out of
  * the Tab order, and a real click on it edits its block (edit mode) instead of opening the popover.
  */
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-012
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S9
 export async function scenarioHiddenReviewMarks(page: Page): Promise<void> {
   const text = "# Review\n\nThe second paragraph has needle text here.\n";
   const sidecar = {
@@ -222,8 +222,8 @@ export async function scenarioHiddenReviewMarks(page: Page): Promise<void> {
  * StRS review-annotations REVIEW-012: the TODO action of the edition palette wraps each line of the
  * block in a TODO comment, one undo restores the lines, and the committed source holds the comment.
  */
-// @tests_req StRS-MDOKFSTUDIO-REVIEW-012
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
+// @accepts_req StRS-MDOKFSTUDIO-REVIEW-012#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160#S7
 export async function scenarioTodoToggle(page: Page): Promise<void> {
   await withSmokeDocument("realinput-todo", async (document) => {
     await openSidePreview(document);
@@ -250,7 +250,7 @@ export async function scenarioTodoToggle(page: Page): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S3
 export async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s2", async (document) => {
     await openSidePreview(document);
@@ -277,8 +277,9 @@ export async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): P
 
 /**
  * T37: Alt+Up/Down on a focused block, and Cmd/Ctrl+Alt+Up/Down inside its text box.
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-014
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-014#S2
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S2
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S6
  */
 export async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Promise<void> {
   const document3 = (order: string[]): string =>
@@ -342,8 +343,8 @@ export async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Pro
 
 /**
  * T39: Shift+click across three blocks, Shift+Up shrinks, Cmd or Ctrl+C copies, Escape clears; CR 157: Right and Escape walk into and out of a table; nothing is edited.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
- * @tests_req StRS-MDOKFSTUDIO-BLOCK-016
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-016#S1
  */
 export async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<void> {
   const text = ["# Selection", "", "Alpha paragraph.", "", "Beta paragraph.", "", "Gamma paragraph.", "",
@@ -425,8 +426,9 @@ function selectedBlocks(page: Page): Promise<SelectedBlock[]> {
 /**
  * Opens the side preview of `document` in edit mode and selects the list that ends on two blank lines. Asserts
  * that the page maps the list up to a blank line, so the host plans a range that ends on it.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-169#S6
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-169#S7
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-174#S5
  */
 async function selectListFollowedByBlankLines(page: Page, document: vscode.TextDocument): Promise<void> {
   await openSidePreview(document);
@@ -507,7 +509,8 @@ async function scenarioPasteAfterListBeforeBlankLines(page: Page, evidence: Evid
 
 /**
  * T41: select two blocks, Alt+Up/Down moves the span, the selection follows
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S2
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S5
  */
 export async function scenarioBlockMoveSelection(page: Page, evidence: Evidence): Promise<void> {
   const document4 = (order: string[]): string =>
@@ -546,8 +549,9 @@ export async function scenarioBlockMoveSelection(page: Page, evidence: Evidence)
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-BLOCK-008
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
+// @accepts_req StRS-MDOKFSTUDIO-BLOCK-008#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S2
 export async function scenarioArrowNavigation(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s3", async (document) => {
     await openSidePreview(document);
@@ -603,8 +607,9 @@ export async function scenarioTableCellEnter(page: Page, evidence: Evidence): Pr
 
 /**
  * RI-T35: Cmd/Ctrl+B in a table cell bolds the selection and Enter saves the cell.
- * @tests_req StRS-MDOKFSTUDIO-TABLE-015
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-085
+ * @accepts_req StRS-MDOKFSTUDIO-TABLE-015#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S2
  */
 export async function scenarioTableCellBold(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t35", async (document) => {
@@ -637,8 +642,9 @@ export async function scenarioTableCellBold(page: Page, evidence: Evidence): Pro
 
 /**
  * RI-T04: one cell edit changes exactly one source line, in a padded and in a compact table.
- * @tests_req StRS-MDOKFSTUDIO-TABLE-014
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-094
+ * @accepts_req StRS-MDOKFSTUDIO-TABLE-014#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-094#S2
  */
 export async function scenarioTableMinimalDiff(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t04", TABLE_DOCUMENT, async (document) => {

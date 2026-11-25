@@ -20,6 +20,26 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-008
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-014
+scenarios:
+- id: S1
+  title: Click on a body cell
+- id: S2
+  title: Edit mode off
+- id: S3
+  title: Loading status until the host sends the table source
+- id: S4
+  title: The clicked cell is selected and its rendered content keeps its width
+- id: S5
+  title: The text box holds the raw Markdown of the clicked cell
+- id: S6
+  title: A click opens the cell with the focus in the text box and the caret at
+    the end
+- id: S7
+  title: The cell editor region shows no status hint
+- id: S8
+  title: Only a well-formed pipe table opens a cell editor
+- id: S9
+  title: A block that is no editable pipe table opens in the raw Markdown editor
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,31 +67,31 @@ default_owner_email: gaetan@xeberon.net
 
 When edit mode is on and the writer clicks a cell of a rendered pipe table, the extension SHALL open a region named "Markdown table cell editor" inside that cell, ask the host for the line range of the table block, and fill the cell text box with the raw Markdown of the cell or, when the block is not an editable pipe table, open the whole block in the raw Markdown editor.
 
-### Scenario (nominal): Click on a body cell
+### Scenario S1 (nominal): Click on a body cell
 - GIVEN edit mode on and a rendered pipe table with a header row and two body rows
 - WHEN the writer clicks the second cell of the first body row
 - THEN a region named "Markdown table cell editor" is placed inside that cell and the page posts one previewEditOpen request with the line and end line of the table block
 
-### Scenario (refusal): Edit mode off
+### Scenario S2 (refusal): Edit mode off
 - GIVEN edit mode off and a rendered pipe table
 - WHEN the reader clicks a cell
 - THEN no cell editor opens and no previewEditOpen is posted
 
-### Scenario (nominal): Loading status until the host sends the table source
+### Scenario S3 (nominal): Loading status until the host sends the table source
 - GIVEN a cell editor opened by a click and no previewEditSource answer yet
 - WHEN the cell editor region is read
 - THEN its only content is a status paragraph reading "Loading Markdown table source…", with no text box yet
 - WHEN the page receives the answer with the table text
 - THEN the status is replaced by the text box and the table bar, and the status now shows the position of the cell
 
-### Scenario (nominal): The clicked cell is selected and its rendered content keeps its width
+### Scenario S4 (nominal): The clicked cell is selected and its rendered content keeps its width
 - GIVEN a cell editor open in a 900 px pane
 - WHEN the page is inspected
 - THEN the cell carries the attribute data-sphinx-preview-table-cell-selected and an outline, and its rendered content is wrapped in an aria-hidden element of height 0 that is invisible but still takes its width, so the column widths do not change
 - WHEN the editor of that cell is closed by Escape
 - THEN the selected mark is removed and the rendered content is back in the cell
 
-### Scenario (nominal): The text box holds the raw Markdown of the clicked cell
+### Scenario S5 (nominal): The text box holds the raw Markdown of the clicked cell
 - GIVEN the table "| a | **y** |" over a delimiter row and a body row "| c | d |"
 - WHEN the writer clicks the header cell "**y**" and, in another session, the body cell "d"
 - THEN the text box holds "**y**" (not the rendered bold text) for the header cell, which is the first model row, and "d" for the body cell, because the delimiter row is skipped when the rendered row is mapped to the model
@@ -79,7 +99,7 @@ When edit mode is on and the writer clicks a cell of a rendered pipe table, the 
 - WHEN the cell is opened
 - THEN the text box holds "padded": only the text between the delimiting pipes, trimmed
 
-### Scenario (nominal): A click opens the cell with the focus in the text box and the caret at the end
+### Scenario S6 (nominal): A click opens the cell with the focus in the text box and the caret at the end
 - GIVEN a cell containing "alpha"
 - WHEN the writer clicks the cell
 - THEN the text box has the focus and the caret sits after the last character
@@ -87,7 +107,7 @@ When edit mode is on and the writer clicks a cell of a rendered pipe table, the 
 - WHEN the writer clicks it
 - THEN the text box has the focus with the caret at position 0, which is also its end
 
-### Scenario (nominal): The cell editor region shows no status hint
+### Scenario S7 (nominal): The cell editor region shows no status hint
 - GIVEN a cell editor open
 - WHEN the cell editor region and the table bar are read
 - THEN the region holds the text box and the buttons only, and the status paragraph is inside the table bar
@@ -95,7 +115,7 @@ When edit mode is on and the writer clicks a cell of a rendered pipe table, the 
 - WHEN the regions are read again
 - THEN the region still holds no status and the bar status shows the new position
 
-### Scenario (boundary): Only a well-formed pipe table opens a cell editor
+### Scenario S8 (boundary): Only a well-formed pipe table opens a cell editor
 A table is editable when it has a header row, a delimiter row whose cells are at least one dash with optional colons (the delimiter rule is /^:?-+:?$/ on each delimiter cell with spaces removed; when a delimiter cell has fewer than three dashes, the delimiter line holds a pipe), the same number of cells in the header and in the delimiter row, and in every body row at least as many cells as the header. The text of a body row after the closing pipe of the header's last column is the row tail (see SwRS-MDOKFSTUDIO-TABLE-094): the preview ignores it and the editor keeps it verbatim.
 
 | Input | Outcome |
@@ -111,7 +131,7 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 | a body row with fewer cells than the header | parse returns no table, no cell editor is built |
 | a body row with text after the closing pipe of its last column, such as "\| a \| 1 \| ^row-a" | parses into rows of the header's cells; the text after the closing pipe is kept as the row tail and a cell editor opens; saving keeps the tail verbatim at the end of its line |
 
-### Scenario (refusal): A block that is no editable pipe table opens in the raw Markdown editor
+### Scenario S9 (refusal): A block that is no editable pipe table opens in the raw Markdown editor
 | Input | Outcome |
 | --- | --- |
 | a cell of a rendered MyST list-table that is not plain (see SwRS-MDOKFSTUDIO-TABLE-055), a raw HTML table or a table inside a {table} directive, in edit mode, after the host sends the block source | the cell shows its rendered content again, the region is renamed "Raw Markdown editor" and a text box labelled "Raw Markdown block" holds the whole block source and the region leaves the cell and sits after the table, which is hidden while its source is edited, so the editor stays in view |

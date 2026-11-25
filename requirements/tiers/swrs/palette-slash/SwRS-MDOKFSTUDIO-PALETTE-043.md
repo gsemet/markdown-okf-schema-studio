@@ -17,6 +17,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
 depends_on: []
+scenarios:
+- id: S1
+  title: Choosing a level
+- id: S2
+  title: Menu entries and tooltip
+- id: S3
+  title: Two lines
+- id: S4
+  title: What counts as a heading line
+- id: S5
+  title: No change or unknown level
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,25 +46,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses the Heading button, the extension SHALL open a menu named Heading with the entries Paragraph and Heading 1 to Heading 5, and apply the chosen level by putting the matching number of # signs and a space in front of every non-blank line that the selection touches, replacing another level, and removing the prefix for Paragraph.
 
-### Scenario (nominal): Choosing a level
+### Scenario S1 (nominal): Choosing a level
 
 - GIVEN a paragraph with the caret in it
 - WHEN the writer presses Heading and chooses Heading 2
 - THEN the list closes and the line starts with ## 
 
-### Scenario (nominal): Menu entries and tooltip
+### Scenario S2 (nominal): Menu entries and tooltip
 
 - GIVEN the palette
 - WHEN the writer hovers the Heading button and opens the menu
 - THEN the tooltip reads Heading level and the menu items carry the option values 0 to 5 with the labels Paragraph, Heading 1 to Heading 5
 
-### Scenario (nominal): Two lines
+### Scenario S3 (nominal): Two lines
 
 - GIVEN the selection a and b on two lines
 - WHEN the level 2 is applied
 - THEN both lines start with ## 
 
-### Scenario (boundary): What counts as a heading line
+### Scenario S4 (boundary): What counts as a heading line
 
 - GIVEN a selection with the line of the table
 - WHEN a level from 0 to 5 is applied
@@ -69,7 +80,7 @@ When the writer presses the Heading button, the extension SHALL open a menu name
 | a single blank line | gets the prefix |
 | other blank lines of a selection | left alone |
 
-### Scenario (refusal): No change or unknown level
+### Scenario S5 (refusal): No change or unknown level
 
 - GIVEN a line that already is a level 2 heading, or the level 9
 - WHEN the action runs

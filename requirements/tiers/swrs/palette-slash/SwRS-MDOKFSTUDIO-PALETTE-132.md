@@ -15,6 +15,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-021
 depends_on: []
+scenarios:
+- id: S1
+  title: Selection
+- id: S2
+  title: Sample
+- id: S3
+  title: The term text
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,19 +38,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Definition list, the extension SHALL add a line `: Definition` below the touched lines and select Definition, or insert a sample term and definition after the text when nothing is selected.
 
-### Scenario (nominal): Selection
+### Scenario S1 (nominal): Selection
 
 - GIVEN the selected line Alpha
 - WHEN Definition list is pressed
 - THEN the line `: Definition` follows Alpha and Definition is selected
 
-### Scenario (nominal): Sample
+### Scenario S2 (nominal): Sample
 
 - GIVEN the caret after Intro
 - WHEN Definition list is pressed
 - THEN the lines Term and `: Definition` follow Intro after a blank line, with Term selected
 
-### Scenario (boundary): The term text
+### Scenario S3 (boundary): The term text
 
 | Input | Outcome |
 | --- | --- |

@@ -19,7 +19,7 @@ test("previewReady without a lock releases nothing", () => {
   assert.deepEqual(lock.onPreviewReady(1), { released: false, flush: [] });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191#S6
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S6
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-105#S7
 test("reloads are deferred while held and flushed once on release", () => {
@@ -57,7 +57,7 @@ test("time alone never releases the lock", () => {
   assert.equal(lock.isHeld, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S7
 test("a save of an unchanged open buffer needs no render (PERF-06)", () => {
   assert.equal(isUnchangedSave({ isActiveDocument: true, documentVersion: 7, stageVersion: 7 }), true);
   assert.equal(isUnchangedSave({ isActiveDocument: true, documentVersion: 8, stageVersion: 7 }), false);
@@ -89,7 +89,8 @@ test("a save of the already rendered buffer is skipped (PERF-06), any other stat
   assert.equal(needsRefresh({ ...rendered, shownStatus: "error" }), true, "the shown error is retried");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S4
 test("an editor the page opened defers page updates and finished renders until it closes (STAB-03)", () => {
   const lock = new EditLock();
   const calls: string[] = [];
@@ -180,7 +181,8 @@ test("a document switch forgets the page editor and drops the old document's wor
   assert.equal(held.shouldDeferResult(), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S2
 test("a table cell editor records its source range at open and clears it when it closes", () => {
   const lock = new EditLock();
   assert.equal(lock.pageCellEditorRange, undefined);
@@ -200,7 +202,8 @@ test("a table cell editor records its source range at open and clears it when it
   assert.equal(lock.pageCellEditorRange, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-119
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-119#S2
 test("a change before the cell editor's table moves its range, one inside it overlaps", () => {
   const lock = new EditLock();
   assert.equal(lock.trackPageCellEditor([{ rangeOffset: 0, rangeLength: 0, text: "x" }]), "none", "no cell editor");

@@ -61,7 +61,8 @@ const THEMES = [
  * keyboard moves the selection off the hovered block, the actions are on the selected block only;
  * a pointer move hands them back to the hovered block and the selection ring goes away.
  */
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S9
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();

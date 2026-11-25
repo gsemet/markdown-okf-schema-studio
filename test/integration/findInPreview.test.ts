@@ -69,7 +69,7 @@ const LIGHT_THEME = "Default Light Modern";
  * only takes the screenshots (on the code that has no find bar), anything else runs the checks and
  * takes the "after" screenshots into `STUDIO_FIND_SHOTS` (default: the e2e report folder).
  */
-// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-003
+// @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-003#S1
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();
@@ -202,7 +202,8 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
       document.hasFocus() && !document.documentElement.hasAttribute("data-sphinx-preview-block-editing")
       && document.querySelector("[data-sphinx-preview-block-editor]") === null));
   };
-  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S2
+  // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009#S3
   // CR 196: Cmd/Ctrl+F with the focus in a block editor's text box, the query typed at once. The
   // page takes the key and opens the bar without waiting for the host: every typed key ends in the
   // query, none in the text box, and the Markdown is unchanged (the unchanged editor closes when
@@ -271,7 +272,8 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
     await settle("the find field to hold the focus", findFieldFocused);
     await page.keyboard.type("studio");
     const count = async (): Promise<string> => (await (await liveFrame(page)).locator("[data-find-count]").textContent()) ?? "";
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S2
     // Headline, paragraph x2, admonition, table, link, math, last words: "studio" in any case.
     await settle("the match count", async () => /^1 of \d+$/u.test(await count()));
     const total = Number((await count()).split(" of ")[1]);
@@ -287,7 +289,7 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
     assert.equal(await page.locator(".webview-find-widget:visible").count(), 0, "the native webview find stayed closed");
     assert.equal(notes.getText(), SOURCE);
 
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S2
     // Match case narrows the matches; Escape closes the bar.
     await (await liveFrame(page)).locator("[data-find-case]").click();
     await settle("a narrower count", async () => Number((await count()).split(" of ")[1]) < total);
@@ -306,7 +308,8 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
       await (await liveFrame(page)).locator("h2", { hasText: "Details" }).getAttribute("data-okf-fold") === "open");
     assert.equal(await count(), "1 of 1");
 
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
     // Replace all: the matched spans only, one undo step. The link label is replaced and its target
     // kept; a match split by markup is skipped (the math is no searchable text: KaTeX's output is
     // hidden from the find index).

@@ -16,6 +16,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-005
 depends_on: []
+scenarios:
+- id: S1
+  title: Shell change
+- id: S2
+  title: Content bounds
+- id: S3
+  title: Status line bounds
+- id: S4
+  title: Another document, folders or startup setting
+- id: S5
+  title: Page not ready for the previous render
+- id: S6
+  title: The wait of 2 seconds for a patched page
+- id: S7
+  title: Page created again by VS Code
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,7 +50,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a render changes the page shell, for example a diagram engine or math appears or disappears, or cannot otherwise be applied to the loaded page as a content patch, the extension SHALL load a new page document instead of a content patch.
 
-### Scenario (nominal): Shell change
+### Scenario S1 (nominal): Shell change
 
 | Input | Outcome |
 | --- | --- |
@@ -43,14 +58,14 @@ When a render changes the page shell, for example a diagram engine or math appea
 | A page where Mermaid appears or disappears | The shell keys differ and the whole page is assigned |
 | A render that only changes text | The shell keys are equal, so the patch is used |
 
-### Scenario (boundary): Content bounds
+### Scenario S2 (boundary): Content bounds
 
 | Input | Outcome |
 | --- | --- |
 | New content that holds a script element or a nonce attribute | No patch is planned and the whole page loads |
 | A content container of 20 MiB plus one character | The patch is refused, because MAX_PATCH_CONTENT_LENGTH is 20 MiB, and the whole page loads |
 
-### Scenario (boundary): Status line bounds
+### Scenario S3 (boundary): Status line bounds
 
 | Input | Outcome |
 | --- | --- |
@@ -59,7 +74,7 @@ When a render changes the page shell, for example a diagram engine or math appea
 | A status line longer than 20000 characters | diagnosticsFitPatch is false and the whole page loads |
 | A severity longer than 50 characters | diagnosticsFitPatch is false and the whole page loads |
 
-### Scenario (refusal): Another document, folders or startup setting
+### Scenario S4 (refusal): Another document, folders or startup setting
 
 | Input | Outcome |
 | --- | --- |
@@ -68,14 +83,14 @@ When a render changes the page shell, for example a diagram engine or math appea
 | The new render uses other resource folders | A new document is loaded the same way |
 | A change of showComments, which the page follows through a message | The context key is not affected and a patch stays possible |
 
-### Scenario (refusal): Page not ready for the previous render
+### Scenario S5 (refusal): Page not ready for the previous render
 
 | Input | Outcome |
 | --- | --- |
 | A render shown while the page of the previous render has not reported ready, then a newer render finishes | The whole page is assigned |
 | A patch posted and not yet acknowledged, then a newer render finishes | A further patch is addressed to the identifiers the page will have, because pageHasStage accepts the patched request id |
 
-### Scenario (boundary): The wait of 2 seconds for a patched page
+### Scenario S6 (boundary): The wait of 2 seconds for a patched page
 
 | Input | Outcome |
 | --- | --- |
@@ -84,7 +99,7 @@ When a render changes the page shell, for example a diagram engine or math appea
 | Three patches posted in a row and a ready report for the first | The 2 second wait restarts for the newest stage |
 | A ready report that names the newest stage | The timer is cleared and the document is kept |
 
-### Scenario (nominal): Page created again by VS Code
+### Scenario S7 (nominal): Page created again by VS Code
 
 - GIVEN a page patched several times whose webview is created again when the editor moves to another window
 - WHEN the new page reports ready with the identifiers of the last assignment, not those of the current render

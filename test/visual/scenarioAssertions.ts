@@ -717,7 +717,6 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
     ["expanded", NARROW360, "360"],
     ["collapsed", NARROW360, "360"],
   ] as const).map(([state, viewport, label]) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-001
     id: `toolbar-rows-${state}-${mode ?? theme}-${label}`,
     fixture: "32-readme-margin-break",
     theme,

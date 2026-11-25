@@ -9,7 +9,8 @@ export const NARROW280 = { width: 280, height: 800 };
 
 export const TABLE_CELL_ROOM_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S5
     id: "table-editing/v29-cell-editor-clamped-light-280",
     fixture: "08-okf-schema",
     theme: "light",

@@ -197,7 +197,6 @@ export async function scenarioHiddenPreviewCatchesUp(page: Page, evidence: Evide
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-LIFE-001
 export async function scenarioTitleBarButton(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t36", async (document) => {
     await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
@@ -213,7 +212,6 @@ export async function scenarioTitleBarButton(page: Page, evidence: Evidence): Pr
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
 // @tests_req SwRS-MDOKFSTUDIO-THEME-016#S7
 /** RI-T38: the anchor button needs a paired text editor; a reopened preview starts in preview mode. */
 export async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<void> {
@@ -448,7 +446,8 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S2
 /** RI-T39: files opened while the side preview has focus land in another group. */
 export async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise<void> {
   const fixture = createFixture("realinput-t39", {

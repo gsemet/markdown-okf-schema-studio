@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Nominal case
+- id: S2
+  title: Boundary cases
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 While a line marker is shown, the page SHALL keep it when the reader scrolls, draw it again at its source line after a re-render, a content patch or a layout change, and remove it when the reader presses the pointer in the page, when an edit starts, or move it when another line is requested.
 
-### Scenario (nominal): Nominal case
+### Scenario S1 (nominal): Nominal case
 
 - GIVEN a line marker is shown on line 20
 - WHEN the reader scrolls, resizes the pane, or the page content is replaced
 - THEN the marker is drawn again on line 20; a pointer press in the page then removes it
 
-### Scenario (boundary): Boundary cases
+### Scenario S2 (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

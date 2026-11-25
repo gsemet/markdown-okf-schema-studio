@@ -7,7 +7,8 @@ from playwright.sync_api import Page
 from capture_support import Failure
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S1
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S9
 def check_table_menu_above_handles(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """A row handle that lands on a button of the table bar (a handle placed before the bar grew or
   wrapped, or a table pushed right of the bar) must not take the press: the bar paints above the

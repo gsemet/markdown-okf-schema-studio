@@ -27,7 +27,7 @@ function siteLinks(html: string): string[] {
 }
 
 test("every site token equals its variable in the cream block of the extension", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S4
   const cream = creamBlock();
   assert.deepEqual(Object.keys(SITE_TOKEN_SOURCES).sort(), Object.keys(SITE_TOKENS).sort());
   for (const [token, source] of Object.entries(SITE_TOKEN_SOURCES)) {
@@ -38,7 +38,8 @@ test("every site token equals its variable in the cream block of the extension",
 });
 
 test("no page or stylesheet has a dark mode, a theme switch or a former palette", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S2
   const documents = [pageDocument("Studio", "index.html", "<h1>x</h1>"), viewerDocument(VIEWER_PAGE, FOOTER), SITE_CSS];
   for (const html of documents) {
     for (const forbidden of ["prefers-color-scheme: dark", "prefers-color-scheme:dark", "data-theme", "req-theme", 'id="theme"', ...FORMER_VALUES]) {
@@ -48,7 +49,7 @@ test("no page or stylesheet has a dark mode, a theme switch or a former palette"
 });
 
 test("a main page and a viewer page carry the same brand and the five links, only the viewer has a breadcrumb", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
   const expected = ["Home", "Contributing", "How we ship", "Gallery", "Requirements"];
   const main = pageDocument("Studio", "index.html", "<h1>x</h1>");
   const viewer = viewerDocument(VIEWER_PAGE, FOOTER);
@@ -62,7 +63,7 @@ test("a main page and a viewer page carry the same brand and the five links, onl
 });
 
 test("the main page stylesheet uses the site tokens and the viewer's typography", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S3
   const html = pageDocument("Studio", "index.html", "<h1>x</h1>");
   assert.ok(html.includes("--bg:#f5f1e8") && html.includes("--ink:#2b2a27") && html.includes("--link:#a14e32"));
   assert.ok(html.includes("main h1, main h2, main h3 { font-family: var(--serif);"));
@@ -70,7 +71,7 @@ test("the main page stylesheet uses the site tokens and the viewer's typography"
 });
 
 test("the social card documents are cream", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S3
   for (const html of [cardDocument(simpleCard("Eyebrow", "Headline", "Line")), cardDocument(levelCardBody("areas")), cardDocument(categoryCardBody({ id: "myst", title: "MyST syntax", description: "", colour: "#7c3aed", useCases: 1, behaviours: 1, linkedPercent: 100 }))]) {
     assert.ok(html.includes("#f5f1e8"));
     for (const former of [...FORMER_VALUES, "--accent", "rgba(14, 105, 116"]) assert.ok(!html.includes(former), former);
@@ -78,7 +79,8 @@ test("the social card documents are cream", () => {
 });
 
 test("the stylesheet keeps wide content and the breadcrumb inside the page", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S2
   assert.ok(/pre\{max-width:100%;overflow-x:auto;/u.test(SITE_CSS));
   assert.ok(SITE_CSS.includes("code{overflow-wrap:anywhere;") && SITE_CSS.includes("pre code{overflow-wrap:normal;"));
   assert.ok(SITE_CSS.includes("table{display:block;max-width:100%;overflow-x:auto}"));

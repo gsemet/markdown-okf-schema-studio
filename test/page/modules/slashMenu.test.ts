@@ -137,7 +137,7 @@ const buttonIds = (root: FakeElement): string[] =>
 // ---------------------------------------------------------------------------------------------
 // Trigger rules
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-232
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-232#S1
 test("P11: a slash at a line start or after whitespace may open the menu, other slashes may not", () => {
   const { slash } = setup("gfm");
   assert.equal(slash.canOpenAt("/", 0), true);
@@ -219,7 +219,7 @@ test("P11: a slash typed while text is selected does not open the menu", () => {
 
 const CARET_DEPENDENT = ["colorCode", "listTable", "pipeTable"];
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S1
 test("P11: the menu lists exactly the actions of the palette for each mode", () => {
   const expected: Record<string, string[]> = {};
   for (const mode of ["strict", "gfm", "myst"] as const) {
@@ -243,7 +243,8 @@ test("P11: the menu lists exactly the actions of the palette for each mode", () 
   assert.equal(expected.myst.includes("figure"), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-085
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-085#S5
 test("P11: the table cell palette lists only the actions allowed in a cell", () => {
   const h = setup("myst", "", "cell");
   const entries = h.palette.menuEntries();
@@ -271,7 +272,8 @@ test("P11: heading is offered as Heading 1 to 5 and Paragraph, alerts and admoni
   assert.ok(heading.icon.includes("<svg"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S4
 test("P11: the MyST slash menu lists every admonition directive, each with its own icon", () => {
   const entries = setup("myst").palette.menuEntries();
   const types = ["note", "tip", "hint", "important", "warning", "caution", "attention", "danger", "error",
@@ -295,7 +297,7 @@ test("P11: the MyST slash menu lists every admonition directive, each with its o
   assert.equal(gfm.some((entry) => entry.key.startsWith("admonition:")), false, "GFM mode has no MyST admonition");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S4
 test("P11: /versionadded inserts a valid version admonition with the version selected", () => {
   for (const type of ["versionadded", "versionchanged", "deprecated"]) {
     const h = setup("myst", "");
@@ -319,7 +321,7 @@ test("P11: the colour-code button is listed only with the caret inside a colour 
 // ---------------------------------------------------------------------------------------------
 // Ranking
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240#S1
 test("P11: ranking puts a prefix before a word start before a subsequence", () => {
   const { slash } = setup("gfm");
   const entry = (label: string, aliases: string[] = []): EditPaletteMenuEntry =>
@@ -339,7 +341,8 @@ test("P11: ranking puts a prefix before a word start before a subsequence", () =
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-017#S3
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-263
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-263#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-263#S2
 test("P11: the registry's aliases find the expected command first", () => {
   const first = (mode: EditActionMode, query: string): string | undefined => {
     const h = setup(mode);
@@ -384,7 +387,7 @@ test("P11: the registry's aliases find the expected command first", () => {
 // ---------------------------------------------------------------------------------------------
 // Keyboard, mouse, accessibility
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-242
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-242#S1
 test("P11: the arrows move through the list and wrap; typing filters and resets the highlight", () => {
   const h = setup("gfm");
   h.type("/");
@@ -635,7 +638,7 @@ test("P11: moving the caret out of the /query closes the menu", () => {
   assert.equal(i.ids()[0], "todo", "and filters by the text up to the caret: /t");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-252
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-252#S3
 test("P11: ARIA: listbox, options, activedescendant on the text box and a polite live count", () => {
   const h = setup("gfm");
   h.type("/");
@@ -674,7 +677,8 @@ test("P11: entry text is set as text, never as markup", () => {
 // ---------------------------------------------------------------------------------------------
 // Placement
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256#S5
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256#S6
 test("P11: the menu opens under the caret inside the viewport and flips above near the bottom", () => {
   const h = setup("gfm");
   const body = h.doc.body as unknown as { appendChild(node: FakeElement): FakeElement };
@@ -704,7 +708,8 @@ test("P11: the menu opens under the caret inside the viewport and flips above ne
   assert.equal(Number.parseInt(edge.styles.get("left") ?? "0", 10) <= 1000 - 360 - 8, true, "kept inside the right edge");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256#S5
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256#S6
 test("P11: the menu follows the caret on scroll and closes when the caret scrolls out of view", () => {
   const h = setup("gfm");
   h.type("/");
@@ -718,7 +723,7 @@ test("P11: the menu follows the caret on scroll and closes when the caret scroll
   assert.equal((h.win.listeners.get("scroll") ?? []).length, 0, "listener removed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256#S3
 test("P11: the menu keeps the same left edge as the query grows", () => {
   const h = setup("gfm");
   h.type("/");
@@ -745,7 +750,8 @@ test("P11 r2: /bullet /ul /- find the Bulleted list, /num /ol /numbered the Numb
   assert.ok(first("myst", "list").indexOf("deflist") > 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277#S2
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-277#S4
 test("P11 r2: choosing the list entries writes the list prefix as one edit", () => {
   const h = setup("strict", "Intro\n");
   h.type("/bullet");
@@ -758,7 +764,8 @@ test("P11 r2: choosing the list entries writes the list prefix as one edit", () 
   assert.equal(n.box.value, "Intro\n1. ");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240#S5
 test("P11 r2: in MyST the MyST entry ranks before its GFM equivalent; GFM and exact labels are unchanged", () => {
   const first = (mode: EditActionMode, query: string): string | undefined => {
     const h = setup(mode);
@@ -780,7 +787,7 @@ test("P11 r2: in MyST the MyST entry ranks before its GFM equivalent; GFM and ex
   assert.equal(first("myst", "alert"), "alert", "an exact label of the picker");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240#S5
 test("P11 r2: the best match being only fuzzy leaves Enter and Tab to the text unless the user moved", () => {
   const h = setup("strict", "x ");
   h.type("/cbl");
@@ -804,7 +811,8 @@ test("P11 r2: the best match being only fuzzy leaves Enter and Tab to the text u
   assert.equal(p.key("Enter").consumed, true, "a prefix match applies");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256#S5
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256#S6
 test("P11 r2: scrolling inside the menu does not move it; page scroll does", () => {
   const h = setup("gfm");
   h.type("/");

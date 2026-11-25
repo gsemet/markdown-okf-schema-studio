@@ -27,7 +27,8 @@ async function pageWhenSettled(t: TestContext, command: () => Promise<unknown>, 
   return html;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S8
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S15
 test("Open Preview to Side completes once the page shows the rendered document, not the pending status page", async (t) => {
   const studio = startStudio(t.mock.timers);
   t.after(() => studio.close());
@@ -37,7 +38,7 @@ test("Open Preview to Side completes once the page shows the rendered document, 
   assert.match(html, /admonition/u, "the page shows the admonition of the source");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S4
 test("Open Preview to Side on the shown document again, and Refresh Preview, complete once the page shows the document", async (t) => {
   const studio = startStudio(t.mock.timers);
   t.after(() => studio.close());

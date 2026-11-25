@@ -59,7 +59,7 @@ def run(repo: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_a_group_gets_the_commit_first(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     sha = commit_text(repo, changelog_with("- A tooltip. (CR-463 change-bar-tooltip, PR #476, issue #413)\n"))
@@ -70,7 +70,7 @@ def test_a_group_gets_the_commit_first(tmp_path: Path) -> None:
     assert text.endswith(OLD)
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_gitlab_and_jira_groups_are_recognised(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     sha = commit_text(repo, changelog_with("- A fix. (MR !476, issue PROJ-12)\n"))
@@ -78,7 +78,7 @@ def test_gitlab_and_jira_groups_are_recognised(tmp_path: Path) -> None:
     assert f"- A fix. (commit {sha}, MR !476, issue PROJ-12)\n" in changelog(repo).read_text(encoding="utf-8")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_a_line_without_group_gets_one(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     sha = commit_text(repo, changelog_with("- A plain line (see the guide).\n"))
@@ -86,7 +86,7 @@ def test_a_line_without_group_gets_one(tmp_path: Path) -> None:
     assert f"- A plain line (see the guide). (commit {sha})\n" in changelog(repo).read_text(encoding="utf-8")
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_a_multi_line_bullet_takes_the_commit_of_its_first_line(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     first = commit_text(repo, changelog_with("- A long line\n  on three\n  physical lines.\n"))
@@ -96,7 +96,7 @@ def test_a_multi_line_bullet_takes_the_commit_of_its_first_line(tmp_path: Path) 
     assert f"- A long line\n  on three\n  physical lines. (commit {first}, PR #9)\n" in text
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_two_bullets_get_their_own_commit(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     one = commit_text(repo, changelog_with("- First. (PR #1)\n"))
@@ -108,7 +108,7 @@ def test_two_bullets_get_their_own_commit(tmp_path: Path) -> None:
     assert f"- Second. (commit {two}, PR #2)\n" in text
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_a_second_run_changes_nothing(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     commit_text(repo, changelog_with("- First. (PR #1)\n- Second.\n"))
@@ -119,7 +119,7 @@ def test_a_second_run_changes_nothing(tmp_path: Path) -> None:
     assert changelog(repo).read_bytes() == before
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S2
 def test_an_uncommitted_changelog_is_refused(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     commit_text(repo, changelog_with("- First. (PR #1)\n"))
@@ -138,7 +138,7 @@ def side_branch_line(repo: Path, unreleased: str) -> str:
     return sha
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S2
 def test_a_commit_not_on_the_base_is_refused(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     side_branch_line(repo, "- Foreign line here. (PR #3)\n")
@@ -149,7 +149,7 @@ def test_a_commit_not_on_the_base_is_refused(tmp_path: Path) -> None:
     assert changelog(repo).read_bytes() == before
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_an_empty_section_changes_nothing(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     before = changelog(repo).read_bytes()
@@ -159,7 +159,7 @@ def test_an_empty_section_changes_nothing(tmp_path: Path) -> None:
     assert changelog(repo).read_bytes() == before
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
 def test_the_written_file_has_lf_line_endings(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     commit_text(repo, changelog_with("- First. (PR #1)\n- Second.\n"))
@@ -167,7 +167,8 @@ def test_the_written_file_has_lf_line_endings(tmp_path: Path) -> None:
     assert b"\r" not in changelog(repo).read_bytes()
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S2
 def test_skip_missing_leaves_a_foreign_line_and_updates_the_others(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     one = commit_text(repo, changelog_with("- Own line. (PR #1)\n"))

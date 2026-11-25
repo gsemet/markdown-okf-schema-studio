@@ -17,6 +17,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-005
 depends_on: []
+scenarios:
+- id: S1
+  title: Changed include
+- id: S2
+  title: Which file events render again
+- id: S3
+  title: Folders the preview ignores
+- id: S4
+  title: Preview setting
+- id: S5
+  title: Other setting section
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +48,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a file that the shown render depends on is changed, created, deleted or renamed below the preview's root, or a markdownOkfSchemaStudio preview, plantuml or frontmatter setting changes, the extension SHALL render the shown document again or bring the page up to date, ignoring file events below build and tool folders of that root.
 
-### Scenario (nominal): Changed include
+### Scenario S1 (nominal): Changed include
 
 - GIVEN a preview whose render includes preview-refresh.md
 - WHEN preview-refresh.md changes on disk
 - THEN the preview renders again and shows the updated include text
 
-### Scenario (boundary): Which file events render again
+### Scenario S2 (boundary): Which file events render again
 
 | Input | Outcome |
 | --- | --- |
@@ -51,7 +62,7 @@ When a file that the shown render depends on is changed, created, deleted or ren
 | the reader renames parts/intro.md to parts/start.md, and the render includes parts/intro.md | the preview renders again and shows the include as unresolved or as the new file |
 | a rename of a file that is not a dependency | no render starts |
 
-### Scenario (refusal): Folders the preview ignores
+### Scenario S3 (refusal): Folders the preview ignores
 
 | Input | Outcome |
 | --- | --- |
@@ -60,13 +71,13 @@ When a file that the shown render depends on is changed, created, deleted or ren
 | a workspace at /home/me/tmp/book, an included file changes on disk | the preview renders again: only the segments below the root are checked |
 | a file at /home/me/tmp/book/out/x.md changes | ignored: the out segment is below the root |
 
-### Scenario (nominal): Preview setting
+### Scenario S4 (nominal): Preview setting
 
 - GIVEN an open preview and a change of markdownOkfSchemaStudio.preview.incrementalUpdates
 - WHEN the settings event arrives
 - THEN the session's configuration holds the new value and the next update uses it
 
-### Scenario (refusal): Other setting section
+### Scenario S5 (refusal): Other setting section
 
 - GIVEN a change of a setting outside the three sections, such as markdownOkfSchemaStudio.comments.authorName
 - WHEN the settings event arrives

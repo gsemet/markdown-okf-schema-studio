@@ -124,7 +124,7 @@ export function measurePopover(): ContrastRow[] {
 const HOSTS = ["Default Dark Modern", "Default Light Modern"] as const;
 const MODES = ["current", "dark", "white", "cream"] as const;
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-002
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-002#S2
 /** review-annotations/r07: the open thread popover reads at 4.5:1 on every host and preview theme. */
 export async function scenarioCommentContrast(page: Page): Promise<void> {
   const settings = vscode.workspace.getConfiguration("markdownOkfSchemaStudio.comments");

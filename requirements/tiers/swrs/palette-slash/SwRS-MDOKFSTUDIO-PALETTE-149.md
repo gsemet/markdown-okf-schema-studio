@@ -17,6 +17,13 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-013
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-039
+scenarios:
+- id: S1
+  title: Key chosen
+- id: S2
+  title: Invalid key
+- id: S3
+  title: Keys that give no edit
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,19 +40,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer chooses a key in the Citation list, the extension SHALL write {cite} with the key in backticks in place of the selection, and produce no edit for a key that is empty or that holds a blank, a comma, a backtick, an angle bracket or a line break.
 
-### Scenario (nominal): Key chosen
+### Scenario S1 (nominal): Key chosen
 
 - GIVEN the text claim and the key smith2024
 - WHEN the action runs
 - THEN the text is claim {cite}`smith2024` with the caret after it, and a selection is replaced
 
-### Scenario (refusal): Invalid key
+### Scenario S2 (refusal): Invalid key
 
 - GIVEN a key that contains a blank or a comma
 - WHEN the action runs
 - THEN no edit is produced
 
-### Scenario (boundary): Keys that give no edit
+### Scenario S3 (boundary): Keys that give no edit
 
 | Input | Outcome |
 | --- | --- |

@@ -17,6 +17,21 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-006
+scenarios:
+- id: S1
+  title: Tab along a row and across rows
+- id: S2
+  title: Shift+Tab and held modifiers
+- id: S3
+  title: ArrowLeft and ArrowRight at the edges of the text
+- id: S4
+  title: ArrowUp and ArrowDown at the first and last line
+- id: S5
+  title: Keys that stay native
+- id: S6
+  title: No cell in the arrow direction
+- id: S7
+  title: Home and End in a wide table
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,13 +54,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text in a cell text box, the extension SHALL move the editor to the next, previous or neighbouring rendered cell, with the caret at the end of its text (at the start for the cell to the right and the cell below), and leave the key to the browser or hand it to block-to-block navigation when no cell can take it.
 
-### Scenario (nominal): Tab along a row and across rows
+### Scenario S1 (nominal): Tab along a row and across rows
 
 - GIVEN a two-column table with a header row and two body rows, the editor in the first header cell
 - WHEN the writer presses Tab four times
 - THEN the editor visits the second header cell, the first and second cell of the first body row, and the first cell of the second body row, each with the caret at the end of its text, with the same edit session and no final save
 
-### Scenario (boundary): Shift+Tab and held modifiers
+### Scenario S2 (boundary): Shift+Tab and held modifiers
 
 | Input | Outcome |
 | --- | --- |
@@ -55,19 +70,19 @@ When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text i
 | Ctrl+Tab in a cell (Tab with Cmd, Ctrl or Alt is not handled by the cell editor) | The editor does not move |
 | Shift+Ctrl+Tab in a cell | The editor does not move |
 
-### Scenario (nominal): ArrowLeft and ArrowRight at the edges of the text
+### Scenario S3 (nominal): ArrowLeft and ArrowRight at the edges of the text
 
 - GIVEN the editor in the first body cell with the caret at the end of its text
 - WHEN the writer presses ArrowRight, then ArrowLeft at the start of the second cell
 - THEN the editor moves to the second cell with the caret at its start, then back to the first cell with the caret at its end; the moved-from cell text is autosaved, with no final save
 
-### Scenario (nominal): ArrowUp and ArrowDown at the first and last line
+### Scenario S4 (nominal): ArrowUp and ArrowDown at the first and last line
 
 - GIVEN the editor in the first body cell of a table with two body rows
 - WHEN the writer presses ArrowDown at the end of the text, then ArrowUp at the start of the next cell
 - THEN the editor moves to the cell below with the caret at its start, then back up with the caret at the end of the upper cell
 
-### Scenario (boundary): Keys that stay native
+### Scenario S5 (boundary): Keys that stay native
 
 | Input | Outcome |
 | --- | --- |
@@ -79,7 +94,7 @@ When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text i
 | The same table with a matching third cell in the model, ArrowRight | The editor moves to that cell |
 | End pressed with Cmd, Ctrl or Alt, or during an IME composition | The cell editor leaves it to the browser |
 
-### Scenario (boundary): No cell in the arrow direction
+### Scenario S6 (boundary): No cell in the arrow direction
 
 - GIVEN the editor in the first header cell with the caret at the start and a block above the table
 - WHEN the writer presses ArrowUp
@@ -87,7 +102,7 @@ When the writer presses Tab, Shift+Tab or an arrow key at the edge of the text i
 
 The same hand-over to the next block applies with the editor in the last column of the last row when the writer presses ArrowRight at the end of the text, then ArrowDown at the last line.
 
-### Scenario (nominal): Home and End in a wide table
+### Scenario S7 (nominal): Home and End in a wide table
 
 - GIVEN the editor in the far-right cell of a sixteen-column table wider than the pane
 - WHEN the writer presses End

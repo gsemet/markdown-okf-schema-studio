@@ -79,7 +79,8 @@ function setup(options: { state?: Record<string, unknown>; busy?: boolean } = {}
   return { page, blocks, fold, layouts, state: () => state, hidden, toggleOf, press, key };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S2
 test("a heading with a section gets a chevron, a heading without one does not", () => {
   const { page, blocks, toggleOf } = setup();
   const empty = page.block("H2", "Empty");
@@ -92,7 +93,8 @@ test("a heading with a section gets a chevron, a heading without one does not", 
   assert.equal(toggleOf(empty), undefined, "an empty section has nothing to fold");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S2
 test("pressing the chevron folds the section up to the next heading of the same level and again unfolds it", () => {
   const { blocks, press, hidden, toggleOf, layouts, page } = setup();
   const calls = press(blocks[2]!);
@@ -110,7 +112,7 @@ test("pressing the chevron folds the section up to the next heading of the same 
   assert.equal(blocks[3]!.hasAttribute("hidden"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S2
 test("the folded headings are kept per document in the state and never touch the text", () => {
   const { blocks, press, state } = setup({ state: { viewZoom: 120 } });
   const before = blocks.map((block) => block.textContent);
@@ -119,7 +121,7 @@ test("the folded headings are kept per document in the state and never touch the
   assert.deepEqual(blocks.map((block) => block.textContent), before);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S2
 test("a reload folds the sections kept in the state, and another document's keys are left alone", () => {
   const { hidden, state, fold } = setup({
     state: { headingFolds: { "file:///a.md": ["2|B|0"], "file:///other.md": ["1|X|0"] } },
@@ -129,7 +131,7 @@ test("a reload folds the sections kept in the state, and another document's keys
   assert.deepEqual(state()?.headingFolds, { "file:///other.md": ["1|X|0"] });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S1
 test("apply puts the folds back on content that was replaced", () => {
   const { page, fold, press, blocks } = setup();
   press(blocks[2]!);
@@ -140,7 +142,8 @@ test("apply puts the folds back on content that was replaced", () => {
   assert.equal(fresh[2]!.getAttribute("data-okf-fold"), "closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S5
 test("fold all folds every section that has content and unfold all opens them, from the toolbar button too", () => {
   const { blocks, fold, hidden, page, state } = setup();
   clickButton(page);
@@ -156,14 +159,16 @@ test("fold all folds every section that has content and unfold all opens them, f
   assert.equal(fold.anyFolded(), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S6
 test("fold all and unfold all do nothing while an editor is open", () => {
   const { fold, hidden, blocks } = setup({ busy: true });
   fold.foldAll();
   assert.deepEqual(hidden(), blocks.map(() => false));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S2
 test("the section shortcut folds the section at the reading line, or the focused heading's", () => {
   const { page, blocks, key, hidden } = setup();
   blocks.forEach((block, index) => { block.top = index * 20 - 50; });
@@ -177,7 +182,7 @@ test("the section shortcut folds the section at the reading line, or the focused
   assert.equal(hidden()[8], false, "and folds the same section again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
 test("the section shortcut ignores keys typed in a text box and other key chords", () => {
   const { blocks, key, hidden } = setup();
   const textarea = new Node("TEXTAREA");
@@ -187,7 +192,7 @@ test("the section shortcut ignores keys typed in a text box and other key chords
   assert.deepEqual(hidden(), blocks.map(() => false));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-006
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-006#S3
 test("revealing a block unfolds every folded section around it and leaves the others folded", () => {
   const { blocks, fold, hidden, press, layouts } = setup();
   press(blocks[0]!);
@@ -199,7 +204,7 @@ test("revealing a block unfolds every folded section around it and leaves the ot
   assert.ok(layouts.length >= 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-006
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-006#S1
 test("the browser find reaching hidden text unfolds its section (beforematch)", () => {
   const { page, blocks, press, hidden } = setup();
   press(blocks[2]!);

@@ -15,7 +15,8 @@ import { PALETTE_ICONS } from "../../../src/core/palette/paletteIcons";
 const descriptors = PALETTE_ACTION_IDS.map((id) => [id, PALETTE_ACTIONS[id] as PaletteActionDescriptor] as const);
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-017#S4
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S3
 test("the registry lists every palette action once, in display order", () => {
   assert.deepEqual(PALETTE_ACTION_IDS, [
     "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence",
@@ -56,7 +57,7 @@ test("a popover descriptor carries what its popover shows", () => {
   assert.deepEqual(PALETTE_ACTIONS.admonition.options.map((option) => option.value), [...ADMONITION_TYPES, "custom"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S3
 test("the two chart actions are listed for Full only, in the Full group, with the chart slash names", () => {
   for (const id of ["vegaLite", "vega"] as const) {
     const descriptor = PALETTE_ACTIONS[id] as PaletteActionDescriptor;

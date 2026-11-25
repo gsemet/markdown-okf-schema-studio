@@ -17,6 +17,23 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Map each block to its source line
+- id: S2
+  title: Map a multi-line block to its end line
+- id: S3
+  title: Map a one-line block and a directive child
+- id: S4
+  title: Hide leading frontmatter from the body
+- id: S5
+  title: Only the leading block is frontmatter
+- id: S6
+  title: Keep body lines absolute after frontmatter
+- id: S7
+  title: Map image-only blocks
+- id: S8
+  title: Drop a raw image without source
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -43,38 +60,38 @@ supersedes:
 
 When a document is rendered, the extension SHALL give every paragraph, heading, block quote, list, list item, code block, table, math block, thematic break and definition list a one-based source line, with an end line for a multi-line block, counted in the whole file after a leading frontmatter block is left out of the body.
 
-### Scenario (nominal): Map each block to its source line
+### Scenario S1 (nominal): Map each block to its source line
 
 - GIVEN a document whose third line starts a paragraph
 - WHEN it is rendered
 - THEN that paragraph element carries source line 3
 
-### Scenario (nominal): Map a multi-line block to its end line
+### Scenario S2 (nominal): Map a multi-line block to its end line
 
 - GIVEN a code fence on lines 5 to 9
 - WHEN it is rendered
 - THEN the block carries start line 5 and end line 9
 
-### Scenario (boundary): Map a one-line block and a directive child
+### Scenario S3 (boundary): Map a one-line block and a directive child
 
 | Input | Outcome |
 | --- | --- |
 | a one-line paragraph | the block carries its start line and no larger end line |
 | a directive whose children have no position of their own | each child carries the line of the directive |
 
-### Scenario (nominal): Hide leading frontmatter from the body
+### Scenario S4 (nominal): Hide leading frontmatter from the body
 
 - GIVEN a document that starts with a YAML frontmatter block
 - WHEN it is rendered
 - THEN the body holds no code block for the frontmatter
 
-### Scenario (boundary): Only the leading block is frontmatter
+### Scenario S5 (boundary): Only the leading block is frontmatter
 
 - GIVEN a document with a thematic break `---` later in the text
 - WHEN it is rendered
 - THEN only the leading block is treated as frontmatter and the later `---` line is unchanged
 
-### Scenario (boundary): Keep body lines absolute after frontmatter
+### Scenario S6 (boundary): Keep body lines absolute after frontmatter
 
 | Input | Outcome |
 | --- | --- |
@@ -82,13 +99,13 @@ When a document is rendered, the extension SHALL give every paragraph, heading, 
 | the same document saved with CRLF line breaks | the paragraph still carries source line 5 |
 | the same document with CR line breaks | the body source lines equal the absolute file line |
 
-### Scenario (nominal): Map image-only blocks
+### Scenario S7 (nominal): Map image-only blocks
 
 - GIVEN a paragraph holding only an image, an `{image}` directive or a lone raw `<img>` element
 - WHEN it is rendered
 - THEN the image block is mapped with its source lines, so an insert point can follow it
 
-### Scenario (refusal): Drop a raw image without source
+### Scenario S8 (refusal): Drop a raw image without source
 
 - GIVEN a raw `<img>` without a `src` attribute
 - WHEN it is rendered

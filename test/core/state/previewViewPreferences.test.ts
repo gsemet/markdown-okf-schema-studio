@@ -23,7 +23,8 @@ function memoryStorage(): ViewPreferencesStorage {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S5
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S9
 test("defaults and the storage key", () => {
   assert.deepEqual(DEFAULT_VIEW_PREFERENCES, {
     zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true,
@@ -32,7 +33,7 @@ test("defaults and the storage key", () => {
   assert.deepEqual(normalizeViewPreferences(undefined), DEFAULT_VIEW_PREFERENCES);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S6
 test("zoom is clamped to 70-200 and rounded to 10", () => {
   const zoom = (value: unknown): number => normalizeViewPreferences({ zoom: value }).zoom;
   assert.equal(zoom(10), 70);

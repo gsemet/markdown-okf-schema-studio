@@ -17,6 +17,14 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-001
+scenarios:
+- id: S1
+  title: A cell of a quoted table, a GitHub alert table or a MyST admonition
+    table
+- id: S2
+  title: Tab in the last cell adds a prefixed row
+- id: S3
+  title: Which table and which prefix
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,19 +50,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer clicks a cell of a pipe table inside a blockquote, a GFM alert or a MyST admonition in edit mode, the extension SHALL open the cell editor and the table bar, write every table line back with its container prefix, leave the other lines of the container unchanged, and fall back to the raw block editor when the table cannot be located safely.
 
-### Scenario (nominal): A cell of a quoted table, a GitHub alert table or a MyST admonition table
+### Scenario S1 (nominal): A cell of a quoted table, a GitHub alert table or a MyST admonition table
 
 - GIVEN edit mode and a pipe table whose lines carry a container prefix (`> | Q1 | Q2 |` in a blockquote, `> | N1 | N2 |` under `> [!NOTE]`), or sit in the body of a MyST admonition directive (a `{note}` fence with an option line, a `:::{note}` block)
 - WHEN the writer clicks a cell of that table
 - THEN the page opens the cell editor and the table bar, as for a top-level table, not the raw block editor; typing and Enter save one edit whose text is the table's source lines with only the edited cell changed and the container prefix on every line (unit tests test/page/runtimeTableInContainer.test.ts "a click on a cell of a table inside a quote opens the cell editor and the table bar, not the raw editor", "typing in a quoted table and Enter save one edit of the container: only the edited line changes", test/page/modules/tableInContainer.test.ts "the table of a quote is read without its prefix and written back with it", "the table of a GitHub alert keeps the marker line byte for byte", "the table of a MyST directive keeps the fence and the option lines byte for byte")
 
-### Scenario (nominal): Tab in the last cell adds a prefixed row
+### Scenario S2 (nominal): Tab in the last cell adds a prefixed row
 
 - GIVEN the cell editor open in the last cell of a quoted table
 - WHEN the writer presses Tab, or presses a row or column button of the bar
 - THEN the table is saved with the new row or column line carrying the same prefix as the other lines, and once the page renders the saved text the editor reopens in the same table, in the cell the action selects (unit tests test/page/runtimeTableInContainer.test.ts "Tab in the last cell of a quoted table adds a prefixed row and the editor reopens in that table", "the second of two tables in a quote is edited by its rank and reopens by its rank"; real input test/integration/realInput/tableInContainer.ts)
 
-### Scenario (boundary): Which table and which prefix
+### Scenario S3 (boundary): Which table and which prefix
 
 | Input | Outcome |
 | --- | --- |

@@ -48,7 +48,8 @@ const deletes = (harness: RuntimeHarness, from = 0): Array<Record<string, unknow
 const finalSaves = (harness: RuntimeHarness): Array<Record<string, unknown>> =>
   harness.messages.filter((message) => message.type === "previewEditSave" && message.final === true);
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("every body bar holds a Delete block button right after the down arrow", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   for (const line of [1, 52, 100]) {
@@ -64,7 +65,7 @@ test("every body bar holds a Delete block button right after the down arrow", ()
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
 test("the properties bar and the Start writing bar have no Delete block button", () => {
   const withProperties = createRuntimeHarness({
     mapFrontmatter: true, propertiesMapped: true, savedState: { editMode: true },
@@ -80,7 +81,8 @@ test("the properties bar and the Start writing bar have no Delete block button",
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S6
 test("the bar of an included block has no Delete block button", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.mappings[1]!.setAttribute("data-sphinx-preview-included", "true");
@@ -91,7 +93,7 @@ test("the bar of an included block has no Delete block button", () => {
   assert.equal(has(52), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
 test("a click on the button posts previewBlocksDelete for the block above the bar", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -107,7 +109,8 @@ test("a click on the button posts previewBlocksDelete for the block above the ba
   assert.equal(deletes(harness, before).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("the button of the last block of a selection deletes the whole selection", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[0]!);
@@ -117,7 +120,8 @@ test("the button of the last block of a selection deletes the whole selection", 
   assert.deepEqual(deletes(harness, before).map((message) => [message.line, message.endLine]), [[1, 52]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
 test("the button does nothing while a block editor is open", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   insertPointAfterLine(harness, 52).childElements[0]!.dispatch("click", plainClick());
@@ -126,7 +130,8 @@ test("the button does nothing while a block editor is open", () => {
   assert.equal(deletes(harness, before).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("Delete and Backspace on a block selection post the delete of its lines", () => {
   for (const name of ["Delete", "Backspace"]) {
     const harness = createRuntimeHarness({ savedState: { editMode: true } });
@@ -142,8 +147,9 @@ test("Delete and Backspace on a block selection post the delete of its lines", (
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("Delete does nothing without a block selection, in a text box, with a chord or outside edit mode", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -165,7 +171,7 @@ test("Delete does nothing without a block selection, in a text box, with a chord
   assert.equal(deletes(reading).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("a refusal is announced and keeps the selection, and the key works again", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[1]!);
@@ -183,7 +189,8 @@ test("a refusal is announced and keeps the selection, and the key works again", 
   assert.equal(deletes(harness, before).length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("a delete keeps the selection until the render, which selects the block that took its place", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true }, trackFocus: true });
   shiftClick(harness, harness.mappings[1]!);
@@ -196,7 +203,8 @@ test("a delete keeps the selection until the render, which selects the block tha
   assert.equal(harness.document.activeElement, harness.mappings[1]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("deleting the last block selects the block above it", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[2]!);
@@ -207,7 +215,8 @@ test("deleting the last block selects the block above it", () => {
   assert.deepEqual(selectedLines(harness), [50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S3
 test("deleting the only block leaves the Start writing button focused", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true }, trackFocus: true });
   shiftClick(harness, harness.mappings[0]!);
@@ -222,7 +231,7 @@ test("deleting the only block leaves the Start writing button focused", () => {
   assert.equal(harness.document.activeElement, start.childElements.find((element) => element.tagName === "BUTTON"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 test("the render clears the wait: a second delete after it is not held back", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[1]!);
@@ -235,7 +244,8 @@ test("the render clears the wait: a second delete after it is not held back", ()
   assert.equal(deletes(harness, before).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
 test("Delete and Backspace post nothing while the structural cursor is on a cell or an inner block", () => {
   const mapped = (harness: RuntimeHarness, line: number, endLine: number, top: number, tag: string): RuntimeElement => {
     const element = new RuntimeElement({
@@ -287,7 +297,7 @@ test("Delete and Backspace post nothing while the structural cursor is on a cell
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S2
 test("Delete with a bar button focused, or while a block editor is open, posts nothing", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[1]!);
@@ -302,7 +312,8 @@ test("Delete with a bar button focused, or while a block editor is open, posts n
   assert.equal(deletes(harness, before).length, 0, "an open editor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S3
 test("the final save of an erased top-level editor carries deleteWhenEmpty, an autosave never does", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -318,7 +329,7 @@ test("the final save of an erased top-level editor carries deleteWhenEmpty, an a
   assert.equal(final.deleteWhenEmpty, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S2
 test("a final save of text that is not empty carries no deleteWhenEmpty", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -330,7 +341,7 @@ test("a final save of text that is not empty carries no deleteWhenEmpty", () => 
   assert.equal("deleteWhenEmpty" in final, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S2
 test("an erased list item editor carries deleteWhenEmpty, a block inside an admonition does not", () => {
   const MAPPED = { "data-sphinx-preview-document": "file:///active.md", "data-sphinx-source-file": "/workspace/active.md" };
   for (const [name, wrapper] of [["list", undefined], ["admonition", "aside"]] as const) {

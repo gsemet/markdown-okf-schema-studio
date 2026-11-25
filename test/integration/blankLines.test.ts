@@ -90,9 +90,10 @@ async function withFixture(
  * each shown blank line is its own block (CR-476), the text replaces that one line (a separator is added only where the neighbour line exists and is not blank), a delete removes
  * that one line, the line endings stay, one undo brings the line back.
  */
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
 export async function run(): Promise<void> {
   for (const [name, eol] of [["lf", "\n"], ["crlf", "\r\n"]] as const) {
     const original = LINES.join(eol);

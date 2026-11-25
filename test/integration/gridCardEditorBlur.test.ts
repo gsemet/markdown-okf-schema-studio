@@ -43,7 +43,8 @@ const CARD_TEXT = "The lifecycle maps to OKF `status` through the schema.";
 /** The normal wait for the editor to close: the host answer of a save takes well under this. */
 const CLOSE_WAIT_MS = 8_000;
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047#S6
 /**
  * Issue 227 repro: in a grid card, a click outside the block editor must save the card and close
  * the editor, whatever happened inside it (typing, the palette, an autosave that already landed).

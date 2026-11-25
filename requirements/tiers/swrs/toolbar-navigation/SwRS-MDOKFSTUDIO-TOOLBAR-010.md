@@ -18,6 +18,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Matches are painted and walked
+- id: S2
+  title: A match in a folded section opens it
+- id: S3
+  title: A hit inside a table scrolled sideways
+- id: S4
+  title: What is searched
+- id: S5
+  title: The three options
+- id: S6
+  title: An invalid expression
+- id: S7
+  title: Literal queries
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -47,22 +62,22 @@ supersedes:
 
 While the find bar holds a query, the extension SHALL paint every match in the rendered text of the page, show the match count, move the current match with Enter, Shift+Enter and F3, unfold the folded sections that hold it and bring it into view, vertically and inside any box that scrolls sideways; the find bar SHALL offer the options match case, whole word and regular expression, and report an invalid regular expression in place of the count instead of searching.
 
-### Scenario (nominal): Matches are painted and walked
+### Scenario S1 (nominal): Matches are painted and walked
 - GIVEN a page whose rendered text holds a word four times, in a heading, a paragraph (once inside bold markup), an admonition and a table cell
 - WHEN the reader types the word in the find bar
 - THEN the four matches are painted, the count reads "1 of 4", Enter shows "2 of 4", Shift+Enter and F3 move back and forward and wrap around at the ends
 
-### Scenario (nominal): A match in a folded section opens it
+### Scenario S2 (nominal): A match in a folded section opens it
 - GIVEN a folded section that holds the only match
 - WHEN the match becomes the current one
 - THEN the folded sections that hold it are unfolded and the page scrolls the match to the middle when it is outside the pane
 
-### Scenario (nominal): A hit inside a table scrolled sideways
+### Scenario S3 (nominal): A hit inside a table scrolled sideways
 - GIVEN a wide table scrolled to its last column and a word that exists only in its second column
 - WHEN the reader types it and presses Enter
 - THEN the table's box scrolls so that the hit text lies inside it with a 16 px margin, and the page does not scroll sideways
 
-### Scenario (boundary): What is searched
+### Scenario S4 (boundary): What is searched
 | Input | Outcome |
 | --- | --- |
 | Text of a hidden element, a button, a field, a formula's MathML copy, a comment chip | Not searched |
@@ -75,17 +90,17 @@ While the find bar holds a query, the extension SHALL paint every match in the r
 | A hit already in view horizontally | No sideways scroll |
 | A hit wider than its scroll box | The box is aligned on the start of the hit |
 
-### Scenario (nominal): The three options
+### Scenario S5 (nominal): The three options
 - GIVEN a page with "Studio" and "studio" in its text
 - WHEN the reader turns on Match case (Alt+C), Whole word (Alt+W) or Regular expression (Alt+R)
 - THEN the matches are searched again at once: match case keeps the same letter case, whole word needs a non-word character (letter, digit, underscore) on each side, and the expression is used as written
 
-### Scenario (failure): An invalid expression
+### Scenario S6 (failure): An invalid expression
 - GIVEN the regular expression option is on
 - WHEN the field holds "stud(io"
 - THEN the count shows the reason of the engine, the field is marked aria-invalid, nothing is painted and nothing is replaced
 
-### Scenario (boundary): Literal queries
+### Scenario S7 (boundary): Literal queries
 | Input | Outcome |
 | --- | --- |
 | A query with ".", "+", "(" or "/" and the expression option off | Plain text |

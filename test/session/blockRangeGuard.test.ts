@@ -210,7 +210,7 @@ async function checkAllAccepted(text: string, label: string, minimum = 20): Prom
   return ranges.length;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S1
 test("an open on a range that starts on a blank line (the shifted heading) is refused and writes nothing", async () => {
   const text = "Intro\n\n### Edit MyST visually\n\nBody.\n";
   const preview = openPreview(text);
@@ -223,7 +223,8 @@ test("an open on a range that starts on a blank line (the shifted heading) is re
   assert.equal(preview.document.getText(), text);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S2
 test("an open on a range past the end of the document is refused", async () => {
   const text = "Intro\n\nBody.\n";
   const preview = openPreview(text);
@@ -235,7 +236,8 @@ test("an open on a range past the end of the document is refused", async () => {
   assert.equal(preview.document.getText(), text);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S4
 test("a range that ends on a blank line keeps the lines of its block (a list ends on its separator)", async () => {
   const text = "- a\n\n- b\n\nAfter.\n";
   const preview = openPreview(text);
@@ -243,7 +245,7 @@ test("a range that ends on a blank line keeps the lines of its block (a list end
   assert.equal(preview.of("previewEditSource")[0]!.originalText, "- a\n\n- b\n\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S1
 test("Done and an autosave on a range that starts on a blank line are refused and the document is unchanged", async () => {
   const text = "Intro\n\n### Edit MyST visually\n\nBody.\n";
   for (const final of [true, false]) {
@@ -259,7 +261,7 @@ test("Done and an autosave on a range that starts on a blank line are refused an
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S3
 test("a save on the right lines still writes", async () => {
   const text = "Intro\n\n### Edit MyST visually\n\nBody.\n";
   const preview = openPreview(text);
@@ -270,13 +272,15 @@ test("a save on the right lines still writes", async () => {
   assert.match(preview.document.getText(), /### Changed/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S2
 test("the host accepts every range the renderer gives to every kind of block", async () => {
   const count = await checkAllAccepted(ALL_KINDS, "LF");
   assert.ok(count > 40);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S2
 test("the host accepts every renderer range of a CRLF document and of one without a final line break", async () => {
   await checkAllAccepted(ALL_KINDS.replace(/\n/gu, "\r\n"), "CRLF");
   await checkAllAccepted(ALL_KINDS.replace(/\n$/u, ""), "no final line break");
@@ -284,7 +288,8 @@ test("the host accepts every renderer range of a CRLF document and of one withou
   await checkAllAccepted("# Only", "single line without final break", 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256#S4
 test("copy and cut still accept the renderer ranges of the kinds whose range ends on content", async () => {
   const ranges = (await renderedRanges(ALL_KINDS)).filter((range) =>
     ["h1", "p", "blockquote", "aside", "figure", "table", "hr", "code", "div"].includes(range.tag));

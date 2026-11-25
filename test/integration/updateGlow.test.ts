@@ -49,7 +49,6 @@ const SOURCE = [
   "",
 ].join("\n");
 
-// @tests_req StRS-MDOKFSTUDIO-LIFE-005
 /**
  * CR 046, in a real window: the preview's own edit and typing in the active text editor make no
  * block glow; an edit made by another tool while the document is not in the active editor, and an
@@ -134,7 +133,8 @@ export async function run(): Promise<void> {
     assert.deepEqual(typing.ranges, [], "typing in the active text editor glows nowhere");
     console.log("PASS update glow: typing in the active text editor glows nowhere");
 
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S3
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S5
     // 4. Undo (of the typing, in the active editor): it glows.
     await vscode.commands.executeCommand("undo");
     assert.equal(document.lineAt(6).text, "A paragraph the user types in.");

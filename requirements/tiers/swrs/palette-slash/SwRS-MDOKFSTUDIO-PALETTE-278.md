@@ -15,6 +15,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-021
+scenarios:
+- id: S1
+  title: The chart commands insert a starter chart
+- id: S2
+  title: Content tabs inserts a tab set
+- id: S3
+  title: PlantUML diagram inserts a sequence diagram
+- id: S4
+  title: A mode that does not list the action offers no command
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,7 +47,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer picks Vega-Lite chart, Vega chart, Content tabs or PlantUML diagram in the edition palette or the slash menu (/chart, /vega, /tab-set, /tabs, /plantuml, /uml), the extension SHALL insert the starter block of that action after the selection, set apart from the text around it by a blank line, with the first editable words selected: a fenced vega-lite or vega block with a three-bar chart, a MyST tab-set of two tab-item tabs, or a fenced plantuml sequence diagram. Which modes list each action is specified in SwRS-MDOKFSTUDIO-PALETTE-001.
 
-### Scenario (nominal): The chart commands insert a starter chart
+### Scenario S1 (nominal): The chart commands insert a starter chart
 
 - GIVEN a paragraph and the caret at its end, in the Full palette mode
 - WHEN the writer picks Vega-Lite chart or Vega chart
@@ -48,19 +57,19 @@ When the writer picks Vega-Lite chart, Vega chart, Content tabs or PlantUML diag
 - WHEN the palette is shown and the writer types /chart or /vega in the slash menu
 - THEN the buttons of the MyST mode are followed by Vega-Lite chart and Vega chart (group full, one-click buttons with their label as tooltip) and the slash menu lists both commands under Full, /vega finding Vega first and /chart listing both (the alias chart is shared with Mermaid)
 
-### Scenario (nominal): Content tabs inserts a tab set
+### Scenario S2 (nominal): Content tabs inserts a tab set
 
 - GIVEN a paragraph and the caret at its end, in the MyST or Full palette mode
 - WHEN the writer picks Content tabs in the palette or types /tab-set in the slash menu
 - THEN a blank line and a `::::{tab-set}` container holding two `:::{tab-item}` tabs (Tab 1 and Tab 2, each with the body Content) are inserted after the selection, set apart from the text around it, with the words Tab 1 selected, and the block renders as a tab set
 
-### Scenario (nominal): PlantUML diagram inserts a sequence diagram
+### Scenario S3 (nominal): PlantUML diagram inserts a sequence diagram
 
 - GIVEN a paragraph and the caret at its end, in the Full palette mode
 - WHEN the writer picks PlantUML diagram in the palette or types /plantuml or /uml in the slash menu
 - THEN a blank line and a fenced `plantuml` block with a two-actor sequence diagram (`@startuml` to `@enduml`) are inserted after the selection, set apart from the text around it, with the word Hello selected, and the block renders as a diagram
 
-### Scenario (refusal): A mode that does not list the action offers no command
+### Scenario S4 (refusal): A mode that does not list the action offers no command
 
 - GIVEN the palette in a mode below the one that lists the action (Strict, GFM or MyST for the chart and PlantUML commands; Strict or GFM for Content tabs)
 - WHEN the palette is shown or the slash menu is typed with /vega, /tab-set or /plantuml

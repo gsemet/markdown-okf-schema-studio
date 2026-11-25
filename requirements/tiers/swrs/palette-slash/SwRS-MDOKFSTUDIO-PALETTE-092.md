@@ -17,6 +17,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Enter or Insert
+- id: S2
+  title: Empty fields
+- id: S3
+  title: Characters that would break the link
+- id: S4
+  title: Link around the caret
+- id: S5
+  title: Reference-style link
+- id: S6
+  title: Not a link
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,14 +47,14 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Enter in the Text or URL field of the link panel or presses Insert, the extension SHALL write [text](url) over the selection, or over the link around the caret, as one undoable step with the text and the target escaped so that they cannot break the link, and return the focus to the text box.
 
-### Scenario (nominal): Enter or Insert
+### Scenario S1 (nominal): Enter or Insert
 
 - GIVEN the panel with Text docs and URL https://example.org
 - WHEN the writer presses Enter in the URL field
 - THEN the selection is replaced by [docs](https://example.org) in one undo step and the focus returns to the text box
 - AND Enter in the Text field and the Insert button write the same link
 
-### Scenario (boundary): Empty fields
+### Scenario S2 (boundary): Empty fields
 
 | Input | Outcome |
 | --- | --- |
@@ -50,7 +63,7 @@ When the writer presses Enter in the Text or URL field of the link panel or pres
 | An empty Text and the URL https://example.org | [https://example.org](https://example.org) is written |
 | A Text that holds only blanks | The address is used as the label as well |
 
-### Scenario (boundary): Characters that would break the link
+### Scenario S3 (boundary): Characters that would break the link
 
 | Input | Outcome |
 | --- | --- |
@@ -61,19 +74,19 @@ When the writer presses Enter in the Text or URL field of the link panel or pres
 | The URL a(b, with unbalanced parentheses | The target is wrapped in angle brackets, written &lt;a(b&gt;; a blank or unbalanced parentheses both trigger the wrapping |
 | A URL with balanced parentheses and no blank | The target is left as typed; the URL is trimmed |
 
-### Scenario (nominal): Link around the caret
+### Scenario S4 (nominal): Link around the caret
 
 - GIVEN the caret inside [docs](https://example.org "Site")
 - WHEN the panel opens and the URL is changed
 - THEN both fields are prefilled, the whole link is replaced, the title "Site" is kept and the caret is after the link; one undo restores it
 
-### Scenario (nominal): Reference-style link
+### Scenario S5 (nominal): Reference-style link
 
 - GIVEN the text see [docs][d] with the line [d]: https://example.org and the caret in the link, in the form [text][ref], [text][] or [ref]
 - WHEN the panel opens and Insert is pressed
 - THEN the panel shows docs and the address, the link becomes an inline link and the definition line stays
 
-### Scenario (boundary): Not a link
+### Scenario S6 (boundary): Not a link
 
 | Input | Outcome |
 | --- | --- |

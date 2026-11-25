@@ -15,6 +15,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Paste a screenshot
+- id: S2
+  title: Paste rich text
 user_need: As a writer, I paste a screenshot and it becomes a picture of the
   document without any dialog, and I copy from a web page, a word processor or
   an editor and the headings, lists, links and tables arrive as Markdown in my
@@ -83,7 +88,7 @@ Text on the clipboard always wins; every other branch ends in one undoable edit.
 
 ### Main paths
 
-#### Path 1: Paste a screenshot
+#### Path S1: Paste a screenshot
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-PALETTE-203: the writer pastes a clipboard that holds only an image and the page sends it to the host
@@ -95,7 +100,7 @@ Text on the clipboard always wins; every other branch ends in one undoable edit.
    - SwRS-MDOKFSTUDIO-PALETTE-203: its reference is inserted as a paragraph of its own
 4. An image reference stands as a paragraph of its own
 
-#### Path 2: Paste rich text
+#### Path S2: Paste rich text
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-PALETTE-213: the writer pastes text/html and the host converts it to Markdown

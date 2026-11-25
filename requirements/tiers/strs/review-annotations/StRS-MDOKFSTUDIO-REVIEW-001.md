@@ -21,6 +21,11 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Open a thread from its highlight
+- id: S2
+  title: A thread comes back after an undo
 user_need: As a reviewer, I see where each discussion sits in the document and
   read it where it applies, I prefer a thread listed as orphaned over a thread
   attached to the wrong text, and I trust that a damaged comments file is never
@@ -82,7 +87,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Open a thread from its highlight
+#### Path S1: Open a thread from its highlight
 
 1. A document with a review comments file is shown
    - SwRS-MDOKFSTUDIO-REVIEW-012: the host posts the threads of the file to the page
@@ -94,7 +99,7 @@ sequenceDiagram
    - SwRS-MDOKFSTUDIO-REVIEW-021: the reader clicks the highlight, or presses Enter or Space on it, and the thread popover opens
 4. The thread popover lists the comments
 
-#### Path 2: A thread comes back after an undo
+#### Path S2: A thread comes back after an undo
 
 1. A thread is listed in the Orphaned comments box
    - SwRS-MDOKFSTUDIO-REVIEW-219: the quote is found again and the thread is placed on the found lines

@@ -108,7 +108,7 @@ function barButton(harness: RuntimeHarness, label: string): RuntimeElement {
 const saves = (harness: RuntimeHarness): Array<Record<string, unknown>> =>
   harness.messages.filter((message) => message.type === "previewEditSave");
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S3
 test("the cell editor shows a loading status until the host sends the table source", () => {
   const harness = createRuntimeHarness();
   const { request } = openCellWithoutSource(harness);
@@ -124,7 +124,8 @@ test("the cell editor shows a loading status until the host sends the table sour
   assert.match(tableBar(harness).childElements.at(-1)!.textContent, /^Row 1 of 2 · /u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
 test("a table with a two-dash delimiter opens the cell editor, not the raw Markdown editor", () => {
   const harness = createRuntimeHarness();
   const { request } = openCellWithoutSource(harness);
@@ -159,7 +160,7 @@ test("a source that is no pipe table, or has no cell at the clicked position, op
   assert.equal(beyond.cell.getAttribute("data-sphinx-preview-table-cell-selected"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-018
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-018#S3
 test("an unchanged cell closes without a save; typed back after an autosave it saves a final text", () => {
   const untouched = createRuntimeHarness();
   const first = openTableCellEditorForTab(untouched);
@@ -184,7 +185,7 @@ test("an unchanged cell closes without a save; typed back after an autosave it s
   assert.equal(last.editedText, PIPE);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S9
 test("turning edit mode off saves a changed open cell and closes an unchanged or loading one without a save", () => {
   const changed = createRuntimeHarness();
   const opened = openTableCellEditorForTab(changed);
@@ -208,7 +209,8 @@ test("turning edit mode off saves a changed open cell and closes an unchanged or
   assert.equal(cellEditorRegion(loading).removed, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-034
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-034#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-034#S2
 test("a host refusal of a cell save shows in the table bar; a refused open replaces the loading status", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);
@@ -235,7 +237,7 @@ test("a host refusal of a cell save shows in the table bar; a refused open repla
   assert.equal(refusedOpen.createdElements.some((element) => element.tagName === "TEXTAREA"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055#S8
 test("rendering the cell editor again closes the emoji picker, the link panel and the slash menu", () => {
   const picker = createRuntimeHarness({ initialPaletteMode: "myst" });
   const first = openTableCellEditorForTab(picker);
@@ -262,7 +264,7 @@ test("rendering the cell editor again closes the emoji picker, the link panel an
   assert.equal(linkPanelOf(panel), undefined, "the panel closed when the editor moved to the next cell");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S4
 test("the table bar position follows a window resize and stops once the editor is closed", () => {
   const harness = createRuntimeHarness({ viewportHeight: 600 });
   const section = new RuntimeElement({}, harness.windowState, 0, 3000, "section");
@@ -312,7 +314,8 @@ test("the table bar position follows a window resize and stops once the editor i
   assert.equal(shiftOf(), resized, "nothing is recomputed once the editor is closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S9
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S19
 test("a cell change after a refused conversion drops the prepared list-table and saves the pipe table", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);
@@ -336,7 +339,8 @@ test("a cell change after a refused conversion drops the prepared list-table and
   assert.equal(saves(plain).at(-1)!.editedText, next.editedText);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-122
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S9
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S10
 test("the List table button converts the table after a line break was pasted into the cell", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);
@@ -349,7 +353,7 @@ test("the List table button converts the table after a line break was pasted int
   assert.match(String(last.editedText), /a b/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-091
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-091#S5
 test("a line break pasted into the cell text box becomes a space in the source row", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);

@@ -146,7 +146,8 @@ test("a resource root that does not exist is dropped with the diagnostic missing
 // ---------------------------------------------------------------------------------------------
 // Includes
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S4
 test("an include that cannot be read is left unresolved", async (t) => {
   const root = makeDirectory();
   const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "folder", directory: root }]);
@@ -378,7 +379,7 @@ test("the manifest declares limited support for untrusted workspaces", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-001
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S4
 test("the manifest declares support for the Agents window", () => {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(path.resolve(__dirname, "../../.."), "package.json"), "utf8"),

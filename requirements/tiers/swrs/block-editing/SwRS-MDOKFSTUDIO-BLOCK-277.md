@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: nominal
+- id: S2
+  title: boundary
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the page takes a copy, it SHALL set the clipboard's text/plain to the raw Markdown of the selection and its text/html to the rendered HTML of the selection without chrome, and prevent the browser's own copy.
 
-### Scenario: nominal
+### Scenario S1: nominal
 
 - GIVEN a taken copy
 - WHEN the page sets the clipboard
 - THEN text/plain holds the raw Markdown, text/html the rendered selection without chrome
 
-### Scenario: boundary
+### Scenario S2: boundary
 
 - GIVEN the copy event carries no clipboard data
 - WHEN the copy is taken

@@ -30,7 +30,8 @@ def _open_first_cell(page: Page, rank: int, label: str, page_name: str, failures
   return True
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 def check_table_in_container(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """`quote`: the cell editor and the bar open on the table of a quote, of an alert and of a MyST
   admonition. `note`: a typed letter and Enter save the alert's table with its prefixes kept."""

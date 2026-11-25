@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Scroll sync on, the line is on screen
+- id: S2
+  title: Scroll modes
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +42,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the side preview marks the line of a jump, it SHALL ask the page to scroll only when the line is off screen and leave the scroll anchor to the editor while scrolling the preview with the editor is on, and SHALL ask the page to scroll the line to the reading line and take it as its anchor while that setting is off.
 
-### Scenario (nominal): Scroll sync on, the line is on screen
+### Scenario S1 (nominal): Scroll sync on, the line is on screen
 
 - GIVEN the side preview with scroll with editor on, and line 40 already on screen below the sticky headings
 - WHEN a jump to line 40 arrives
 - THEN the marker is drawn on line 40, the page does not move and the jump takes no anchor
 
-### Scenario (boundary): Scroll modes
+### Scenario S2 (boundary): Scroll modes
 
 | Input | Outcome |
 | --- | --- |

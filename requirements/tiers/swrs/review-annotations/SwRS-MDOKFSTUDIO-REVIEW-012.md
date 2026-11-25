@@ -20,6 +20,29 @@ derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
 depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-059
+scenarios:
+- id: S1
+  title: Valid file
+- id: S2
+  title: Orphan verdict
+- id: S3
+  title: Document that is not a saved file
+- id: S4
+  title: Document without a comments file
+- id: S5
+  title: Change of the file outside the Studio
+- id: S6
+  title: The same threads are not posted twice
+- id: S7
+  title: Read overtaken by a newer read
+- id: S8
+  title: A read of the comments file that fails
+- id: S9
+  title: The watch of the comments file is released
+- id: S10
+  title: After a write by the host
+- id: S11
+  title: Shape of the threads message the page accepts
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,67 +62,67 @@ default_owner_email: gaetan@xeberon.net
 
 When a document is shown or its review comments file is created, changed, deleted or written by the Studio, the extension SHALL post the current threads of the file to the page with their comments, anchors, resolved flags and orphaned verdicts, once for each distinct content, never from a read that a newer read overtook and never from a read that failed.
 
-### Scenario (nominal): Valid file
+### Scenario S1 (nominal): Valid file
 - GIVEN a comments file with one thread quoting "second paragraph" whose comment body is `<b>Why?</b>`
 - WHEN the preview renders
 - THEN the page receives that thread with the body as stored
 
-### Scenario (nominal): Orphan verdict
+### Scenario S2 (nominal): Orphan verdict
 - GIVEN a thread whose quote the document no longer holds
 - WHEN the threads are posted
 - THEN the thread is posted with orphaned true and its stored lines
 
-### Scenario (boundary): Document that is not a saved file
+### Scenario S3 (boundary): Document that is not a saved file
 | Input | Outcome |
 | --- | --- |
 | A preview of an untitled document, or of another scheme than file | Nothing is posted, whatever files exist |
 | A preview of a document saved as a file | The threads of its comments file are posted |
 
-### Scenario (boundary): Document without a comments file
+### Scenario S4 (boundary): Document without a comments file
 | Input | Outcome |
 | --- | --- |
 | A document with no comments file and no threads shown before | No previewComments message is posted |
 | A preview that showed threads and whose comments file was deleted | An empty list is posted so the page removes them |
 
-### Scenario (nominal): Change of the file outside the Studio
+### Scenario S5 (nominal): Change of the file outside the Studio
 | Input | Outcome |
 | --- | --- |
 | A preview that shows two threads and a comments file rewritten with one thread, the file watcher fires | The page receives the one thread after a debounce of 150 ms |
 | A comments file created next to a document that had none | The threads of the new file are posted |
 
-### Scenario (refusal): The same threads are not posted twice
+### Scenario S6 (refusal): The same threads are not posted twice
 | Input | Outcome |
 | --- | --- |
 | A comment just written by the Studio, the file watcher reports the write | No second post is made |
 | The same comments file text after the lines followed in memory were dropped (see SwRS-MDOKFSTUDIO-REVIEW-119) | The text is not skipped: the anchors are checked again, and a post is made only if the threads differ |
 | A page that already shows the threads, the document renders again | The same threads are not posted again |
 
-### Scenario (boundary): Read overtaken by a newer read
+### Scenario S7 (boundary): Read overtaken by a newer read
 | Input | Outcome |
 | --- | --- |
 | Two changes of the comments file in quick succession, the first read ends after the second started | Only the result of the second read is posted |
 | One change of the file, the read ends | Its result is posted |
 | A post overtaken by a newer post while it checks the anchors against the document, both reading the same new text | The newer post shows the new threads; the overtaken one posts nothing and does not mark the text as shown |
 
-### Scenario (refusal): A read of the comments file that fails
+### Scenario S8 (refusal): A read of the comments file that fails
 | Input | Outcome |
 | --- | --- |
 | A preview that shows a resolved thread whose open popover the reader uses, the next read of the existing comments file fails (busy, denied, interrupted) | Nothing is posted: the page keeps its threads and the popover stays open; the next successful read is posted as usual |
 | A preview that showed threads and a read that finds the file missing | An empty list is posted so the page removes the threads (see the boundary "Document without a comments file") |
 
-### Scenario (boundary): The watch of the comments file is released
+### Scenario S9 (boundary): The watch of the comments file is released
 | Input | Outcome |
 | --- | --- |
 | The preview shows another document, so another comments file | The watcher of the previous file and its three change, create and delete subscriptions are all disposed; the live count stays at one watcher and three subscriptions |
 | The preview closes | The watcher and its three subscriptions are disposed; disposing twice is harmless |
 
-### Scenario (nominal): After a write by the host
+### Scenario S10 (nominal): After a write by the host
 | Input | Outcome |
 | --- | --- |
 | A comment just written, the write ends | The page receives the new list of threads |
 | A refused change, the host answers | No new list is posted by the write |
 
-### Scenario (refusal): Shape of the threads message the page accepts
+### Scenario S11 (refusal): Shape of the threads message the page accepts
 | Input | Outcome |
 | --- | --- |
 | previewComments with a threads list of threads (id, anchor, resolved, createdAt, comments, optional boolean orphaned) and the render fields | The page shows the threads |

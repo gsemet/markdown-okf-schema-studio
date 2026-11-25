@@ -21,6 +21,17 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Labels
+- id: S2
+  title: Fences and bad names
+- id: S3
+  title: Detail of a label
+- id: S4
+  title: Size of the list
+- id: S5
+  title: Shape of the request and of the answer
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,19 +49,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the host answers previewListTargets, the extension SHALL list the lines (name)= of the current document text that are outside code fences and whose name starts with a letter or digit and holds only letters, digits, underscore, dot, colon and hyphen, in source order, each with the heading or first text line after it as detail clipped to 80 characters, at most 500 entries, and set the truncated flag when the list is cut.
 
-### Scenario (nominal): Labels
+### Scenario S1 (nominal): Labels
 
 - GIVEN a document with (intro)=, (plain-one)= and (a.b:c_d-1)=
 - WHEN the host answers previewListTargets
 - THEN the three names are listed in source order
 
-### Scenario (refusal): Fences and bad names
+### Scenario S2 (refusal): Fences and bad names
 
 - GIVEN labels inside a backtick or tilde fence and (bad name)=
 - WHEN the host answers
 - THEN they are not listed
 
-### Scenario (boundary): Detail of a label
+### Scenario S3 (boundary): Detail of a label
 
 | Input | Outcome |
 | --- | --- |
@@ -62,14 +73,14 @@ When the host answers previewListTargets, the extension SHALL list the lines (na
 | a label line with blanks around it and nothing else | listed |
 | a name of more than 100 characters (the label length limit of the rename feature) | not listed |
 
-### Scenario (boundary): Size of the list
+### Scenario S4 (boundary): Size of the list
 
 | Input | Outcome |
 | --- | --- |
 | 505 label lines | 500 entries and truncated true |
 | one label line | one entry and truncated false |
 
-### Scenario (nominal): Shape of the request and of the answer
+### Scenario S5 (nominal): Shape of the request and of the answer
 
 - GIVEN a previewListTargets message with a non-empty editId of at most 100 characters
 - WHEN the host answers for the current document

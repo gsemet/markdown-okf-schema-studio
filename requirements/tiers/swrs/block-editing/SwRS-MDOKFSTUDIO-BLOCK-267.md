@@ -18,6 +18,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-011
 - StRS-MDOKFSTUDIO-BLOCK-025
+scenarios:
+- id: S1
+  title: Arrows, Enter and a click
+- id: S2
+  title: Arrows, Shift+Arrow and a click inside a list
+- id: S3
+  title: Delete needs the selection
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,19 +43,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer reaches a blank-line block with Up or Down, presses Enter on it or clicks it, the extension SHALL select it, or open an insertion editor in its place, stop on each blank-line block in line order, remove it on Delete or Backspace only when it is selected, and keep it out of every block selection range, move and clipboard copy or cut. Inside a list, a quote or another container, the arrows visit the blocks of the container in line order.
 
-### Scenario: Arrows, Enter and a click
+### Scenario S1: Arrows, Enter and a click
 
 - GIVEN edit mode on and two blank-line blocks between two blocks
 - WHEN the writer presses Down from the block above, presses Down again, presses Enter on a blank-line block, or clicks it
 - THEN Down stops on the first blank-line block, then on the second, then on the block below, and Enter or a click opens an insertion editor in the place of that one blank line
 
-### Scenario: Arrows, Shift+Arrow and a click inside a list
+### Scenario S2: Arrows, Shift+Arrow and a click inside a list
 
 - GIVEN edit mode on and a list that holds blank-line blocks
 - WHEN the writer presses Down from the selected list, Up from the block after it, Shift+Up or Shift+Down from one of its blank-line blocks, or clicks one
 - THEN Down stops on each blank-line block of the list in line order and then on the block after the list, Up walks back, Shift+Up or Shift+Down starts the block selection on the list or on the block after it, and a click opens the insertion editor of the run, not the list item editor
 
-### Scenario: Delete needs the selection
+### Scenario S3: Delete needs the selection
 
 - GIVEN a blank-line block that is only focused, and one that is selected
 - WHEN the writer presses Delete or Backspace

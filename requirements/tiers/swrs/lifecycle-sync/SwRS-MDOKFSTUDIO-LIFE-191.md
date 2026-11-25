@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: A link with a line
+- id: S2
+  title: Link cases
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a link, Back or Next followed in the side preview that follows the editor opens another document at a line, the side preview SHALL mark that line once, and SHALL mark nothing for an anchor link or a Back or Next inside the same document.
 
-### Scenario (nominal): A link with a line
+### Scenario S1 (nominal): A link with a line
 
 - GIVEN a side preview that follows the editor
 - WHEN the reader follows a link with a line or a heading fragment in it, or Back or Next to a line
 - THEN the target opens in the text editor and the side preview marks the target line once
 
-### Scenario (boundary): Link cases
+### Scenario S2 (boundary): Link cases
 
 | Input | Outcome |
 | --- | --- |

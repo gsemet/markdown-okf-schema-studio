@@ -11,7 +11,7 @@ test("frontmatter link tooltips wrap text in a fixed theme-aware pointer-transpa
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028#S5
 test("typography is driven by VS Code markdown preview variables", () => {
   for (const variable of [
     "--studio-markdown-font-family",
@@ -51,7 +51,7 @@ test("list insertion lines show the drop boundary without moving the rows", () =
   assert.match(PREVIEW_THEME_CSS, /\[data-okf-list-drop="after"\]::after \{\s*bottom: -0\.1em;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028#S2
 test("the top heading keeps the stock preview rule underneath it", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -99,7 +99,8 @@ test("sticky headings align with content and emphasize text in a full-width band
   assert.doesNotMatch(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*box-shadow:/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S10
 test("sticky headings start at the viewport top without filler and leave horizontal room for controls", () => {
   assert.doesNotMatch(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]::before/u);
   assert.match(
@@ -247,7 +248,7 @@ test("raw Markdown and YAML editors use the editor font, text fields keep the pr
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S1
 test("the table cell editor shares the block editor textarea rule and grows with its content", () => {
   // One rule carries the font family, size and line-height for both editors (no duplicated values).
   const shared = PREVIEW_THEME_CSS.match(
@@ -266,7 +267,8 @@ test("the table cell editor shares the block editor textarea rule and grows with
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S6
 test("the table toolbar status is not pushed up by the paragraph margin", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -359,7 +361,7 @@ test("MyST simple and no-icon admonition modifiers are styled", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-022
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S5
 test("MyST table alignment and notebook output placeholders are styled", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -460,7 +462,7 @@ test("the caption title bar takes its colours from theme variables only", () => 
   assert.doesNotMatch(rule, /#[0-9a-fA-F]{3,8}\b/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-008
+// @tests_req SwRS-MDOKFSTUDIO-CORE-008#S1
 test("images never overflow the preview column", () => {
   assert.match(PREVIEW_THEME_CSS, /#sphinx-myst-preview-content img \{[^}]*max-width: 100%;/u);
 });
@@ -482,11 +484,13 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
   assert.doesNotMatch(PREVIEW_THEME_CSS, /data-sphinx-preview-mode-controls/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2
 test("preview toolbar has four rows of four buttons: main with the collapse button, navigation, view, review", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
@@ -694,7 +698,8 @@ test("active toolbar toggles do not show a redundant focus ring", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S8
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S9
 test("frontmatter and table editors keep the active cell surface without nested input frames", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -726,7 +731,8 @@ test("preview content width is configurable and can be unlimited", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064#S9
 test("CR 168: the table toolbar paints above the row and column handle layer", () => {
   const rule = /\.sphinx-preview-table-menu\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   const layer = /\[data-okf-row-handle-layer\]\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
@@ -753,7 +759,7 @@ test("table toolbar sits in the document flow above the table with labelled butt
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
 test("the table bar draws one rule per group and the cell group carries its own rule", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -766,7 +772,7 @@ test("the table bar draws one rule per group and the cell group carries its own 
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S4
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S5
-// @tests_req SwRS-MDOKFSTUDIO-CORE-034
+// @tests_req SwRS-MDOKFSTUDIO-CORE-034#S1
 test("overflowing content tables keep short cells whole and show scroll shadows", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -842,7 +848,8 @@ function reducedMotionBlock(css: string): string {
   return "";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-050
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S5
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S6
 test("CR 046: prefers-reduced-motion: reduce turns off every animation and transition of the motion layer", () => {
   // The page-wide rule ends every transition at once (a tiny duration would still start one).
   assert.match(reducedMotionBlock(PREVIEW_ACCESSIBILITY_CSS), /transition-duration: 0s !important;/u);
@@ -875,7 +882,8 @@ test("CR 046: prefers-reduced-motion: reduce turns off every animation and trans
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-050
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S5
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S6
 test("CR 046: the motion layer is short and never animates layout or the table bar's transform", () => {
   const rules = cssRules(PREVIEW_THEME_CSS).filter(([selector]) =>
     /data-sphinx-preview-(?:motion|theme-switching|edit-closed|updated)/u.test(selector));
@@ -896,7 +904,7 @@ test("CR 046: the motion layer is short and never animates layout or the table b
   assert.ok(cssRules(starting).length >= 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028#S4
 test("a block quote is tinted with the theme block quote background", () => {
   const rule = /#sphinx-myst-preview-content blockquote\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   assert.match(rule, /background: var\(--studio-textBlockQuote-background, /u);
@@ -934,7 +942,8 @@ function outranks(left: [number, number, number], right: [number, number, number
   return false;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028#S4
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028#S5
 test("CR 107: the preview block quote background outranks the VS Code webview default rule", () => {
   const defaults = /^(\S[^{]*)\{([^}]*)\}/u.exec(VSCODE_WEBVIEW_BLOCKQUOTE_RULE);
   assert.ok(defaults);
@@ -953,7 +962,7 @@ test("CR 107: the preview block quote background outranks the VS Code webview de
     "every preview block quote background beats the host default, so the host colour theme cannot show through");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-002#S1
 test("CR 112: the edit bar buttons share the floating toolbar's tooltip bubble and slide it in on hover", () => {
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-edit-palette > button\[data-tooltip\]::after[^{]*\{[^}]*content: attr\(data-tooltip\);/u);
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-edit-palette > button\[data-tooltip\]:hover::after[^{]*\{[^}]*visibility: visible;[^}]*opacity: 1;/u);
@@ -961,7 +970,7 @@ test("CR 112: the edit bar buttons share the floating toolbar's tooltip bubble a
   assert.match(PREVIEW_THEME_CSS, /@keyframes sphinx-preview-tooltip-in/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-129
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-129#S1
 test("CR 162: every tooltip bubble slides in from the left with one shared animation", () => {
   const keyframes = /@keyframes sphinx-preview-tooltip-in \{([^@]*?)\n\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   assert.match(keyframes, /from \{[^}]*opacity: 0;[^}]*translate: -6px 0;/u);
@@ -981,7 +990,7 @@ test("CR 162: every tooltip bubble slides in from the left with one shared anima
   assert.doesNotMatch(PREVIEW_THEME_CSS, /button\[data-tooltip\]::after\s*\{[^}]*transition: opacity 100ms/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S1
 test("CR 162: the toolbar rows unroll as one block, only under the animating mark", () => {
   const mark = "[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating]";
   const rules = cssRules(PREVIEW_THEME_CSS);
@@ -1002,8 +1011,8 @@ test("CR 162: the toolbar rows unroll as one block, only under the animating mar
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-129
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-129#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130#S3
 test("CR 162: reduced motion turns off the tooltip slide-in and the toolbar rows unroll", () => {
   const reduced = reducedMotionBlock(PREVIEW_THEME_CSS);
   const selectors = reduced.slice(reduced.lastIndexOf("/* The toolbar motion"));
@@ -1018,7 +1027,8 @@ test("CR 162: reduced motion turns off the tooltip slide-in and the toolbar rows
   assert.match(selectors, /animation: none !important;\s*transition: none !important;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S10
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S11
 test("CR 112: a horizontal rule is 12px taller above and below than its line, with the spacing unchanged", () => {
   const rule = /#sphinx-myst-preview-content hr \{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   assert.match(rule, /height: 1px;/u);
@@ -1028,7 +1038,7 @@ test("CR 112: a horizontal rule is 12px taller above and below than its line, wi
   assert.match(rule, /margin: calc\(2em - 12px\) 0;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006#S7
 test("in edit mode table cells keep a minimum width and the edited cell is wider", () => {
   const edit = 'html\\[data-sphinx-preview-edit-mode="on"\\] #sphinx-myst-preview-content table';
   assert.match(PREVIEW_THEME_CSS, new RegExp(`${edit} :where\\(th, td\\) \\{[^}]*min-width: 8em;`, "u"));
@@ -1040,7 +1050,7 @@ test("in edit mode table cells keep a minimum width and the edited cell is wider
   assert.doesNotMatch(PREVIEW_THEME_CSS, /(?:^|\n)#sphinx-myst-preview-content table :where\(th, td\) \{[^}]*min-width/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S4
 test("CR 143: the chevron shows on hover, focus and while folded, and a folded block drops its spacing", () => {
   assert.match(PREVIEW_THEME_CSS, /\[data-okf-fold-toggle\] \{[^}]*position: absolute;[^}]*opacity: 0;/u);
   assert.match(PREVIEW_THEME_CSS,
@@ -1048,13 +1058,14 @@ test("CR 143: the chevron shows on hover, focus and while folded, and a folded b
   assert.match(PREVIEW_THEME_CSS, /> \[data-okf-folded\] \{[^}]*margin: 0 !important;[^}]*padding: 0 !important;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S5
 test("CR 143: the toolbar has a Fold button, off until a section is folded", () => {
   assert.match(renderPreviewToolbar(),
     /<button type="button" data-sphinx-preview-fold-toggle aria-pressed="false" aria-label="Fold all sections"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S1
 test("the find bar and the match paint read the theme tokens, in forced colours as well", () => {
   assert.match(PREVIEW_THEME_CSS, /::highlight\(studio-find\)\s*\{[^}]*--studio-editor-findMatchHighlightBackground/u);
   assert.match(PREVIEW_THEME_CSS, /::highlight\(studio-find-current\)\s*\{[^}]*background-color/u);
@@ -1062,13 +1073,13 @@ test("the find bar and the match paint read the theme tokens, in forced colours 
   assert.match(PREVIEW_THEME_CSS, /@media \(forced-colors: active\)\s*\{\s*::highlight\(studio-find\)/u);
   assert.doesNotMatch(renderPreviewToolbar(), /data-sphinx-preview-find/u, "the bar is created by the page, not by the toolbar");});
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S1
 test("CR147: the toolbar offers a Side-by-side button in the review row after the Table of contents button, not pressed at first", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /data-sphinx-preview-toc-toggle[\s\S]*data-sphinx-preview-sbs-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
 test("CR147: the side-by-side cards are two columns, switch off with the page attribute and never show in edit mode", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\[data-okf-sbs-card\] \{[^}]*display: grid;[^}]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\);/u);

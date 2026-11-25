@@ -20,6 +20,23 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-042
 - SwRS-MDOKFSTUDIO-BLOCK-058
+scenarios:
+- id: S1
+  title: Typing in one cell
+- id: S2
+  title: Two cells edited
+- id: S3
+  title: Switch to a neighbouring cell
+- id: S4
+  title: Cell missing from the model
+- id: S5
+  title: Switch right after typing
+- id: S6
+  title: Switch with nothing typed
+- id: S7
+  title: The cell the editor leaves shows its rendered content again
+- id: S8
+  title: Editor closed
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,42 +53,42 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer types in a cell text box and then moves the editor to another cell of the table, the extension SHALL keep every change made in any cell, so that the autosave carries the whole serialised table and not only the edited cell, and keep the same edit session, so that moving between cells does not reopen the editor and the whole session is one undo step.
 
-### Scenario (nominal): Typing in one cell
+### Scenario S1 (nominal): Typing in one cell
 - GIVEN a two-column table with two body rows and the editor in the first body cell
 - WHEN the writer types a new text and the autosave fires
 - THEN one non-final previewEditSave is posted whose editedText is the whole table with the new text in that cell and every other cell unchanged
 
-### Scenario (nominal): Two cells edited
+### Scenario S2 (nominal): Two cells edited
 - GIVEN text typed in one cell, then the editor moved to another cell where text is typed too
 - WHEN the autosave of the second cell fires
 - THEN editedText holds both changes
 
-### Scenario (nominal): Switch to a neighbouring cell
+### Scenario S3 (nominal): Switch to a neighbouring cell
 - GIVEN a cell editor open on the first body cell of a two-column table
 - WHEN the writer clicks the other body cell of the same row
 - THEN the editor sits in the new cell with its raw Markdown, no previewEditOpen was posted for the click, and later saves carry the same editId
 
-### Scenario (boundary): Cell missing from the model
+### Scenario S4 (boundary): Cell missing from the model
 - GIVEN a rendered cell whose position has no cell in the parsed table model
 - WHEN the writer clicks it
 - THEN the editor stays where it was
 
-### Scenario (nominal): Switch right after typing
+### Scenario S5 (nominal): Switch right after typing
 - GIVEN text typed in a cell less than 400 ms ago
 - WHEN the writer clicks another cell
 - THEN a non-final previewEditSave with the typed text is posted immediately and the autosave timer is cleared
 
-### Scenario (boundary): Switch with nothing typed
+### Scenario S6 (boundary): Switch with nothing typed
 - GIVEN a cell editor open with no change since the last post
 - WHEN the writer clicks another cell
 - THEN no previewEditSave is posted
 
-### Scenario (nominal): The cell the editor leaves shows its rendered content again
+### Scenario S7 (nominal): The cell the editor leaves shows its rendered content again
 - GIVEN the editor on cell A and the writer clicks cell B
 - WHEN the move is done
 - THEN cell A has no selected mark and shows its original rendered content, and cell B carries the mark and hides its content
 
-### Scenario (boundary): Editor closed
+### Scenario S8 (boundary): Editor closed
 - GIVEN the editor on cell B closed by Escape
 - WHEN the page is inspected
 - THEN no cell carries the selected mark

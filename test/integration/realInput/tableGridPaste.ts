@@ -42,7 +42,7 @@ const CELL = "[data-sphinx-preview-table-cell-editor] textarea";
  * the cell `row five` with a real Select all and Paste fill the cells from that cell: no tab
  * reaches the source, a column and a row are added, the editor is open in the start cell, and one
  * undo in the source brings the table back.
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-120
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-120#S2
  */
 export async function scenarioTableGridPaste(page: Page): Promise<void> {
   await withDocument("realinput-table-grid-paste", READING_DOCUMENT, async (document) => {

@@ -19,6 +19,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Ctrl+C or Cmd+C posts the source lines of the selection
+- id: S2
+  title: The host puts the exact Markdown on the clipboard
+- id: S3
+  title: The page announces the answer
+- id: S4
+  title: A refusal of the clipboard keys is shown for four seconds
+- id: S5
+  title: The keys stay with the browser
+- id: S6
+  title: A held key sends one request until the host answers
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,13 +54,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a writer presses the platform copy chord with blocks selected in edit mode and no editor open, the page SHALL post previewBlocksCopy with the first and last source line of the selection and take the key from the browser, so that the host puts the exact Markdown of those lines on the clipboard after the range's trailing blank lines (spaces and tabs only) are dropped.
 
-### Scenario (nominal): Ctrl+C or Cmd+C posts the source lines of the selection
+### Scenario S1 (nominal): Ctrl+C or Cmd+C posts the source lines of the selection
 
 - GIVEN two selected blocks at lines 5 to 6 and 8 to 10
 - WHEN the writer presses Ctrl+C (Cmd+C on macOS)
 - THEN previewBlocksCopy carries line 5 and endLine 10 and the default action is prevented
 
-### Scenario (nominal): The host puts the exact Markdown on the clipboard
+### Scenario S2 (nominal): The host puts the exact Markdown on the clipboard
 
 | Input | Outcome |
 | --- | --- |
@@ -56,21 +69,21 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 | A list whose range ends on the blank lines after it (the renderer maps it so), followed by two blank lines | The clipboard holds the list's lines without the blank lines after it, and the document is unchanged |
 | A selection that ends on a line holding only a no-break space | Refused with "The preview is out of date. Refresh it and try again.", and nothing is copied |
 
-### Scenario (nominal): The page announces the answer
+### Scenario S3 (nominal): The page announces the answer
 
 | Input | Outcome |
 | --- | --- |
 | A copy answered ok | The selection status reads "Copied as Markdown" and returns to the selection count after four seconds (4000 ms) |
 | A cut answered ok | The selection is cleared instead of announcing a copy |
 
-### Scenario (refusal): A refusal of the clipboard keys is shown for four seconds
+### Scenario S4 (refusal): A refusal of the clipboard keys is shown for four seconds
 
 | Input | Outcome |
 | --- | --- |
 | A copy, a cut or a paste answered ok false with a reason (for example a paste) | The status region shows the reason, keeps the selection and returns to the selection count after four seconds (4000 ms) |
 | A copy answered ok | The copy message is shown instead |
 
-### Scenario (refusal): The keys stay with the browser
+### Scenario S5 (refusal): The keys stay with the browser
 
 | Input | Outcome |
 | --- | --- |
@@ -81,7 +94,7 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 | The chord with no selection or focused bar | The page leaves the key to the browser |
 | Ctrl+C alone on macOS (the chord there is Cmd) | The key is ignored by the page |
 
-### Scenario (refusal): A held key sends one request until the host answers
+### Scenario S6 (refusal): A held key sends one request until the host answers
 
 | Input | Outcome |
 | --- | --- |

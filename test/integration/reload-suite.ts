@@ -109,9 +109,10 @@ async function ensureCampaignWindowFocused(page: Page, pid: number | undefined):
 }
 
 /** `onSpawn` hands the window process, its user-data directory and CDP port to the hang watchdog. */
-// @tests_req StRS-MDOKFSTUDIO-LIFE-014
+// @accepts_req StRS-MDOKFSTUDIO-LIFE-014#S1
 // @accepts_req StRS-MDOKFSTUDIO-THEME-011#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S4
 export async function runReloadCampaign(executable: string, extensionRoot: string, workspaceRoot: string,
   onSpawn?: (child: ChildProcess, userDataDirectory: string, port: number) => void): Promise<void> {
   const temporary = fs.mkdtempSync("/tmp/studio-reload-");

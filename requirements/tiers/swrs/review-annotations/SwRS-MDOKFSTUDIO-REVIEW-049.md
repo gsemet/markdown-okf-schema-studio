@@ -16,6 +16,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Selection across blocks
+- id: S2
+  title: Normal selection
+- id: S3
+  title: Triple click
+- id: S4
+  title: Long selection
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,25 +41,25 @@ default_owner_email: gaetan@xeberon.net
 
 When a reader saves a comment on a selection, the page SHALL anchor it from the first line of the first selected block to the last line of the last selected block, with the selected text collapsed and cut at 500 characters and up to 32 characters of text before and after it.
 
-### Scenario (nominal): Selection across blocks
+### Scenario S1 (nominal): Selection across blocks
 
 - GIVEN a selection from a paragraph on lines 3 to 4 to a paragraph on lines 7 to 8
 - WHEN the comment is saved
 - THEN the anchor runs from line 3 to line 8
 
-### Scenario (nominal): Normal selection
+### Scenario S2 (nominal): Normal selection
 
 - GIVEN a selection of "second   paragraph" in the middle of a block
 - WHEN the comment is saved
 - THEN the quote is "second paragraph" and the prefix and suffix hold the words around it
 
-### Scenario (boundary): Triple click
+### Scenario S3 (boundary): Triple click
 
 - GIVEN a triple click whose selection ends at offset 0 of the next block
 - WHEN the comment is saved
 - THEN the anchor stays in the block that was clicked
 
-### Scenario (boundary): Long selection
+### Scenario S4 (boundary): Long selection
 
 | Input | Outcome |
 | --- | --- |

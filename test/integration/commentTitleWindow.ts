@@ -95,7 +95,7 @@ async function shoot(page: Page, file: string): Promise<void> {
   await page.screenshot({ path: file, clip: box });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
 /** review-annotations: an open comment in edit mode is titled with its literal tag. */
 export async function scenarioCommentTitle(page: Page): Promise<void> {
   const workbench = vscode.workspace.getConfiguration("workbench");

@@ -17,6 +17,19 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on: []
+scenarios:
+- id: S1
+  title: Single line and range
+- id: S2
+  title: Block id, label and heading targets
+- id: S3
+  title: Lines inside a fenced example
+- id: S4
+  title: Nothing matches
+- id: S5
+  title: Frontmatter marker with an exact identity
+- id: S6
+  title: Unknown identity or empty marker
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +48,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a followed link names a fragment or a frontmatter marker, the extension SHALL select the first source line outside fenced code blocks that the fragment names (#L{n} or #L{n}-L{m} lines, #^{id} block id, a MyST (label)= line, an explicit {#id}, an HTML heading id or the slug of an ATX or setext heading) or that holds the marker followed by the exact identity, and select nothing when no line matches.
 
-### Scenario (nominal): Single line and range
+### Scenario S1 (nominal): Single line and range
 
 - GIVEN #L4 and #L11-L12 on a 12-line file
 - WHEN the fragment is resolved
 - THEN lines 4 and 11 to 12 are selected
 
-### Scenario (nominal): Block id, label and heading targets
+### Scenario S2 (nominal): Block id, label and heading targets
 
 | Input | Outcome |
 | --- | --- |
@@ -51,7 +64,7 @@ When a followed link names a fragment or a frontmatter marker, the extension SHA
 | a heading with an HTML id equal to the fragment | the heading line is selected |
 | a file with CRLF line ends and a heading fragment | the heading line is selected |
 
-### Scenario (boundary): Lines inside a fenced example
+### Scenario S3 (boundary): Lines inside a fenced example
 
 | Input | Outcome |
 | --- | --- |
@@ -59,7 +72,7 @@ When a followed link names a fragment or a frontmatter marker, the extension SHA
 | #shown and (shown)= inside a fenced example | nothing is selected |
 | a fence closed by a longer run of the same marker, then a heading resolved | the heading after the fence is selected |
 
-### Scenario (refusal): Nothing matches
+### Scenario S4 (refusal): Nothing matches
 
 | Input | Outcome |
 | --- | --- |
@@ -67,13 +80,13 @@ When a followed link names a fragment or a frontmatter marker, the extension SHA
 | #L7-L3, a range that ends before it starts | nothing is selected (start <= end <= line count is required) |
 | #^other with no line ending ^other | nothing is selected |
 
-### Scenario (nominal): Frontmatter marker with an exact identity
+### Scenario S5 (nominal): Frontmatter marker with an exact identity
 
 - GIVEN the lines # @implements_req SwRS-1-extra and # @implements_req SwRS-1
 - WHEN the marker @implements_req with identity SwRS-1 is resolved
 - THEN line 2 is selected, because a longer identity with the same prefix does not match
 
-### Scenario (refusal): Unknown identity or empty marker
+### Scenario S6 (refusal): Unknown identity or empty marker
 
 - GIVEN an unknown identity or an empty marker
 - WHEN it is resolved

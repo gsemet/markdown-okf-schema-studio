@@ -143,7 +143,7 @@ function fixture(): Fixture {
 
 const lineOf = (entry: Shown): number | undefined => entry.selection === undefined ? undefined : entry.selection.start.line + 1;
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
 test("a link with a heading anchor followed in a Studio tab hands the heading's line with the open", async () => {
   const f = fixture();
   try {
@@ -158,7 +158,7 @@ test("a link with a heading anchor followed in a Studio tab hands the heading's 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
 test("a link with a marker line and a link with neither hand their line, 1 for neither", async () => {
   const f = fixture();
   try {
@@ -172,7 +172,7 @@ test("a link with a marker line and a link with neither hand their line, 1 for n
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-197
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-197#S1
 test("a link that opens a new Studio tab records the move, and the new tab shares the source's history", async () => {
   const f = fixture();
   try {
@@ -201,7 +201,7 @@ test("a link that opens a new Studio tab records the move, and the new tab share
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-197
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-197#S1
 test("a link to a Studio tab that is already open keeps its own history and appends the move to it", async () => {
   const f = fixture();
   try {
@@ -230,7 +230,7 @@ test("a link to a Studio tab that is already open keeps its own history and appe
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-197
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-197#S1
 test("a link from a Studio tab that opens as text records nothing, in either history", async () => {
   const f = fixture();
   try {
@@ -249,7 +249,7 @@ test("a link from a Studio tab that opens as text records nothing, in either his
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-197
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-197#S2
 test("a link to a file that is not Markdown opens without the Studio tab hand-off and without a history entry", async () => {
   const f = fixture();
   try {
@@ -263,7 +263,8 @@ test("a link to a file that is not Markdown opens without the Studio tab hand-of
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S8
 test("a fixed preview that is not a Studio tab records anchor jumps only and hands no line", async () => {
   const f = fixture();
   try {
@@ -280,7 +281,7 @@ test("a fixed preview that is not a Studio tab records anchor jumps only and han
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
 test("the side preview that follows the editor hands no Studio tab line and keeps recording its links", async () => {
   const f = fixture();
   try {
@@ -293,7 +294,7 @@ test("the side preview that follows the editor hands no Studio tab line and keep
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
 test("Back and Next from a Studio tab to a file whose Studio tab is open elsewhere ask the host to reveal it, the same call as a link", async () => {
   const f = fixture();
   try {

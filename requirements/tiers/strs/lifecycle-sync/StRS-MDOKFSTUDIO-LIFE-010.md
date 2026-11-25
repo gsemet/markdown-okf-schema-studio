@@ -14,6 +14,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Scroll one pane, the other follows
+- id: S2
+  title: The reading line survives an update
 user_need: As a writer, I scroll the source and the preview shows the same
   passage; as a reader, I scroll or click in the rendered text and the source
   editor shows where that text comes from; and I keep my place when images load,
@@ -71,7 +76,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Scroll one pane, the other follows
+#### Path S1: Scroll one pane, the other follows
 
 1. The editor and the preview show the same document
    - SwRS-MDOKFSTUDIO-LIFE-100: the editor is scrolled and the preview follows, as far as the setting allows
@@ -81,7 +86,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-LIFE-108 (refusal): no visible text editor shows the file, so no editor moves
 3. Both panes show the same source line
 
-#### Path 2: The reading line survives an update
+#### Path S2: The reading line survives an update
 
 1. The preview is scrolled to a reading line
    - SwRS-MDOKFSTUDIO-LIFE-119: the page keeps its scroll anchor, a source line, through the rebuild or edit

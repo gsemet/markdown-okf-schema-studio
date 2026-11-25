@@ -108,7 +108,7 @@ test("explicit themes override the same host colors, including the floating tool
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CODE-007#S5
-// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028#S5
 test("cream mirrors the white-mode code colouring", () => {
   assert.match(
     PREVIEW_THEME_CSS,

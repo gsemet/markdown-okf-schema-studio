@@ -22,6 +22,39 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 - StRS-MDOKFSTUDIO-LIFE-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Entry points of the command
+- id: S2
+  title: Resource that is not offered the command
+- id: S3
+  title: First preview
+- id: S4
+  title: The shown document again
+- id: S5
+  title: Another document
+- id: S6
+  title: No eligible file
+- id: S7
+  title: Previews that do not follow the active editor
+- id: S8
+  title: Hidden preview
+- id: S9
+  title: Not a saved Markdown file
+- id: S10
+  title: Studio Open With tab active
+- id: S11
+  title: Text diff active
+- id: S12
+  title: Another custom editor active
+- id: S13
+  title: Eligible and ineligible files
+- id: S14
+  title: File passed by a menu
+- id: S15
+  title: Argument that is not the file to open
+- id: S16
+  title: A file that cannot be opened
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,7 +81,7 @@ supersedes:
 
 When a reader runs Open Preview to Side on a saved Markdown file, the extension SHALL show that file in the side preview that follows the active editor, by creating that preview beside the active editor when none is open and otherwise revealing it, and offer the command only for a resource whose extension is .md; the extension SHALL preview only a saved file with the extension .md, taken from the active editor (a text editor, a text diff, or the Studio Open With tab) or from a file URI the command receives, ignore an argument that is not a URI of the file scheme, and otherwise show the message Open a Markdown file to use Markdown OKF-Schema Studio. or the error Cannot open {path}: {reason} and open no preview.
 
-### Scenario (nominal): Entry points of the command
+### Scenario S1 (nominal): Entry points of the command
 
 | Entry point | Declaration |
 | --- | --- |
@@ -58,7 +91,7 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 | Editor title bar | the book button, when resourceExtname == .md && (activeEditor == workbench.editors.files.textFileEditor || activeEditor == workbench.editors.textDiffEditor), group navigation; it runs Open Preview to Side |
 | Keybinding | Ctrl+K Shift+V (Cmd+K Shift+V on macOS), when editorTextFocus && resourceExtname == .md |
 
-### Scenario (boundary): Resource that is not offered the command
+### Scenario S2 (boundary): Resource that is not offered the command
 
 | Input | Outcome |
 | --- | --- |
@@ -68,7 +101,7 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 | a .md file shown in the Studio Open With editor, title bar drawn | the book button is absent, because the when clause requires the text file editor or the text diff editor (deduced from the when clause, not run) |
 | focus in the terminal or in a non-Markdown editor, the chord pressed | the Studio does not handle it (deduced from the when clause editorTextFocus && resourceExtname == .md, not run) |
 
-### Scenario (nominal): First preview
+### Scenario S3 (nominal): First preview
 
 - GIVEN a saved Markdown file in the active editor and no Studio preview open
 - WHEN the reader runs Open Preview to Side
@@ -76,26 +109,26 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 - AND the command completes once the page shows the rendered document, not while it still shows the pending status page (host test test/host/openCompletes.test.ts)
 - AND with the active editor alone in the only editor group, the panel is requested with ViewColumn.Beside, so VS Code opens it in a new group to the side (deduced from the code, not run)
 
-### Scenario (nominal): The shown document again
+### Scenario S4 (nominal): The shown document again
 
 - GIVEN a side preview showing preview.md and preview.md in the active editor
 - WHEN the reader runs Open Preview to Side again
 - THEN no second panel opens; the existing panel is revealed and the document is rendered again
 - AND the command completes once the page shows that render (host test test/host/openCompletes.test.ts)
 
-### Scenario (nominal): Another document
+### Scenario S5 (nominal): Another document
 
 - GIVEN a side preview showing preview.md and preview-other.md in the active editor
 - WHEN the reader runs Open Preview to Side
 - THEN the existing panel is revealed and switches to preview-other.md, after the page saved its open editors (see SwRS-MDOKFSTUDIO-BLOCK-205)
 
-### Scenario (refusal): No eligible file
+### Scenario S6 (refusal): No eligible file
 
 - GIVEN the active editor holds no saved Markdown file
 - WHEN the command runs
 - THEN the side preview is left as it was and the file checks of the scenarios below apply
 
-### Scenario (boundary): Previews that do not follow the active editor
+### Scenario S7 (boundary): Previews that do not follow the active editor
 
 | Input | Outcome |
 | --- | --- |
@@ -103,26 +136,26 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 | a panel restored by VS Code that is no longer the newest and has become a fixed preview, the command run from the Explorer | that panel is not reused |
 | an Open With tab and a side preview of the same file, the command run | only the side preview that follows the active editor is reused |
 
-### Scenario (boundary): Hidden preview
+### Scenario S8 (boundary): Hidden preview
 
 | Input | Outcome |
 | --- | --- |
 | a side preview with a scrolled page, hidden behind another tab of its group, the reader selects the preview tab again | the page is reloaded and restores its scroll position, edit state and comments panel from the saved webview state, because the panel is created without retainContextWhenHidden (deduced from the code, not run) |
 | an Open With preview tab hidden behind another tab, selected again | its page is restored the same way, because the custom editor is registered without retainContextWhenHidden |
 
-### Scenario (refusal): Not a saved Markdown file
+### Scenario S9 (refusal): Not a saved Markdown file
 
 - GIVEN a TypeScript file in the active editor
 - WHEN the command runs from the Command Palette
 - THEN the information message Open a Markdown file to use Markdown OKF-Schema Studio. shows and no preview opens
 
-### Scenario (nominal): Studio Open With tab active
+### Scenario S10 (nominal): Studio Open With tab active
 
 - GIVEN a Studio Open With tab of a saved .md file is the active tab, so no text editor is active
 - WHEN the command runs from the Command Palette
 - THEN the file of that tab opens in the side preview and no refusal message shows (the keybinding and the editor-title button are not offered while a custom editor has the focus)
 
-### Scenario (nominal): Text diff active
+### Scenario S11 (nominal): Text diff active
 
 - GIVEN a text diff is the active tab (a git diff, a two-file compare or the search and replace preview) and one side is a saved .md file of the file scheme, whichever side holds the cursor
 - WHEN the command runs from the Command Palette, the editor-title button or the keybinding, with no argument or with the URI of one side
@@ -130,13 +163,13 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 - AND with two .md files compared the side that holds the cursor is the real file (the modified side when none does)
 - AND with no side of the file scheme (a staged diff) the working-tree file at the modified side's path stands in when it exists and is .md, and otherwise the refusal message shows
 
-### Scenario (refusal): Another custom editor active
+### Scenario S12 (refusal): Another custom editor active
 
 - GIVEN the active tab is a custom editor of another type, so no text editor is active
 - WHEN the command runs from the Command Palette
 - THEN the message Open a Markdown file to use Markdown OKF-Schema Studio. shows and no preview opens
 
-### Scenario (boundary): Eligible and ineligible files
+### Scenario S13 (boundary): Eligible and ineligible files
 
 | Input | Outcome |
 | --- | --- |
@@ -145,14 +178,14 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 | notes.markdown | refused with the message above |
 | an untitled document | refused with the message above |
 
-### Scenario (nominal): File passed by a menu
+### Scenario S14 (nominal): File passed by a menu
 
 - GIVEN a side preview in group two, preview.md active, and preview-other.md chosen in the Explorer
 - WHEN the reader runs the Explorer entry Open Preview to Side on preview-other.md
 - THEN preview-other.md opens as a permanent tab outside the preview's group, becomes the active editor and the side preview shows it (integration test test/integration/lifecycle.test.ts, the passed Uri is the active text editor)
 - AND without a side preview the file opens in the active group (by reading openPreview)
 
-### Scenario (boundary): Argument that is not the file to open
+### Scenario S15 (boundary): Argument that is not the file to open
 
 | Input | Outcome |
 | --- | --- |
@@ -162,7 +195,7 @@ When a reader runs Open Preview to Side on a saved Markdown file, the extension 
 | the argument { not: "a uri" } with a side preview of preview-other.md | ignored; the preview still shows preview-other.md (integration test test/integration/lifecycle.test.ts) |
 | a URI whose scheme is not file | ignored the same way, because only the file scheme passes the check (deduced from the code, not run) |
 
-### Scenario (refusal): A file that cannot be opened
+### Scenario S16 (refusal): A file that cannot be opened
 
 | Input | Outcome |
 | --- | --- |

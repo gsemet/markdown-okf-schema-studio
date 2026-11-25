@@ -100,7 +100,8 @@ function cardViews(opened: Opened): CardView[] {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S5
 test("CR147: a changed block is a card with HEAD left, now right and the words marked", () => {
   const opened = open();
   toggle(opened);
@@ -118,7 +119,8 @@ test("CR147: a changed block is a card with HEAD left, now right and the words m
   assert.ok(opened.layouts.count > 0, "the page is told the layout changed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S8
 test("CR147: an added block has an empty left side and a removed block an empty right side", () => {
   const opened = open();
   toggle(opened);
@@ -138,7 +140,8 @@ test("CR147: an added block has an empty left side and a removed block an empty 
   assert.equal(card.nextElementSibling?.getAttribute("id"), "omega");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S5
 test("CR147: the original of a changed block is marked replaced while its card shows, and the file text is untouched", () => {
   const opened = open();
   toggle(opened);
@@ -152,8 +155,9 @@ test("CR147: the original of a changed block is marked replaced while its card s
   assert.equal(opened.document.documentElement.getAttribute("data-sphinx-preview-sbs"), "on");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S2
 test("CR147: edit mode shows and builds no cards and keeps the green bars; leaving it brings them back", () => {
   const opened = open();
   toggle(opened);
@@ -167,8 +171,9 @@ test("CR147: edit mode shows and builds no cards and keeps the green bars; leavi
   assert.equal(opened.cards().length, 3, "the cards return after edit mode");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S2
 test("CR147: toggling the diff off removes the cards and restores the default", () => {
   const opened = open();
   toggle(opened);
@@ -217,7 +222,7 @@ const INCOMING_PAGE_HTML = `
 <p data-line="10" data-sphinx-preview-changed="true" id="added">A paragraph added after the commit.</p>
 </main>`;
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S5
 test("CR234: a paragraph removed next to an edited one is a removed card, the edited one is paired with its own last-commit text", () => {
   const { committed, current } = incomingTexts();
   assert.equal(current.split("\n")[2], "This paragraph changed in the buffer and is not saved.", "the page lines follow the buffer");
@@ -240,7 +245,8 @@ test("CR234: a paragraph removed next to an edited one is a removed card, the ed
   assert.equal(opened.element("list").hasAttribute("data-okf-sbs-replaced"), false, "the unchanged list has no card");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S8
 test("CR234: two blocks inside one hunk do not share a last-commit block: the closer keeps it, the other is added", () => {
   const base = ["Alpha stays", "", "The quick red fox", "", "Omega tail", ""].join("\n");
   const current = ["Alpha stays", "", "The quick brown fox", "", "A new paragraph", "", "Omega tail", ""].join("\n");
@@ -266,7 +272,7 @@ test("CR234: two blocks inside one hunk do not share a last-commit block: the cl
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S1
 test("CR463: a click on a block's bar asks for the baseline and shows the card of that block only; a second click closes it", () => {
   const opened = open();
   opened.module.toggleSingle({ element: opened.element("changed") as unknown as Element });
@@ -289,7 +295,8 @@ test("CR463: a click on a block's bar asks for the baseline and shows the card o
   assert.equal(opened.element("changed").hasAttribute("data-okf-sbs-replaced"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S3
 test("CR463: Escape closes the single card, edit mode takes the click away, and the Side-by-side button still shows every card", () => {
   const opened = open();
   opened.module.toggleSingle({ element: opened.element("changed") as unknown as Element });
@@ -316,7 +323,7 @@ test("CR463: Escape closes the single card, edit mode takes the click away, and 
   assert.equal(opened.cards().length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S2
 test("CR463: a click on a removed-lines marker shows the removed card of that hunk, in place", () => {
   const base = ["Alpha", "", "Gone paragraph", "", "Omega", ""].join("\n");
   const current = ["Alpha", "", "Omega", ""].join("\n");
@@ -341,7 +348,7 @@ test("CR463: a click on a removed-lines marker shows the removed card of that hu
   assert.equal(opened.cards().length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S1
 test("CR463: after a content change with the diff off, the next click on the same bar opens its card at once", () => {
   const document = new DomDocument(PAGE_HTML);
   document.documentElement.setAttribute("data-sphinx-preview-sbs", "off");
@@ -364,7 +371,7 @@ test("CR463: after a content change with the diff off, the next click on the sam
   assert.equal(document.body.querySelectorAll("[data-okf-sbs-card]").length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S1
 test("CR463: a click on a bar whose card is not showing opens it again instead of closing nothing", () => {
   const opened = open();
   const target = { element: opened.element("changed") as unknown as Element };

@@ -71,7 +71,8 @@ test("status titles and messages are block-level only on status pages and non-pe
     /\[data-sphinx-preview-status-message\][^{]*\{[^}]*margin-block-start: 0\.25em;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S5
 test("T43: the pending overlay is fixed, pointer-transparent and never in flow", () => {
   const rule = /\[data-sphinx-preview-pending-overlay\]\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS);
   assert.ok(rule, "the pending overlay rule exists");
@@ -100,7 +101,7 @@ test("T08: zoom scales the content font size and the column width together", () 
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S1
 // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S7
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S3
 test("the warning banner keeps clear of the four-button-wide toolbar, expanded or collapsed", () => {
   assert.match(PREVIEW_THEME_CSS,
     /\[data-sphinx-preview-warning-banner\]\s*\{[^}]*--sphinx-preview-warning-banner-reserve: calc\(4 \* 30px \+ 3 \* 2px \+ 8px \+ 14px \+ 8px\);/u);
@@ -136,7 +137,7 @@ test("T10: the auto measure lifts every cap, the row-handle one included", () =>
     /\[data-sphinx-preview-measuring\]\s*\{\s*max-width: none !important;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
 test("the TOC column is hidden by default, reserves 256px when open and hides on narrow panes", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /nav\[data-sphinx-preview-toc\] \{\s*display: none;/u);
@@ -147,7 +148,7 @@ test("the TOC column is hidden by default, reserves 256px when open and hides on
   assert.match(css, /\[data-sphinx-preview-sticky-headings\] \{[^}]*max-width: calc\(100% - var\(--sphinx-preview-toc-reserve, 0px\)\)/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
 test("a narrow pane with the TOC on shows a rail and opens the column as an overlay", () => {
   const css = PREVIEW_THEME_CSS;
   const media = css.match(/@media \(max-width: 759px\) \{[\s\S]*?\n\}\n/u)?.[0] ?? "";
@@ -157,7 +158,7 @@ test("a narrow pane with the TOC on shows a rail and opens the column as an over
   assert.doesNotMatch(media, /animation|transition/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037#S4
 test("a narrow pane with the TOC on pads the content for the 16px rail and keeps the overlay under the toolbar tooltip", () => {
   const css = PREVIEW_THEME_CSS;
   const media = css.match(/@media \(max-width: 759px\) \{[\s\S]*?\n\}\n/u)?.[0] ?? "";
@@ -166,8 +167,9 @@ test("a narrow pane with the TOC on pads the content for the 16px rail and keeps
   assert.match(media, /nav\[data-sphinx-preview-toc\]\[data-sphinx-preview-toc-overlay="open"\] \{[^}]*inset-block-start: calc\(var\(--sphinx-preview-toc-top, 96px\) \+ 40px\);/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143#S4
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S6
 test("T15: an open comment is an admonition-like box and showComments off hides the gray chips only", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\.okf-comment > \.okf-comment-body:not\(\[hidden\]\) \{[^}]*border-inline-start: 4px solid/u);
@@ -176,7 +178,7 @@ test("T15: an open comment is an admonition-like box and showComments off hides 
   assert.doesNotMatch(css, /data-okf-show-comments="false"\][^{]*kind="todo"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
 test("edit mode titles an open comment with its literal tag in code font", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /html\[data-sphinx-preview-edit-mode="on"\] #sphinx-myst-preview-content \.okf-comment > \.okf-comment-body\[data-okf-tag\]:not\(\[hidden\]\)::before \{\s*content: attr\(data-okf-tag\);\s*font-family: var\(--studio-editor-font-family/u);
@@ -184,7 +186,7 @@ test("edit mode titles an open comment with its literal tag in code font", () =>
   assert.match(css, /\.okf-comment > \.okf-comment-body:not\(\[hidden\]\)::before \{\s*content: "Comment";/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S4
 test("README HTML: align, per-theme picture images and the edit-mode frame titled with the tag", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\[align="center"\], #sphinx-myst-preview-content center \{ text-align: center; \}/u);
@@ -199,7 +201,7 @@ test("README HTML: align, per-theme picture images and the edit-mode frame title
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S6
 test("the Comments toolbar button hides the gray and thread chips at once and goes away with the setting", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\],\s*html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="thread"\] \{\s*display: none;/u);
@@ -209,7 +211,7 @@ test("the Comments toolbar button hides the gray and thread chips at once and go
   assert.match(toolbar, /data-sphinx-preview-comments-toggle aria-pressed="true" aria-label="Hide comments" title="Hide comments" data-tooltip="Hide comments"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S3
 test("comments hidden by the button or the setting: highlights lose their paint, badges and the orphan box go", () => {
   const css = PREVIEW_THEME_CSS;
   const ruleOf = (selector: string): string => {
@@ -252,7 +254,7 @@ test("the comment boxes (compose, thread popover, open comment) have square corn
   assert.match(PREVIEW_THEME_CSS, /\[data-okf-comment-compose\] button,[^{]*\{[^}]*border-radius: 3px;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S4
 test("T16: the change bars sit in one column of a layer, square, with no layout shift", () => {
   const css = PREVIEW_THEME_CSS;
   // The bar is no longer an inset shadow against the text edge, nor a pseudo-element of the block.
@@ -265,7 +267,7 @@ test("T16: the change bars sit in one column of a layer, square, with no layout 
   assert.match(css, /data-sphinx-preview-incoming="off"\] \[data-sphinx-preview-change-layer\] \{\s*display: none;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045#S5
 test("T16b: only the current TOC entry loses its rounded corners", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /li\[data-sphinx-preview-toc-current\] > button:not\(\[data-sphinx-preview-toc-twisty\]\) \{[^}]*border-radius: 0;[^}]*box-shadow: inset 3px 0 0 var\(--studio-focusBorder, Highlight\)/u);
@@ -305,7 +307,8 @@ test("P4: the palette sits on top of the frame and sticks below the sticky band 
   assert.doesNotMatch(css, /sphinx-preview-edit-palette[^{]*\{[^}]*style=/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
 test("CR 123: the frame reserves the distance the sticky palette rides down, as a top margin", () => {
   assert.match(PREVIEW_THEME_CSS,
     /#sphinx-myst-preview-content \.sphinx-preview-block-editor-host > \.sphinx-preview-block-editor \{\s*margin-top: var\(--sphinx-preview-palette-reserve, 0px\);/u);
@@ -336,7 +339,7 @@ test("CR 034: the table toolbar rides down with a scrolling table by a transform
   assert.doesNotMatch(rule, /position: (?:fixed|absolute)|inset-block|top:/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S5
 test("T44: the Orphaned comments box sits in the content's bottom padding and adds no scroll height", () => {
   const padding = /#sphinx-myst-preview-content \{[^}]*padding: 0 var\(--sphinx-preview-content-gutter\) (min\(80vh[^;]*\));/u
     .exec(PREVIEW_THEME_CSS);
@@ -363,7 +366,7 @@ test("P11: the slash menu floats above the toolbar and the palette popovers and 
   assert.match(live, /clip: rect\(0 0 0 0\);/u, "the live region is visually hidden");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-034
+// @tests_req SwRS-MDOKFSTUDIO-CORE-034#S1
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001#S2
 test("K1: long words and bare URLs wrap inside text blocks, links and table cells", () => {
   const rule = /#sphinx-myst-preview-content :is\(([^)]*)\)\s*\{[^}]*overflow-wrap: anywhere;/u.exec(PREVIEW_THEME_CSS);
@@ -374,7 +377,8 @@ test("K1: long words and bare URLs wrap inside text blocks, links and table cell
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167#S5
 test("an inline thread is a green chip with a bubble, a green titled box, and goes with the gray chips", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\.okf-chip--thread \{[^}]*border-color: var\(--studio-charts-green/u);

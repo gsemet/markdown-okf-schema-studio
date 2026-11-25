@@ -43,7 +43,8 @@ function harness(requests: string[]) {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S3
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S9
 test("link discovery waits for the viewport and deduplicates bounded batches", () => {
   const runtime = harness(["references/PROPERTIES.md", "references/PROPERTIES.md", "wiki:Note", "okf-link:identity", "#heading", "https://example.test"]);
   assert.equal(runtime.messages.length, 0);
@@ -62,7 +63,8 @@ test("link discovery waits for the viewport and deduplicates bounded batches", (
   assert.equal(many.messages.map((message) => message.requests.length).join(","), "64,64,2");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S4
 test("local and wiki clicks are host-routed even before discovery, including middle click", () => {
   const runtime = harness(["references/PROPERTIES.md", "wiki:Note", "okf-link:identity"]);
   let prevented = 0;
@@ -77,7 +79,7 @@ test("local and wiki clicks are host-routed even before discovery, including mid
   assert.equal(runtime.messages[0].requestId, context.requestId);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085#S2
 // The stale-render half of this test moved to test/page/runtimeContentPatch.test.ts ("link target hints of a
 // stale render are ignored"): the page's host message filter now matches previewLinkTargets to the
 // render before the router hands it to applyTargets.
@@ -207,7 +209,7 @@ function iconHarness() {
   return { parent, link, document };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085#S3
 test("a blocked target keeps the link and adds a warning icon described by the reason", () => {
   const { parent, link, document } = iconHarness();
   applyLinkHint(document, link as never, "blocked", "File not found: docs/guid.md");
@@ -225,7 +227,7 @@ test("a blocked target keeps the link and adds a warning icon described by the r
   assert.equal(parent.children[1].getAttribute("title"), "The navigation target is outside the workspace.");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085#S3
 test("a target that becomes valid loses the warning icon and the description", () => {
   const { parent, link, document } = iconHarness();
   applyLinkHint(document, link as never, "blocked", "File not found: docs/guid.md");
@@ -238,7 +240,7 @@ test("a target that becomes valid loses the warning icon and the description", (
   assert.equal(valid.parent.children.length, 1, "a valid link gets no icon");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S10
 test("links are asked again when the preview regains focus or becomes visible", () => {
   const runtime = harness(["a.md"]);
   runtime.intersect([{ target: runtime.links[0], isIntersecting: true }]);
@@ -254,7 +256,7 @@ test("links are asked again when the preview regains focus or becomes visible", 
   assert.equal(runtime.messages[1].requests[0], "a.md");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S6
 test("T22: rescan unobserves the links that the replaced content detached", () => {
   const runtime = rescanHarness(["a.md", "b.md"]);
   const [a, b] = runtime.observed;
@@ -264,7 +266,7 @@ test("T22: rescan unobserves the links that the replaced content detached", () =
   assert.equal(runtime.observed.length, 3, "the new link is observed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S6
 test("T22: rescan keeps observing the links that are still in the content", () => {
   const runtime = rescanHarness(["a.md", "b.md"]);
   runtime.keepLinksAndAdd(["c.md"]);
@@ -273,7 +275,7 @@ test("T22: rescan keeps observing the links that are still in the content", () =
   assert.equal(runtime.observed.length, 3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S3
 test("an auxclick with button 2 posts nothing and leaves the default action", () => {
   const runtime = harness(["references/PROPERTIES.md"]);
   let prevented = 0;

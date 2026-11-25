@@ -18,6 +18,23 @@ derives_from:
 - StRS-MDOKFSTUDIO-LIFE-010
 depends_on:
 - SwRS-MDOKFSTUDIO-CORE-003
+scenarios:
+- id: S1
+  title: Reading the anchor line
+- id: S2
+  title: A line inside a long paragraph
+- id: S3
+  title: A new render starts at the last anchor
+- id: S4
+  title: Layout changes re-apply the stored anchor
+- id: S5
+  title: Lines added or removed above the anchor
+- id: S6
+  title: While a block or field editor is open
+- id: S7
+  title: Every mapped block carries its source mapping
+- id: S8
+  title: The page measures only its own visible mapped blocks
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,26 +61,26 @@ default_owner_email: gaetan@xeberon.net
 
 When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL define its scroll anchor as a source line (the editor's first visible line, and the preview's line at its reading line below the sticky heading band, with the very top of the page always being line 1) and keep that anchor through the update.
 
-### Scenario (nominal): Reading the anchor line
+### Scenario S1 (nominal): Reading the anchor line
 | Input | Outcome |
 | --- | --- |
 | a preview scrolled down the page | the anchor line is the line that starts at the reading line below the band, never the caret line; the editor top line is the floor of the anchor |
 | a scroll position of 0 | the anchor line is line 1 |
 
-### Scenario (nominal): A line inside a long paragraph
+### Scenario S2 (nominal): A line inside a long paragraph
 | Input | Outcome |
 | --- | --- |
 | a paragraph of five source lines wrapped over twelve rendered lines, and source line 4 looked up | the position is the measured start of that line, not a proportional guess |
 | a paragraph whose line starts cannot be measured reliably, and a line inside it looked up | the block's top and bottom bound the position |
 
-### Scenario (nominal): A new render starts at the last anchor
+### Scenario S3 (nominal): A new render starts at the last anchor
 | Input | Outcome |
 | --- | --- |
 | a preview whose anchor is line 80, and a new render is built | its boot context carries initialAnchor 80 and the page applies it before the first paint |
 | no anchor yet and a visible editor whose zero-based first visible line is 30, the first render is built | its initial anchor is line 31 in one-based numbering |
 | no anchor yet and the follow setting off | no anchor is passed |
 
-### Scenario (nominal): Layout changes re-apply the stored anchor
+### Scenario S4 (nominal): Layout changes re-apply the stored anchor
 | Input | Outcome |
 | --- | --- |
 | an image loads, the pane is resized, the content changes size, the sticky band changes or the zoom changes | the page scrolls again to the stored anchor line instead of re-reading it from the scroll position |
@@ -72,19 +89,19 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 | a scroll whose layout pass runs before the scroll is handled (a viewport resize reported with each scroll, as in a webview next to an editor) | the scroll sets the anchor first; the page stays where the reader scrolled |
 | a pending scroll while blocks change position or height, such as a comment above the reading line closing | the stored anchor survives; the layout-induced scroll does not become a new reading position |
 
-### Scenario (boundary): Lines added or removed above the anchor
+### Scenario S5 (boundary): Lines added or removed above the anchor
 | Input | Outcome |
 | --- | --- |
 | an anchor at line 50 and two lines inserted at line 10 | the anchor of each preview of that document is line 52 |
 | an edit at line 60 with the anchor at line 50 | the anchor stays line 50 |
 
-### Scenario (nominal): While a block or field editor is open
+### Scenario S6 (nominal): While a block or field editor is open
 | Input | Outcome |
 | --- | --- |
 | an open block editor or frontmatter field editor whose text grows and the layout shifts | the edited element stays where it was on screen |
 | an open block editor and the text editor scrolled explicitly | the preview follows, the editor stays open and the element's anchor is the new position |
 
-### Scenario (nominal): Every mapped block carries its source mapping
+### Scenario S7 (nominal): Every mapped block carries its source mapping
 - GIVEN a rendered document of a heading, paragraphs, an admonition and a figure
 - WHEN the host builds the page
 - THEN each element with a positive integer source line carries the source file, the source line, the document id and a block id source-block-1, source-block-2 and so on in document order; an element that spans several lines also carries its end line; no line is 0 or negative
@@ -92,7 +109,7 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 - WHEN the host builds the page
 - THEN the figure is keyboard-accessible with tabindex 0 (an element that is naturally focusable, or one that already carries a tabindex, keeps its own) and the invalid element gets no mapping attributes
 
-### Scenario (refusal): The page measures only its own visible mapped blocks
+### Scenario S8 (refusal): The page measures only its own visible mapped blocks
 | Input | Outcome |
 | --- | --- |
 | an element that names another document or another file | ignored for scrolling and anchors |

@@ -39,7 +39,8 @@ const DIAG_001 = `## A diagram is drawn
 `;
 
 test("the Main paths section is read into paths, states, steps and options", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S2
   const paths = parseMainPaths(DIAG_001);
   assert.equal(paths.length, 2);
   assert.equal(paths[0]?.title, "Insert a diagram, break it, fix it");
@@ -61,7 +62,7 @@ test("the Main paths section is read into paths, states, steps and options", () 
 });
 
 test("a StRS without the section gives no path and an unknown id is kept as cited", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
   assert.deepEqual(parseMainPaths("## T\n\n### Rationale\n\ntext\n"), []);
   assert.deepEqual(parseMainPaths(""), []);
   assert.deepEqual(parseMainPaths("### Main paths\n\nnothing yet\n"), []);

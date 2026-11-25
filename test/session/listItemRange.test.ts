@@ -75,7 +75,7 @@ const CASES: Array<{ name: string; lines: string[]; items: number[][]; range: [n
   },
 ];
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S5
 test("the items of a list in a quote, an alert and admonitions carry their lines and the list range is the list's own", async () => {
   for (const { name, lines, items, range, inner } of CASES) {
     const found = await outerList(lines);

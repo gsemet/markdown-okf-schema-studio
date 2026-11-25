@@ -23,6 +23,31 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-090
 relates_to:
 - StRS-MDOKFSTUDIO-FMEDIT-008
+scenarios:
+- id: S1
+  title: Every body bar holds the two arrows
+- id: S2
+  title: The arrows are disabled at the ends of the document
+- id: S3
+  title: The properties bar and Start writing have no arrows
+- id: S4
+  title: The Delete block button follows the arrows
+- id: S5
+  title: The arrows are hidden while a block editor is open
+- id: S6
+  title: A click on an enabled arrow asks the host for the swap
+- id: S7
+  title: A disabled arrow posts nothing and the arrows stand down during an edit
+- id: S8
+  title: A refused move says why next to the bar for six seconds
+- id: S9
+  title: The actions show on one block, the one that moved last
+- id: S10
+  title: A result for the render the page shows
+- id: S11
+  title: A result for another context
+- id: S12
+  title: A move refused as stale is sent once more
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -50,7 +75,7 @@ supersedes:
 
 While edit mode is on, the page SHALL give the insert point of every body block an up arrow labelled "Move the block above up" and a down arrow labelled "Move the block above down", and a click on an enabled arrow asks the host to swap the block with its neighbour.
 
-### Scenario (nominal): Every body bar holds the two arrows
+### Scenario S1 (nominal): Every body bar holds the two arrows
 
 - GIVEN a document with three body blocks in edit mode
 - WHEN the bars are built
@@ -58,14 +83,14 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - WHEN the bar is the one under the last block of a block selection and the labels are updated
 - THEN they read "Move the selected blocks up" and "Move the selected blocks down" (see SwRS-MDOKFSTUDIO-BLOCK-156)
 
-### Scenario (boundary): The arrows are disabled at the ends of the document
+### Scenario S2 (boundary): The arrows are disabled at the ends of the document
 
 | Input | Outcome |
 | --- | --- |
 | Three body blocks | The up arrow of the first bar and the down arrow of the last bar are disabled, the others are enabled |
 | One body block | Both arrows are disabled |
 
-### Scenario (refusal): The properties bar and Start writing have no arrows
+### Scenario S3 (refusal): The properties bar and Start writing have no arrows
 
 | Input | Outcome |
 | --- | --- |
@@ -73,7 +98,7 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 | An empty document, the Start writing bar | It holds only that button, a single control and no move buttons |
 | A document with only frontmatter, the Start writing point | It holds a single control and no move buttons |
 
-### Scenario (boundary): The Delete block button follows the arrows
+### Scenario S4 (boundary): The Delete block button follows the arrows
 
 | Input | Outcome |
 | --- | --- |
@@ -81,35 +106,35 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 | The bar of an included block | No Delete block button |
 | The move status of a refused move | It sits to the right of the Delete block button and never overlaps it |
 
-### Scenario (boundary): The arrows are hidden while a block editor is open
+### Scenario S5 (boundary): The arrows are hidden while a block editor is open
 
 | Input | Outcome |
 | --- | --- |
 | A block editor is open | The move buttons and the Delete block button of all bars are not displayed |
 | No editor is open | The arrows are displayed again |
 
-### Scenario (nominal): A click on an enabled arrow asks the host for the swap
+### Scenario S6 (nominal): A click on an enabled arrow asks the host for the swap
 
 - GIVEN a bar under a block at lines 7 to 8 and a neighbour at lines 10 to 12
 - WHEN the writer clicks the down arrow
 - THEN previewBlockMove carries line 7, endLine 8, neighbourLine 10, neighbourEndLine 12, direction down and pinViewportTop, one message per click
 - AND the bar is marked data-sphinx-move-pending until a refusal clears the mark or the re-render rebuilds the bars
 
-### Scenario (refusal): A disabled arrow posts nothing and the arrows stand down during an edit
+### Scenario S7 (refusal): A disabled arrow posts nothing and the arrows stand down during an edit
 
 | Input | Outcome |
 | --- | --- |
 | A click on a disabled arrow at the end of the document | No message is posted |
 | An arrow activated while a block editor or a field editor is open | No message is posted |
 
-### Scenario (refusal): A refused move says why next to the bar for six seconds
+### Scenario S8 (refusal): A refused move says why next to the bar for six seconds
 
 | Input | Outcome |
 | --- | --- |
 | The host answers ok false with a reason to a move requested from a bar | A status element with role status and the reason appears next to that bar and disappears after 6 s; the pending mark is cleared |
 | The host answers ok true | No status is shown; the page is re-rendered |
 
-### Scenario (nominal): The actions show on one block, the one that moved last
+### Scenario S9 (nominal): The actions show on one block, the one that moved last
 
 - GIVEN edit mode, the pointer resting on a block and a keyboard block selection on another
 - WHEN the keyboard moves the selection (the page marks the root `data-sphinx-preview-actions-owner="keyboard"` and the bar under the last selected block `data-sphinx-actions-shown`)
@@ -118,13 +143,13 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - THEN the owner is "pointer", the hovered block shows its actions again, the bar of the selection hides and the selection outline is removed
 - AND a selection that is cleared leaves the owner unset, so the hover alone shows the actions
 
-### Scenario (nominal): A result for the render the page shows
+### Scenario S10 (nominal): A result for the render the page shows
 
 - GIVEN a previewBlockMoveResult whose documentId, revision and requestId are those of the page's render
 - WHEN it arrives
 - THEN it is handled, and a refusal reason is shown next to the insert point bar
 
-### Scenario (refusal): A result for another context
+### Scenario S11 (refusal): A result for another context
 
 | Input | Outcome |
 | --- | --- |
@@ -132,7 +157,7 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 | a result that names another document | ignored |
 | a result that names another revision | ignored |
 
-### Scenario (boundary): A move refused as stale is sent once more
+### Scenario S12 (boundary): A move refused as stale is sent once more
 
 | Input | Outcome |
 | --- | --- |

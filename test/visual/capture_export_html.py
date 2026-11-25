@@ -24,9 +24,10 @@ FIRST_PANEL = f"{TAB_SET} .myst-tab-panel[data-export-tab='1']"
 SECOND_PANEL = f"{TAB_SET} .myst-tab-panel[data-export-tab='2']"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
 # @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-091#S1
 def check_export_html(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Opens `<scenario>.export.html` (next to the page) in a context with JavaScript disabled and checks what
@@ -83,7 +84,7 @@ def check_export_html(page: Page, scenario: dict, failures: list[Failure]) -> No
     context.close()
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3
 def check_edited_cell(export: Page, cell_text: str, fail) -> None:
   """CR 310: the file of a page exported while a table cell editor was open shows the cell's text (visible,
   with a height), wrapped in nothing that hides it, with no editor control or hidden wrapper left."""

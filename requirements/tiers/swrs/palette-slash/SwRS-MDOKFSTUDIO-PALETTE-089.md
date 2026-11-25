@@ -16,6 +16,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on: []
+scenarios:
+- id: S1
+  title: Button
+- id: S2
+  title: Structure
+- id: S3
+  title: Prefill and focus
+- id: S4
+  title: Keyboard inside the panel
+- id: S5
+  title: IME composition
+- id: S6
+  title: Text changed since the opening
+- id: S7
+  title: One panel, removed with the editor
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,20 +51,20 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses the Link button or Cmd+K or Ctrl+K, the extension SHALL open the link panel under the palette, a dialog named Insert link with the fields Text and URL and the buttons Insert and Cancel, prefilled from the selection, and make no edit until the panel is submitted.
 
-### Scenario (nominal): Button
+### Scenario S1 (nominal): Button
 
 - GIVEN a block editor with a selected word
 - WHEN the writer presses Link
 - THEN the panel Insert link opens under the palette and the text is unchanged
 
-### Scenario (nominal): Structure
+### Scenario S2 (nominal): Structure
 
 - GIVEN an open link panel
 - WHEN the panel is inspected
 - THEN it has role dialog and the name Insert link, two text fields with the accessible names Text and URL and the buttons Insert and Cancel in this tab order
 - AND, when the panel was opened from a table cell editor, it sits inside the table bar under the buttons
 
-### Scenario (nominal): Prefill and focus
+### Scenario S3 (nominal): Prefill and focus
 
 | Input | Outcome |
 | --- | --- |
@@ -59,7 +74,7 @@ When the writer presses the Link button or Cmd+K or Ctrl+K, the extension SHALL 
 | Both fields filled | The focus is in Text |
 | No selection | Both fields are empty and Text has the focus |
 
-### Scenario (nominal): Keyboard inside the panel
+### Scenario S4 (nominal): Keyboard inside the panel
 
 | Input | Outcome |
 | --- | --- |
@@ -69,21 +84,21 @@ When the writer presses the Link button or Cmd+K or Ctrl+K, the extension SHALL 
 | Ctrl+K or Cmd+K with the focus in Text | The panel consumes the key, the focus moves to URL and VS Code does not receive the key |
 | Ctrl+Shift+K with the focus in Text | The key is not consumed by the panel |
 
-### Scenario (refusal): IME composition
+### Scenario S5 (refusal): IME composition
 
 - GIVEN the panel open and an IME composition in progress
 - WHEN Enter confirms the composition
 - THEN the panel stays open and nothing is inserted
 - AND once the composition has ended, Enter inserts the link
 
-### Scenario (refusal): Text changed since the opening
+### Scenario S6 (refusal): Text changed since the opening
 
 - GIVEN the panel open and the text box value changed by a script, without an input event
 - WHEN Insert is pressed
 - THEN the panel closes and the text is unchanged
 - AND with the same text as at the opening, Insert writes the link
 
-### Scenario (boundary): One panel, removed with the editor
+### Scenario S7 (boundary): One panel, removed with the editor
 
 | Input | Outcome |
 | --- | --- |

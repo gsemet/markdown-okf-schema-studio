@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Nominal case
+- id: S2
+  title: Boundary cases
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader follows a link from a Studio tab to a Markdown file, the extension SHALL record the move in the Studio tab's navigation history only when the target opens in a Studio tab, sharing that history with a Studio tab the link created and appending the move to the own history of a Studio tab already open.
 
-### Scenario (nominal): Nominal case
+### Scenario S1 (nominal): Nominal case
 
 - GIVEN a Studio tab of a.md
 - WHEN the reader follows a link to b.md and b.md opens in a new Studio tab
 - THEN a.md's history records the move and the new tab shares the same history, so Back in either tab returns to the place left
 
-### Scenario (boundary): Boundary cases
+### Scenario S2 (boundary): Boundary cases
 
 | Input | Outcome |
 | --- | --- |

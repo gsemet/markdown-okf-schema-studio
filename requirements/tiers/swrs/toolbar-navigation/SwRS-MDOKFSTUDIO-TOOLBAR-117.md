@@ -18,6 +18,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-011
 depends_on: []
+scenarios:
+- id: S1
+  title: Heading anchor
+- id: S2
+  title: Unknown fragment
+- id: S3
+  title: Where the page scrolls to
+- id: S4
+  title: Invalid, unknown and stale requests
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,19 +46,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader follows an anchor, the extension SHALL post navigateAnchor with the anchor value and, when the shown document has a matching fragment, its start and end source lines, so that the page scrolls the mapped block of the source line, else the element whose id equals the decoded value or the value without a leading ^, to the reading line below the band, and does not scroll when no block or element is found or the request names another render.
 
-### Scenario (nominal): Heading anchor
+### Scenario S1 (nominal): Heading anchor
 
 - GIVEN an anchor #target on a heading at line 5
 - WHEN it is followed
 - THEN navigateAnchor carries the value, sourceLine 5 and sourceEndLine 5, and the page scrolls so the block is at the reading line
 
-### Scenario (nominal): Unknown fragment
+### Scenario S2 (nominal): Unknown fragment
 
 - GIVEN an anchor #generated-id with no source line
 - WHEN it is followed
 - THEN navigateAnchor carries the value only
 
-### Scenario (boundary): Where the page scrolls to
+### Scenario S3 (boundary): Where the page scrolls to
 
 | navigateAnchor received | Outcome |
 | --- | --- |
@@ -57,7 +66,7 @@ When the reader follows an anchor, the extension SHALL post navigateAnchor with 
 | #^note with no source line, and an element with id note | the page scrolls to that element |
 | a value that cannot be decoded, with a source line that maps to a block | the page scrolls to that block (the source line wins) |
 
-### Scenario (refusal): Invalid, unknown and stale requests
+### Scenario S4 (refusal): Invalid, unknown and stale requests
 
 | navigateAnchor received | Outcome |
 | --- | --- |

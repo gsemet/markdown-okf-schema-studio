@@ -18,8 +18,8 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
 annotation_exemption: true
-exemption_reason: "Archived. Another requirement specifies this behaviour, so no marker
-  is expected."
+exemption_reason: "Archived by CR-477: links and history moves inside Studio no longer
+  open Studio at the target line, the raw text stays text; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

@@ -14,6 +14,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
+scenarios:
+- id: S1
+  title: A rendered syntax is reachable from the slash menu
+- id: S2
+  title: A syntax without an entry is a documented exception
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -30,13 +35,13 @@ default_owner_email: gaetan@xeberon.net
 
 The extension SHALL let the writer insert from the slash menu every syntax the preview renders, in the palette mode that offers it, except the documented exceptions that have another way in.
 
-### Scenario (nominal): A rendered syntax is reachable from the slash menu
+### Scenario S1 (nominal): A rendered syntax is reachable from the slash menu
 
 - GIVEN a syntax of the writing skill's "What renders" table (a GFM construct, an admonition, a card, grid, tab set or figure, a role, a diagram or a chart fence)
 - WHEN the writer opens the slash menu in the palette mode that offers it
 - THEN the menu lists an entry that inserts that syntax, from the first mode that offers it up to Full, and no lower mode lists it
 
-### Scenario (boundary): A syntax without an entry is a documented exception
+### Scenario S2 (boundary): A syntax without an entry is a documented exception
 
 - GIVEN a rendered syntax that has no slash entry of its own (autolinks, `{list-table}`, `{toctree}`, `{uml}`, `{contents}`, presentation HTML, front matter)
 - WHEN the syntax list of the coverage test is read

@@ -166,8 +166,10 @@ const GESTURES: Array<{ name: string; type: string; run: (current: Page) => void
 ];
 
 for (const gesture of GESTURES) {
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S2
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S7
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
   test(`${gesture.name} posts when no edit is in flight and nothing with an editor open or a detached save`, () => {
     const free = page("free");
     const mark = free.harness.messages.length;
@@ -193,8 +195,10 @@ function findPart(harness: RuntimeHarness, name: string): RuntimeElement {
   return part;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053#S5
 test("the replace gesture posts and changes nothing with an editor open or a detached save", () => {
   const free = page("free");
   free.harness.dispatchMessage(FIND_COMMAND);
@@ -215,7 +219,8 @@ test("the replace gesture posts and changes nothing with an editor open or a det
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S4
 test("a full page replacement leaves no editor and no detached save: the replace gesture works again", () => {
   for (const setup of ["an editor open", "a detached save"] as const) {
     const { harness } = page(setup);

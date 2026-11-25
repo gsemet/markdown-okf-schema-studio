@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Find and set a Studio setting
 user_need: As a reader, I find every Studio setting in the settings editor,
   grouped by what it controls, with a default and an explanation.
 derived_by:
@@ -53,7 +56,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Find and set a Studio setting
+#### Path S1: Find and set a Studio setting
 
 1. The reader opens the settings editor
    - SwRS-MDOKFSTUDIO-LIFE-156: the Studio settings are listed in the groups Preview, Editing, Frontmatter, Comments and PlantUML, in that order

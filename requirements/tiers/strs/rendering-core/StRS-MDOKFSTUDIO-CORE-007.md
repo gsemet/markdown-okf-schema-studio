@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Ship a version
 user_need: A maintainer ships a version only after the heavy CI run is green,
   with manifests at the package version and reviewed release notes.
 derived_by:
@@ -58,7 +61,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Ship a version
+#### Path S1: Ship a version
 
 1. A maintainer sets a release version
    - SwRS-MDOKFSTUDIO-CORE-075: every manifest holds the package version in one version commit

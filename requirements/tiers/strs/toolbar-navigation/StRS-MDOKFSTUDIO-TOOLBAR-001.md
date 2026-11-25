@@ -14,6 +14,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Collapse the toolbar and find it collapsed
 user_need: "As a reader, I find the preview controls in four clear rows. I fold the
   toolbar down to its first row to free the top of the pane and unfold it again, and
   a collapsed toolbar stays collapsed when I reopen a preview of the same workspace,
@@ -72,7 +75,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Collapse the toolbar and find it collapsed
+#### Path S1: Collapse the toolbar and find it collapsed
 
 1. A preview page is built
    - SwRS-MDOKFSTUDIO-TOOLBAR-001: the toolbar is drawn as four rows of titled buttons, inside the pane and without overlap

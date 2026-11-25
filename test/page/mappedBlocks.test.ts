@@ -21,7 +21,7 @@ function blocksOf(...elements: ReturnType<typeof block>[]) {
   return createMappedBlocks(document as never, { activeSourceFile: "/w/a.md", documentId: "file:///a.md" } as never);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-008
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-008#S1
 test("a block inside a folded section is neither selectable nor found by its line", () => {
   const blocks = blocksOf(block(1), block(3, { "data-okf-folded": "" }), block(5));
   assert.deepEqual(blocks.selectableBlocks().map((element) => element.getAttribute("data-sphinx-source-line")), ["1", "5"]);
@@ -29,7 +29,7 @@ test("a block inside a folded section is neither selectable nor found by its lin
   assert.ok(blocks.bodyBlockAtLine(5));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-008
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-008#S2
 test("the folded block stays mapped for scrolling, so the editor and preview still line up", () => {
   const blocks = blocksOf(block(1), block(3, { "data-okf-folded": "" }));
   assert.equal(blocks.topLevelMappedBlocks().length, 2);

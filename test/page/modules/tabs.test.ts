@@ -167,7 +167,7 @@ test("apply puts the choices back on content that a patch rendered again", () =>
   assert.deepEqual(states(fewer), ["true/0/shown", "false/-1/hidden"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S4
 test("reveal shows the tab of a hidden panel without moving the focus and tells onChange; a shown panel changes nothing", () => {
   const document = new Doc();

@@ -66,7 +66,7 @@ test("the bounded cache evicts the least recently used entry and refuses an over
   assert.equal(byCost.size, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S8
 test("a resource referenced many times in one render is stat-ed once", async (t) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-policy-cache-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));

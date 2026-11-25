@@ -17,6 +17,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Compare a changed block with its last-commit version
 user_need: As a writer, I read what I changed in a block next to what the block
   said at the last commit, word by word, unsaved edits included, and I go back
   to the plain document when I do not need the comparison.
@@ -65,7 +68,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Compare a changed block with its last-commit version
+#### Path S1: Compare a changed block with its last-commit version
 
 1. A file tracked by Git differs from its last commit
    - SwRS-MDOKFSTUDIO-REVIEW-008: the writer presses the Side-by-side button and the page tells the host that the diff is on

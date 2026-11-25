@@ -16,6 +16,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Scroll the two panes together
+- id: S2
+  title: See the cursor in the preview
 user_need: As a reader, I choose per preview panel whether scrolling the text
   editor scrolls the preview, the button tells me when there is no text editor
   to follow, and I see in the preview which block I am working on in the text
@@ -65,7 +70,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Scroll the two panes together
+#### Path S1: Scroll the two panes together
 
 1. The Anchor button is enabled
    - SwRS-MDOKFSTUDIO-TOOLBAR-120: the reader presses it, the button shows the anchor mode and the pairing, and the preview is aligned with the first visible line of each text editor that shows its document
@@ -75,7 +80,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-120 (refusal): a value that is not a boolean is not accepted by the host
 3. The panel keeps the choice
 
-#### Path 2: See the cursor in the preview
+#### Path S2: See the cursor in the preview
 
 1. The setting that marks the editor selection is on
    - SwRS-MDOKFSTUDIO-TOOLBAR-128: the host sends the cursor line and the preview outlines the block that contains it

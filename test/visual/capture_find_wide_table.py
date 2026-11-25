@@ -10,7 +10,7 @@ MARGIN = 16
 TOLERANCE = 1.0
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010#S3
 def check_find_hit_in_wide_table(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """With the table scrolled to its end, Find for `needle` and Enter bring the hit text inside the
   table's box (less the 16 px margin) and the viewport, and the page does not scroll sideways."""

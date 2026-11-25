@@ -15,7 +15,7 @@ for (const [name, eol] of EOLS) {
   const text = ["# Title", "", "First paragraph.", "", "Second paragraph.", ""].join(eol);
   const expected = ["# Title", "", "Second paragraph.", ""].join(eol);
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S3
   test(`${name}: an erased editor committed before any autosave deletes the block in one edit`, async () => {
     const run = fixture({ text });
     await run.send("previewEditSave", { ...first(eol), editedText: "", final: true, deleteWhenEmpty: true });
@@ -23,7 +23,7 @@ for (const [name, eol] of EOLS) {
     assert.equal(run.applyCalls.length, 1);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S3
   test(`${name}: an erased editor committed after an autosave deletes the block in a second edit`, async () => {
     const run = fixture({ text });
     await run.send("previewEditSave", { ...first(eol), editedText: "", final: false });
@@ -33,14 +33,15 @@ for (const [name, eol] of EOLS) {
     assert.equal(run.applyCalls.length, 2);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S2
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S4
   test(`${name}: without deleteWhenEmpty the placeholder line is written`, async () => {
     const run = fixture({ text });
     await run.send("previewEditSave", { ...first(eol), editedText: "", final: true });
     assert.equal(run.document.getText(), ["# Title", "", "", "Second paragraph.", ""].join(eol));
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
   test(`${name}: previewBlocksDelete deletes the span in one edit and answers op delete`, async () => {
     const run = fixture({ text });
     await run.send("previewBlocksDelete", { line: 3, endLine: 3, pinViewportTop: 120 });
@@ -53,7 +54,8 @@ for (const [name, eol] of EOLS) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
 test("previewBlocksDelete of the last block pins nothing, and refusals change nothing", async () => {
   const last = fixture();
   await last.send("previewBlocksDelete", { line: 5, endLine: 5, pinViewportTop: 120 });
@@ -78,7 +80,8 @@ test("previewBlocksDelete of the last block pins nothing, and refusals change no
   assert.equal(failing.of("previewBlocksResult")[0]!.ok, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
 test("previewBlocksDelete is refused while a block edit is held", async () => {
   const held = fixture();
   await held.send("previewEditSave", { editId: "e1", line: 5, endLine: 5, originalText: "Second paragraph.\n", editedText: "Second A.\n", final: false });

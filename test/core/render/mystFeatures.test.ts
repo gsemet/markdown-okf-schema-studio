@@ -19,7 +19,7 @@ import { fakeRunner, nodeFiles } from "./plantUmlFakes";
 import { fixtureDirectory, fixtureDocument, inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
 import { createNodeFileSystem } from "../../../src/node-services/nodeFileSystem";
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-010
+// @tests_req SwRS-MDOKFSTUDIO-CORE-010#S1
 test("wikilinks render as lazy note targets without changing code or existing links", async () => {
   const document = inlineDocument(
     "See [[Note]], [[Folder/My Note#Heading|Label]] and [[#Section]].\n\n"
@@ -36,7 +36,8 @@ test("wikilinks render as lazy note targets without changing code or existing li
   assert.match(result.html, /\[\[Fenced\]\]/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-088
+// @tests_req SwRS-MDOKFSTUDIO-CORE-088#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-088#S2
 test("the in-process renderer preserves the active-file MyST feature contract", async () => {
   const document = fixtureDocument("feature-contract.md");
   const result = await renderPreviewDocument({
@@ -220,7 +221,7 @@ test("MyST code directives number and emphasize lines relative to their start", 
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-022
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S5
 test("MyST code-cell directives render numbered input without claiming execution", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1013,7 +1014,8 @@ test("table directives render trusted workspace-local HTML includes", async () =
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-022
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S2
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S5
 test("Jupyter table output embeds show a project-build placeholder", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1038,7 +1040,8 @@ test("Jupyter table output embeds show a project-build placeholder", async () =>
   assert.equal(result.diagnostics[0].line, 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S2
 test("block elements carry the source line the editor scrolls against", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1055,7 +1058,8 @@ test("block elements carry the source line the editor scrolls against", async ()
   assert.match(result.html, /<table data-line="9" data-end-line="11">/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S2
 test("multiline blocks retain their full mapped source range", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1294,7 +1298,7 @@ test("standard HTML and inline or fenced XML stay outside context grouping", asy
   assert.equal(result.diagnostics.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S5
 test("block source ranges stay absolute when leading frontmatter is stripped", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1315,7 +1319,8 @@ test("block source ranges stay absolute when leading frontmatter is stripped", a
   assert.equal(attribute(paragraph, "data-end-line"), "8");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-022
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022#S4
 test("project-scoped roles and directives degrade to labelled placeholders", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -1427,7 +1432,8 @@ test("tilde pairs render as struck-through text only in prose", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-003
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003#S8
 test("a lone raw <img> block is a mapped block with a source line", async () => {
   const result = await renderPreviewDocument({
     files: createNodeFileSystem(),

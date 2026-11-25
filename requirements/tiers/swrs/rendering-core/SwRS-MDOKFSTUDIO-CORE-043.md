@@ -14,6 +14,11 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Preview panel
+- id: S2
+  title: Custom editor preview
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,12 +36,12 @@ default_owner_email: gaetan@xeberon.net
 
 When the preview panel is created, the extension SHALL enable the find widget so that Cmd/Ctrl+F searches the rendered page.
 
-### Scenario (nominal): Preview panel
+### Scenario S1 (nominal): Preview panel
 - GIVEN a preview panel
 - WHEN it is created
 - THEN its options enable find
 
-### Scenario (boundary): Custom editor preview
+### Scenario S2 (boundary): Custom editor preview
 - GIVEN a custom editor preview
 - WHEN it is created
 - THEN find is enabled as well

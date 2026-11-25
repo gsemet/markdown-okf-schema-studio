@@ -109,7 +109,7 @@ function openColourField(value = "say foo now") {
   return { ...h, menu, field };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S5
 test("Escape in the colour code field closes the picker and gives the focus back to the text box", () => {
   const h = openColourField();
   const focused = h.textbox.focused;
@@ -121,7 +121,7 @@ test("Escape in the colour code field closes the picker and gives the focus back
   assert.equal(h.done.count, 0, "the editor is not finished");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-036
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-036#S6
 test("Cmd or Ctrl with Enter in the colour code field closes the picker and finishes the edit; plain Enter applies", () => {
   for (const modifier of ["ctrlKey", "metaKey"]) {
     const h = openColourField();
@@ -152,7 +152,7 @@ test("a button that owns a popover announces it with aria-haspopup and an aria-e
   assert.equal(button(root, "bold").getAttribute("aria-haspopup"), null, "a button without a popover is not marked");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S6
 test("a select value outside the four modes is put back to the current mode and reported nothing", () => {
   const changes: string[] = [];
   const { root } = open({ mode: "gfm", onModeChange: (mode) => changes.push(mode) });
@@ -168,7 +168,8 @@ test("a select value outside the four modes is put back to the current mode and 
   assert.deepEqual(changes, ["strict"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-140
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-140#S2
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-140#S4
 test("a truncated Reference list ends with the note that more entries exist; a complete one has none", () => {
   const items = [{ value: "intro", label: "intro" }, { value: "setup", label: "setup" }];
   const noteOf = (truncated: boolean | undefined): FakeElement[] => {
@@ -202,7 +203,7 @@ function pasteWindow(): { window: PasteImageWindow; env: PasteEnvironment } {
   return { window: { FileReader: FakeReader }, env };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-203
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-203#S3
 test("a pasted image that cannot be read shows The image could not be read. and posts nothing; a closed editor is left alone", () => {
   for (const current of [true, false]) {
     const { window, env } = pasteWindow();

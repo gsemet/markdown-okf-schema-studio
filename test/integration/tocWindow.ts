@@ -141,7 +141,8 @@ async function editTitles(page: Page): Promise<string[]> {
     })));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072#S3
 /** rendering-core: [TOC], [[_TOC_]] and {contents} list the headings with links in read mode and is titled in edit mode. */
 export async function scenarioToc(page: Page): Promise<void> {
   await logSideBarState(page, "toc");

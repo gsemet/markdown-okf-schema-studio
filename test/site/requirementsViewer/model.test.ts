@@ -11,8 +11,8 @@ function model() {
 }
 
 test("the model separates active from retired by req_lifecycle and reads the older key", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-083
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-083#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
   const m = model();
   assert.deepEqual(m.retired.map((r) => r.id), ["StRS-X-002", "SwRS-X-015", "SwRS-X-016"]);
   assert.equal(m.byId.get("SwRS-X-014")?.lifecycle, "proposed", "lifecycle is the fallback of req_lifecycle");
@@ -29,7 +29,8 @@ test("the model separates active from retired by req_lifecycle and reads the old
 });
 
 test("the model counts the figures of active requirements and the areas", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
   const { stats, areas } = model();
   assert.equal(stats.targets, 5);
   assert.equal(stats.implemented, 4);
@@ -48,8 +49,9 @@ test("the model counts the figures of active requirements and the areas", () => 
 });
 
 test("the model reads scenarios, files, parents, paths and known issues", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-087
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S4
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-087#S2
   const m = model();
   const go = m.byId.get("SwRS-X-011")!;
   assert.deepEqual(go.scenarios.map((s) => [s.kind, s.name]), [["nominal", "Go on"], ["boundary", "Go on twice"]]);
@@ -71,7 +73,8 @@ test("the model reads scenarios, files, parents, paths and known issues", () => 
 });
 
 test("the model reads table scenarios, notes and mixed scenarios in source order", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S4
   const m = model();
   const [table, mixed] = m.byId.get("SwRS-X-014")!.scenarios;
   assert.deepEqual(table?.blocks.map((b) => b.type), ["table"]);

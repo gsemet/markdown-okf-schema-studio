@@ -14,6 +14,9 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-006
+scenarios:
+- id: S1
+  title: Tab in a table wider than the pane
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,7 +35,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the editor moves to or opens in a cell of a table that scrolls sideways in its own box, the extension SHALL bring that cell and its editor into the visible part of the box, instantly and by the smallest amount, with a 16 px margin and without scrolling the page, and again after a layout pass that resizes the box.
 
-### Scenario (nominal): Tab in a table wider than the pane
+### Scenario S1 (nominal): Tab in a table wider than the pane
 
 - GIVEN a ten-column table wider than the pane, which scrolls sideways in its own box, and the editor in the first body cell
 - WHEN the writer presses Tab through the row and across the wrap to the next row, then Shift+Tab back

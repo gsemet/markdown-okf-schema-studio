@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-220#S3
 test("CR 463: the change bar tooltip shows on the bar only, in the tooltip look, never in edit mode or with the bars hidden", () => {
   const css = PREVIEW_THEME_CSS;
   // Only a bar takes the pointer (the layer and the block do not), and only the bar's own hover shows the bubble.
@@ -17,8 +17,10 @@ test("CR 463: the change bar tooltip shows on the bar only, in the tooltip look,
   assert.match(css, /data-sphinx-preview-incoming="off"\] \[data-sphinx-preview-change-layer\] \{\s*display: none;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S2
 test("CR 463: the removed-lines marker is a red triangle in the diff's removed colour, the bubble sits above the bar, and a bar is clickable", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\[data-sphinx-preview-change-layer\] > span\[data-removed\] \{[^}]*background: transparent;/u);

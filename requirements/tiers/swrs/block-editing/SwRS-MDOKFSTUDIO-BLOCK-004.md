@@ -17,6 +17,18 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Up and Down select, Enter opens, Escape or Cmd/Ctrl+Enter returns to
+    the selection
+- id: S2
+  title: Moving the selection
+- id: S3
+  title: Coming back to the window
+- id: S4
+  title: Keys that belong to other controls
+- id: S5
+  title: The arrows reach each blank-line block
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,7 +49,7 @@ default_owner_email: gaetan@xeberon.net
 
 When edit mode is on and no editor is open, the page SHALL move a one-block selection with ArrowUp and ArrowDown, open the selected block with Enter, and, when an editor closes through Escape or Cmd/Ctrl+Enter, leave the edited block selected. The keys SHALL work while the page itself (the document, its body or the content root) holds the focus, the page itself SHALL show no focus ring, and when the window or tab comes back with the page holding the focus in edit mode with no editor open, the page SHALL select the block that was selected, else the last block the keyboard selected, else the block nearest the top of the viewport.
 
-### Scenario (nominal): Up and Down select, Enter opens, Escape or Cmd/Ctrl+Enter returns to the selection
+### Scenario S1 (nominal): Up and Down select, Enter opens, Escape or Cmd/Ctrl+Enter returns to the selection
 
 - GIVEN edit mode on, no editor open and no block selected
 - WHEN the writer presses ArrowDown, ArrowDown, Enter, types, then presses Escape (or Cmd/Ctrl+Enter)
@@ -45,7 +57,7 @@ When edit mode is on and no editor is open, the page SHALL move a one-block sele
 
 The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the focus colour, scrolled into view, takes the focus and is announced as "1 block selected". After a save, the block is selected once the patch of the save is in; when the save changed the number of blocks, nothing is selected.
 
-### Scenario (boundary): Moving the selection
+### Scenario S2 (boundary): Moving the selection
 
 | Input | Outcome |
 | --- | --- |
@@ -57,13 +69,13 @@ The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the fo
 | Delete or Backspace with a block selection | The selected blocks are deleted (SwRS-MDOKFSTUDIO-BLOCK-265) |
 | Delete or Backspace with only a focused block, a focused bar button, a text box, an open editor, or the structural cursor on a cell, a list item or an inner block | Nothing is deleted |
 
-### Scenario (nominal): Coming back to the window
+### Scenario S3 (nominal): Coming back to the window
 
 - GIVEN edit mode on, no editor open, and the page itself holds the focus (the writer clicked the margin of the page, or the window or the tab comes back)
 - WHEN the writer presses ArrowDown
 - THEN the selection moves as above and the page shows no focus ring; when the window or tab comes back, the block that was selected (else the last one the keyboard selected, else the block nearest the top of the viewport) is selected again and holds the focus before any key is pressed
 
-### Scenario (refusal): Keys that belong to other controls
+### Scenario S4 (refusal): Keys that belong to other controls
 
 | Input | Outcome |
 | --- | --- |
@@ -75,7 +87,7 @@ The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the fo
 
 Table-cell editors keep their own Escape and Cmd/Ctrl+Enter and do not select a block when they close.
 
-### Scenario (nominal): The arrows reach each blank-line block
+### Scenario S5 (nominal): The arrows reach each blank-line block
 
 - GIVEN edit mode on and two blank-line blocks between two blocks
 - WHEN the writer presses Down on the block above, and then Down again

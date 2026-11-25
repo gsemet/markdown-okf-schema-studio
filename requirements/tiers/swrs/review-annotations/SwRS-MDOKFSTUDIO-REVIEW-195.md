@@ -26,6 +26,30 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-017
 depends_on: []
+scenarios:
+- id: S1
+  title: Changed lines and unsaved edits
+- id: S2
+  title: When the marks are posted
+- id: S3
+  title: An untracked file, another scheme, an untrusted workspace or an off
+    choice
+- id: S4
+  title: Nothing to say and marks to take back
+- id: S5
+  title: Added, modified and separate edits
+- id: S6
+  title: Differences that do not count
+- id: S7
+  title: Range size limits
+- id: S8
+  title: Git available
+- id: S9
+  title: Git missing or failing
+- id: S10
+  title: Only file documents under 1 MiB
+- id: S11
+  title: A new HEAD commit is announced
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -50,14 +74,14 @@ supersedes:
 
 When the shown document is a file tracked by Git, in a trusted workspace, with preview.showIncomingChanges on and the Diff choice on, the extension SHALL post to the page the line ranges of the shown text, unsaved edits included, that differ from the file at HEAD, and in every other case post an empty list of ranges only to take back marks the page shows; it reports the added and modified lines of the shown text as 1-based ranges, merging adjacent lines and keeping separate edits as separate ranges, reports no range for a difference of line endings, of a missing final newline or of deleted lines only, and reports the whole differing middle as one range when more than 20 000 lines differ or more than 2000 edits are needed; it reads the text at HEAD through the built-in Git extension without starting a process, returns nothing when Git cannot give it or when the shown text, the document or the HEAD text is not a file under 1 MiB, and announces a change of the Git state only when the HEAD commit id has changed.
 
-### Scenario (nominal): Changed lines and unsaved edits
+### Scenario S1 (nominal): Changed lines and unsaved edits
 
 | Input | Outcome |
 | --- | --- |
 | A tracked file whose shown text has two lines changed since HEAD | the page receives two ranges of the changed lines, 1-based, in the shown text |
 | A tracked file with an unsaved edit in the editor | the edited lines are in the ranges |
 
-### Scenario (nominal): When the marks are posted
+### Scenario S2 (nominal): When the marks are posted
 
 | Trigger | Outcome |
 | --- | --- |
@@ -68,7 +92,7 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 | A page has just loaded | the marks are posted at once |
 | The Diff choice is stored | the marks are posted at once (see SwRS-MDOKFSTUDIO-REVIEW-214) |
 
-### Scenario (refusal): An untracked file, another scheme, an untrusted workspace or an off choice
+### Scenario S3 (refusal): An untracked file, another scheme, an untrusted workspace or an off choice
 
 | Input | Outcome |
 | --- | --- |
@@ -76,7 +100,7 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 | A file that is not a file document, a workspace that is not trusted, or the setting or the Diff choice off, with no mark showing and the enabled value unchanged | nothing is posted |
 | A page that shows marks and a file that Git no longer knows or a workspace that is no longer trusted | an empty list of ranges is posted so the page clears the marks |
 
-### Scenario (boundary): Nothing to say and marks to take back
+### Scenario S4 (boundary): Nothing to say and marks to take back
 
 | Input | Outcome |
 | --- | --- |
@@ -84,7 +108,7 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 | A page that shows marks and a document that now equals HEAD | an empty list is posted |
 | A page that shows marks and the Diff choice turned off | an empty list is posted |
 
-### Scenario (nominal): Added, modified and separate edits
+### Scenario S5 (nominal): Added, modified and separate edits
 
 | Input | Outcome |
 | --- | --- |
@@ -93,7 +117,7 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 | Two separate edits | two ranges |
 | Identical texts | no range |
 
-### Scenario (boundary): Differences that do not count
+### Scenario S6 (boundary): Differences that do not count
 
 | Input | Outcome |
 | --- | --- |
@@ -101,26 +125,26 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 | A base without a final newline against one with it | no range is reported |
 | A current text with lines removed and nothing added | no range is reported |
 
-### Scenario (boundary): Range size limits
+### Scenario S7 (boundary): Range size limits
 
 | Input | Outcome |
 | --- | --- |
 | A middle part of more than 20 000 lines (above the line cap) | one range covers the whole middle |
 | More than 2000 edits (above the edit budget) | one range covers the whole middle |
 
-### Scenario (nominal): Git available
+### Scenario S8 (nominal): Git available
 
 - GIVEN a repository with the file in HEAD
 - WHEN the base is read
 - THEN the commit id and the text are returned
 
-### Scenario (refusal): Git missing or failing
+### Scenario S9 (refusal): Git missing or failing
 
 - GIVEN no Git extension, no repository, no file in HEAD or a failing show
 - WHEN the base is read
 - THEN nothing is returned and nothing is marked
 
-### Scenario (boundary): Only file documents under 1 MiB
+### Scenario S10 (boundary): Only file documents under 1 MiB
 
 | Input | Outcome |
 | --- | --- |
@@ -128,7 +152,7 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 | A document that is not a file | nothing is returned |
 | A file whose HEAD text is longer than 1 MiB (a big blob) | nothing is returned |
 
-### Scenario (nominal): A new HEAD commit is announced
+### Scenario S11 (nominal): A new HEAD commit is announced
 
 | Input | Outcome |
 | --- | --- |

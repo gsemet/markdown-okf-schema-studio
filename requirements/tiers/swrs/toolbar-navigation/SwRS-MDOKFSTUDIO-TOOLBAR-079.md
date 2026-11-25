@@ -21,6 +21,31 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-052
+scenarios:
+- id: S1
+  title: Link scrolls in
+- id: S2
+  title: Same request twice
+- id: S3
+  title: Batches of at most 64
+- id: S4
+  title: Requests that are not looked up
+- id: S5
+  title: Search by name
+- id: S6
+  title: Content replaced
+- id: S7
+  title: The host answers each request
+- id: S8
+  title: No answer for another render
+- id: S9
+  title: A failed discovery
+- id: S10
+  title: Links are asked again when the reader returns
+- id: S11
+  title: Requests within the bounds
+- id: S12
+  title: Requests over the bounds or of the wrong kind
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -45,26 +70,26 @@ supersedes:
 
 When a link with a navigation request scrolls into view, the extension SHALL ask the host once for the target of its request, in previewLinkDiscover messages of at most 64 requests, and the host answers with previewLinkTargets that lists, for each request in order, its kind and its path or reason; the host accepts a previewLinkDiscover message only when its requests are an array of at most 64 strings of at most 4096 characters each. When the host looks for a file by name to answer a request, it SHALL skip the folders node_modules, .git, _build, .venv and venv, SHALL NOT apply the VS Code files.exclude setting (an explicit exclude replaces it, so files hidden by files.exclude can be found), and SHALL stop at 50 matching files per root, so a name matching more files may be truncated before it is resolved or reported as ambiguous.
 
-### Scenario (nominal): Link scrolls in
+### Scenario S1 (nominal): Link scrolls in
 
 - GIVEN a long document with a link below the fold
 - WHEN the link intersects the viewport
 - THEN its request is sent once in a previewLinkDiscover message and the link is no longer observed
 
-### Scenario (boundary): Same request twice
+### Scenario S2 (boundary): Same request twice
 
 - GIVEN two links with the same request
 - WHEN both come into view
 - THEN the request is sent once
 
-### Scenario (boundary): Batches of at most 64
+### Scenario S3 (boundary): Batches of at most 64
 
 | Requests waiting | Outcome |
 | --- | --- |
 | 130 distinct requests in view | three messages carry 64, 64 and 2 requests |
 | three requests | one message carries three requests |
 
-### Scenario (refusal): Requests that are not looked up
+### Scenario S4 (refusal): Requests that are not looked up
 
 | Link request or page | Outcome |
 | --- | --- |
@@ -76,7 +101,7 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 | a page whose window has no IntersectionObserver | no discovery message is sent and clicks still reach the host (see SwRS-MDOKFSTUDIO-TOOLBAR-077) |
 | a page with the observer, a link that intersects | its request is sent |
 
-### Scenario (boundary): Search by name
+### Scenario S5 (boundary): Search by name
 
 | Given | Outcome |
 | --- | --- |
@@ -84,34 +109,34 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 | a target hidden by the files.exclude setting | found |
 | a name matching more than 50 files under one root | the search stops at 50 files; the answer may differ from the full set |
 
-### Scenario (boundary): Content replaced
+### Scenario S6 (boundary): Content replaced
 
 | Input | Outcome |
 | --- | --- |
 | The page content is replaced and the rescan finds new links | The new links are observed; a link still in the content is not observed twice |
 | Links of the old content are gone from the page | The observer releases them, so they are not kept alive |
 
-### Scenario (nominal): The host answers each request
+### Scenario S7 (nominal): The host answers each request
 
 - GIVEN requests for an existing file, a missing file and a javascript: link
 - WHEN the host answers
 - THEN previewLinkTargets lists a local target with the real path and two blocked targets with their reasons, in the order of the requests
 
-### Scenario (refusal): No answer for another render
+### Scenario S8 (refusal): No answer for another render
 
 | Given | Outcome |
 | --- | --- |
 | a discovery of an older request id, or of another document or revision than the host's render | no previewLinkTargets is sent |
 | a discovery in flight when a new render is shown | no answer is sent when the resolution ends |
 
-### Scenario (refusal): A failed discovery
+### Scenario S9 (refusal): A failed discovery
 
 | Given | Outcome |
 | --- | --- |
 | a request whose resolution raises an error | the warning "Preview link discovery failed: {error}" is shown and nothing is answered for the batch |
 | a preview closed meanwhile, when the error is raised | no warning is shown |
 
-### Scenario (nominal): Links are asked again when the reader returns
+### Scenario S10 (nominal): Links are asked again when the reader returns
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -122,14 +147,14 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 - Known issue: a link name matching more than 50 files under one root is resolved from the first 50 found, not from all of them.
 - Known issue: while the preview stays focused and visible, a file created or deleted meanwhile is not noticed; the links are asked again only when the focus or the visibility comes back, or when the page is replaced.
 
-### Scenario (nominal): Requests within the bounds
+### Scenario S11 (nominal): Requests within the bounds
 
 | Input | Outcome |
 | --- | --- |
 | 64 requests of 4096 characters | the message is accepted (the limit) |
 | an empty array | accepted |
 
-### Scenario (refusal): Requests over the bounds or of the wrong kind
+### Scenario S12 (refusal): Requests over the bounds or of the wrong kind
 
 | Input | Outcome |
 | --- | --- |

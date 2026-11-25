@@ -20,6 +20,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
 - StRS-MDOKFSTUDIO-PALETTE-019
 depends_on: []
+scenarios:
+- id: S1
+  title: Bold and undo
+- id: S2
+  title: No native editing command
+- id: S3
+  title: An action that makes no edit
+- id: S4
+  title: A refusal that has a reason
+- id: S5
+  title: Invalid selection
+- id: S6
+  title: A matched shortcut is consumed
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,25 +54,25 @@ default_owner_email: gaetan@xeberon.net
 
 When a palette button, a slash command or a shortcut runs an action, the extension SHALL apply the edit that the action returns to the text box as one native editing step that autosaves the editor and leaves the selection that the action returned, and, when the action returns no edit, leave the text unchanged, put the focus back in the text box and show the reason in the status line when the action has one.
 
-### Scenario (nominal): Bold and undo
+### Scenario S1 (nominal): Bold and undo
 
 - GIVEN a text box with a selected word
 - WHEN the writer presses Bold and then the undo key combination
 - THEN the word is wrapped in one step, the editor stays open and one undo restores the text
 
-### Scenario (boundary): No native editing command
+### Scenario S2 (boundary): No native editing command
 
 - GIVEN a page where the native editing command is not available
 - WHEN the writer presses Bold
 - THEN the text is spliced by hand, the editor reacts as to an input event and the returned selection is set
 
-### Scenario (refusal): An action that makes no edit
+### Scenario S3 (refusal): An action that makes no edit
 
 - GIVEN a text box and an action that refuses the selection (the Colour action on a selection that straddles a span boundary)
 - WHEN the writer presses the button
 - THEN the text is unchanged and the text box has the focus, and the same action on a valid selection applies the edit
 
-### Scenario (refusal): A refusal that has a reason
+### Scenario S4 (refusal): A refusal that has a reason
 
 - GIVEN an open editor and a command that makes no edit
 - WHEN the writer runs it as in the table
@@ -71,7 +84,7 @@ When a palette button, a slash command or a shortcut runs an action, the extensi
 | the slash menu | the same refusal, or a conversion that would lose content chosen from the menu | the typed slash query is removed, the text is otherwise unchanged and the status line gives the reason |
 | the slash menu | a command that refuses without a reason | the query is removed and the status line is unchanged |
 
-### Scenario (boundary): Invalid selection
+### Scenario S5 (boundary): Invalid selection
 
 - GIVEN a text of 5 characters
 - WHEN a line or block action is applied with the selection of the table
@@ -84,7 +97,7 @@ When a palette button, a slash command or a shortcut runs an action, the extensi
 | start after its end | no edit |
 | inside the text | the edit is produced |
 
-### Scenario (nominal): A matched shortcut is consumed
+### Scenario S6 (nominal): A matched shortcut is consumed
 
 - GIVEN the block text box
 - WHEN the writer presses a palette shortcut that matches, such as Ctrl+B

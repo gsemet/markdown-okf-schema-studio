@@ -16,6 +16,15 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: setting off
+- id: S2
+  title: both edges inside one construct
+- id: S3
+  title: boundary crossed at the start
+- id: S4
+  title: boundary crossed at the end
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,25 +44,25 @@ default_owner_email: gaetan@xeberon.net
 
 When the balance-edges setting is on and a selection ends or starts inside an inline construct it does not entirely contain, the raw copy SHALL add that construct's missing opening or closing delimiter read from the source, and when both edges lie inside one construct it SHALL copy the text between the edges alone.
 
-### Scenario: setting off
+### Scenario S1: setting off
 
 - GIVEN the setting is off and `Hello **world** again`
 - WHEN the reader selects from the `r` of `world` to the end of the line
 - THEN the copy is `rld** again`
 
-### Scenario: both edges inside one construct
+### Scenario S2: both edges inside one construct
 
 - GIVEN the setting is on and both edges lie inside the bold `world`
 - WHEN the reader copies
 - THEN the clipboard holds the text between the edges, `orl`, with no delimiter
 
-### Scenario: boundary crossed at the start
+### Scenario S3: boundary crossed at the start
 
 - GIVEN the setting is on
 - WHEN the selection starts inside the bold `world` and ends after it
 - THEN the opening `**` is added, read from the source
 
-### Scenario: boundary crossed at the end
+### Scenario S4: boundary crossed at the end
 
 - GIVEN the setting is on
 - WHEN the selection starts before the bold `world` and ends inside it

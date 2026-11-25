@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
 test("the table bar status takes no room when it is empty", () => {
   assert.match(
     PREVIEW_THEME_CSS,

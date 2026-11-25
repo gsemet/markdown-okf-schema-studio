@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { droppedFilePath, droppedReference, droppedText, firstHeadingTitle } from "../../../src/core/mapping/dropReferences";
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("firstHeadingTitle reads the first heading outside front matter and code", () => {
   assert.equal(firstHeadingTitle("# Getting started\n\ntext"), "Getting started");
   assert.equal(firstHeadingTitle("---\ntitle: x\n# no\n---\n\n## **Bold** and `code` ##\n"), "Bold and code");
@@ -14,7 +14,7 @@ test("firstHeadingTitle reads the first heading outside front matter and code", 
   assert.equal(firstHeadingTitle(""), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S2
 test("droppedReference writes a relative, percent-encoded link or image", () => {
   const doc = "/w/doc/a.md";
   assert.equal(droppedReference(doc, { path: "/w/doc/The Guide.md", title: "Getting started" }), "[Getting started](The%20Guide.md)");
@@ -25,7 +25,8 @@ test("droppedReference writes a relative, percent-encoded link or image", () => 
   assert.equal(droppedReference("C:\\w\\a.md", { path: "D:\\x\\b.md" }), undefined, "another drive has no relative reference");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S4
 test("droppedText joins the references with a space and skips files without one", () => {
   assert.equal(
     droppedText("C:\\w\\a.md", [{ path: "C:\\w\\one.md" }, { path: "D:\\x\\b.md" }, { path: "C:\\two.png" }]),
@@ -34,7 +35,7 @@ test("droppedText joins the references with a space and skips files without one"
   assert.equal(droppedText("C:\\w\\a.md", [{ path: "D:\\x\\b.md" }]), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("droppedFilePath reads local file addresses only", () => {
   assert.equal(droppedFilePath("file:///w/The%20Guide.md"), "/w/The Guide.md");
   assert.equal(droppedFilePath("file:///c%3A/w/a.md"), "c:\\w\\a.md");

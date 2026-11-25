@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-001
+scenarios:
+- id: S1
+  title: One slide-in for every bubble
+- id: S2
+  title: Reduced motion
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,7 +38,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader hovers or focuses a button of the floating toolbar, the edit bar or the table menu, the extension SHALL show its tooltip bubble sliding in from 6 px to the left of its place while fading in over 120 ms, with one shared animation, and SHALL show it without motion when the user prefers reduced motion.
 
-### Scenario (nominal): One slide-in for every bubble
+### Scenario S1 (nominal): One slide-in for every bubble
 | Input | Outcome |
 | --- | --- |
 | hover or keyboard focus on a button of the floating toolbar | the bubble fades in over 120 ms while moving 6 px from the left to its place |
@@ -42,7 +47,7 @@ When the reader hovers or focuses a button of the floating toolbar, the edit bar
 
 The three bubbles share one keyframes rule (sphinx-preview-tooltip-in) and the fast motion time; it moves the bubble with the translate property, so each bubble keeps its own anchoring.
 
-### Scenario (refusal): Reduced motion
+### Scenario S2 (refusal): Reduced motion
 - GIVEN the user prefers reduced motion
 - WHEN a button of the toolbar, the edit bar or the table menu is hovered or focused
 - THEN the bubble appears without animation

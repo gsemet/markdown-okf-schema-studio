@@ -23,7 +23,7 @@ function reference(before: string, after: string) {
   return { start: prefix, end: before.length - suffix, text: after.slice(prefix, after.length - suffix) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S4
 test("every pair of short texts is replaced minimally without splitting a CRLF or surrogate pair", () => {
   // The code units sit on both sides of each surrogate boundary: 0xd7ff, 0xd800, 0xdbff, 0xdc00, 0xdfff, 0xe000.
   const alphabet = ["a", "\r", "\n", "\ud7ff", "\ud800", "\udbff", "\udc00", "\udfff", "\ue000"];
@@ -45,7 +45,8 @@ test("every pair of short texts is replaced minimally without splitting a CRLF o
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S5
 test("a CRLF pair is kept whole when only one of the two texts holds it, at the start or the end of the change", () => {
   assert.deepEqual(minimalReplacement("a\r\nb", "a\rb"), { start: 1, end: 3, text: "\r" });
   assert.deepEqual(minimalReplacement("a\rb", "a\r\nb"), { start: 1, end: 2, text: "\r\n" });
@@ -55,7 +56,8 @@ test("a CRLF pair is kept whole when only one of the two texts holds it, at the 
   assert.deepEqual(minimalReplacement("\r\nx", "\nx"), { start: 0, end: 2, text: "\n" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042#S5
 test("a surrogate pair is kept whole when only one of the two texts holds it", () => {
   assert.deepEqual(minimalReplacement("a\ud83d\ude00b", "a\ud83d\ude01b"), { start: 1, end: 3, text: "\ud83d\ude01" });
   assert.deepEqual(minimalReplacement("a\ud83d\ude00b", "a\ud83dxb"), { start: 1, end: 3, text: "\ud83dx" });

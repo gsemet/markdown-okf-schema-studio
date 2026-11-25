@@ -15,6 +15,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-019
+scenarios:
+- id: S1
+  title: Hovering a button
+- id: S2
+  title: Shortcut in the tooltip
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,13 +40,13 @@ default_owner_email: gaetan@xeberon.net
 
 While a block editor is open, the extension SHALL give every button of its edit bar the data-tooltip attribute with the text of its title, so that hovering or focusing the button shows the same sliding tooltip bubble as the floating toolbar.
 
-### Scenario (nominal): Hovering a button
+### Scenario S1 (nominal): Hovering a button
 
 - GIVEN a paragraph editor open with its edit bar
 - WHEN the pointer rests on the Horizontal rule button
 - THEN the button carries data-tooltip "Horizontal rule" and a bubble with that text slides in under it within 100 ms, as under a floating toolbar button
 
-### Scenario (boundary): Shortcut in the tooltip
+### Scenario S2 (boundary): Shortcut in the tooltip
 
 - GIVEN the edit bar of a paragraph editor
 - WHEN the buttons are built

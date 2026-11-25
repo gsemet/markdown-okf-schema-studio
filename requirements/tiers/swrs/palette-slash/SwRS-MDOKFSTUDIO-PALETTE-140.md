@@ -18,6 +18,15 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 - SwRS-MDOKFSTUDIO-TRUST-090
+scenarios:
+- id: S1
+  title: Reference and Citation lists
+- id: S2
+  title: The filter narrows the entries
+- id: S3
+  title: Keys in the filter and on the entries
+- id: S4
+  title: Empty list, host error and truncation
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,7 +44,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer presses Reference or Citation, the extension SHALL open a popover with a filter field, show Loading... until the host answers, and then list one button per entry with its detail text, narrowed by the words typed in the filter.
 
-### Scenario (nominal): Reference and Citation lists
+### Scenario S1 (nominal): Reference and Citation lists
 
 | Given | Pressing | Outcome |
 | --- | --- | --- |
@@ -44,7 +53,7 @@ When the writer presses Reference or Citation, the extension SHALL open a popove
 
 The popover holds an input with data-choice-filter and a list; an entry button shows the label, an em dash and the detail when there is one. A page without a way to ask the host shows The list is not available here. The host request and its answer are in SwRS-MDOKFSTUDIO-TRUST-090.
 
-### Scenario (nominal): The filter narrows the entries
+### Scenario S2 (nominal): The filter narrows the entries
 
 - GIVEN the list shown
 - WHEN the writer types a word of a label
@@ -53,7 +62,7 @@ The popover holds an input with data-choice-filter and a list; an entry button s
 
 The words are split on blanks; the label text of an entry that is not its value or detail is not matched.
 
-### Scenario (nominal): Keys in the filter and on the entries
+### Scenario S3 (nominal): Keys in the filter and on the entries
 
 | Input | Outcome |
 | --- | --- |
@@ -64,7 +73,7 @@ The words are split on blanks; the label text of an entry that is not its value 
 | ArrowUp on the first entry | The focus goes back to the filter |
 | Escape in the filter or on an entry | The popover closes and the focus returns to the text box |
 
-### Scenario (boundary): Empty list, host error and truncation
+### Scenario S4 (boundary): Empty list, host error and truncation
 
 | Host answer | Outcome |
 | --- | --- |

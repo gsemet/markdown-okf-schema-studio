@@ -66,7 +66,8 @@ const request = (extra: Record<string, unknown> = {}) => ({
 const findItem = (extra: Record<string, unknown> = {}) =>
   ({ line: 1, endLine: 1, find: "Title", occurrence: 0, occurrences: 1, replacement: "Heading", ...extra });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S2
 test("find and replace edits the matched spans in one undo step and answers with the counts", async () => {
   const writable = setup();
   await writable.handlers.get("previewFindReplace")!(request({
@@ -77,7 +78,8 @@ test("find and replace edits the matched spans in one undo step and answers with
     [["previewFindReplaceResult", true, 2, 1]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S4
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S5
 test("find and replace applies in a restricted-reads preview, is refused during an open edit and when nothing maps", async () => {
   const restricted = setup({ restrictedReads: true });
   await restricted.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), restricted.preview);
@@ -96,7 +98,8 @@ test("find and replace applies in a restricted-reads preview, is refused during 
   assert.deepEqual(none.applied, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012#S6
 test("a find and replace dry run answers the counts of the plan and never edits the document", async () => {
   const writable = setup();
   await writable.handlers.get("previewFindReplace")!(request({

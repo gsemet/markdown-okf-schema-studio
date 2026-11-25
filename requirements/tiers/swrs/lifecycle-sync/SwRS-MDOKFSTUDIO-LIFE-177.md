@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Open as Text on a Studio tab
+- id: S2
+  title: No Studio tab, and a text editor that stays
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,13 +39,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader runs Open as Text on a Studio tab, the extension SHALL open the text editor of the same file in the same group, at the line shown at the top of the Studio page when it is known, close the Studio tab, and never replace that text editor by Studio, with or without the editor association of Markdown files.
 
-### Scenario (nominal): Open as Text on a Studio tab
+### Scenario S1 (nominal): Open as Text on a Studio tab
 
 - GIVEN a Studio tab of a Markdown file whose page shows source line 12 at the top
 - WHEN the reader runs Open as Text
 - THEN the text editor of the same file opens in the same group at line 12, it is not a preview tab, the side preview marks no line for that opening, the Studio tab is closed, and the text editor stays the active tab
 
-### Scenario (boundary): No Studio tab, and a text editor that stays
+### Scenario S2 (boundary): No Studio tab, and a text editor that stays
 
 | Input | Outcome |
 | --- | --- |

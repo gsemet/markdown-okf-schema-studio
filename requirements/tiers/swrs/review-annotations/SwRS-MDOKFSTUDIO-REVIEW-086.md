@@ -21,6 +21,15 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Resolve and Reopen
+- id: S2
+  title: Delete asks inside the popover
+- id: S3
+  title: A refused or unanswered resolve or delete
+- id: S4
+  title: One action at a time
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,14 +46,14 @@ default_owner_email: gaetan@xeberon.net
 
 When a reader presses Resolve or Reopen in a thread popover, or presses Delete and confirms it in the popover, the extension SHALL send the new flag or the delete to the host, wait for its answer, change the highlight or remove the thread only when the thread is posted again, and run one such action at a time.
 
-### Scenario (nominal): Resolve and Reopen
+### Scenario S1 (nominal): Resolve and Reopen
 
 - GIVEN an open thread
 - WHEN the reader presses Resolve
 - THEN a resolve message with true is sent and the highlight style changes after the thread is posted again, not before
 - AND for a resolved thread the button reads Reopen, and pressing it sends a resolve message with false
 
-### Scenario (nominal): Delete asks inside the popover
+### Scenario S2 (nominal): Delete asks inside the popover
 
 - GIVEN an open popover
 - WHEN the reader presses Delete
@@ -52,7 +61,7 @@ When a reader presses Resolve or Reopen in a thread popover, or presses Delete a
 - AND No removes the question and sends nothing
 - AND Yes sends one delete message and the buttons wait for the host
 
-### Scenario (refusal): A refused or unanswered resolve or delete
+### Scenario S3 (refusal): A refused or unanswered resolve or delete
 
 | Input | Outcome |
 | --- | --- |
@@ -62,7 +71,7 @@ When a reader presses Resolve or Reopen in a thread popover, or presses Delete a
 | a delete answered ok false with a reason | the thread stays, the reason is shown and the question is replaced by the Resolve and Delete buttons |
 | a delete with no answer in 15 seconds | the question is replaced by the buttons and the alert reads "No answer from the editor. Nothing changed here: try again." |
 
-### Scenario (boundary): One action at a time
+### Scenario S4 (boundary): One action at a time
 
 | Input | Outcome |
 | --- | --- |

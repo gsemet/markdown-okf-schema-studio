@@ -13,6 +13,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Wait for a render
+- id: S2
+  title: The source is gone
 user_need: As a reader, I can tell whether the preview is current, still
   rendering, stale after an error or recovered, and I am told whether the file
   was deleted, renamed, is not a Markdown file or could not be restored.
@@ -61,7 +66,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Wait for a render
+#### Path S1: Wait for a render
 
 1. A new preview waits for its render
    - SwRS-MDOKFSTUDIO-LIFE-049: the status reads Preview pending, with a pending notice for a slow render
@@ -69,7 +74,7 @@ stateDiagram-v2
    - Option SwRS-MDOKFSTUDIO-LIFE-049 (refusal): a failed render is labelled in the status
 2. The status reads Preview ready
 
-#### Path 2: The source is gone
+#### Path S2: The source is gone
 
 1. The Markdown file of a preview is missing
    - SwRS-MDOKFSTUDIO-LIFE-062: the page is replaced by the status Preview source missing with the reason of the case

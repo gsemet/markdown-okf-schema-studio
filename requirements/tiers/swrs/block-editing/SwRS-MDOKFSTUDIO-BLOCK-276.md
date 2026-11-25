@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: nominal
+- id: S2
+  title: boundary
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the page copies a native selection, it SHALL leave out of the clipboard the text of interface chrome (comment chips and threads, buttons, handles, toggles, line numbers, toolbars, the find bar) and of an old-side card, in the plain text and in the HTML.
 
-### Scenario: nominal
+### Scenario S1: nominal
 
 - GIVEN a selection spanning line numbers, the copy button of a code block, the side-by-side cards or hidden math
 - WHEN the copy is taken
 - THEN none of that chrome appears in the text/plain or in the text/html
 
-### Scenario: boundary
+### Scenario S2: boundary
 
 - GIVEN a selection in the old side of a side-by-side card
 - WHEN the copy is taken

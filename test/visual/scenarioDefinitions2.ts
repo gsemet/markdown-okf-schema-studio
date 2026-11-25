@@ -68,7 +68,8 @@ import {
 
 export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S5
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S8
     id: "edit-list-narrow",
     fixture: "11-list-editing",
     theme: "dark",
@@ -200,7 +201,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   ...LINK_HINT_SCENARIOS,
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S8
     id: "preview-edit-activation-scroll-wide",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -250,8 +251,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the original $$ Markdown editor after activation without a scroll jump.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S3
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S4
     id: "preview-sticky-headings-1",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -297,7 +298,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Depth three remains legible in a narrow preview at the normal text size.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S7
     id: "preview-sticky-headings-natural-growth",
     fixture: "10-sticky-heading-wrap",
     theme: "dark",
@@ -536,7 +537,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   // CR 090: README showcase captures of one polished demo document, Cream theme.
   {
-    // @tests_req StRS-MDOKFSTUDIO-CORE-001
     id: "rendering-core/v25-readme-showcase-hero-cream-1200",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -571,7 +571,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "README capture, cream theme: the OKF properties table of the demo handbook, resolved from its handbook schema, with type icons and field descriptions.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S3
     id: "review-annotations/v21-readme-showcase-diff-cream-1000",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -605,7 +605,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   ] as const).flatMap(([theme, viewport]) => (viewport.width >= 760
     ? (["margin", "auto", "full"] as const)
     : (["margin"] as const)).map((mode) => ({
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-006
     id: `toc-column-${theme}-${viewport.width}${mode === "margin" ? "" : `-${mode}`}`,
     fixture: "30-toc",
     theme,
@@ -644,7 +643,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["light", "hidden", 9],
     ["dark", "hidden", 10],
   ] as const).map(([theme, state, number]) => ({
-    // @tests_req StRS-MDOKFSTUDIO-REVIEW-012
     id: `review-annotations/v${String(number).padStart(2, "0")}-comment-list-chips-${state}-${theme}-900`,
     fixture: "46-comment-list",
     theme,
@@ -724,7 +722,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   }))),
   // P9 B4: content and error states (gap fill). Ids are final; see scenarioIds.ts for their locks.
   ...([WIDE, NARROW] as const).map((viewport) => ({
-    // @tests_req StRS-MDOKFSTUDIO-CORE-001
     id: `rendering-core/v${viewport === WIDE ? "17" : "18"}-cjk-rtl-light-${viewport.width}`,
     fixture: "35-cjk-rtl",
     theme: "light",
@@ -759,7 +756,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the code is left-aligned like the plain fence and the caption is a left-aligned monospace title bar joined to the top of the block.",
   })),
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-008
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-008#S4
     id: "rendering-core/v19-missing-image-dark-900",
     fixture: "36-missing-image",
     theme: "dark",
@@ -770,7 +767,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "and the broken pictures do not push the content outside the column.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-001
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-001#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-001#S2
     id: "rendering-core/v20-huge-document-bottom-dark-900",
     fixture: "gen-huge-document",
     theme: "dark",
@@ -1019,8 +1017,9 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "A preview with restricted reads, edit mode switched on and a click on a paragraph: the block editor opens, as in a trusted workspace.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S2
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S3
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117#S1
     id: "toolbar-navigation/v30-back-enabled-after-anchor-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -1041,8 +1040,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "and the target heading sits at the top of the pane.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S3
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S4
     id: "toolbar-navigation/v31-mark-editor-selection-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -1057,8 +1056,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "(the dispatch path sentence) in the preview, and only that block.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S4
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S5
     id: "toolbar-navigation/v32-sticky-shadow-light-900",
     fixture: "05-long-chapter",
     theme: "light",
@@ -1071,8 +1070,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "that scrolls under it, the band keeps its place and the toolbar stays above it.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S4
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S5
     id: "toolbar-navigation/v33-sticky-shadow-dark-900",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -1085,8 +1084,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "that scrolls under it, the band keeps its place and the toolbar stays above it.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
-    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S4
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S5
     id: "toolbar-navigation/v34-sticky-shadow-cream-900",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -1100,8 +1099,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "that scrolls under it, the band keeps its place and the toolbar stays above it.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-BLOCK-016
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-140
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-140#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-140#S4
     id: "block-editing/v17-block-selection-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -1117,7 +1116,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the selection is announced and no editor is open.",
   },
   {
-    // @tests_req StRS-MDOKFSTUDIO-PALETTE-015
     id: "palette-slash/v21-slash-gfm-light-360",
     fixture: "05-long-chapter",
     theme: "light",
@@ -1146,7 +1144,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   // P9 B5 (b): review annotations (incoming changes, review threads, orphans, comment chips).
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req StRS-MDOKFSTUDIO-REVIEW-017
     id: `review-annotations/v${14 + index}-incoming-bars-${theme}-900`,
     fixture: "44-change-bar",
     theme,
@@ -1213,7 +1210,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "The show-comments setting off: the gray comment chips are in the document but not displayed, and the TODO chips stay visible.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S6
     id: "review-annotations/v22-comments-button-hides-thread-light-900",
     fixture: "46-inline-thread",
     theme: "light",
@@ -1239,7 +1236,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined, 2],
     ["dark", "cream", 3],
   ] as const).map(([theme, mode, number]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S7
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S8
     id: `lifecycle-sync/v0${number}-update-glow-${mode ?? theme}-900`,
     fixture: "44-change-bar",
     theme,

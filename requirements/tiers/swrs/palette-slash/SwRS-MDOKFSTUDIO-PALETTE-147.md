@@ -15,6 +15,13 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-013
 depends_on: []
+scenarios:
+- id: S1
+  title: No selection
+- id: S2
+  title: Selected text
+- id: S3
+  title: Labels and selections that give no edit
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,19 +38,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer chooses a label, the extension SHALL write {ref} with the label in backticks in place of the selection, using the one-line selection as the link text when there is one.
 
-### Scenario (nominal): No selection
+### Scenario S1 (nominal): No selection
 
 - GIVEN the text see and the label intro chosen
 - WHEN the action runs
 - THEN the ref role for intro is inserted after the word see, with the caret after it
 
-### Scenario (nominal): Selected text
+### Scenario S2 (nominal): Selected text
 
 - GIVEN the selection the intro and the label intro chosen
 - WHEN the action runs
 - THEN the ref role is written with the link text the intro and the target intro
 
-### Scenario (refusal): Labels and selections that give no edit
+### Scenario S3 (refusal): Labels and selections that give no edit
 
 | Input | Outcome |
 | --- | --- |

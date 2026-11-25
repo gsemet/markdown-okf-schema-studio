@@ -190,7 +190,8 @@ def stress_frontmatter_scroll(page: Page, scenario: dict, failures: list[Failure
       )
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030#S4
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030#S5
 def stress_sticky_heading_scroll(page: Page, scenario: dict, failures: list[Failure]) -> None:
     if not scenario.get("scrollOscillationStress"):
         return
@@ -724,7 +725,7 @@ FORCED_CREAM_CHECKS = """
 
 # @tests_req SwRS-MDOKFSTUDIO-THEME-031#S3
 # @tests_req SwRS-MDOKFSTUDIO-THEME-031#S4
-# @tests_req SwRS-MDOKFSTUDIO-CORE-028
+# @tests_req SwRS-MDOKFSTUDIO-CORE-028#S5
 def check_forced_cream_theme(page: Page, scenario: dict, failures: list[Failure]) -> None:
     if scenario.get("previewThemeMode") != "cream":
         return

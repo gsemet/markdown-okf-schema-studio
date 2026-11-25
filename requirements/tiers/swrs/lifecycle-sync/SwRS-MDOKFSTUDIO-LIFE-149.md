@@ -16,6 +16,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Both open
+- id: S2
+  title: Stock settings snapshot
+- id: S3
+  title: Studio settings
+- id: S4
+  title: Native diff
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,25 +43,25 @@ default_owner_email: gaetan@xeberon.net
 
 While the Studio runs, the extension SHALL open its side preview beside an open built-in Markdown preview and leave that preview, its commands, the native text diff and every markdown.preview setting and style setting of the built-in Markdown preview as they were.
 
-### Scenario (nominal): Both open
+### Scenario S1 (nominal): Both open
 
 - GIVEN the built-in preview of preview.md open
 - WHEN the reader runs Open Preview to Side
 - THEN both previews are open and the built-in commands such as markdown.showPreviewToSide and markdown.preview.refresh still exist
 
-### Scenario (nominal): Stock settings snapshot
+### Scenario S2 (nominal): Stock settings snapshot
 
 - GIVEN a snapshot of the built-in preview settings
 - WHEN the Studio side preview opens beside the built-in preview
 - THEN the snapshot is equal
 
-### Scenario (boundary): Studio settings
+### Scenario S3 (boundary): Studio settings
 
 - GIVEN a change of a Studio setting
 - WHEN it is saved
 - THEN no markdown.* key is written
 
-### Scenario (boundary): Native diff
+### Scenario S4 (boundary): Native diff
 
 - GIVEN a text diff of two Markdown files while the Studio is installed
 - WHEN the reader opens it

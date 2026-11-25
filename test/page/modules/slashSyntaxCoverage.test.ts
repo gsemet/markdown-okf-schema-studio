@@ -120,7 +120,8 @@ const SYNTAXES: Row[] = [
 
 const isCovered = (row: Row): row is Covered => "slash" in row;
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275#S2
 test("CR 248: every covered syntax has a slash entry in its mode and in the modes above, not below", () => {
   for (const row of SYNTAXES.filter(isCovered)) {
     const rank = PALETTE_MODES.indexOf(row.mode);
@@ -131,7 +132,7 @@ test("CR 248: every covered syntax has a slash entry in its mode and in the mode
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275#S2
 test("CR 248: every exception is justified and each syntax is listed once", () => {
   const exempt = SYNTAXES.filter((row): row is Exempt => !isCovered(row));
   assert.ok(exempt.length > 0);
@@ -153,7 +154,8 @@ function skillSyntaxes(): { directives: string[]; fences: string[] } {
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-275#S2
 test("CR 248: every directive and fence language of the writing skill is in the syntax list", () => {
   const named = SYNTAXES.map((row) => row.syntax).join("\n");
   const { directives, fences } = skillSyntaxes();
@@ -178,8 +180,9 @@ function insertion(id: string, value: string, at: number): { value: string; sele
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278#S2
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S9
 test("CR 248: tabs inserts a tab set of two tabs set apart, first title selected, in MyST and Full", () => {
   const out = insertion("tabs", "Intro\n\nOutro", 5);
   assert.equal(out.value,
@@ -189,8 +192,9 @@ test("CR 248: tabs inserts a tab set of two tabs set apart, first title selected
   for (const mode of ["myst", "full"] as const) assert.equal(keysByMode[mode].has("tabs"), true, mode);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-278#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001#S9
 test("CR 248: plantuml inserts a sequence diagram fence set apart, first message selected, in Full only", () => {
   const out = insertion("plantuml", "Intro\n\nOutro", 5);
   assert.equal(out.value, "Intro\n\n```plantuml\n@startuml\nAlice -> Bob: Hello\n@enduml\n```\n\nOutro");

@@ -27,6 +27,29 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
 - SwRS-MDOKFSTUDIO-TRUST-052
+scenarios:
+- id: S1
+  title: First comment on a text
+- id: S2
+  title: The first comment creates the review comments file
+- id: S3
+  title: Changes of one file run one after another
+- id: S4
+  title: A refused change does not stop the queue
+- id: S5
+  title: Refusal reasons
+- id: S6
+  title: A write replaces the file in one step
+- id: S7
+  title: A refusal also shows a warning
+- id: S8
+  title: The change is written once the cause is gone
+- id: S9
+  title: Valid create message
+- id: S10
+  title: Invalid create messages
+- id: S11
+  title: Accepted limits of a create message
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -56,7 +79,7 @@ supersedes:
 
 When the host receives a create message from a preview of a saved document, the extension SHALL append a thread with the anchor as sent, resolved false and one comment, with thread and comment ids and the time chosen by the host, in the review comments file next to the document, running the changes of one file one after another on its latest content and refusing with a reason and a warning, and writing nothing, a change that the file state or its limits do not allow, and writing through a temporary file renamed onto the comments file and never into a comments file that is a symbolic link; a create message is dropped without an answer unless its anchor has integer lines with 1 <= line <= endLine, a quote of at most 500 characters and a prefix and suffix of at most 32 characters, and its body has 1 to 10 000 characters.
 
-### Scenario (nominal): First comment on a text
+### Scenario S1 (nominal): First comment on a text
 
 - GIVEN a preview of notes.md and a create message with an anchor and the body "First remark"
 - WHEN the host handles it
@@ -64,14 +87,14 @@ When the host receives a create message from a preview of a saved document, the 
 - AND the earlier threads of the file are unchanged
 - AND the answer of the store carries the written text and its hash
 
-### Scenario (nominal): The first comment creates the review comments file
+### Scenario S2 (nominal): The first comment creates the review comments file
 
 | Input | Outcome |
 | --- | --- |
 | notes.md with no comments file and a comment is saved | notes.comments.json exists with version 1 and the document name notes.md |
 | A comments file that names the document and a comment is saved | The file keeps its document name and gains the thread |
 
-### Scenario (nominal): Changes of one file run one after another
+### Scenario S3 (nominal): Changes of one file run one after another
 
 | Input | Outcome |
 | --- | --- |
@@ -79,13 +102,13 @@ When the host receives a create message from a preview of a saved document, the 
 | A create and a reply to another thread queued together | Both changes are in the file |
 | A resolve or a delete queued with a create | The same per-file queue runs them, each on the latest file |
 
-### Scenario (refusal): A refused change does not stop the queue
+### Scenario S4 (refusal): A refused change does not stop the queue
 
 - GIVEN a refused change followed by a valid one for the same file
 - WHEN both are handled
 - THEN the valid change is written
 
-### Scenario (refusal): Refusal reasons
+### Scenario S5 (refusal): Refusal reasons
 
 When the host refuses a comment change, it answers the page ok false with the reason below, writes nothing and leaves the file untouched.
 
@@ -99,21 +122,21 @@ When the host refuses a comment change, it answers the page ok false with the re
 | The existing comments file is not valid | "the comments file is not valid ({first problem}) and is left untouched." |
 | The comments file path is itself a symbolic link (a dangling one included) | "the comments file is a symbolic link and is left untouched" |
 
-### Scenario (nominal): A write replaces the file in one step
+### Scenario S6 (nominal): A write replaces the file in one step
 
 - GIVEN a valid change to a comments file that is not a symbolic link
 - WHEN the host writes it
 - THEN the text is written to a temporary file in the same folder and renamed onto the comments file
 - AND a failed write or rename removes the temporary file and leaves the comments file as it was
 
-### Scenario (refusal): A refusal also shows a warning
+### Scenario S7 (refusal): A refusal also shows a warning
 
 - GIVEN a comments file with unsaved changes in an editor
 - WHEN a comment is saved
 - THEN the warning "The comment was not saved: {reason}" names the reason and the page is told the same reason
 - AND WHEN a comment is saved normally, THEN no warning is shown
 
-### Scenario (boundary): The change is written once the cause is gone
+### Scenario S8 (boundary): The change is written once the cause is gone
 
 | Input | Outcome |
 | --- | --- |
@@ -121,13 +144,13 @@ When the host refuses a comment change, it answers the page ok false with the re
 | A comment that keeps the file below 2 MiB | The comment is written |
 | A preview of a saved file, and a comment is created | The comment is written |
 
-### Scenario (nominal): Valid create message
+### Scenario S9 (nominal): Valid create message
 
 - GIVEN a previewCommentCreate message with an anchor on lines 3 to 3 with a quote of 5 characters and a body of 1 character
 - WHEN the message is validated
 - THEN it is accepted
 
-### Scenario (refusal): Invalid create messages
+### Scenario S10 (refusal): Invalid create messages
 
 | Input | Outcome |
 | --- | --- |
@@ -138,7 +161,7 @@ When the host refuses a comment change, it answers the page ok false with the re
 | A body of 0 characters | dropped without an answer and nothing is written |
 | A body of 10 001 characters | dropped without an answer and nothing is written |
 
-### Scenario (boundary): Accepted limits of a create message
+### Scenario S11 (boundary): Accepted limits of a create message
 
 | Input | Outcome |
 | --- | --- |

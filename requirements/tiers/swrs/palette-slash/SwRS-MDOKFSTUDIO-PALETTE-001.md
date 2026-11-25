@@ -19,6 +19,27 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+scenarios:
+- id: S1
+  title: Select in the palette
+- id: S2
+  title: Each mode adds its buttons to those of the mode before
+- id: S3
+  title: Order and groups
+- id: S4
+  title: The editor opened from an insert point
+- id: S5
+  title: Choosing another mode
+- id: S6
+  title: Same mode again or a value outside the four modes
+- id: S7
+  title: The setting defaultPaletteMode
+- id: S8
+  title: The cell formatting group follows the mode
+- id: S9
+  title: A mode that does not list an insertion command offers none
+- id: S10
+  title: The mode setting and the stored choice
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -50,13 +71,13 @@ supersedes:
 
 When the extension builds the edition palette of a block editor, the extension SHALL start it with a select named Palette buttons that offers Strict Markdown, GitHub (GFM), MyST and Full and shows the current mode, and list below it the buttons of that mode in the order of the registry, marking the start of each group.
 
-### Scenario (nominal): Select in the palette
+### Scenario S1 (nominal): Select in the palette
 
 - GIVEN an open block editor in the GFM mode
 - WHEN the palette is inspected
 - THEN its first control is a select with the accessible name Palette buttons and four options with the values strict, gfm, myst and full labelled Strict Markdown, GitHub (GFM), MyST and Full, and the option gfm is selected
 
-### Scenario (nominal): Each mode adds its buttons to those of the mode before
+### Scenario S2 (nominal): Each mode adds its buttons to those of the mode before
 
 - GIVEN an open paragraph editor in the strict, gfm, myst or full mode
 - WHEN the palette is inspected
@@ -69,25 +90,25 @@ When the extension builds the edition palette of a block editor, the extension S
 | myst | the GitHub buttons, followed by the MyST buttons Admonition, Definition list, Math, Subscript, Superscript, Label, Reference, Document link, Citation, Dropdown, Table with caption, List table, Pipe table, Figure and Key (MyST); List table and Pipe table are hidden unless the caret is in a table of the matching form | none; both Key (the HTML kbd element) and Key (MyST) (the kbd role) are present, because the modes add up |
 | full | the MyST buttons, followed by the Full buttons Vega-Lite chart and Vega chart (see SwRS-MDOKFSTUDIO-PALETTE-278) | nothing of the other modes is missing |
 
-### Scenario (nominal): Order and groups
+### Scenario S3 (nominal): Order and groups
 
 - GIVEN the MyST mode
 - WHEN the buttons are listed
 - THEN they follow the registry order from Heading to Key (MyST), and the first button of each group other than the first carries data-edit-group-start (the groups are inline, block, insert, annotation, github, myst and full)
 
-### Scenario (nominal): The editor opened from an insert point
+### Scenario S4 (nominal): The editor opened from an insert point
 
 - GIVEN the GFM mode and an editor opened from an insert point
 - WHEN the palette is inspected
 - THEN its buttons equal those of a paragraph editor in the GFM mode and it carries data-palette-mode gfm, and in the strict and the MyST modes the two palettes list the same buttons as well
 
-### Scenario (nominal): Choosing another mode
+### Scenario S5 (nominal): Choosing another mode
 
 - GIVEN an editor in the strict mode with some text typed
 - WHEN the writer chooses MyST in the select
 - THEN the buttons are rebuilt at once, the MyST buttons are shown, the select reads MyST, the text and the focus stay in the text box and no save is posted (the choice is stored for the workspace, see SwRS-MDOKFSTUDIO-LIFE-169)
 
-### Scenario (refusal): Same mode again or a value outside the four modes
+### Scenario S6 (refusal): Same mode again or a value outside the four modes
 
 - GIVEN a palette in the GFM mode
 - WHEN the select fires a change
@@ -99,7 +120,7 @@ When the extension builds the edition palette of a block editor, the extension S
 | to an unknown value | the select shows gfm again and no mode change is reported |
 | to strict | the change is applied and reported once |
 
-### Scenario (boundary): The setting defaultPaletteMode
+### Scenario S7 (boundary): The setting defaultPaletteMode
 
 - GIVEN the setting markdownOkfSchemaStudio.editing.defaultPaletteMode
 - WHEN the editing configuration is read
@@ -111,7 +132,7 @@ When the extension builds the edition palette of a block editor, the extension S
 | not set | gfm |
 | the text html or a number | gfm |
 
-### Scenario (nominal): The cell formatting group follows the mode
+### Scenario S8 (nominal): The cell formatting group follows the mode
 
 - GIVEN an open table cell editor (the group is specified in SwRS-MDOKFSTUDIO-TABLE-085)
 - WHEN the cell formatting group is inspected
@@ -122,7 +143,7 @@ When the extension builds the edition palette of a block editor, the extension S
 | gfm | Bold, Italic, Strikethrough, Colour, Colour code, Link, Emoji and Key, and no Subscript or Superscript |
 | myst | also Subscript, Superscript and Key (MyST) |
 
-### Scenario (refusal): A mode that does not list an insertion command offers none
+### Scenario S9 (refusal): A mode that does not list an insertion command offers none
 
 - GIVEN the palette or the slash menu in a mode below the one that lists a command
 - WHEN the palette is shown or the slash is typed
@@ -134,7 +155,7 @@ When the extension builds the edition palette of a block editor, the extension S
 | PlantUML diagram (/plantuml, /uml) | full | strict, gfm, myst |
 | Content tabs (/tab-set, /tabs) | myst and full | strict, gfm |
 
-### Scenario (nominal): The mode setting and the stored choice
+### Scenario S10 (nominal): The mode setting and the stored choice
 
 - GIVEN the select of the palette, the setting defaultPaletteMode or a stored choice
 - WHEN the mode is chosen

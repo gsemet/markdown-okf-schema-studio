@@ -19,6 +19,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Replace one and replace all
+- id: S2
+  title: Matches that do not map one-to-one to the source
+- id: S3
+  title: The note and the rest of the file
+- id: S4
+  title: Open editor
+- id: S5
+  title: The host refuses
+- id: S6
+  title: The note counts the skipped matches before the click
+- id: S7
+  title: When the page does not ask, and stale or refused answers
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -49,12 +64,12 @@ supersedes:
 
 When the reader replaces matches from the find bar, the extension SHALL replace the source span of each match that maps one-to-one to the source, and no other text, in one undo step; the extension SHALL refuse every replacement with the reason, without editing the document, while a block editor is open (the find bar keeps finding), and, while the find bar holds a query and its replace row is open, count in its note, before any replacement, the matches that cannot be replaced from the preview.
 
-### Scenario (nominal): Replace one and replace all
+### Scenario S1 (nominal): Replace one and replace all
 - GIVEN the bar holds a query with matches in a heading and two paragraphs, a replacement text and a preview
 - WHEN the reader presses Replace (or Enter in the replace field), or Replace all (Cmd/Ctrl+Alt+Enter)
 - THEN the page sends, for each match, the source lines of its block, the matched text, which occurrence of it that is, and the final replacement text (with the "$1" groups of a regular expression expanded); the host replaces exactly those source spans, all in one undo step, and answers with the number replaced and skipped
 
-### Scenario (boundary): Matches that do not map one-to-one to the source
+### Scenario S2 (boundary): Matches that do not map one-to-one to the source
 | Input | Outcome |
 | --- | --- |
 | A match in a link label whose target or title repeats the text (`[needle](https://example.com/needle)`) | Replaced; the target and the title are kept: link and image targets and titles, a whole inline image, alt text included (the page does not show it) and reference definition lines (`[label]: url`) are left out of the source occurrences |
@@ -68,27 +83,27 @@ When the reader replaces matches from the find bar, the extension SHALL replace 
 | Two edits that overlap | The later one is skipped |
 | Every match skipped | The host refuses with a reason and the document is unchanged |
 
-### Scenario (boundary): The note and the rest of the file
+### Scenario S3 (boundary): The note and the rest of the file
 - GIVEN a replacement in which the page or the host skipped N matches
 - WHEN the answer arrives
 - THEN the note of the bar reads "Replaced R matches; N matches cannot be replaced from the preview", and everything outside the replaced spans is byte-identical, the host having checked the lines and the revision again
 
-### Scenario (failure): Open editor
+### Scenario S4 (failure): Open editor
 - GIVEN a preview with a block editor open, whatever the trust
 - WHEN the reader opens the replace row or presses Replace or Replace all
 - THEN the replace controls are marked aria-disabled with the reason as title, the note shows the reason, the host is not asked and the document is unchanged; finding keeps working
 
-### Scenario (failure): The host refuses
+### Scenario S5 (failure): The host refuses
 - GIVEN a request that reaches the host with a Markdown edit open or from an older render
 - WHEN the host handles it
 - THEN it answers with the reason and does not read or change the document
 
-### Scenario (nominal): The note counts the skipped matches before the click
+### Scenario S6 (nominal): The note counts the skipped matches before the click
 - GIVEN a preview, the replace row open, and a query with matches of which the page cannot map some (front matter, an included file, a formula) and the host would skip others (an admonition title, markup inside the match)
 - WHEN the reader types the query, opens the replace row, or the content is refreshed
 - THEN 150 ms after the last of these the page asks the host to plan Replace all of every mapped match without applying it (the `previewFindReplace` request with `dryRun: true` and an empty replacement text: the counts do not depend on it), the host answers the counts of the plan without editing the document, and the note reads "N matches cannot be replaced from the preview", N being the page's unmapped matches plus the host's skipped ones
 
-### Scenario (boundary): When the page does not ask, and stale or refused answers
+### Scenario S7 (boundary): When the page does not ask, and stale or refused answers
 | Input | Outcome |
 | --- | --- |
 | The replace row is closed (the reader only searches) | No request; the note counts the page's unmapped matches only |

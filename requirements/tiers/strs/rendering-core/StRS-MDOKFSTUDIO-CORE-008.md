@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Find a use case and read it
 user_need: A reviewer browses use cases, behaviours, coverage and the e2e
   gallery on GitHub Pages without building anything.
 derived_by:
@@ -64,7 +67,7 @@ flowchart LR
 
 ### Main paths
 
-#### Path 1: Find a use case and read it
+#### Path S1: Find a use case and read it
 
 1. The reviewer opens the site
    - SwRS-MDOKFSTUDIO-CORE-069: the home shows the requirements chain and the report

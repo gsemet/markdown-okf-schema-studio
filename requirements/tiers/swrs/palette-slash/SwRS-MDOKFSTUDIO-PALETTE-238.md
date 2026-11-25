@@ -19,6 +19,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-001
+scenarios:
+- id: S1
+  title: The mode lists
+- id: S2
+  title: An empty query groups the commands, a query ranks them
+- id: S3
+  title: Variants run an action with a ready-made argument
+- id: S4
+  title: MyST admonitions are listed with their icons
+- id: S5
+  title: The Key commands in MyST mode
+- id: S6
+  title: A query that matches nothing
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -42,7 +55,7 @@ supersedes:
 
 When the slash menu opens, the extension SHALL list the actions of the palette for the current mode and scope in the order of the buttons, without the buttons that depend on the caret and are hidden, together with the variants and the two list entries, grouped under category headings with an icon and a shortcut while the query is empty, and a disabled No command row when the query matches nothing.
 
-### Scenario (nominal): The mode lists
+### Scenario S1 (nominal): The mode lists
 - GIVEN the strict, GFM and MyST modes
 - WHEN the menu opens in each
 - THEN it lists the same actions as the palette buttons of that mode and nothing of a higher mode, plus Bulleted list and Numbered list
@@ -55,7 +68,7 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 | caret inside a pipe table | List table is listed, Pipe table is not (see SwRS-MDOKFSTUDIO-TABLE-122) |
 | caret inside a list table | Pipe table is listed, List table is not (see SwRS-MDOKFSTUDIO-TABLE-122) |
 
-### Scenario (nominal): An empty query groups the commands, a query ranks them
+### Scenario S2 (nominal): An empty query groups the commands, a query ranks them
 - GIVEN the MyST mode and the menu just opened
 - WHEN the list is inspected, then the query tab is typed
 - THEN the empty query shows headings Text, Blocks, Insert, Annotations, GFM and MyST in registry order, each row with an icon, the label and the shortcut where there is one, and the query shows one list, the best match first, each row with its category name
@@ -65,7 +78,7 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 | empty | commands under the headings Text, Blocks, Insert, Annotations, GFM and MyST in registry order, each with its icon and its shortcut when it has one |
 | not empty | one list, the best match first, each command with its category name |
 
-### Scenario (nominal): Variants run an action with a ready-made argument
+### Scenario S3 (nominal): Variants run an action with a ready-made argument
 - GIVEN the strict mode, then the MyST mode
 - WHEN /h2 is typed and chosen, then /warning is typed
 - THEN the line gets the prefix ## as with the Heading popover and the parent entry Heading is not listed, and the Warning alert and the Warning admonition are listed, the MyST one first
@@ -77,7 +90,7 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 | one admonition per type | run Admonition with the argument of the same option in the Admonition popover, plus the version admonitions (see the scenario of the admonition entries below) |
 | the pickers Alert, Admonition and Code block | stay listed |
 
-### Scenario (nominal): MyST admonitions are listed with their icons
+### Scenario S4 (nominal): MyST admonitions are listed with their icons
 
 - GIVEN the MyST mode and an empty text box
 - WHEN / is typed
@@ -102,7 +115,7 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 - WHEN the slash menu or the popover is opened
 - THEN the GFM menu lists no admonition entry, and the popover keeps offering only the ten simple types and Custom (the version admonitions are not options of the popover, see SwRS-MDOKFSTUDIO-PALETTE-127)
 
-### Scenario (boundary): The Key commands in MyST mode
+### Scenario S5 (boundary): The Key commands in MyST mode
 - GIVEN the MyST mode, then the GFM mode
 - WHEN /kbd is typed
 - THEN in MyST mode Key (MyST) is first and Key is also listed; in GFM mode Key is first and Key (MyST) is not listed
@@ -112,7 +125,7 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 | myst | Key and Key (MyST) are both listed; Key (MyST) ranks first for the queries kbd and key |
 | gfm | Key is listed, Key (MyST) is not |
 
-### Scenario (refusal): A query that matches nothing
+### Scenario S6 (refusal): A query that matches nothing
 - GIVEN an open menu
 - WHEN the query zzzz is typed, then Backspace removes the query and the slash
 - THEN a disabled row No command is shown, the live region reads No command and Enter inserts a line break, then the menu closes

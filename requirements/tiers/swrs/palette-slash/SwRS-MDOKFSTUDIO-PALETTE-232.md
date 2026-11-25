@@ -17,6 +17,19 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
+scenarios:
+- id: S1
+  title: Line start or after whitespace
+- id: S2
+  title: A slash inside a word, an address or a tag
+- id: S3
+  title: A selection, a paste or an IME composition
+- id: S4
+  title: Code
+- id: S5
+  title: A composition that starts while the menu is open closes it
+- id: S6
+  title: A second slash or a space ends the command
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -35,7 +48,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer types a slash with no selection at the start of a line or after whitespace in the text box of a paragraph editor, an insertion editor, a Start writing editor or a table cell editor, outside inline code and fenced code and not by a paste or an IME composition, the extension SHALL open the slash menu, and close it when a composition starts or when the typed command holds a space or a second slash, leaving the text as typed.
 
-### Scenario (nominal): Line start or after whitespace
+### Scenario S1 (nominal): Line start or after whitespace
 - GIVEN a block editor with an empty text box
 - WHEN the writer types /
 - THEN the slash menu opens
@@ -44,7 +57,7 @@ When the writer types a slash with no selection at the start of a line or after 
 | --- | --- |
 | paragraph editor, insertion editor, Start writing editor, table cell editor | the menu opens for a slash at the start of a line or after whitespace |
 
-### Scenario (refusal): A slash inside a word, an address or a tag
+### Scenario S2 (refusal): A slash inside a word, an address or a tag
 - GIVEN the text path, http: or <
 - WHEN the writer types /
 - THEN no menu opens
@@ -54,7 +67,7 @@ When the writer types a slash with no selection at the start of a line or after 
 | not whitespace (a path, a scheme, a closing tag) | no menu opens |
 | start of the line, or whitespace | the menu may open |
 
-### Scenario (refusal): A selection, a paste or an IME composition
+### Scenario S3 (refusal): A selection, a paste or an IME composition
 - GIVEN a selection of text, a text box that receives a slash by paste, and an IME composition that produces a slash
 - WHEN the input event arrives
 - THEN no menu opens
@@ -66,7 +79,7 @@ When the writer types a slash with no selection at the start of a line or after 
 | slash that arrives during an IME composition | no menu opens |
 | input type insertText, or no input type | may open the menu; no other input type does |
 
-### Scenario (boundary): Code
+### Scenario S4 (boundary): Code
 - GIVEN the caret in or around a code span, a fenced block or a fence line
 - WHEN the writer types /
 - THEN the menu opens or not as the table says
@@ -79,7 +92,7 @@ When the writer types a slash with no selection at the start of a line or after 
 | inside a fenced code block | no menu opens |
 | after the opening fence, on its info string | no menu opens |
 
-### Scenario (nominal): A composition that starts while the menu is open closes it
+### Scenario S5 (nominal): A composition that starts while the menu is open closes it
 - GIVEN an open menu
 - WHEN a composition starts
 - THEN the menu closes
@@ -89,7 +102,7 @@ When the writer types a slash with no selection at the start of a line or after 
 | composition starts | the menu closes |
 | the writer types a letter (no composition) | the menu stays open |
 
-### Scenario (boundary): A second slash or a space ends the command
+### Scenario S6 (boundary): A second slash or a space ends the command
 - GIVEN an open menu
 - WHEN the writer types a second /, or a space
 - THEN the menu closes and the typed text stays

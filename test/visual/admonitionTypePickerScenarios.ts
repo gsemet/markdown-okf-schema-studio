@@ -52,7 +52,8 @@ const VARIANTS = [
 
 export const ADMONITION_TYPE_PICKER_SCENARIOS: ScenarioDefinition[] = [
   ...VARIANTS.map((variant, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269#S1
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269#S2
     id: `palette-slash/v${36 + index}-alert-type-picker-${variant.name}-900`,
     fixture: "78-gfm-alert-type-picker",
     theme: variant.theme,
@@ -64,7 +65,8 @@ export const ADMONITION_TYPE_PICKER_SCENARIOS: ScenarioDefinition[] = [
     description: `Edit mode, ${variant.name} theme, 900 px: with the caret on the type of the opened note alert, the five GFM types are listed with their icons at the caret.`,
   })),
   ...VARIANTS.map((variant, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269#S1
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269#S2
     id: `palette-slash/v${38 + index}-admonition-type-picker-${variant.name}-900`,
     fixture: "79-myst-admonition-type-picker",
     theme: variant.theme,

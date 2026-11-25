@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-014
+scenarios:
+- id: S1
+  title: The content without chrome
+- id: S2
+  title: Tabs and dropdowns work with no script
+- id: S3
+  title: Sections and checkboxes
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,19 +45,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the extension writes the exported file, it SHALL write the content as the reader sees it with every section unfolded, tabs that switch and dropdowns that open without JavaScript, and SHALL leave out review comments, comment marks and editing controls.
 
-### Scenario (nominal): The content without chrome
+### Scenario S1 (nominal): The content without chrome
 
 - GIVEN a page with a review comment, a TODO comment chip and the editing controls of edit mode
 - WHEN the page is exported
 - THEN the file has no `[data-okf-comment-kind]` element, no comment text and no `button`
 
-### Scenario (nominal): Tabs and dropdowns work with no script
+### Scenario S2 (nominal): Tabs and dropdowns work with no script
 
 - GIVEN a page with a tab set of two tabs and a dropdown
 - WHEN the file is opened with JavaScript off and a click lands on the label of the second tab, then on the dropdown summary
 - THEN the second panel replaces the first, the dropdown opens, and a tab set that showed its second tab when exported opens on it
 
-### Scenario (boundary): Sections and checkboxes
+### Scenario S3 (boundary): Sections and checkboxes
 
 | Input | Outcome |
 | --- | --- |

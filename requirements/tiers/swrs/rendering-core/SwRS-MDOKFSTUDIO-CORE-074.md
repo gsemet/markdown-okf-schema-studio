@@ -16,6 +16,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-006
+scenarios:
+- id: S1
+  title: One skill tree for every host
+- id: S2
+  title: Refusals
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -32,13 +37,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the repository is checked, the packaging SHALL provide a Claude Code plugin and marketplace, an Agent Plugins 1.0.0 plugin.json valid against its published JSON Schema, a Codex marketplace and a GitHub Copilot marketplace catalog, all resolving to the single writing skill folder with no copy, and SHALL keep the manifests out of the VSIX.
 
-### Scenario (nominal): One skill tree for every host
+### Scenario S1 (nominal): One skill tree for every host
 
 - GIVEN the repository root with `plugin.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json` and `.github/plugin/marketplace.json`
 - WHEN the manifests are read
 - THEN they all name the plugin `markdown-okf-schema-studio`, the Claude Code and GitHub Copilot marketplaces are both named `markdown-okf-schema-studio`, the marketplaces point at the repository root, no manifest redirects the skill location, `plugin.json` validates against the pinned Agent Plugins 1.0.0 JSON Schema, and exactly one `skills/writing-for-markdown-okf-schema-studio/SKILL.md` exists
 
-### Scenario (boundary): Refusals
+### Scenario S2 (boundary): Refusals
 
 | Input | Outcome |
 | --- | --- |

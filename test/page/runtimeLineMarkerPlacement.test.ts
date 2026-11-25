@@ -58,10 +58,11 @@ function keyOn(harness: RuntimeHarness, target: RuntimeElement, name: string): v
   harness.flushFrames();
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S2
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S8
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-193#S1
 test("a paragraph line in a hidden tab selects the tab, marks the exact wrapped line and posts nothing", () => {
   const harness = createRuntimeHarness();
   const { tabs, panels, set } = simpleTabs(harness);
@@ -81,7 +82,7 @@ test("a paragraph line in a hidden tab selects the tab, marks the exact wrapped 
   assert.equal(top(overlays(harness)[0]), "1550px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("the first line of a wrapped paragraph in a hidden tab marks the paragraph top", () => {
   const harness = createRuntimeHarness();
   simpleTabs(harness);
@@ -89,7 +90,7 @@ test("the first line of a wrapped paragraph in a hidden tab marks the paragraph 
   assert.equal(top(overlays(harness)[0]), "1530px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a code line in a hidden tab marks its span", () => {
   const harness = createRuntimeHarness();
   const { panels, code } = simpleTabs(harness);
@@ -100,7 +101,7 @@ test("a code line in a hidden tab marks its span", () => {
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a paragraph line after a code block in a tab panel is not put on a code span", () => {
   const harness = createRuntimeHarness();
   const { after, code } = simpleTabs(harness);
@@ -113,10 +114,10 @@ test("a paragraph line after a code block in a tab panel is not put on a code sp
   assert.equal(after.getAttribute("data-okf-marker-line"), "219");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S6
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S8
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-193#S1
 test("a line in a nested hidden tab selects the outer tab first, then the inner one", () => {
   const harness = createRuntimeHarness();
   const outer = buildTabSet(harness, {
@@ -138,8 +139,8 @@ test("a line in a nested hidden tab selects the outer tab first, then the inner 
   assert.equal(outer.panels[1]!.getAttribute("aria-current"), "location");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-193#S1
 test("a tab set in a closed dropdown is opened, then its tab is selected", () => {
   const harness = createRuntimeHarness();
   const details = new RuntimeElement({}, harness.windowState, 2400, 300, "details");
@@ -160,7 +161,7 @@ test("a tab set in a closed dropdown is opened, then its tab is selected", () =>
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-006#S5
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("a line in the body of a closed dropdown directive opens it and is marked, from the real render", async () => {
   const rendered = await renderPreviewDocument({
     files: createNodeFileSystem(),
@@ -201,7 +202,7 @@ test("a line in the body of a closed dropdown directive opens it and is marked, 
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("a re-render keeps the revealed tab and places the marker again", () => {
   const harness = createRuntimeHarness();
   const { panels, tabs } = simpleTabs(harness);
@@ -219,7 +220,7 @@ test("a re-render keeps the revealed tab and places the marker again", () => {
   assert.equal(top(overlays(harness)[0]), "1570px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("a tab shown by the keyboard hides the marker, and showing its tab again draws it again", () => {
   const harness = createRuntimeHarness();
   const { panels, tabs } = simpleTabs(harness);
@@ -237,7 +238,8 @@ test("a tab shown by the keyboard hides the marker, and showing its tab again dr
   assert.equal(top(overlays(harness)[0]), "1570px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a later placement never selects a tab", () => {
   const harness = createRuntimeHarness();
   const { panels, tabs, wrapped } = simpleTabs(harness);
@@ -254,7 +256,7 @@ test("a later placement never selects a tab", () => {
   assert.equal(overlays(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("the line of the tab-set itself marks its top and selects no tab", () => {
   const harness = createRuntimeHarness();
   const { panels, tabs, set } = simpleTabs(harness);
@@ -265,8 +267,8 @@ test("the line of the tab-set itself marks its top and selects no tab", () => {
   assert.equal(set.getAttribute("aria-current"), "location");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-193
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-193#S1
 test("the line of a tab item belongs to its panel and selects its tab", () => {
   const harness = createRuntimeHarness();
   const { panels, tabs } = simpleTabs(harness);
@@ -276,7 +278,7 @@ test("the line of a tab item belongs to its panel and selects its tab", () => {
   assert.equal(top(overlays(harness)[0]), "1520px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S2
 // @tests_req SwRS-MDOKFSTUDIO-MYST-099#S8
 test("a tab revealed by the marker takes the click's path: the sets of its sync group follow", () => {
@@ -297,7 +299,7 @@ test("a tab revealed by the marker takes the click's path: the sets of its sync 
   assert.equal(second.panels[1]!.hidden, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 test("revealing a tab only schedules the layout pass: the marker is placed once, inside the request", () => {
   const harness = createRuntimeHarness();
   const { wrapped } = simpleTabs(harness);
@@ -325,8 +327,9 @@ function frontmatter(harness: RuntimeHarness): RuntimeElement {
   return section;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-194
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S2
 test("a front matter key line marks its row, a line in a list value the row of the list, a comment the section top", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 160, firstMappedSourceLine: 22 });
   const section = frontmatter(harness);
@@ -341,8 +344,9 @@ test("a front matter key line marks its row, a line in a list value the row of t
   assert.equal(section.getAttribute("aria-current"), "location");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-194
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S2
 test("a line near the closing fence of a long front matter marks the section, not the first body block", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 160, firstMappedSourceLine: 22 });
   const section = frontmatter(harness);
@@ -359,9 +363,10 @@ function collapse(harness: RuntimeHarness): void {
   harness.dispatchDocument("click", { target: harness.frontmatterToggleButton, preventDefault: noop, stopImmediatePropagation: noop });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-194
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-194#S2
 test("a row line expands a collapsed properties table and marks the row; a fence line leaves it collapsed", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 160, firstMappedSourceLine: 22 });
   const section = frontmatter(harness);
@@ -379,7 +384,7 @@ test("a row line expands a collapsed properties table and marks the row; a fence
   assert.equal(top(overlays(harness)[0]), "0px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S2
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
 test("a properties table the reader collapses again hides the marker, and a later placement never expands it", () => {
   const harness = createRuntimeHarness({ frontmatterHeight: 160, firstMappedSourceLine: 22 });
@@ -420,8 +425,8 @@ function quotedTable(harness: RuntimeHarness): RuntimeElement {
   return quote;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
 test("a table in a quote marks its row, the quote is the marked block, and the delimiter line marks the header row", () => {
   const harness = createRuntimeHarness();
   const quote = quotedTable(harness);
@@ -439,8 +444,9 @@ test("a table in a quote marks its row, the quote is the marked block, and the d
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-192
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-192#S1
 test("a line past the last row of a table, or in a table with no row lines, marks the block top", () => {
   const harness = createRuntimeHarness();
   const quote = quotedTable(harness);

@@ -91,7 +91,8 @@ const entries = (lines: string[]): string[] => lines.filter((line) => !line.star
 const FIRST = ["# Use cases", strs("GFM", "014"), "# Behaviours", swrs("GFM", "014")];
 
 test("a full ID, a short ID and any case list the use case first and the behaviour right under it", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S3
   const page = load();
   for (const query of ["mdokfstudio-GFM-014", "GFM-014", "gfm-14", "MDOKFSTUDIO-GFM-014", "  Gfm-014  "]) {
     const lines = list(page, query);
@@ -101,19 +102,21 @@ test("a full ID, a short ID and any case list the use case first and the behavio
 });
 
 test("a number is not a text hit of another number: gfm-14 lists GFM-140 only after the ID matches", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S1
   const lines = list(load(), "gfm-14");
   assert.deepEqual(entries(lines), [strs("GFM", "014"), swrs("GFM", "014"), swrs("GFM", "140")]);
 });
 
 test("a full ID of one tier matches that tier only", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S4
   assert.deepEqual(list(load(), "StRS-MDOKFSTUDIO-GFM-14"), ["# Use cases", strs("GFM", "014")]);
   assert.deepEqual(list(load(), "SwRS-MDOKFSTUDIO-GFM-014"), ["# Behaviours", swrs("GFM", "014")]);
 });
 
 test("a bare number lists every requirement numbered 14 first, then the text hits", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S4
   const page = load();
   const idMatches = [strs("GFM", "014"), swrs("GFM", "014"), swrs("MYST", "014")];
   assert.deepEqual(entries(list(page, "14")), [...idMatches, swrs("GFM", "020"), swrs("GFM", "114"), swrs("GFM", "140")], "the text hits follow, in index order (114, 140 and the title that holds 14 are no ID match)");
@@ -125,7 +128,8 @@ test("a bare number lists every requirement numbered 14 first, then the text hit
 });
 
 test("114 is not an ID match of 14: only a 014 entry is, and 114 is found by its own number", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S4
   const page = load();
   const exact = [strs("GFM", "014"), swrs("GFM", "014"), swrs("MYST", "014")];
   for (const query of ["14", "014", "gfm-14", "GFM-014"]) {
@@ -141,7 +145,7 @@ test("114 is not an ID match of 14: only a 014 entry is, and 114 is found by its
 });
 
 test("with more than 30 hits the ID matches are kept and the text hits are cut first", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S2
   const ids = entries(list(load(26), "14"));
   assert.equal(ids.length, 30);
   assert.equal(ids.filter((id) => /-014$/u.test(id)).length, 29, "the 29 ID matches are all kept");
@@ -153,7 +157,7 @@ test("with more than 30 hits the ID matches are kept and the text hits are cut f
 });
 
 test("Enter opens the first ID match: the use case of a short ID", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S5
   const page = load();
   list(page, "gfm-14");
   page.q.onkeydown!({ key: "Enter", preventDefault() {} });
@@ -161,7 +165,7 @@ test("Enter opens the first ID match: the use case of a short ID", () => {
 });
 
 test("a retired ID is hidden while History is off and listed once it is on", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-092
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-092#S5
   const page = load();
   assert.deepEqual(list(page, "gfm-2"), []);
   assert.ok(page.results.innerHTML.includes("Nothing matches"));

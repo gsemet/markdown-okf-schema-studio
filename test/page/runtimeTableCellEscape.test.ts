@@ -18,7 +18,8 @@ const typeInto = (control: { value: string; dispatch(type: string, init?: object
 
 type Leave = "Tab" | "ArrowRight" | "click";
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S5
 for (const leave of ["Tab", "ArrowRight", "click"] as Leave[]) {
   test("Escape after leaving a typed cell with " + leave + " keeps that cell and drops the open one", () => {
     const harness = createRuntimeHarness();
@@ -43,7 +44,8 @@ for (const leave of ["Tab", "ArrowRight", "click"] as Leave[]) {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S3
 test("Escape after two cells left with Tab keeps both and drops only the open one", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness, { start: [0, 0] });
@@ -58,7 +60,8 @@ test("Escape after two cells left with Tab keeps both and drops only the open on
   assert.match(String(last?.editedText), /^\| A2 \| B2 \|\n\| --- \| --- \|\n\| x \| y \|/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S5
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S13
 test("Escape outside the cell editor after leaving a typed cell keeps that cell", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness);
@@ -71,7 +74,8 @@ test("Escape outside the cell editor after leaving a typed cell keeps that cell"
   assert.match(String(last?.editedText), /\| x2 \| y \|/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S3
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S5
 test("Escape in an untouched cell after a typed cell was left keeps the typed cell", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness);
@@ -83,7 +87,8 @@ test("Escape in an untouched cell after a typed cell was left keeps the typed ce
   assert.match(String(last?.editedText), /\| x2 \| y \|/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S4
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S5
 test("Cancel after leaving a typed cell keeps that cell, like Escape", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness);
@@ -100,7 +105,7 @@ test("Cancel after leaving a typed cell keeps that cell, like Escape", () => {
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025#S5
 test("Escape after leaving an untouched cell runs the whole cancel", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness);

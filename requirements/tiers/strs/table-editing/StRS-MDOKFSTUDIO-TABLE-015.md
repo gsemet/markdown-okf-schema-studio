@@ -15,6 +15,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Format the text of a cell
 user_need: As a writer, I format text in a table cell from the bar, with a
   shortcut or from the slash menu as simply as in a paragraph, and the table
   keeps its shape.
@@ -63,7 +66,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Format the text of a cell
+#### Path S1: Format the text of a cell
 
 1. A cell editor is open
    - SwRS-MDOKFSTUDIO-TABLE-085: the writer presses a button of the Cell formatting group of the table bar and it applies to the cell text

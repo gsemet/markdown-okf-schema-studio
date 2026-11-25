@@ -28,7 +28,7 @@ function openObjectYamlEditor() {
   return { harness, textarea };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: the save command writes the typed frontmatter value as a flush before the save request", () => {
   const { harness, textarea } = openTextFieldEditor("Alpha");
   textarea.value = "Beta";
@@ -41,7 +41,7 @@ test("CR 312: the save command writes the typed frontmatter value as a flush bef
   assert.equal(frontmatterSaves(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: a refused plain save is written again as a flush, then the save request follows", () => {
   const { harness, textarea } = openObjectYamlEditor();
   textarea.value = "[unclosed";
@@ -59,7 +59,7 @@ test("CR 312: a refused plain save is written again as a flush, then the save re
   assert.equal(posted[0].flush, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: a plain save with no result still gets its save request after the bounded wait", () => {
   const { harness, textarea } = openObjectYamlEditor();
   textarea.value = "[unclosed";
@@ -71,7 +71,7 @@ test("CR 312: a plain save with no result still gets its save request after the 
   assert.deepEqual(harness.messages.slice(before).map((message) => message.type).at(-1), "previewSaveRequest");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
 test("CR 312: the save command posts the typed cell text as an autosave, then the save request, and keeps the cell editor open", () => {
   const harness = createRuntimeHarness();
   const input = openTableCellEditor(harness);

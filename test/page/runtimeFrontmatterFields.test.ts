@@ -550,7 +550,8 @@ test("T30: previewPropertiesTable is ignored for another request, version, docum
   assert.equal(harness.htmlInsertions.length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S8
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S3
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043#S4
 test("T30: previewPropertiesTable is deferred while a frontmatter editor is open, then applied on close", () => {

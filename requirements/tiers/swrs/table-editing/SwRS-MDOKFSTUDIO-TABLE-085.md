@@ -16,6 +16,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-015
 depends_on: []
+scenarios:
+- id: S1
+  title: Cell group
+- id: S2
+  title: A button applies to the cell text
+- id: S3
+  title: Cmd or Ctrl with B, I or K
+- id: S4
+  title: Block-only shortcut
+- id: S5
+  title: Slash menu of a cell
+- id: S6
+  title: Rebuilt bar keeps the group
+- id: S7
+  title: The group leaves with the editor
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,44 +52,44 @@ default_owner_email: gaetan@xeberon.net
 
 When a cell editor is open, the extension SHALL add to the table bar, after a separator, a group named "Cell formatting" holding only the palette buttons allowed in a cell and no mode selector, and apply its buttons, their shortcuts and the cell slash menu to the cell text.
 
-### Scenario (nominal): Cell group
+### Scenario S1 (nominal): Cell group
 | Input | Outcome |
 | --- | --- |
 | A cell editor open in GFM mode, the bar inspected | After the separator the group holds bold, italic, strikethrough, link, colour, colour code, emoji and key buttons and no block-only button such as heading, quote, table, image or code fence |
 | The same editor in MyST mode, the bar inspected | Sub, sup and the key role are offered |
 
-### Scenario (nominal): A button applies to the cell text
+### Scenario S2 (nominal): A button applies to the cell text
 - GIVEN all of the cell text selected and Bold pressed
 - WHEN the cell text is read
 - THEN it starts with ** and the editor is still open and focused, and Cmd+Z restores the text; the format was applied as one native edit
 - AND WHEN the writer then presses Enter, the cell is saved
 
-### Scenario (nominal): Cmd or Ctrl with B, I or K
+### Scenario S3 (nominal): Cmd or Ctrl with B, I or K
 | Input | Outcome |
 | --- | --- |
 | Text selected in a cell and Cmd+B (Ctrl on other platforms) | The text is bold, the default is prevented and the key is stopped |
 | Text selected in a cell and Cmd+K | The link panel opens in the cell |
 | Cmd+I in the cell text box | Italic runs on the cell text and the key stays away from the browser |
 
-### Scenario (refusal): Block-only shortcut
+### Scenario S4 (refusal): Block-only shortcut
 | Input | Outcome |
 | --- | --- |
 | Text in a cell and the shortcut of the TODO action pressed | The cell text is unchanged |
 | Cmd+B in the same cell | The action runs |
 
-### Scenario (nominal): Slash menu of a cell
+### Scenario S5 (nominal): Slash menu of a cell
 | Input | Outcome |
 | --- | --- |
 | The writer types a slash in a cell editor in MyST mode | The menu lists Bold, Italic, Strikethrough, Colour, Link, Emoji, Key, Subscript, Superscript and Key (MyST), and no list entry, Table, Code block, Quote, Rule, Alert, Admonition, Figure or Image; the chosen command runs through the cell formatting group |
 | A cell whose caret is inside a colour code | Colour code is listed too |
 
-### Scenario (boundary): Rebuilt bar keeps the group
+### Scenario S6 (boundary): Rebuilt bar keeps the group
 | Input | Outcome |
 | --- | --- |
 | The editor moved to another cell by a click, rendered again | The bar element is the same and holds the same group element |
 | The editor moved to the next cell by Tab, rendered again | The same bar and the same group are in place |
 
-### Scenario (boundary): The group leaves with the editor
+### Scenario S7 (boundary): The group leaves with the editor
 | Input | Outcome |
 | --- | --- |
 | The editor closed by Escape | No cell group and no table bar are left |

@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: See what changed since the last commit
 user_need: As a writer, I see at a glance what I changed since the last commit,
   unsaved edits included, and I read the document without the bars when I do not
   need them.
@@ -70,7 +73,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: See what changed since the last commit
+#### Path S1: See what changed since the last commit
 
 1. A file tracked by Git differs from its last commit
    - SwRS-MDOKFSTUDIO-REVIEW-195: the host posts the line ranges that differ from the file at HEAD

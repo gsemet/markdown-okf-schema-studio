@@ -19,7 +19,8 @@ function editorWithFigureForm(): { press: () => Promise<void>; isOpen: () => Pro
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S8
 test("one Escape in the figure form leaves the block editor open; the helper presses again", async () => {
   const single = editorWithFigureForm();
   await single.press();
@@ -31,7 +32,8 @@ test("one Escape in the figure form leaves the block editor open; the helper pre
   assert.equal(await editor.isOpen(), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S8
 test("a text-box editor closes with the first Escape", async () => {
   let open = true;
   const presses = await escapeUntilClosed(async () => { open = false; }, async () => open, async () => undefined);

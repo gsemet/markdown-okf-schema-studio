@@ -96,7 +96,7 @@ const ROWS: Row[] = [
 
 for (const [name, eol] of EOLS) {
   for (const row of ROWS) {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
     test(`${name}: the indent of ${row.name}`, () => {
       const text = join(eol, [...row.lines, ""]);
       const run = quoteBlankRuns(text)[0] ?? blankRuns(text)[0];
@@ -110,7 +110,8 @@ for (const [name, eol] of EOLS) {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a quote run has its first line, byte for byte, as the copy of a blank line", () => {
   const text = "> a\n> \n> \n> b\n";
   assert.equal(blankRunIndent(text, 2)?.blank, "> ");
@@ -119,7 +120,8 @@ test("a quote run has its first line, byte for byte, as the copy of a blank line
   assert.deepEqual(blankRunIndent("a\n\n\nb\n", 2), { quote: "", content: "" }, "and no container indent");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a footnote label after a tab is no footnote label: it is refused", () => {
   const text = "\t[^a]: f1\n\n\n\tmore\n";
   assert.equal(blankRunIndent(text, 2, undefined, 1), undefined);
@@ -132,7 +134,8 @@ const refused = (lines: string[], itemLine: number | undefined, containerLine: n
   return blankRunIndent(text, run.line, itemLine, containerLine) === undefined;
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a container line that is not of the shape of a container is refused as stale", () => {
   assert.ok(refused(["a paragraph", "", "", "b"], undefined, 1), "a paragraph line");
   assert.ok(refused(["```", "a", "", "", "b", "```"], undefined, 1), "a fence without a name");
@@ -145,7 +148,7 @@ test("a container line that is not of the shape of a container is refused as sta
   assert.ok(refused(["```{note}", "a", "", "", "b", "```"], 1, undefined), "a fence line given as an item line");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a container line at or after the run, in the frontmatter, or out of the text is refused as stale", () => {
   const text = "a\n\n```{note}\n\n\nb\n```\n";
   assert.equal(blankRunIndent(text, 4, undefined, 3)?.content, "", "the line before the run holds");
@@ -160,7 +163,8 @@ test("a container line at or after the run, in the frontmatter, or out of the te
   assert.equal(blankRunIndent(frontmatter, 4, undefined, 6), undefined, "a line after the run");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("quote markers at another depth or other columns than the run's refuse the container line", () => {
   assert.equal(blankRunIndent("> - x\n>\n>\n> y\n", 2, 1)?.quote, "> ");
   assert.equal(blankRunIndent("- x\n>\n>\n> y\n", 2, 1), undefined, "no markers on the container line");
@@ -173,13 +177,14 @@ test("quote markers at another depth or other columns than the run's refuse the 
   assert.equal(blankRunIndent("> - x\n\n\n  y\n", 2, 1), undefined, "a plain run with a quote line");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
 test("a fence in a list item takes its leading spaces and tabs as they are, also for a tab after a quote marker", () => {
   assert.equal(blankRunIndent(">\t```{note}\n>\n>\n> y\n", 2, undefined, 1)?.content, "  ", "the rest of the tab stays");
   assert.equal(blankRunIndent("- a\n  ```{note}\n\n\n  y\n  ```\n", 3, undefined, 2)?.content, "  ");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
 test("a block is a new definition entry or a new footnote only by its own lines", () => {
   assert.ok(startsDefinitionEntry(["New", ": dn"]));
   assert.ok(startsDefinitionEntry(["New", "", ": dn"]));

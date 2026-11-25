@@ -22,6 +22,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-023
+scenarios:
+- id: S1
+  title: Reveal a code line
+- id: S2
+  title: Folded, outside and soft-wrapped lines
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,13 +57,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the host asks the page to reveal a source line, the page SHALL scroll silently so that the line sits at the reading line below the sticky heading band, unfold a folded heading section or a closed details block that holds it, and draw an arrow in the left margin and a light band at the exact line of a paragraph or of a code block itself, at the top of the enclosing block for any other block (a pipe table row, a tab item and the front matter are covered by SwRS-MDOKFSTUDIO-LIFE-192, SwRS-MDOKFSTUDIO-LIFE-193 and SwRS-MDOKFSTUDIO-LIFE-194), and at the nearest block for a line outside every block. When the request asks for the if-off-screen scroll, the page SHALL scroll only when the line is not already on screen below the sticky heading band, and SHALL always draw the marker.
 
-### Scenario (nominal): Reveal a code line
+### Scenario S1 (nominal): Reveal a code line
 
 - GIVEN a page with a numbered code block whose line 20 is `value_15 = 15`, in a 900 px pane
 - WHEN the page receives previewRevealLine for line 20
 - THEN one arrow and band are drawn on exactly that code line, the line sits at the reading line and is inside the viewport, its block has aria-current=location, and no previewScroll is posted
 
-### Scenario (boundary): Folded, outside and soft-wrapped lines
+### Scenario S2 (boundary): Folded, outside and soft-wrapped lines
 
 | Input | Outcome |
 | --- | --- |

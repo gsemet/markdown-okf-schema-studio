@@ -17,6 +17,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-017
+scenarios:
+- id: S1
+  title: Click a bar, then click it again
+- id: S2
+  title: Escape, the removed marker and the global button
+- id: S3
+  title: Not in edit mode
 annotation_exemption: false
 exemption_reason:
 relates_to:
@@ -46,13 +53,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the reader clicks a change bar or a removed-lines marker outside edit mode, the page SHALL show the side-by-side diff card of that block or removal only, in place, and SHALL close it on a second click on the same bar or marker or on Escape, while the Side-by-side button keeps showing every card.
 
-### Scenario (nominal): Click a bar, then click it again
+### Scenario S1 (nominal): Click a bar, then click it again
 
 - GIVEN the Diff button on, outside edit mode, a block marked as changed
 - WHEN the reader clicks its bar, then clicks the same bar again
 - THEN the first click shows the side-by-side diff card of that block only, in place, and the second click closes it
 
-### Scenario (boundary): Escape, the removed marker and the global button
+### Scenario S2 (boundary): Escape, the removed marker and the global button
 
 | Input | Outcome |
 | --- | --- |
@@ -61,7 +68,7 @@ When the reader clicks a change bar or a removed-lines marker outside edit mode,
 | A click on another bar while one card is open | the card moves to that block |
 | The Side-by-side button | shows every card as before, whatever the single card |
 
-### Scenario (refusal): Not in edit mode
+### Scenario S3 (refusal): Not in edit mode
 
 - GIVEN edit mode on
 - WHEN the reader clicks a bar or a marker

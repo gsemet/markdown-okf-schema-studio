@@ -41,7 +41,8 @@ function shiftClick(harness: RuntimeHarness, block: RuntimeElement, extra: Recor
   return counts;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-140
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-140#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-140#S8
 test("T39: Shift+click on two blocks selects the run between them without opening an editor", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -157,9 +158,11 @@ test("T39: Escape or a plain click clears the selection", () => {
   assert.deepEqual(selectedLines(harness), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193#S7
 test("T39: a content patch and leaving edit mode clear the selection", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[0]);
@@ -171,7 +174,7 @@ test("T39: a content patch and leaving edit mode clear the selection", () => {
   assert.deepEqual(selectedLines(harness), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S4
 test("T39: included blocks stop the range and the properties table is never selected", () => {
   const harness = createRuntimeHarness({
     mapFrontmatter: true, propertiesMapped: true, firstMappedSourceLine: 5, savedState: { editMode: true },
@@ -191,7 +194,7 @@ test("T39: included blocks stop the range and the properties table is never sele
   assert.equal(properties.getAttribute(SELECTED), null, "Shift+Up stops at the first body block");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148#S3
 test("T39 r2: blocks are named by position, so an edit that adds lines selects the right blocks", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -207,7 +210,7 @@ test("T39 r2: blocks are named by position, so an edit that adds lines selects t
   assert.equal(selectionAnnouncement(harness), "2 blocks selected");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148#S2
 test("T39 r2: a save that changes the number of blocks selects nothing instead of another block", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -219,7 +222,8 @@ test("T39 r2: a save that changes the number of blocks selects nothing instead o
   assert.deepEqual(selectedLines(harness), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-148#S4
 test("T39 r2: a pending selection does not survive its editor closing without the patch", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -257,7 +261,8 @@ test("T39 r2: Shift+mousedown inside a link keeps the browser default", () => {
   assert.equal(prevented, true, "on plain block text it is cancelled");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041#S3
 test("T39 r2: Shift+click while the property editor is open selects nothing", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.dispatchDocument("click", {
@@ -278,7 +283,7 @@ function blocksMessages(harness: RuntimeHarness, from = 0): Array<Record<string,
     typeof message.type === "string" && message.type.startsWith("previewBlocks") && !message.type.endsWith("Result"));
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166#S1
 test("T40: Ctrl+C and Ctrl+X on a selection post its source lines; the keys are ours", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[0]);
@@ -341,7 +346,8 @@ test("T40: the keys are ignored inside a text box, a field and the property tabl
   assert.equal(prevented, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174#S2
 test("T40: Ctrl+V pastes after the selection, or after the block of a focused bar", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -378,7 +384,8 @@ test("T40: a held key sends one request until the host answers; a refusal is ann
   assert.equal(blocksMessages(harness, before).length, 2, "a new request after the answer");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-169#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-169#S7
 test("T40: a copy answer says so and a cut answer clears the selection", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[1]);
@@ -397,7 +404,8 @@ function selectTwo(harness: RuntimeHarness, from = 0): void {
   shiftClick(harness, harness.mappings[from + 1]);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156#S2
 test("T41: Alt+ArrowDown with a two-block selection posts the span; the selection follows the patch", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   selectTwo(harness);
@@ -581,7 +589,8 @@ function editorsOpen(harness: RuntimeHarness): boolean {
   return harness.documentElement.getAttribute("data-sphinx-preview-block-editing") === "true";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S2
 test("CR 120: plain Up and Down select a block, starting at the block nearest the viewport top", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -600,7 +609,7 @@ test("CR 120: plain Up and Down select a block, starting at the block nearest th
   assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S5
 test("CR 120: plain Up collapses a block run onto the neighbour of its free end", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   shiftClick(harness, harness.mappings[0]);
@@ -609,7 +618,7 @@ test("CR 120: plain Up collapses a block run onto the neighbour of its free end"
   assert.deepEqual(selectedLines(harness), [50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
 test("CR 120: plain Up and Down do nothing outside edit mode, in a text box or with a modifier", () => {
   const reading = createRuntimeHarness();
   reading.dispatchDocument("keydown", plainKey("ArrowDown"));
@@ -626,7 +635,7 @@ test("CR 120: plain Up and Down do nothing outside edit mode, in a text box or w
   assert.deepEqual(selectedLines(harness), [50], "only the Escape selection is left; no chord selected anything");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
 test("CR 120: Enter opens the editor of the selected block", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.dispatchDocument("keydown", plainKey("ArrowDown"));
@@ -639,7 +648,8 @@ test("CR 120: Enter opens the editor of the selected block", () => {
   assert.equal(editorsOpen(harness), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S2
 test("CR 120: Enter with no selection opens nothing", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const before = harness.messages.length;
@@ -647,7 +657,8 @@ test("CR 120: Enter with no selection opens nothing", () => {
   assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S5
 test("CR 120: Escape closes the editor and leaves its block selected for the arrow keys", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -658,7 +669,7 @@ test("CR 120: Escape closes the editor and leaves its block selected for the arr
   assert.deepEqual(selectedLines(harness), [100]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
 test("CR 120: Cmd/Ctrl+Enter without changes closes the editor and selects its block", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -667,7 +678,7 @@ test("CR 120: Cmd/Ctrl+Enter without changes closes the editor and selects its b
   assert.deepEqual(selectedLines(harness), [50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
 test("CR 120: Cmd/Ctrl+Enter with changes saves, and the block is selected once the patch is in", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");
@@ -688,7 +699,8 @@ function previewRoot(harness: RuntimeHarness): RuntimeElement {
   return harness.previewContent;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S2
 test("CR 129: plain Up and Down on the focused content root move the block selection", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const root = previewRoot(harness);
@@ -700,7 +712,8 @@ test("CR 129: plain Up and Down on the focused content root move the block selec
   assert.deepEqual(selectedLines(harness), [50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S2
 test("CR 129: Shift+Down on the focused content root extends a selection", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.dispatchDocument("keydown", plainKey("ArrowDown"));
@@ -708,7 +721,7 @@ test("CR 129: Shift+Down on the focused content root extends a selection", () =>
   assert.deepEqual(selectedLines(harness), [1, 50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S3
 test("CR 129: the window coming back selects the block nearest the top when nothing was selected", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   assert.deepEqual(selectedLines(harness), []);
@@ -718,7 +731,7 @@ test("CR 129: the window coming back selects the block nearest the top when noth
   assert.deepEqual(selectedLines(harness), [50]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S3
 test("CR 129: the window coming back restores the last block the keyboard selected", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.dispatchDocument("keydown", plainKey("ArrowDown"));
@@ -731,7 +744,7 @@ test("CR 129: the window coming back restores the last block the keyboard select
   assert.equal(selectionAnnouncement(harness), "1 block selected");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S3
 test("CR 129: the window coming back selects nothing outside edit mode, in an editor or on another control", () => {
   const reading = createRuntimeHarness();
   reading.dispatchWindow("focus");

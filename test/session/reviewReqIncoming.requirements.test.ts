@@ -85,7 +85,8 @@ async function flush(): Promise<void> {
 
 const incoming = (f: Fixture) => f.posted.filter((message) => message.type === "previewIncomingChanges");
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-195#S6
 test("a tracked file posts the 1-based ranges of the shown lines that differ from HEAD", async (t) => {
   const f = fixture(t);
   f.controller.schedule(f.preview, 0);
@@ -207,7 +208,8 @@ test("nothing is posted for a page without marks and an unchanged enabled value,
   assert.deepEqual(incoming(f)[3]!.ranges, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152#S2
 test("the value of preview.showComments is posted to the page when the settings change, without a render", async (t) => {
   const f = fixture(t);
   f.manager.view.postShowComments(f.preview);
@@ -248,7 +250,7 @@ function sideBySideFixture(t: TestContext, html: string | null = "<p data-line=\
   return { ...f, controller, renders, baselines, run };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S1
 test("CR147: with the side-by-side diff on, the page gets the HEAD rendering and the hunks, rendered once per HEAD text", async (t) => {
   const f = sideBySideFixture(t);
   await f.run();
@@ -287,7 +289,7 @@ test("CR147: with the side-by-side diff on, the page gets the HEAD rendering and
   assert.equal(f.renders.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S2
 test("CR147: the baseline does not depend on the Diff button and is empty for an untracked file", async (t) => {
   const f = sideBySideFixture(t);
   f.state.diff = false;
@@ -304,7 +306,7 @@ test("CR147: the baseline does not depend on the Diff button and is empty for an
 
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S1
 test("CR147: a HEAD text that cannot be rendered is posted empty, so the page keeps the green bars", async (t) => {
   const broken = sideBySideFixture(t, null);
   broken.controller.setSideBySide(broken.preview, true);
@@ -313,7 +315,7 @@ test("CR147: a HEAD text that cannot be rendered is posted empty, so the page ke
   assert.deepEqual([(broken.baselines()[0] as any).html, (broken.baselines()[0] as any).hunks], ["", []]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S2
 test("CR147: with preview.showIncomingChanges off nothing is read or posted", async (t) => {
   const off = sideBySideFixture(t);
   off.preview.configuration.showIncomingChanges = false;
@@ -324,7 +326,8 @@ test("CR147: with preview.showIncomingChanges off nothing is read or posted", as
   assert.equal(off.headReads(), 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006#S4
 test("CR147: the page message switches the diff on the session", async (t) => {
   const f = sideBySideFixture(t);
   const handlers = new Map<string, (message: any, preview: any) => void>();
@@ -339,7 +342,7 @@ test("CR147: the page message switches the diff on the session", async (t) => {
   assert.equal(f.preview.incoming.baseline, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-221#S1
 test("CR463: lines removed since HEAD with nothing in their place are posted as removed hunks with their lines at HEAD", async (t) => {
   const f = fixture(t);
   f.preview.stage.sourceText = "one\nfour\n";
@@ -356,7 +359,8 @@ test("CR463: lines removed since HEAD with nothing in their place are posted as 
   assert.deepEqual(incoming(f)[1]!.removed, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-222#S2
 test("CR463: a click asks for the HEAD rendering once, without the Side-by-side button", async (t) => {
   const f = sideBySideFixture(t);
   await f.run();

@@ -77,7 +77,8 @@ async function restore(studio: Studio, panel: FakeWebviewPanel, state: unknown):
 
 const restoredState = (file: string): Record<string, unknown> => ({ documentId: Uri.file(file).toString(), sourceFile: file });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-062
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S5
 test("deleting the shown file shows The active Markdown source was deleted.", async (t) => {
   const studio = start(t);
   const file = writeFile("# A\n");
@@ -104,7 +105,7 @@ test("renaming the shown file shows The active Markdown source was renamed or de
   assert.match(lastHtml(panel), /The active Markdown source was renamed or deleted\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S2
 test("renaming a file the render depends on renders the document again, an unrelated rename does not", async (t) => {
   const studio = start(t);
   const intro = writeFile("Included text.\n", workspaceRoot, `parts-${process.pid}/intro.md`);
@@ -196,7 +197,7 @@ test("a document that is not a saved .md file shows The restored or active sourc
   assert.match(lastHtml(panel), /The restored or active source is not a Markdown file\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S3
 test("a failed render of a document that was not shown yet shows Preview unavailable", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# Alpha page\n\nAlpha text.\n");
@@ -213,7 +214,7 @@ test("a failed render of a document that was not shown yet shows Preview unavail
   assert.equal(studio.manager.active!.status, "error");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S8
 test("Refresh Preview does nothing while the active text editor shows another document", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n");
@@ -254,7 +255,7 @@ test("Refresh Preview acts on the preview created last that is still open", asyn
   assert.ok(side.probe.renderedStages > again);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S9
 test("Open Preview to Side refuses a file that is not a saved Markdown file", async (t) => {
   const studio = start(t);
   const typescript = writeFile("export {};\n", workspaceRoot, `code-${process.pid}.ts`);
@@ -272,7 +273,8 @@ test("Open Preview to Side refuses a file that is not a saved Markdown file", as
   assert.equal(fake.controls.panels.length, panels);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S10
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S15
 test("Open Preview to Side from a Studio Open With tab previews that tab's file", async (t) => {
   const studio = start(t);
   const file = writeFile("# From the Open With tab\n");
@@ -303,7 +305,7 @@ test("Open Preview to Side reports a file it cannot open", async (t) => {
   assert.ok(shown[0]!.text.startsWith(`Cannot open ${missing}: `), shown[0]!.text);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S4
 test("Open Preview to Side on the shown document reveals the preview and renders it again", async (t) => {
   const studio = start(t);
   const file = writeFile("# Twice\n");
@@ -342,7 +344,7 @@ test("the side preview and the Open With editor do not retain their page while h
   assert.notEqual(captured.editorOptions!.webviewOptions!.retainContextWhenHidden, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S3
 test("previews of one root share one file watcher, which closing the last preview removes with its subscriptions", async (t) => {
   const studio = start(t);
   const file = writeFile("# Watched\n");
@@ -362,7 +364,8 @@ test("previews of one root share one file watcher, which closing the last previe
   assert.deepEqual([shared!.changed.size, shared!.created.size, shared!.deleted.size], [0, 0, 0]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-026
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S8
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 test("a document outside the workspace folder gets a new session on the same panel", async (t) => {
   const studio = start(t);
@@ -394,7 +397,7 @@ test("a document outside the workspace folder gets a new session on the same pan
   assert.equal(fake.controls.panels.filter((candidate) => candidate === panel).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151#S7
 test("the recorded column of a locked preview follows its group", async (t) => {
   const studio = start(t);
   const { panel } = await studio.openSide(writeFile("# Locked\n"));
@@ -480,7 +483,7 @@ test("granting trust flushes the open page editor before the preview is replaced
   assert.equal(studio.manager.active!.panel, restricted.panel);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S5
 test("removing the folder of a preview flushes its open page editor before the preview is replaced", async (t) => {
   const studio = start(t);
   const setFolders = folderControl(t);
@@ -587,7 +590,7 @@ test("adding a workspace folder gives the previews of its files full reads on th
   assert.equal(studio.manager.active, other, "the active preview stays the active one");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S5
 test("removing the folder of a preview keeps its panel, with restricted reads, until the folder is added back", async (t) => {
   const studio = start(t);
   const setFolders = folderControl(t);
@@ -625,7 +628,7 @@ test("removing the folder of a preview keeps its panel, with restricted reads, u
   assert.equal(panel.disposed, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-127
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S4
 test("a restored side preview owns the group lock the workbench restored", async (t) => {
   const studio = start(t);
   const first = writeFile("# First\n");
@@ -675,7 +678,7 @@ test("of two restored panels only the newer one switches with the active editor"
   assert.equal(older!.documentUri, Uri.file(first).toString());
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-018
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-018#S5
 test("the Open With editor explains that it needs a Markdown file", async (t) => {
   const studio = start(t);
   const untitled = new FakeTextDocument(new Uri("untitled", "Untitled-1"), "# Untitled\n");
@@ -747,7 +750,7 @@ test("a saved source that is not a Markdown file shows an explanation", async (t
   assert.equal(studio.manager.sessions().size, 0, "no session is created");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S7
 test("the host tells each preview whether a text editor shows its file whenever the visible editors change", async (t) => {
   const studio = start(t);
   const file = writeFile("# Paired\n");
@@ -916,7 +919,7 @@ test("the Description column choice of a document is stored for the workspace an
   assert.equal(studio.manager.active!.state?.descriptionsCollapsed, false, "the saved panel state wins");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-125
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125#S5
 test("switching back to a document brings back its remembered state", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n\nFirst.\n");
@@ -941,7 +944,7 @@ test("switching back to a document brings back its remembered state", async (t) 
   assert.equal(session.state?.sourceLine, 80, "the scroll line of A is back");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-038
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-038#S1
 test("a change of a file renders only the previews that show it, each on its own schedule", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# Page A\n\nText of A.\n");
@@ -963,7 +966,7 @@ test("a change of a file renders only the previews that show it, each on its own
   assert.equal(withPanel.htmlAssignments.length, fixedHtml);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-038
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-038#S1
 test("two previews of one document both render the new text", async (t) => {
   const studio = start(t);
   const file = writeFile("# Twice\n\nOld text.\n");
@@ -981,8 +984,10 @@ test("two previews of one document both render the new text", async (t) => {
   assert.match(lastRendered(withPanel), /New text\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-024
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-026
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-024#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-024#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S5
 test("switching the active file retitles the side preview and shows the following message until the render ends", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n", workspaceRoot, `title-a-${process.pid}.md`);
@@ -1003,7 +1008,7 @@ test("switching the active file retitles the side preview and shows the followin
   assert.doesNotMatch(lastHtml(panel), /Following the active Markdown editor\./u, "the pending message ends with the render");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-024
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-024#S2
 test("an Open With tab is titled with the bare file name", async (t) => {
   const studio = start(t);
   const file = writeFile("# Fixed\n", workspaceRoot, `fixed-${process.pid}.md`);
@@ -1011,7 +1016,7 @@ test("an Open With tab is titled with the bare file name", async (t) => {
   assert.equal(panel.title, `fixed-${process.pid}.md`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039#S2
 test("a change event of a file that is gone shows Preview source missing instead of rendering", async (t) => {
   const studio = start(t);
   const file = writeFile("# Gone soon\n\nText.\n");
@@ -1024,7 +1029,8 @@ test("a change event of a file that is gone shows Preview source missing instead
   assert.doesNotMatch(lastHtml(panel), /Edited\./u, "the edit is not rendered");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S6
 test("with incrementalUpdates off a render assigns the page document instead of a content patch", async (t) => {
   const studio = start(t);
   const { document, panel } = await studio.openSide(writeFile("# Patch\n\nBefore.\n"));
@@ -1046,7 +1052,8 @@ test("with incrementalUpdates off a render assigns the page document instead of 
   assert.match(lastRendered(panel), /After\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-127
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S5
 test("a restored panel of a file in no workspace folder renders with restricted reads", async (t) => {
   const studio = start(t);
   const outside = writeFile("# Outside\n\nStandalone.\n", outsideRoot);
@@ -1059,7 +1066,7 @@ test("a restored panel of a file in no workspace folder renders with restricted 
   assert.match(lastRendered(panel), /Standalone\./u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-125
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125#S3
 test("a state report records its fields within bounds and leaves out the ones that fail the host's parse", async (t) => {
   const studio = start(t);
   const { panel } = await studio.openSide(writeFile("# Bounds\n\nText.\n"));
@@ -1092,7 +1099,8 @@ test("a state report records its fields within bounds and leaves out the ones th
   assert.equal(recorded?.openDisclosures?.length, 100, "at most the first 100 indexes");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-125
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125#S4
 test("a state report that names another document leaves the recorded state unchanged", async (t) => {
   const studio = start(t);
   const { panel } = await studio.openSide(writeFile("# Other\n\nText.\n"));
@@ -1108,7 +1116,7 @@ test("a state report that names another document leaves the recorded state uncha
   assert.equal(session.state?.sourceLine, 7);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032#S8
 test("a previewRefresh of the current render records the state and renders again, one of an older render is dropped", async (t) => {
   const studio = start(t);
   const { panel } = await studio.openSide(writeFile("# Refresh\n\nText.\n"));
@@ -1134,7 +1142,8 @@ test("a previewRefresh of the current render records the state and renders again
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S4
 test("the first page of an Open With editor on an existing file says Preview pending: Waiting for the first render.", async (t) => {
   const studio = start(t);
   const file = writeFile("# First\n\nText.\n");
@@ -1150,7 +1159,8 @@ test("the first page of an Open With editor on an existing file says Preview pen
   assert.match(lastRendered(panel), /data-sphinx-preview-status="success"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044#S4
 test("a change of a preview setting makes the previews read their settings again, a change of another section is ignored", async (t) => {
   const studio = start(t);
   await studio.openSide(writeFile("# Settings\n\nText.\n"));

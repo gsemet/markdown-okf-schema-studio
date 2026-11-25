@@ -17,6 +17,9 @@ tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-001
+scenarios:
+- id: S1
+  title: Bold a word, then take it back
 user_need: As a writer, I format text from buttons, slash commands or keyboard
   shortcuts without typing the syntax, take any such edit back with a single
   undo, and am never left with half-written markup.
@@ -85,7 +88,7 @@ A formatting action is one undoable edit, or no edit with a reason.
 
 ### Main paths
 
-#### Path 1: Bold a word, then take it back
+#### Path S1: Bold a word, then take it back
 
 1. A block text box is open in edit mode
    - SwRS-MDOKFSTUDIO-PALETTE-001: the palette opens above the text box with the Palette buttons select and the buttons of the mode in registry order

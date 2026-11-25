@@ -21,6 +21,17 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-LIFE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: A Studio command runs
+- id: S2
+  title: A Markdown file alone
+- id: S3
+  title: Manifest contract
+- id: S4
+  title: Studio in the Agents window
+- id: S5
+  title: What VS Code reads
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,19 +55,19 @@ supersedes:
 
 When VS Code loads the extension manifest, the extension SHALL declare VS Code 1.95 as its lowest supported version and as its only activation events the two Studio commands, the Studio Open With editor, the Studio preview panel serializer and the Markdown language, and start only its registrations and the restore of the editor association at activation, leaving the preview engine, the watchers and the diagnostics to the first Studio preview, and contribute no command whose identifier starts with markdown. and no language and no grammar, so that the built-in Markdown support is neither activated nor replaced, and declare that it supports the VS Code Agents window, so that VS Code enables it there without a user setting.
 
-### Scenario (nominal): A Studio command runs
+### Scenario S1 (nominal): A Studio command runs
 
 - GIVEN VS Code started and no Studio entry point used yet
 - WHEN the reader runs Open Preview to Side from the Command Palette
 - THEN the extension activates and the command runs
 
-### Scenario (boundary): A Markdown file alone
+### Scenario S2 (boundary): A Markdown file alone
 
 - GIVEN VS Code started with a Markdown file open in a text editor and no Studio entry point used
 - WHEN the reader only reads and edits the file
 - THEN the extension activates through onLanguage:markdown but starts no service: no engine warm-up, no stem-root or conf.py watcher and no diagnostics until the first Studio preview (host test "an activation with no preview starts no service, the first preview starts them once, a second one does not again"); package.json lists the five activation events, onLanguage:markdown is the only language event and there is no workspaceContains event
 
-### Scenario (boundary): Manifest contract
+### Scenario S3 (boundary): Manifest contract
 
 | Input | Outcome |
 | --- | --- |
@@ -67,13 +78,13 @@ When VS Code loads the extension manifest, the extension SHALL declare VS Code 1
 | contributes section read | no languages key and no grammars key (unit test "contributes only opt-in Markdown OKF-Schema Studio commands") |
 | the Studio installed beside the built-in Markdown extension | the built-in Markdown language and grammar are untouched, because the Studio contributes none |
 
-### Scenario (nominal): Studio in the Agents window
+### Scenario S4 (nominal): Studio in the Agents window
 
 - GIVEN the packaged extension installed in VS Code, and no user setting about the Agents window
 - WHEN the reader opens the Agents window (the companion window for agent sessions)
 - THEN VS Code enables the extension there, because `capabilities.agentsWindow.supported` in package.json is true, and Open With offers Markdown OKF-Schema Studio for a Markdown file
 
-### Scenario (boundary): What VS Code reads
+### Scenario S5 (boundary): What VS Code reads
 
 | Input | Outcome |
 | --- | --- |

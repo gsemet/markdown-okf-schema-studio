@@ -446,7 +446,7 @@ export async function scenarioUndoStaysInEditor(
 
 /**
  * RI-T20: Cmd/Ctrl+B and Ctrl+/ edit the text box, and one Cmd/Ctrl+Z undoes each of them.
- * @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+ * @tests_req SwRS-MDOKFSTUDIO-BLOCK-069#S6
  */
 export async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t20", async (source) => {
@@ -496,9 +496,10 @@ export async function scenarioShortcuts(page: Page, evidence: Evidence): Promise
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-015
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-232
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238
+// @accepts_req StRS-MDOKFSTUDIO-PALETTE-015#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-232#S5
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-232#S6
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S5
 /** RI-P11: the / command menu: /h2 Enter, /tab Enter (size grid) and an Escape that keeps the text. */
 export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-p11", async (source) => {
@@ -563,7 +564,8 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
     });
     await press(page, "Enter");
     await waitMenu(false, "the menu to close after Enter");
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-242
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-242#S4
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-242#S5
     await expectValue("/h2 Enter to write the heading prefix", original + "\n## ");
     assert.equal((await readEditor()).tag, "TEXTAREA", "the focus stays in the text box");
     await typeText(page, "Title");
@@ -617,9 +619,10 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-019
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-005
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
+// @accepts_req StRS-MDOKFSTUDIO-PALETTE-019#S1
+// @accepts_req StRS-MDOKFSTUDIO-PALETTE-005#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S4
 /** RI-T21: palette buttons edit the text box without closing it, and one undo reverts each. */
 export async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t21", async (source) => {
@@ -738,7 +741,6 @@ export async function scenarioPalette(page: Page, evidence: Evidence): Promise<v
   });
 }
 
-// @tests_req StRS-MDOKFSTUDIO-PALETTE-007
 /** RI-T22: Cmd/Ctrl+K opens the link panel, Enter inserts [text](url) and one undo reverts it. */
 export async function scenarioLinkPanel(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t22", async (source) => {

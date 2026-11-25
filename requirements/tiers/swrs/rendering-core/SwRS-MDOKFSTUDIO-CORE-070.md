@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
+scenarios:
+- id: S1
+  title: The parse time does not grow with the directives
+- id: S2
+  title: The packages on disk stay untouched
+- id: S3
+  title: An unknown package version
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -31,20 +38,20 @@ default_owner_email: gaetan@xeberon.net
 
 When a document is parsed, the MyST parser SHALL take a time that does not grow with the number of directives times the size of the document, and the blank lines before and after each directive (its tightness) SHALL stay unchanged.
 
-### Scenario (nominal): The parse time does not grow with the directives
+### Scenario S1 (nominal): The parse time does not grow with the directives
 
 - GIVEN a document with five directive fences, some with a blank line before, after, both or neither, and a long document with many directive fences
 - WHEN it is parsed with markdown-it-myst patched in memory (the esbuild bundle plugin, or the Node load hook of Node-run code)
 - THEN each directive reports the same tightness as the unpatched package: false, "before", "after" or true
 - AND the parse cost does not grow with the number of directives times the size of the document: the test counts the splits of the source into lines, which is one for the parse instead of one per directive fence
 
-### Scenario (boundary): The packages on disk stay untouched
+### Scenario S2 (boundary): The packages on disk stay untouched
 
 - GIVEN an install of the pristine MyST packages
 - WHEN the bundle is built or Node-run code parses a document
 - THEN the patches are applied to the source in memory, no file of node_modules is written, and the install has no postinstall script
 
-### Scenario (refusal): An unknown package version
+### Scenario S3 (refusal): An unknown package version
 
 - GIVEN a markdown-it-myst version other than 1.0.19, or a file that does not match the expected code
 - WHEN the bundle is built or the package is loaded

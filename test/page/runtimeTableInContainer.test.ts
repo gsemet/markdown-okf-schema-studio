@@ -103,7 +103,7 @@ function open(harness: RuntimeHarness, cells: RuntimeElement[][], row: number, c
   return request;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
 test("a click on a cell of a table inside a quote opens the cell editor and the table bar, not the raw editor", () => {
   const harness = createRuntimeHarness();
   const { cells } = buildQuote(harness);
@@ -118,7 +118,8 @@ test("a click on a cell of a table inside a quote opens the cell editor and the 
   assert.equal(input(harness).value, "qa");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("typing in a quoted table and Enter save one edit of the container: only the edited line changes", () => {
   const harness = createRuntimeHarness();
   const { cells } = buildQuote(harness);
@@ -132,7 +133,8 @@ test("typing in a quoted table and Enter save one edit of the container: only th
   assert.equal(saves[0]!.editedText, "> | Q1 | Q2 |\n> | --- | --- |\n> | qaX | qb |\n> | qc | qd |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S2
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("Tab and the arrow keys move between the cells of a quoted table and keep the prefix", () => {
   const harness = createRuntimeHarness();
   const { cells } = buildQuote(harness);
@@ -147,7 +149,7 @@ test("Tab and the arrow keys move between the cells of a quoted table and keep t
   assert.equal(finalSaves(harness).at(-1)!.editedText, "> | Q1 | Q2 |\n> | --- | --- |\n> | qa1 | qb1 |\n> | qc | qd |\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S2
 test("Tab in the last cell of a quoted table adds a prefixed row and the editor reopens in that table", () => {
   const harness = createRuntimeHarness();
   const { cells, table } = buildQuote(harness);
@@ -185,7 +187,7 @@ test("Tab in the last cell of a quoted table adds a prefixed row and the editor 
   assert.equal(harness.getWebviewState().pendingBlockNavigation, undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
 test("the second of two tables in a quote is edited by its rank and reopens by its rank", () => {
   const harness = createRuntimeHarness();
   const { first, second } = buildTwoTables(harness);
@@ -229,7 +231,8 @@ test("the second of two tables in a quote is edited by its rank and reopens by i
   assert.equal(regions(harness).at(-1)!.getAttribute("aria-label"), "Markdown table cell editor");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a quoted table's bar disables Convert to list-table and says why", () => {
   const harness = createRuntimeHarness();
   const { cells } = buildQuote(harness);
@@ -242,7 +245,7 @@ test("a quoted table's bar disables Convert to list-table and says why", () => {
   assert.equal(messagesAfter(harness, before).some((message) => message.type === "previewEditSave"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a quoted table whose lines do not share one prefix opens the raw editor, never a wrong table", () => {
   const lazy = createRuntimeHarness();
   const lazyTable = buildQuote(lazy);
@@ -258,7 +261,8 @@ test("a quoted table whose lines do not share one prefix opens the raw editor, n
   assert.equal(bar(mixed), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("rendered tables that do not match the pipe tables of the source open the raw editor", () => {
   const harness = createRuntimeHarness();
   const { second } = buildTwoTables(harness);
@@ -269,7 +273,8 @@ test("rendered tables that do not match the pipe tables of the source open the r
   assert.equal(bar(harness), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a rendered table that has not the rows and columns of the source pipe table opens the raw editor", () => {
   // The page rendered 3 rows of 2 columns (an HTML table, a list-table, say) while the one pipe table
   // the source holds is a fenced code sample of 4 rows: same count of tables, another table.
@@ -286,7 +291,8 @@ test("a rendered table that has not the rows and columns of the source pipe tabl
   assert.equal(bar(columns), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
 test("a table block that is itself the click target and holds no container keeps the plain path", () => {
   const harness = createRuntimeHarness();
   const parent = new RuntimeElement({}, harness.windowState, 100, 100, "div");

@@ -19,8 +19,10 @@ function start(t: TestContext): Studio {
   return studio;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-001
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S3
 test("an activation with no preview starts no service, the first preview starts them once, a second one does not again", async (t) => {
   const studio = start(t);
   setCurrentActivation(studio.activation);
@@ -39,7 +41,7 @@ test("an activation with no preview starts no service, the first preview starts 
   assert.ok(panel);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-001
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S2
 test("an activation with no preview creates no file watcher", (t) => {
   const watchersBefore = captured.watchers.length;
   const studio = start(t);
@@ -47,7 +49,7 @@ test("an activation with no preview creates no file watcher", (t) => {
   assert.equal(studio.activation.servicesStarted, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("the setting writer maps the user and workspace values, and writes to the matching target", async () => {
   fake.controls.configuration.values.set("workbench.editorAssociations", { globalValue: { "*.md": "x" }, workspaceValue: undefined });
   fake.controls.configuration.updates.length = 0;
@@ -61,8 +63,9 @@ test("the setting writer maps the user and workspace values, and writes to the m
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-149
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-149#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-149#S3
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("the setting writer refuses the built-in Markdown preview settings and any other key without writing", async () => {
   fake.controls.configuration.updates.length = 0;
   const scopes = createVscodeSettingScopes();
@@ -72,7 +75,8 @@ test("the setting writer refuses the built-in Markdown preview settings and any 
   assert.deepEqual(fake.controls.configuration.updates, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S2
 test("Open as Text on a Studio tab opens the text editor at the previewed line in the same column, closes the Studio tab and expects the selection as no-mark", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\n");
@@ -91,7 +95,8 @@ test("Open as Text on a Studio tab opens the text editor at the previewed line i
   assert.deepEqual(fake.controls.executedCommands.filter((call) => call.id === "vscode.openWith"), [], "no Studio tab opens in its place");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S2
 test("Open as Text with no Studio tab active tells the reader and opens nothing", async (t) => {
   const studio = start(t);
   fake.controls.activateCustomEditorTab(undefined);
@@ -104,7 +109,8 @@ test("Open as Text with no Studio tab active tells the reader and opens nothing"
   assert.equal(fake.controls.shownMessages.length, messages + 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S2
 test("Show Feature Introductions Again forgets the stored introductions", async (t) => {
   const studio = start(t);
   const key = "markdownOkfSchemaStudio.introductions.someIntroduction";
@@ -125,7 +131,8 @@ function resetTabs(): void {
   fake.controls.configuration.updates.length = 0;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S2
 test("a Markdown text tab that opens, plainly or at a line, with default settings is never closed or replaced", async (t) => {
   resetTabs();
   const studio = start(t);
@@ -136,7 +143,8 @@ test("a Markdown text tab that opens, plainly or at a line, with default setting
   assert.deepEqual(fake.controls.closedTabs, [], "no tab closed");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-177
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-177#S2
 test("a Markdown text tab that opens while *.md is associated with Studio, or the retired setting is on, is never closed or replaced", async (t) => {
   resetTabs();
   fake.controls.configuration.values.set("workbench.editorAssociations", { globalValue: { "*.md": STUDIO_TYPE } });

@@ -19,7 +19,7 @@ function attribute(tag: string, name: string): string | undefined {
   return new RegExp(`\\s${name}="([^"]*)"`, "u").exec(tag)?.[1];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S3
 test("every one of the 16 toolbar buttons has a data-tooltip equal to its title", () => {
   const tags = buttonTags();
   assert.equal(tags.length, 16);
@@ -37,7 +37,7 @@ test("every one of the 16 toolbar buttons has a data-tooltip equal to its title"
   assert.equal(attribute(edit, "data-tooltip"), "Edit mode");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S4
 test("the tooltip shown on keyboard focus is the same box as on hover, and the toolbar sits 12 px from the top and 14 px from the end", () => {
   // One rule shows the tooltip for hover and for keyboard focus: same content and same colours.
   const shared = [...PREVIEW_THEME_CSS.matchAll(
@@ -53,7 +53,8 @@ test("the tooltip shown on keyboard focus is the same box as on hover, and the t
   assert.match(box[1], /position: fixed;\s*inset-block-start: 12px;\s*inset-inline-end: 14px;\s*z-index: 1100;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S7
 test("the Anchor button starts in the off mode, not pressed, before the page script runs", () => {
   const anchor = buttonTags().find((tag) => tag.includes("data-sphinx-preview-anchor"));
   assert.ok(anchor, "the Anchor button is in the markup");
@@ -63,7 +64,7 @@ test("the Anchor button starts in the off mode, not pressed, before the page scr
   assert.doesNotMatch(anchor, /\sdisabled\b/u, "the pairing, not the markup, disables it");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S7
 test("in forced-colors mode the marked block is outlined in the highlight colour", () => {
   const normal = /^\[data-sphinx-preview-current="true"\] \{([^}]*)\}/mu.exec(PREVIEW_ACCESSIBILITY_CSS);
   assert.ok(normal, "the rule of the normal mode exists");

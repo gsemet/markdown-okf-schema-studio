@@ -13,7 +13,7 @@ function readyFixture(): ReturnType<typeof fixture> {
   return run;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271#S1
 test("a page ready for the current render gets the text of that render, addressed to it", async () => {
   const run = readyFixture();
   (run.preview.stage as unknown as { sourceText: string }).sourceText = "---\ntitle: A\n---\n\n# Title\r\n";
@@ -28,7 +28,7 @@ test("a page ready for the current render gets the text of that render, addresse
   assert.equal(run.of("previewSourceText").length, 2, "every ready posts it again (a patched page reports ready too)");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-271#S1
 test("a page ready for a render that is not the current one gets nothing", async () => {
   const run = readyFixture();
   (run.preview.stage as unknown as { sourceText: string }).sourceText = "# Title\n";

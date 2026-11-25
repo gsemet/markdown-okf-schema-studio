@@ -26,6 +26,29 @@ depends_on:
 - SwRS-MDOKFSTUDIO-TRUST-052
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-006
+scenarios:
+- id: S1
+  title: The button switches the mode
+- id: S2
+  title: Initial state
+- id: S3
+  title: No text editor shows the file
+- id: S4
+  title: A text editor shows the file
+- id: S5
+  title: Pairing message without the field
+- id: S6
+  title: Turning the mode on aligns the preview
+- id: S7
+  title: Turning the mode off
+- id: S8
+  title: Foreign document
+- id: S9
+  title: Own document
+- id: S10
+  title: Boolean
+- id: S11
+  title: Not a boolean
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -54,70 +77,70 @@ supersedes:
 
 When the reader presses the enabled Anchor button, or the page learns whether a text editor shows its document, the extension SHALL show the anchor mode and the pairing on the button (data-anchor-mode, aria-pressed, label, title and tooltip, disabled while no text editor shows the file) and, when the mode is turned on, post to the preview the first visible line of each visible text editor that shows its document; a pairing message for another document, document version or request than the page's leaves the button unchanged, and the host accepts a mode change only when anchorToEditor is a boolean.
 
-### Scenario (nominal): The button switches the mode
+### Scenario S1 (nominal): The button switches the mode
 
 | Input | Outcome |
 | --- | --- |
 | the enabled Anchor button in the off mode, pressed | data-anchor-mode is on, aria-pressed is true, the title and tooltip say Preview and text editor scroll together |
 | the button in the on mode, pressed | data-anchor-mode is off, aria-pressed is false, the title and tooltip say Preview and text editor scroll independently |
 
-### Scenario (boundary): Initial state
+### Scenario S2 (boundary): Initial state
 
 - GIVEN the toolbar markup before the page script runs
 - WHEN the Anchor button is read
 - THEN data-anchor-mode is off and aria-pressed is false
 
-### Scenario (refusal): No text editor shows the file
+### Scenario S3 (refusal): No text editor shows the file
 
 - GIVEN a preview whose file is shown in no text editor and an anchor mode of on
 - WHEN previewPairing arrives with pairedTextEditor false
 - THEN the button is disabled, its label, title and tooltip say No text editor shows this file and aria-pressed is false
 
-### Scenario (nominal): A text editor shows the file
+### Scenario S4 (nominal): A text editor shows the file
 
 | Input | Outcome |
 | --- | --- |
 | a disabled Anchor button, previewPairing with pairedTextEditor true | the button is enabled, its label is restored to Anchor preview to text editor and its title and tooltip show the mode of the moment |
 | an enabled Anchor button, previewPairing with pairedTextEditor true | the button stays enabled and keeps its mode |
 
-### Scenario (boundary): Pairing message without the field
+### Scenario S5 (boundary): Pairing message without the field
 
 - GIVEN a previewPairing message without the field pairedTextEditor
 - WHEN the page applies it
 - THEN the button is enabled, because only the value false means unpaired
 
-### Scenario (nominal): Turning the mode on aligns the preview
+### Scenario S6 (nominal): Turning the mode on aligns the preview
 
 - GIVEN a panel in the off mode and a visible text editor of the same file
 - WHEN the mode is switched on
 - THEN the preview receives a sourceScroll with the editor's first visible line and scrolls there, because the page follows the editor now
 
-### Scenario (boundary): Turning the mode off
+### Scenario S7 (boundary): Turning the mode off
 
 - GIVEN the mode switched off
 - WHEN the host handles it
 - THEN no sourceScroll is posted
 
-### Scenario (refusal): Foreign document
+### Scenario S8 (refusal): Foreign document
 
 | Input | Outcome |
 | --- | --- |
 | a message for another document identity | the button does not change |
 | a message for another document version or another request | the button does not change |
 
-### Scenario (nominal): Own document
+### Scenario S9 (nominal): Own document
 
 - GIVEN a message for the page's document
 - WHEN the page receives it
 - THEN the button follows it
 
-### Scenario (nominal): Boolean
+### Scenario S10 (nominal): Boolean
 
 - GIVEN anchorToEditor true and false
 - WHEN the validator runs
 - THEN both are accepted
 
-### Scenario (refusal): Not a boolean
+### Scenario S11 (refusal): Not a boolean
 
 - GIVEN the string true, the number 1 and a missing field
 - WHEN the validator runs

@@ -17,6 +17,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Refer to a label of the document
+- id: S2
+  title: Fence code in a language
 user_need: "As a writer, I link to a label, a document or a bibliography entry by
   choosing it, not by typing its name from memory, choose a code language from a list
   and get a highlighted code block without trial and error, and never wait on an editor
@@ -83,7 +88,7 @@ The list is bounded and says when it was cut.
 
 ### Main paths
 
-#### Path 1: Refer to a label of the document
+#### Path S1: Refer to a label of the document
 
 1. The palette is shown above the text box
    - SwRS-MDOKFSTUDIO-PALETTE-140: the writer presses Reference and a popover opens with a filter field, showing Loading... until the host answers
@@ -95,7 +100,7 @@ The list is bounded and says when it was cut.
    - Option SwRS-MDOKFSTUDIO-PALETTE-140 (boundary): the list is empty, the host fails, or the list is cut
 4. A ref role is in the text
 
-#### Path 2: Fence code in a language
+#### Path S2: Fence code in a language
 
 1. The palette is shown above the text box
    - SwRS-MDOKFSTUDIO-PALETTE-054: the writer presses Code block and a menu lists text, then each language the preview highlights, once and sorted

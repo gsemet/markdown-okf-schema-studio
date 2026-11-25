@@ -76,7 +76,8 @@ function setup(options: { reduced?: boolean } = {}) {
   return { root, body, main, motion, glow, block, glowing, press, timers };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S5
 test("CR 046: an update glows on the innermost blocks whose lines meet a range, and only there", () => {
   const { main, glow, block, glowing } = setup();
   const before = block(main, "P", 1);
@@ -113,7 +114,7 @@ test("CR 046: a changed code block glows on its <pre> box", () => {
   assert.deepEqual(glowing(), [pre]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094#S5
 test("CR 046: included blocks, open editors and the block being edited never glow", () => {
   const { main, glow, block, glowing } = setup();
   block(main, "P", 2, undefined, { "data-sphinx-preview-included": "" });
@@ -135,7 +136,8 @@ test("CR 046: no ranges, invalid ranges or a change too large to point at blocks
   assert.equal(glow([{ start: 1, end: 40 }]).length, 40);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-050
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S5
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S6
 test("CR 046: with prefers-reduced-motion: reduce nothing is marked to move", () => {
   const { root, main, motion, glow, block, glowing, press, timers } = setup({ reduced: true });
   block(main, "P", 1);
@@ -150,7 +152,7 @@ test("CR 046: with prefers-reduced-motion: reduce nothing is marked to move", ()
   assert.equal(edited.getAttribute("data-sphinx-preview-edit-closed"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-050
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S2
 test("CR 046: editors and menus appear softly only after a pointer or key press, never after a patch", () => {
   const { root, main, motion, block, press } = setup();
   const edited = block(main, "P", 2);
@@ -169,7 +171,7 @@ test("CR 046: editors and menus appear softly only after a pointer or key press,
   assert.equal(root.getAttribute("data-sphinx-preview-motion"), "on");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-050
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050#S4
 test("CR 046: a theme switch transitions the colours once, until the body background has changed", () => {
   const { root, body, motion, timers } = setup();
   motion.themeSwitch();

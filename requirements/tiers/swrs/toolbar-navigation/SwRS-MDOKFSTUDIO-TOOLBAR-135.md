@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-014
+scenarios:
+- id: S1
+  title: External and anchor links stay
+- id: S2
+  title: Other links become text after a warning
+- id: S3
+  title: Cancelling the warning
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,19 +45,19 @@ default_owner_email: gaetan@xeberon.net
 
 When the exported page has relative, wiki or blocked links, the extension SHALL list them in a modal warning before the save dialog, keep the external and anchor links, write the other links as plain text, and stop the export when the writer cancels the warning.
 
-### Scenario (nominal): External and anchor links stay
+### Scenario S1 (nominal): External and anchor links stay
 
 - GIVEN a page with an `https:` link, a `mailto:` link and an `#anchor` link
 - WHEN the page is exported
 - THEN each of the three keeps its `href`
 
-### Scenario (nominal): Other links become text after a warning
+### Scenario S2 (nominal): Other links become text after a warning
 
 - GIVEN a page with the links `other.md`, `./sub/x.md#h`, `wiki:Page` and a blocked `file:` link
 - WHEN the page is exported
 - THEN a modal warning lists the four targets before the save dialog, and after the writer accepts, the file shows their text with no `a` element
 
-### Scenario (boundary): Cancelling the warning
+### Scenario S3 (boundary): Cancelling the warning
 
 | Input | Outcome |
 | --- | --- |

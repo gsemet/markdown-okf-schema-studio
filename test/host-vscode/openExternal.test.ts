@@ -19,7 +19,8 @@ nodeModule._load = function load(request: string, ...rest: unknown[]): unknown {
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { createVscodeHost } = require("../../src/host-vscode/vscodeHost") as typeof import("../../src/host-vscode/vscodeHost");
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S3
 test("only http, https and mailto URIs reach openExternal", async () => {
   const opened: string[] = [];
   const env = fake.vscode.env as unknown as { openExternal: (uri: { scheme: string; toString(): string }) => Promise<boolean> };

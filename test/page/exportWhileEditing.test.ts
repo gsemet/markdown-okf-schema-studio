@@ -83,7 +83,7 @@ function assertShown(body: HtmlParent, text: string): void {
   assert.equal(all.some((element) => attribute(element, "data-sphinx-table-cell-content") !== undefined), false);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a paragraph under the block editor is exported, and its editor stays open", () => {
   const harness = createRuntimeHarness();
   harness.mappings[1]!.textContent = "Second paragraph rendered.";
@@ -97,7 +97,7 @@ test("a paragraph under the block editor is exported, and its editor stays open"
   assert.equal(harness.mappings[1]!.getAttribute("data-sphinx-preview-editing"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a block editor opened inside a card exports the block of the card", () => {
   const harness = createRuntimeHarness();
   const card = new RuntimeElement({ class: "myst-card" }, harness.windowState, 400, 100, "div");
@@ -142,7 +142,7 @@ function openCellEditor(harness: RuntimeHarness, source: string): { table: Runti
   return { table, cell };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a table cell under the cell editor is exported shown, and its editor stays open", () => {
   const harness = createRuntimeHarness();
   const { table, cell } = openCellEditor(harness, "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n");
@@ -155,7 +155,7 @@ test("a table cell under the cell editor is exported shown, and its editor stays
   assert.equal(cell.getAttribute("data-sphinx-preview-table-cell-selected"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a {list-table} edited as raw Markdown is exported with its table", () => {
   const harness = createRuntimeHarness();
   const { table } = openCellEditor(harness, "Not a table the cell editor can read\n");
@@ -174,7 +174,7 @@ function propertiesContent(harness: RuntimeHarness): void {
   contentOf(harness, harness.frontmatterProperties);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a front matter value under the value editor is exported shown, and its editor stays open", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.editModeButton.dispatch("click");
@@ -188,7 +188,7 @@ test("a front matter value under the value editor is exported shown, and its edi
   assert.equal(harness.frontmatterValueDisplay.getAttribute("hidden"), "", "the export changed the live display");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("a front matter key under the key editor is exported shown, and its editor stays open", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.editModeButton.dispatch("click");

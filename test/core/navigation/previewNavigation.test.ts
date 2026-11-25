@@ -9,7 +9,7 @@ import {
   markdownMarkerLine,
 } from "../../../src/core/navigation/previewNavigation";
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102#S3
 test("Markdown fragments select headings and source lines, not fenced examples", () => {
   const source = "```md\n## My Heading\n```\n\n## My Heading\n\nOther Heading\n---\n## Café {#explicit-id}\nParagraph ^block-id\n## Range start\nRange end\n";
   assert.equal(markdownFragmentLine(source, "#my-heading"), 5);
@@ -38,7 +38,7 @@ test("marker navigation selects exact marker identities", () => {
   assert.equal(markdownMarkerLine(source, "", "SwRS-1"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
 test("classifies relative links without touching the filesystem", () => {
   assert.deepEqual(classifyPreviewReference("references/PROPERTIES.md"), { kind: "relative", value: "references/PROPERTIES.md" });
   assert.equal(classifyPreviewReference("wiki:Note").kind, "wiki");
@@ -47,7 +47,7 @@ test("classifies relative links without touching the filesystem", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S3
 test("a link path is decoded once: a literal percent is reachable, an escaped percent is not decoded again", () => {
   assert.equal(decodePath("100%25.md"), "100%.md");
   assert.equal(decodePath("a%2541.md"), "a%41.md");
@@ -59,7 +59,8 @@ test("a link path is decoded once: a literal percent is reachable, an escaped pe
   assert.equal(classifyPreviewReference("%5Csecret").kind, "blocked");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S3
 test("a link with a malformed escape is blocked as undecodable, like a decoded backslash or NUL", () => {
   for (const request of ["a%zz.md", "docs/%E0%A4%A.md", "%5Csecret", "%00.md"]) {
     assert.deepEqual(
@@ -78,7 +79,7 @@ test("a MyST (label)= line is the target of its fragment, but not inside a fence
   assert.equal(markdownFragmentRange(source, "#missing"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
 test("the scheme is read on the raw link: a percent sign before the first colon is never external", () => {
   for (const request of [
     "https%3A/../../System/Applications/Calculator.app",
@@ -95,7 +96,7 @@ test("the scheme is read on the raw link: a percent sign before the first colon 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090#S2
 test("a query-only link is blocked and a file with a query is relative", () => {
   assert.deepEqual(classifyPreviewReference("?x=1"), {
     kind: "blocked",

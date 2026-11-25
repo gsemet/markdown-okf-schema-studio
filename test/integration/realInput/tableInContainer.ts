@@ -55,7 +55,8 @@ async function openCell(page: Page, text: string): Promise<void> {
  * cell editor and the table bar on a click, not the raw block editor. A typed letter and Enter
  * change only that cell, the quote prefixes, the alert marker line and the directive fence and
  * option line stay as written, and Tab in the last cell adds a row that carries the prefix.
- * @tests_req SwRS-MDOKFSTUDIO-TABLE-121
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S1
+ * @tests_req SwRS-MDOKFSTUDIO-TABLE-121#S3
  */
 export async function scenarioTableInContainer(page: Page): Promise<void> {
   await withDocument("realinput-table-in-container", DOCUMENT, async (document) => {

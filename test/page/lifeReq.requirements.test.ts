@@ -9,7 +9,7 @@ import { test } from "node:test";
 import { createRuntimeHarness } from "./runtimeHarness";
 import { overlayMessage, pendingOverlays } from "./runtimeTestSupport";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049#S7
 test("the page ignores a pending notice with an oversized or malformed field", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage(overlayMessage({ message: "x".repeat(501) }));
@@ -40,7 +40,7 @@ function reportedLine(change?: (block: ReturnType<typeof createRuntimeHarness>["
   return harness.messages.filter((message) => message.type === "previewScroll").at(-1)?.line;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119#S8
 test("the page uses only mapped blocks of its own document and file that are visible", () => {
   const own = reportedLine();
   assert.ok(Number(own) >= 100, `a block of the page's own document and file is used (${String(own)})`);

@@ -15,6 +15,9 @@ tier: StRS
 derives_from: []
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-234
+scenarios:
+- id: S1
+  title: Save a cell edit
 user_need: As a reviewer, I see a one-line diff for a one-cell edit, and the
   table's layout in the source is the one the author wrote.
 derived_by:
@@ -59,7 +62,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Save a cell edit
+#### Path S1: Save a cell edit
 
 1. A cell editor is open in a pipe table
    - SwRS-MDOKFSTUDIO-TABLE-094: the writer edits one cell and only the line of that cell changes in the source

@@ -28,7 +28,8 @@ export const FRONTMATTER_VALUE_SCENARIOS: ScenarioDefinition[] = [
     ["v32", "light", "white", "White"],
     ["v33", "dark", "dark", "Dark"],
   ] as const).map(([version, theme, mode, label]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-079
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-079#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-079#S2
     id: `rendering-core/${version}-frontmatter-this-field-${mode}-900`,
     fixture: "83-frontmatter-this-field",
     theme,

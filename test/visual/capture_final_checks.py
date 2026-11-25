@@ -116,8 +116,9 @@ def pin_frontmatter_capture(page: Page, scenario: dict, failures: list[Failure])
     if sticky_headings.count() == 1 and sticky_headings.is_visible() and sticky_headings.inner_text().strip():
       failures.append(Failure(page_name, "sticky heading is visible in the top-of-file screenshot"))
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S4
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018#S5
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025#S7
 def check_sticky_headings(
   page: Page,
   scenario: dict,
@@ -501,7 +502,8 @@ def check_link_details(page: Page, scenario: dict, failures: list[Failure]) -> N
       failures.append(Failure(scenario["page"], f"link marker line label is incorrect: {result['lineLabel']}"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S3
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S4
 def check_tooltip_contrast(page: Page, scenario: dict, failures: list[Failure]) -> None:
     # A drag held down for the capture keeps the pointer button pressed: no hover (and no tooltip) then.
     if any(action.get("hold") for action in scenario.get("pageActions") or []):

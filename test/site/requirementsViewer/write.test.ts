@@ -14,7 +14,7 @@ import { redirectDocument, viewerPages, writeViewerPages } from "./write";
 const EXTENSION_ROOT = path.resolve(__dirname, "..", "..", "..", "..");
 
 test("the site navigation links requirements/ from the root and from nested pages", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
   // The link pointed to requirements.html before the viewer; it points to the folder of the viewer now.
   for (const [currentPage, prefix] of [["index.html", ""], ["docs/guide.html", "../"], ["a/b/c.html", "../../"]]) {
     const html = pageDocument("Studio", currentPage, "");
@@ -28,8 +28,9 @@ function tags(html: string): string[] {
 }
 
 test("requirements.html redirects to requirements/ and carries the tags of the index", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S6
   const model = parseRequirementsReport(fixtureReport(), "abc123");
   assert.ok(model);
   const index = viewerPages(model, "/nonexistent-root")[0];
@@ -47,10 +48,11 @@ test("requirements.html redirects to requirements/ and carries the tags of the i
 });
 
 test("the viewer is written under requirements/ with its assets, index and redirect", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-084
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-084#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S2
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-requirements-"));
   try {
     const reportPath = path.join(root, "report.json");
@@ -62,7 +64,7 @@ test("the viewer is written under requirements/ with its assets, index and redir
       assert.ok(fs.existsSync(path.join(site, file)), file);
     }
     assert.ok(!fs.existsSync(path.join(site, "requirements", "myst", "StRS-X-002")));
-    // @tests_req StRS-MDOKFSTUDIO-CORE-008
+    // @accepts_req StRS-MDOKFSTUDIO-CORE-008#S1
     // A reviewer reads the site written from a report: its home, an area, a use case and its
     // behaviours, without building anything.
     const home = fs.readFileSync(path.join(site, "requirements", "index.html"), "utf8");
@@ -78,9 +80,9 @@ test("the viewer is written under requirements/ with its assets, index and redir
 });
 
 test("a missing report writes the home and the redirect only", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-084
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-085
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S3
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-084#S2
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-085#S6
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-requirements-"));
   try {
     fs.writeFileSync(path.join(root, "broken.json"), "{");
@@ -100,7 +102,7 @@ test("a missing report writes the home and the redirect only", () => {
 });
 
 test("the History checkbox sits inside the header landmark", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-069
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-069#S1
   const html = viewerDocument({ dir: "", level: "areas", title: "T", shareTitle: "T", description: "d", body: "<p>x</p>", crumbs: [] }, { sha: "abc", generatedAt: "2026-01-01" });
   const header = html.slice(html.indexOf('<header class="top">'), html.indexOf("</header>"));
   assert.ok(header.includes('id="history"'));

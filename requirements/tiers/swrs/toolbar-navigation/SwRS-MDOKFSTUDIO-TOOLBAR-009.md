@@ -20,6 +20,15 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-003
 depends_on: []
+scenarios:
+- id: S1
+  title: Open and close
+- id: S2
+  title: Editors and an open bar
+- id: S3
+  title: Select all in the find field
+- id: S4
+  title: Other keys
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -48,12 +57,12 @@ supersedes:
 
 When the reader presses Cmd+F (macOS) or Ctrl+F (other systems) with the focus in the preview page, including a field of an open block, table cell or frontmatter editor, the extension SHALL open a find bar over the preview at once with its field focused, so the keys typed next go to the query, close it on Escape, and leave the key to VS Code when the focus is in the text editor; and the find and replace fields keep their native text-editing shortcuts (select all, copy, cut, paste, undo, redo, caret and word moves, delete a word), applied to the field alone without handing the key to the page or to VS Code.
 
-### Scenario (nominal): Open and close
+### Scenario S1 (nominal): Open and close
 - GIVEN a preview page with the focus in its content
 - WHEN the reader presses Cmd+F on macOS or Ctrl+F elsewhere
 - THEN the key is taken before VS Code's webview find sees it, the find bar is shown under the toolbar with its field focused and the selected text of one line as the query, and Escape hides it and gives the focus back to where it was
 
-### Scenario (boundary): Editors and an open bar
+### Scenario S2 (boundary): Editors and an open bar
 | Input | Outcome |
 | --- | --- |
 | Cmd/Ctrl+F while the focus is in the text editor | VS Code's own find opens; the preview is not involved |
@@ -66,12 +75,12 @@ When the reader presses Cmd+F (macOS) or Ctrl+F (other systems) with the focus i
 | F3 while the focus is in a field of an open editor | The key is left to the field |
 | Tab in the bar | The order is the toolbar, the bar controls, then the content |
 
-### Scenario (nominal): Select all in the find field
+### Scenario S3 (nominal): Select all in the find field
 - GIVEN the find bar is open with a query in its field
 - WHEN the reader presses Cmd+A on macOS or Ctrl+A elsewhere in the field
 - THEN the key is stopped inside the bar, so no page listener and no VS Code key forwarding sees it, and its default action is not prevented: the browser selects the text of the field
 
-### Scenario (boundary): Other keys
+### Scenario S4 (boundary): Other keys
 | Input | Outcome |
 | --- | --- |
 | Cmd/Ctrl+C, +X, +V, +Z, +Shift+Z, +Y in the find or replace field | Stopped inside the bar, default action kept: the field copies, cuts, pastes, undoes or redoes, never a block selection or the workbench history |

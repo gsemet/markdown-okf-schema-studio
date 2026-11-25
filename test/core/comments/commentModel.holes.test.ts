@@ -27,7 +27,7 @@ const file = (threads: unknown[] = [thread()], extra: Record<string, unknown> = 
 const errorsOf = (text: string) => parseSidecar(text).errors;
 const dateErrors = (createdAt: string) => errorsOf(file([thread({ createdAt })]));
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S1
 test("a sidecar name keeps the last path segment whole, and a leading dot is not an extension", () => {
   assert.equal(sidecarNameFor("a/b.d\\c"), "a/b.d\\c.comments.json", "the last of / and \\ ends the directory");
   assert.equal(sidecarNameFor("a\\b.d/c"), "a\\b.d/c.comments.json");
@@ -37,7 +37,7 @@ test("a sidecar name keeps the last path segment whole, and a leading dot is not
   assert.equal(sidecarNameFor("a.b.md"), "a.b.comments.json", "only the last extension goes");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S2
 test("a comment date is an ISO 8601 date-time with a zone, to the minute or finer, naming a real instant", () => {
   for (const good of [
     "2026-10-21T10:00Z",
@@ -76,7 +76,8 @@ test("a comment date is an ISO 8601 date-time with a zone, to the minute or fine
   assert.ok(errorsOf(file([thread({ createdAt: 20261021 })])).length > 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S7
 test("a sidecar is refused over 2 MiB of text or of UTF-8, and accepted at exactly 2 MiB", () => {
   const base = file([]);
   const exact = base + " ".repeat(MAX_SIDECAR_BYTES - base.length);
@@ -91,7 +92,7 @@ test("a sidecar is refused over 2 MiB of text or of UTF-8, and accepted at exact
   assert.deepEqual(errorsOf(`${wide}é`), [`the sidecar is larger than ${MAX_SIDECAR_BYTES} bytes`], "one more two-byte character is over");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S2
 test("each way a sidecar can be refused gives its own error and no threads", () => {
   const refused = (text: unknown) => {
     const parsed = parseSidecar(text as string);
@@ -111,7 +112,8 @@ test("each way a sidecar can be refused gives its own error and no threads", () 
   assert.deepEqual(errorsOf(file(many.slice(0, MAX_THREADS))), []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S2
 test("a broken thread names its place and what is wrong, and keeps the document name", () => {
   const parsed = parseSidecar(file([
     42,
@@ -142,7 +144,8 @@ test("a broken thread names its place and what is wrong, and keeps the document 
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S7
 test("a valid sidecar returns its document name and every thread", () => {
   const parsed = parseSidecar(file([thread({ id: "a" }), thread({ id: "b", resolved: true })]));
   assert.deepEqual(parsed.errors, []);
@@ -150,8 +153,10 @@ test("a valid sidecar returns its document name and every thread", () => {
   assert.deepEqual(parsed.threads.map((entry) => [entry.id, entry.resolved]), [["a", false], ["b", true]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S6
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S7
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001#S3
 test("an anchor sent by the page holds at most 500 characters of quote and 32 of prefix and suffix", () => {
   const anchor = (extra: Record<string, unknown>) => ({ line: 2, endLine: 2, quote: "q", prefix: "p", suffix: "s", ...extra });
   assert.equal(isValidAnchor(anchor({})), true, "one line is a valid range");

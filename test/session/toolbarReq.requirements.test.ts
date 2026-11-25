@@ -203,7 +203,8 @@ test("a preview with restricted reads stores a view preference like any other", 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-214
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-214#S3
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-214#S4
 test("only the incoming-change preference schedules the update of the marks at once", async () => {
   const f = fixture();
   try {
@@ -220,7 +221,8 @@ test("only the incoming-change preference schedules the update of the marks at o
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S7
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S8
 test("a link message without a request records the page state and follows nothing", async () => {
   const f = fixture();
   try {
@@ -255,7 +257,7 @@ test("a preview with restricted reads follows a link to a sibling Markdown file"
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205#S6
 test("following a link applies the pending saves before the link is resolved", async () => {
   const f = fixture();
   try {
@@ -303,7 +305,8 @@ test("a link request of a stale page or a disposed preview is ignored", async ()
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S4
 test("a fixed preview that is not a Studio tab records anchor jumps only; a Studio tab records a link only when it opens in a Studio tab", async () => {
   // A fixed preview (one that does not follow the active editor) and is not a Studio tab: a link to
   // another document records nothing (CR 483 narrowed the rule to the fixed preview, since a Studio
@@ -364,7 +367,7 @@ test("a link to a file that is not Markdown opens without a history entry", asyn
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077#S5
 test("a file that cannot be opened shows a warning with the path and the reason", async () => {
   const f = fixture();
   try {
@@ -426,7 +429,8 @@ test("each preview panel has its own history that outlives a session", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S5
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S7
 test("Back with nowhere to go only posts the history state again", async () => {
   const f = fixture();
   try {
@@ -449,7 +453,7 @@ test("Back with nowhere to go only posts the history state again", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S7
 test("a previewHistoryGo that names another render is refused by the render gate", async () => {
   const f = fixture();
   try {
@@ -532,7 +536,7 @@ test("a preview with restricted reads answers the link discovery", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S7
 test("the host answers a discovery with one target per request, in order", async () => {
   const f = fixture();
   try {
@@ -602,7 +606,7 @@ test("a failed discovery shows a warning and sends no answer", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-098
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-098#S7
 test("one search per wikilink name runs at a time", async () => {
   const f = fixture();
   try {
@@ -656,7 +660,7 @@ test("in a preview with restricted reads only the document's folder is allowed",
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-094
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-094#S3
 test("a symbolic link out of the workspace is blocked", needsSymlinks, async () => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "toolbar-req-sym-")));
   const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "toolbar-req-out-")));
@@ -701,7 +705,7 @@ test("a target that is missing or not a regular file is blocked", async () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128#S4
 test("the host sends the editor's cursor line and no scroll line", () => {
   const f = fixture();
   try {
@@ -745,8 +749,9 @@ test("the host sends the first visible line and the cursor line when the editor 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-279
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S6
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-279#S1
 test("the page does not follow the editor's scroll caused by an edit the preview applied (CR 134)", () => {
   const f = fixture();
   try {
@@ -770,7 +775,7 @@ test("the page does not follow the editor's scroll caused by an edit the preview
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S6
 test("turning the anchor mode on aligns the preview with the text editor", async () => {
   const f = fixture();
   try {
@@ -787,7 +792,7 @@ test("turning the anchor mode on aligns the preview with the text editor", async
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
 test("a link to a Markdown file always opens a text editor at the target line, from a Studio tab or the side preview", async () => {
   const tab = fixture({ followsActiveEditor: false });
   const side = fixture({ followsActiveEditor: true });
@@ -805,7 +810,7 @@ test("a link to a Markdown file always opens a text editor at the target line, f
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
 test("Back to another Markdown document always opens a text editor at the stored line; a move inside the document stays a source scroll", async () => {
   const f = fixture({ followsActiveEditor: false });
   try {
@@ -829,7 +834,7 @@ test("Back to another Markdown document always opens a text editor at the stored
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181#S1
 test("a requested line waits for the page to be ready, is posted once and becomes the anchor", () => {
   const f = fixture({ followsActiveEditor: false });
   try {
@@ -849,7 +854,7 @@ test("a requested line waits for the page to be ready, is posted once and become
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-181
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181#S1
 test("a requested line is posted at once when the page is already ready", () => {
   const f = fixture({ followsActiveEditor: false });
   try {
@@ -864,7 +869,7 @@ test("a requested line is posted at once when the page is already ready", () => 
 
 const revealsOf = (f: Fixture): Array<Record<string, any>> => f.posted.filter((message) => message.type === "previewRevealLine");
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
 test("a jump into the shown document is posted to the following side preview, and a Studio tab is left alone", () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -885,7 +890,7 @@ test("a jump into the shown document is posted to the following side preview, an
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
 test("a jump that arrives before the switch of document waits for the page of that document", () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -903,7 +908,7 @@ test("a jump that arrives before the switch of document waits for the page of th
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
 test("the switch of document drops a line requested for another document and the old marker", () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -921,7 +926,7 @@ test("the switch of document drops a line requested for another document and the
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
 test("a line past the window is dropped and a hidden page waits for its ready", () => {
   const f = fixture({ followsActiveEditor: true });
   const realNow = Date.now;
@@ -948,7 +953,7 @@ test("a line past the window is dropped and a hidden page waits for its ready", 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
 test("with scroll sync on a jump asks to scroll only if off screen and keeps the anchor; off, it takes the anchor", () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -966,7 +971,7 @@ test("with scroll sync on a jump asks to scroll only if off screen and keeps the
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189#S1
 test("the marker is cleared for its own document only, once", () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -987,7 +992,7 @@ test("the marker is cleared for its own document only, once", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
 test("a link with a fragment, followed in the following side preview, asks for the marker of its target line", async () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -1001,7 +1006,8 @@ test("a link with a fragment, followed in the following side preview, asks for t
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S2
 test("a link followed from a Studio tab asks for no marker", async () => {
   const f = fixture({ followsActiveEditor: false });
   try {
@@ -1029,7 +1035,7 @@ const editOf = (f: Fixture, documentId = f.preview.documentUri): never => ({
   reason: undefined,
 }) as never;
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189#S1
 test("a text-editor edit of the marked document clears the marker once", () => {
   const f = markedFixture();
   try {
@@ -1043,7 +1049,7 @@ test("a text-editor edit of the marked document clears the marker once", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189#S1
 test("an edit the page applied only forgets the marker, and a scroll keeps it", () => {
   const f = markedFixture();
   try {
@@ -1060,7 +1066,7 @@ test("an edit the page applied only forgets the marker, and a scroll keeps it", 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-189
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-189#S1
 test("an edit of another document keeps the marker", () => {
   const f = markedFixture();
   try {
@@ -1072,7 +1078,7 @@ test("an edit of another document keeps the marker", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
 test("Back or Next to another document from the following side preview requests the target line", async () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -1097,7 +1103,7 @@ test("Back or Next to another document from the following side preview requests 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
 test("Back or Next from a Studio tab, or inside the same document, requests no line", async () => {
   const studio = fixture({ followsActiveEditor: false });
   try {
@@ -1127,7 +1133,7 @@ test("Back or Next from a Studio tab, or inside the same document, requests no l
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-191
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-191#S1
 test("a path link to the same file with a fragment marks the target line; a plain anchor does not", async () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -1142,7 +1148,7 @@ test("a path link to the same file with a fragment marks the target line; a plai
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-187
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-187#S1
 test("a jump before the switch is posted at the page ready of the switched render, not before", async () => {
   const f = fixture({ followsActiveEditor: true });
   try {
@@ -1162,7 +1168,7 @@ test("a jump before the switch is posted at the page ready of the switched rende
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-188
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-188#S1
 test("with scroll sync on, the first render after the switch anchors on the editor's first visible line and the jump leaves the anchor alone", () => {
   const f = fixture({ followsActiveEditor: true });
   try {

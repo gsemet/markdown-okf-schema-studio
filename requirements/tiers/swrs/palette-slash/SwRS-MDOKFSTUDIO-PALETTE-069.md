@@ -19,6 +19,19 @@ derives_from:
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 - SwRS-MDOKFSTUDIO-PALETTE-036
+scenarios:
+- id: S1
+  title: Caret in a code
+- id: S2
+  title: Where the button shows and hides
+- id: S3
+  title: The picker starts on the code and replaces it in place
+- id: S4
+  title: Invalid colour code
+- id: S5
+  title: Caret leaves the code
+- id: S6
+  title: Caret stays in the code
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -37,13 +50,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the caret or selection lies inside a #rgb, #rrggbb or rgb() colour code that is not part of a word or a character reference, the extension SHALL show the Colour code button with a swatch of that colour, hide it otherwise, and let its picker, started on the colour of the code with no tabs and no Remove button, replace the code under the caret in place and close when the caret leaves the code.
 
-### Scenario (nominal): Caret in a code
+### Scenario S1 (nominal): Caret in a code
 
 - GIVEN the text color #1e88e5 with the caret inside the code
 - WHEN the caret moves into the code
 - THEN the Colour code button appears and its swatch shows the colour
 
-### Scenario (boundary): Where the button shows and hides
+### Scenario S2 (boundary): Where the button shows and hides
 
 - GIVEN the text &#123; with the caret inside
 - WHEN the caret moves
@@ -71,7 +84,7 @@ In this table `|` marks the caret.
 
 The code must be accepted by the colour grammar of the sanitizer (hex with 3, 4, 6 or 8 digits, rgb, rgba), a hex code must not be preceded by a word character, an ampersand or a hash and not followed by a word character; the button follows keyup, mouseup and select events.
 
-### Scenario (nominal): The picker starts on the code and replaces it in place
+### Scenario S3 (nominal): The picker starts on the code and replaces it in place
 
 - GIVEN the caret in #c00
 - WHEN the picker is opened and a swatch is chosen
@@ -84,7 +97,7 @@ The code must be accepted by the colour grammar of the sanitizer (hex with 3, 4,
 
 The popover has no element with data-color-tab and none with data-color-remove, and the field starts with the code; the field takes the focus without saving.
 
-### Scenario (refusal): Invalid colour code
+### Scenario S4 (refusal): Invalid colour code
 
 - GIVEN the same picker
 - WHEN an invalid colour code is typed and Enter is pressed
@@ -97,13 +110,13 @@ The popover has no element with data-color-tab and none with data-color-remove, 
 | `a plain\| b` (no code at the caret) | `#00f` | no edit |
 | `a #c0\|0 b` | no argument | no edit |
 
-### Scenario (nominal): Caret leaves the code
+### Scenario S5 (nominal): Caret leaves the code
 
 - GIVEN the picker open on a colour code
 - WHEN the caret moves out of the code
 - THEN the button is hidden and the picker is closed
 
-### Scenario (boundary): Caret stays in the code
+### Scenario S6 (boundary): Caret stays in the code
 
 - GIVEN the picker open
 - WHEN the caret moves inside the code

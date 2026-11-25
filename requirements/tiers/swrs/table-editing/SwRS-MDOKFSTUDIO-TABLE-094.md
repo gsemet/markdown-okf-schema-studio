@@ -20,6 +20,37 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-013
 - StRS-MDOKFSTUDIO-TABLE-014
 depends_on: []
+scenarios:
+- id: S1
+  title: Unchanged table gives back the original text
+- id: S2
+  title: One edited cell changes one line
+- id: S3
+  title: The edited cell keeps its leading whitespace and its width
+- id: S4
+  title: Any single cell edit parses again with that cell
+- id: S5
+  title: A new row takes the style of a neighbouring body row
+- id: S6
+  title: Deleting a row removes exactly one line
+- id: S7
+  title: The header row is not deleted
+- id: S8
+  title: Edge cells of rows without outer pipes and indented tables
+- id: S9
+  title: A row with text after its closing pipe
+- id: S10
+  title: Rows without outer pipes
+- id: S11
+  title: Trailing pipe after a backslash
+- id: S12
+  title: Escaped pipe
+- id: S13
+  title: Escaped pipe in backticks
+- id: S14
+  title: Unescaped pipe in backticks
+- id: S15
+  title: Text after the closing pipe of a body row
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,7 +72,7 @@ supersedes:
 
 When a table is parsed and written back after a cell edit, a row insertion, a row deletion or no change, the extension SHALL change only the line the edit concerns, so that a cell edit changes one line, a new row adds one line, a deleted row removes one line and an unchanged table gives back exactly the original text; when a row is split into cells it SHALL accept rows with or without leading and trailing pipes, keep a pipe escaped with a backslash within its cell, and split a cell at every other pipe, also one inside a code span, as the preview does.
 
-### Scenario (nominal): Unchanged table gives back the original text
+### Scenario S1 (nominal): Unchanged table gives back the original text
 
 | Table written back with no change | Outcome |
 | --- | --- |
@@ -56,7 +87,7 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 | wider than the padding | output equals the input |
 | CRLF table with an escaped pipe and a pipe in a code span | output equals the input |
 
-### Scenario (nominal): One edited cell changes one line
+### Scenario S2 (nominal): One edited cell changes one line
 
 - GIVEN a padded table and a compact table, one body cell edited in each
 - WHEN the table is written back
@@ -65,7 +96,7 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 - WHEN the buffer is compared with the original
 - THEN the diff is one line
 
-### Scenario (nominal): The edited cell keeps its leading whitespace and its width
+### Scenario S3 (nominal): The edited cell keeps its leading whitespace and its width
 
 | Edit | Outcome |
 | --- | --- |
@@ -75,7 +106,7 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 | an empty cell filled, in a padded table | the table keeps its padding |
 | a cell emptied or filled, in a compact table | single spaces |
 
-### Scenario (boundary): Any single cell edit parses again with that cell
+### Scenario S4 (boundary): Any single cell edit parses again with that cell
 
 | Input | Outcome |
 | --- | --- |
@@ -84,7 +115,7 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 | the same cells set to a typed pipe between a and b | the pipe is saved escaped, the rows equal the edited model and at most one line changed |
 | a cell set to the value it already holds | no line changes |
 
-### Scenario (nominal): A new row takes the style of a neighbouring body row
+### Scenario S5 (nominal): A new row takes the style of a neighbouring body row
 
 - GIVEN a padded table and a row inserted after the first body row
 - WHEN the table is written back
@@ -93,19 +124,19 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 - WHEN the table is written back
 - THEN one parseable line "|  |  |" is added (the row is written with outer pipes) and the table parses again with the new empty row
 
-### Scenario (nominal): Deleting a row removes exactly one line
+### Scenario S6 (nominal): Deleting a row removes exactly one line
 
 - GIVEN a compact table and its first body row deleted
 - WHEN the table is written back
 - THEN one line is removed and none is added and the other lines are verbatim
 
-### Scenario (refusal): The header row is not deleted
+### Scenario S7 (refusal): The header row is not deleted
 
 - GIVEN the header row selected
 - WHEN a deletion is requested from the model
 - THEN nothing is deleted
 
-### Scenario (boundary): Edge cells of rows without outer pipes and indented tables
+### Scenario S8 (boundary): Edge cells of rows without outer pipes and indented tables
 
 | Input | Outcome |
 | --- | --- |
@@ -115,43 +146,43 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 | a table whose rows are indented and one cell edited | only the edited row changes and its indentation is unchanged |
 | the same indented table after Col + | the indentation is lost (see SwRS-MDOKFSTUDIO-TABLE-055) |
 
-### Scenario (boundary): A row with text after its closing pipe
+### Scenario S9 (boundary): A row with text after its closing pipe
 
 - GIVEN a table whose body row ends with a tail such as " ^row-a" after its closing pipe
 - WHEN one cell of that row is edited
 - THEN only that row's line changes and the tail stays at its end, and the table without an edit serialises to the same bytes, CRLF included
 
-### Scenario (nominal): Rows without outer pipes
+### Scenario S10 (nominal): Rows without outer pipes
 
 - GIVEN the rows "a | b", "| a | b" and "a | b |"
 - WHEN each is split
 - THEN each gives the cells a and b
 
-### Scenario (boundary): Trailing pipe after a backslash
+### Scenario S11 (boundary): Trailing pipe after a backslash
 
 - GIVEN a row ending with \|
 - WHEN it is split
 - THEN the final pipe belongs to the last cell when the backslashes before it are odd in number
 
-### Scenario (nominal): Escaped pipe
+### Scenario S12 (nominal): Escaped pipe
 
 - GIVEN a row "| Brake | x\|y |"
 - WHEN it is parsed, and then written back unchanged
 - THEN the cells are Brake and x\|y (the cell text holds the backslash) and the serialised row text is unchanged
 
-### Scenario (nominal): Escaped pipe in backticks
+### Scenario S13 (nominal): Escaped pipe in backticks
 
 - GIVEN the row "| Brake | `a\|b` and x |"
 - WHEN it is parsed for editing
 - THEN the cells are Brake and `a\|b` and x (the preview shows a|b in the code span)
 
-### Scenario (boundary): Unescaped pipe in backticks
+### Scenario S14 (boundary): Unescaped pipe in backticks
 
 - GIVEN the row "| `x|y` | z |" under a two-column table
 - WHEN it is parsed for editing
 - THEN the pipe splits the cell, as it does in the preview (GFM): the row has three cells, of which the editor keeps the first two (the same cells as the preview) and the third, with the closing pipe, as the row tail, so the editor and the preview hold the same cells
 
-### Scenario (boundary): Text after the closing pipe of a body row
+### Scenario S15 (boundary): Text after the closing pipe of a body row
 
 - GIVEN a body row of a table of two columns with more cells than the header, such as "| alpha | 1 | ^row-a", "| alpha | 1 | {#row-c}", "| alpha | 1 | <!-- keep -->" or "| a | b | c |"
 - WHEN it is parsed for editing

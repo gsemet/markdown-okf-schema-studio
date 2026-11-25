@@ -45,7 +45,8 @@ function workspaceOf(found: string[][]): never {
   } as never;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183#S5
 test("the scan skips files that do not fit in 2 MiB, marks the list truncated and skips an unreadable file", async () => {
   const big = MAX_BIB_BYTES - 10;
   const { files, read } = bibFiles({
@@ -68,7 +69,8 @@ test("the scan skips files that do not fit in 2 MiB, marks the list truncated an
   assert.equal(fits.truncated, false, "files within the cap do not truncate");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183#S4
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183#S5
 test("exactly 20 bibliography files are a complete list, a 21st marks it truncated", async () => {
   const names = Array.from({ length: 21 }, (_, index) => `/ws/docs/f${index}.bib`);
   const entries = Object.fromEntries(names.map((name, index) => [name, { size: 5, text: `@book{k${index},\n}\n` }]));
@@ -265,7 +267,7 @@ test("a citation scan that throws is answered with ok false and the message of t
   assert.equal(answer.reason, "search backend down");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148#S1
 test("the document picker opens in a restricted-reads preview and in a writable one", async () => {
   for (const options of [{ restrictedReads: true }, {}]) {
     const preview = setup(options);
@@ -276,7 +278,7 @@ test("the document picker opens in a restricted-reads preview and in a writable 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S4
 test("the image picker of a standalone file accepts an image of the document folder and refuses one elsewhere", async () => {
   const picked = (path: string): { picked: PickedFile } => ({ picked: { path, local: true } as PickedFile });
@@ -327,7 +329,7 @@ test("while the block editor is open, palette requests are answered after its au
 
 const paste = { mime: "image/png", dataBase64: PNG.toString("base64") };
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S6
 test("an image paste is refused for an unsaved document or one that is not the previewed document", async () => {
   const unsaved = setup({ documentPath: undefined });
   const answer = await unsaved.ask("previewPasteImage", paste);
@@ -354,7 +356,7 @@ test("an image paste is refused for a folder outside the workspace, links resolv
   assert.ok(inside.writes > 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S6
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
 test("an image paste is saved next to a standalone file and in Restricted Mode", async () => {
   const standalone = setup({ restrictedReads: true, workspaceFolder: undefined });

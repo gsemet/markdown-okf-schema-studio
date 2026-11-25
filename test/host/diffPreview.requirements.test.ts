@@ -38,7 +38,7 @@ const diffTab = (original: Uri, modified: Uri): never =>
 
 const idOf = (file: string): string => Uri.file(file).toString();
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S11
 test("the real file of a diff is the file side, the active side of two files, or the working-tree stand-in", async () => {
   const file = writeFile("# Real\n");
   const other = writeFile("# Other\n");
@@ -70,7 +70,8 @@ test("the real file of a diff is the file side, the active side of two files, or
   assert.equal((await realFileOfDiff(git, undefined))?.kind, "file");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S11
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S15
 test("Open Preview to Side from a diff previews the real file, whichever side holds the cursor, and opens no text editor", async (t) => {
   const studio = start(t);
   const file = writeFile("# Real file\n");
@@ -98,7 +99,8 @@ test("Open Preview to Side from a diff previews the real file, whichever side ho
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S11
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S15
 test("Open Preview to Side from a staged diff previews the working-tree file, and refuses when it is missing", async (t) => {
   const studio = start(t);
   const file = writeFile("# Working tree\n");
@@ -120,7 +122,8 @@ test("Open Preview to Side from a staged diff previews the working-tree file, an
   ]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S11
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S15
 test("Open Preview to Side with the URI of another file keeps its path while a diff is active", async (t) => {
   const studio = start(t);
   const file = writeFile("# Diffed\n");
@@ -134,7 +137,7 @@ test("Open Preview to Side with the URI of another file keeps its path while a d
   assert.equal(studio.manager.active?.documentUri, idOf(another));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-026
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S3
 test("a text diff that becomes active switches the side preview to its real file, never to a stand-in", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n");
@@ -159,7 +162,8 @@ test("a text diff that becomes active switches the side preview to its real file
   assert.equal(session.documentUri, idOf(fileC), "a diff with only a working-tree stand-in does not switch it");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S9
 test("the real file's side of a diff scrolls the side preview, and a git side never does", async (t) => {
   const studio = start(t);
   const file = writeFile(Array.from({ length: 80 }, (_, index) => `line ${index}\n`).join("\n"));
@@ -181,7 +185,8 @@ test("the real file's side of a diff scrolls the side preview, and a git side ne
   assert.deepEqual(scrolls(from).map((message) => message.line), [31], "the real file's side moves the preview");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S7
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100#S9
 test("a staged-like diff, with no file side, scrolls no side preview from either side", async (t) => {
   const studio = start(t);
   const file = writeFile(Array.from({ length: 80 }, (_, index) => `line ${index}\n`).join("\n"));
@@ -201,7 +206,8 @@ test("a staged-like diff, with no file side, scrolls no side preview from either
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108#S3
 test("a click in the preview reveals the line in the real file's side of a diff, not in a side that shares its path", async (t) => {
   const studio = start(t);
   const file = writeFile(Array.from({ length: 20 }, (_, index) => `line ${index}\n`).join("\n"));

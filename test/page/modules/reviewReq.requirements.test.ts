@@ -29,7 +29,8 @@ function threadsPage(window: { innerWidth: number; innerHeight: number }) {
   return { document, comments, popover };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S1
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021#S2
 test("Enter and Space on a focused highlight or badge toggle its popover, another key does nothing", () => {
   const { document, comments, popover } = threadsPage({ innerWidth: 800, innerHeight: 600 });
   document.add("p", { "data-line": "1" }, document.content, "a needle and more");
@@ -106,7 +107,7 @@ class ChipElement {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143#S6
 test("the saved state drops the key of a comment the content no longer holds", () => {
   const root = new ChipElement("html");
   const block = root.append(new ChipElement("div"));
@@ -131,7 +132,7 @@ test("the saved state drops the key of a comment the content no longer holds", (
   assert.equal(body.hidden, false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S5
 test("the change bars are placed again on a window resize and after a content change", () => {
   const document = new FakeDocument();
   const resizeListeners: Array<() => void> = [];

@@ -37,7 +37,7 @@ function openWideTableForReveal(editorWidth = 220, start?: [number, number]) {
   return { harness, table, editor, tab, ...opened };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126#S1
 test("Tab to a cell right of a wide table's box scrolls the box by the smallest amount plus 16 px", () => {
   const { harness, table, editor, tab, cells } = openWideTableForReveal();
   const pageScroll = harness.windowState.scrollY;
@@ -52,7 +52,7 @@ test("Tab to a cell right of a wide table's box scrolls the box by the smallest 
   assert.equal(harness.windowState.scrollY, pageScroll);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126#S1
 test("Tab across the row wrap and Shift+Tab to a cell left of the box align the cell start 16 px inside", () => {
   const { harness, table, editor, tab, cells } = openWideTableForReveal();
   const pageScroll = harness.windowState.scrollY;
@@ -72,7 +72,7 @@ test("Tab across the row wrap and Shift+Tab to a cell left of the box align the 
   assert.equal(harness.windowState.scrollY, pageScroll);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126#S1
 test("a cell already inside the table box does not scroll it; a target wider than the box is aligned on its start", () => {
   const visible = openWideTableForReveal();
   visible.table.scrollLeft = 30;
@@ -87,7 +87,7 @@ test("a cell already inside the table box does not scroll it; a target wider tha
   assert.equal(wide.table.scrollLeft, 650 - (50 + 16));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126#S1
 test("a layout pass that narrows the table box brings the open cell editor back inside it", () => {
   const opened = openWideTableForReveal();
   // Cell 150..350, editor 150..370: 20 px past the 50..350 box, so the open scrolled it 36 px.
@@ -101,7 +101,7 @@ test("a layout pass that narrows the table box brings the open cell editor back 
   assert.equal(opened.table.scrollLeft, 36 + 334 - (310 - 16));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TABLE-126
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-126#S1
 test("a click on a partly hidden cell and an editor opening in a hidden cell scroll the table box to it", () => {
   const clicked = openWideTableForReveal();
   clicked.table.scrollLeft = 400;

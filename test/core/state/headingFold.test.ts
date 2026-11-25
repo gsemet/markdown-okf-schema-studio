@@ -14,7 +14,7 @@ import {
 // Blocks: h1, p, h2, p, p, h3, p, h2, p
 const BLOCKS = [1, undefined, 2, undefined, undefined, 3, undefined, 2, undefined];
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S4
 test("a folded heading hides its blocks up to the next heading of the same or a higher level", () => {
   assert.deepEqual(planHeadingFold(BLOCKS, new Set([2])),
     [false, false, false, true, true, true, true, false, false]);
@@ -24,13 +24,14 @@ test("a folded heading hides its blocks up to the next heading of the same or a 
     [false, true, true, true, true, true, true, true, true], "the h1 holds the whole document");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S2
 test("a heading inside a folded section stays hidden whatever its own fold state", () => {
   assert.deepEqual(planHeadingFold(BLOCKS, new Set([2, 5])), planHeadingFold(BLOCKS, new Set([2])));
   assert.deepEqual(planHeadingFold(BLOCKS, new Set()), BLOCKS.map(() => false));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003#S2
 test("a section ends at the next heading of the same or a higher level, and may be empty", () => {
   assert.equal(sectionEnd(BLOCKS, 2), 7);
   assert.equal(sectionEnd(BLOCKS, 5), 7);
@@ -40,14 +41,14 @@ test("a section ends at the next heading of the same or a higher level, and may 
   assert.equal(hasSection([2, 3, undefined], 0), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S1
 test("the key tells two headings with the same text apart by their occurrence", () => {
   assert.equal(headingFoldKey(2, "Scope", 0), "2|Scope|0");
   assert.notEqual(headingFoldKey(2, "Scope", 0), headingFoldKey(2, "Scope", 1));
   assert.notEqual(headingFoldKey(2, "Scope", 0), headingFoldKey(3, "Scope", 0));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S2
 test("the saved fold state keeps only documents mapped to string keys", () => {
   assert.deepEqual(normalizeHeadingFolds({ "file:///a.md": ["2|A|0", 7, "3|B|0"], b: "x", c: [], d: null }),
     { "file:///a.md": ["2|A|0", "3|B|0"] });
@@ -55,7 +56,7 @@ test("the saved fold state keeps only documents mapped to string keys", () => {
   assert.deepEqual(normalizeHeadingFolds(["2|A|0"]), {});
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S2
 test("the fold state replaces the keys of one document, drops it when empty and stays bounded", () => {
   const first = withDocumentFolds({}, "a", ["2|A|0"]);
   assert.deepEqual(first, { a: ["2|A|0"] });

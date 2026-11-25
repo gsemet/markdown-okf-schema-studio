@@ -14,6 +14,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-006
+scenarios:
+- id: S1
+  title: Every example renders
+- id: S2
+  title: Shape of the skill
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -30,13 +35,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the repository is checked, the writing skill for Studio SHALL contain only examples that the preview pipeline renders without a diagnostic or an unresolved directive, and that cover the syntaxes the skill lists.
 
-### Scenario (nominal): Every example renders
+### Scenario S1 (nominal): Every example renders
 
 - GIVEN the skill folder `skills/writing-for-markdown-okf-schema-studio/` with its `SKILL.md` and `references/*.md`
 - WHEN each `markdown` example block of those files is rendered by the preview pipeline, in a workspace where the files it names exist
 - THEN no render fails, no diagnostic of warning or error severity is produced, no directive is left unresolved, and every syntax family the skill lists (cards, tabs, version notes, alerts, admonitions, table of contents, math, list table, figure, Mermaid, PlantUML, Vega-Lite, README HTML, comment threads, front matter, radio choices in a plan) appears in at least one example and is rendered as its own element
 
-### Scenario (boundary): Shape of the skill
+### Scenario S2 (boundary): Shape of the skill
 
 | Input | Outcome |
 | --- | --- |

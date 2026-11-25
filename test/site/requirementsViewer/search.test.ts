@@ -6,7 +6,8 @@ import { parseRequirementsReport } from "./model";
 import { searchIndex, searchIndexScript } from "./searchIndex";
 
 test("search index entries: areas, use cases, behaviours, files, retired flagged", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-084
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-084#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-084#S2
   const model = parseRequirementsReport(fixtureReport(), "abc123");
   assert.ok(model);
   const items = searchIndex(model);

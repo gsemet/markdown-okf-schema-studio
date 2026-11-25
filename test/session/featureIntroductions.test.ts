@@ -8,7 +8,7 @@ import { MemoryStore, recordingLogger, recordingUi } from "./memoryPorts";
 const OWN = { ownFeature: "A feature of the test." } as const;
 const OWN_KEY = "markdownOkfSchemaStudio.introductions.ownFeature";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S1
 test("an introduction shows once, the key is stored before the message, and a second call shows nothing", async () => {
   const store = new MemoryStore();
   const shown: string[] = [];
@@ -20,7 +20,7 @@ test("an introduction shows once, the key is stored before the message, and a se
   assert.equal(shown.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S1
 test("an introduction already stored shows nothing in a later session", async () => {
   const store = new MemoryStore();
   await new FeatureIntroductions(OWN, store, recordingUi([]), recordingLogger()).showOnce("ownFeature");
@@ -29,7 +29,7 @@ test("an introduction already stored shows nothing in a later session", async ()
   assert.deepEqual(later, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S1
 test("resetting forgets every introduction key and nothing else, so each shows once more", async () => {
   const store = new MemoryStore();
   store.values.set("markdownOkfSchemaStudio.view.mode", "dark");
@@ -42,7 +42,7 @@ test("resetting forgets every introduction key and nothing else, so each shows o
   assert.equal(shown.length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S1
 test("a store that cannot write is logged and the message still shows once in the session", async () => {
   const store = new MemoryStore();
   store.failWrites = true;
@@ -55,7 +55,7 @@ test("a store that cannot write is logged and the message still shows once in th
   assert.equal(errors.length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-176
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-176#S1
 test("the extension ships no introduction today: the shipped list is empty and resetting it shows and writes nothing", async () => {
   assert.deepEqual(Object.keys(FEATURE_INTRODUCTIONS), []);
   const store = new MemoryStore();

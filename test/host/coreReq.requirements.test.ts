@@ -35,7 +35,7 @@ async function openFailingFirstRender(studio: Studio, failure: unknown): Promise
   return panel.htmlAssignments.at(-1) ?? "";
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S4
 test("a first render that throws shows the error page with its message", async (t) => {
   const studio = start(t);
   const html = await openFailingFirstRender(studio, new Error("engine exploded"));
@@ -46,7 +46,7 @@ test("a first render that throws shows the error page with its message", async (
 });
 
 for (const [label, failure] of [["undefined", undefined], ["null", null], ["an Error with an empty message", new Error("")]] as const) {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-025
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-025#S4
   test(`a first render that throws ${label} shows the fallback 'The render failed.'`, async (t) => {
     const studio = start(t);
     const html = await openFailingFirstRender(studio, failure);
@@ -56,14 +56,15 @@ for (const [label, failure] of [["undefined", undefined], ["null", null], ["an E
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S4
 test("a failure with a text but no Error keeps that text", async (t) => {
   const studio = start(t);
   const html = await openFailingFirstRender(studio, "plain text failure");
   assert.match(html, /data-sphinx-preview-status-message>plain text failure</u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-025
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S3
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025#S4
 test("a later render that fails without a message keeps the old page stale with 'The latest render failed.'", async (t) => {
   const studio = start(t);
   await studio.openSide(writeFile("# Good page\n\nGood body.\n"));
@@ -80,7 +81,8 @@ test("a later render that fails without a message keeps the old page stale with 
   assert.doesNotMatch(html, /undefined/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-043
+// @tests_req SwRS-MDOKFSTUDIO-CORE-043#S1
+// @tests_req SwRS-MDOKFSTUDIO-CORE-043#S2
 test("the custom editor and the preview panel are created with the find widget enabled", async (t) => {
   const studio = start(t);
   const editorOptions = captured.editorOptions as { webviewOptions?: { enableFindWidget?: boolean } } | undefined;

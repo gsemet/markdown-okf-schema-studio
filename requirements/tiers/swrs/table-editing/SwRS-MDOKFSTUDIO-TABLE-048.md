@@ -18,6 +18,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-008
 depends_on: []
+scenarios:
+- id: S1
+  title: Bar above the table
+- id: S2
+  title: Placement and lifetime
+- id: S3
+  title: Seven labelled operation buttons
+- id: S4
+  title: Groups and rules
+- id: S5
+  title: Status of the selected cell
+- id: S6
+  title: Status centring
+- id: S7
+  title: Narrow pane
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -40,13 +55,13 @@ default_owner_email: gaetan@xeberon.net
 
 When a cell editor opens in a table, the extension SHALL create once a toolbar named "Table row and column actions" in the page flow directly above the table, showing seven labelled operation buttons and a status with the position of the selected cell, keep it while the editor moves between cells of that table, and remove it when the editor closes.
 
-### Scenario (nominal): Bar above the table
+### Scenario S1 (nominal): Bar above the table
 
 - GIVEN a cell editor opened in a table
 - WHEN the page is inspected
 - THEN a toolbar named "Table row and column actions" is the previous sibling of the table in the page flow, with no floating coordinates, and its bottom is not below the top of the table
 
-### Scenario (boundary): Placement and lifetime
+### Scenario S2 (boundary): Placement and lifetime
 
 | Input | Outcome |
 | --- | --- |
@@ -55,7 +70,7 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 | The editor moves to the next cell with Tab | The same bar element is still in place and only its status changes |
 | The editor is closed by Escape or by a save | No table bar is left |
 
-### Scenario (nominal): Seven labelled operation buttons
+### Scenario S3 (nominal): Seven labelled operation buttons
 
 - GIVEN a cell editor open
 - WHEN the bar is inspected
@@ -71,7 +86,7 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 | Col − | Delete selected column |
 | List table | Convert to list-table |
 
-### Scenario (boundary): Groups and rules
+### Scenario S4 (boundary): Groups and rules
 
 | Input | Outcome |
 | --- | --- |
@@ -80,7 +95,7 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 | The styles are read for Row above, Row below, Row −, Col right and Col − | No rule is drawn before them |
 | The cell formatting group wraps onto a second line of the bar | Its rule is the first element of the group, so it starts the second line instead of ending the first |
 
-### Scenario (nominal): Status of the selected cell
+### Scenario S5 (nominal): Status of the selected cell
 
 | Input | Outcome |
 | --- | --- |
@@ -91,14 +106,14 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 | The status has no text | It is not displayed and takes no room on the bar line |
 | The status has text (the position of the cell) | It is displayed |
 
-### Scenario (boundary): Status centring
+### Scenario S6 (boundary): Status centring
 
 | Input | Outcome |
 | --- | --- |
 | Cell editor open in a sixteen-column table at 900 px; the vertical centres of the status and of the first operation button are compared | They differ by at most 2 px |
 | A status that wraps onto its own line in a narrow pane | The centring is not required |
 
-### Scenario (boundary): Narrow pane
+### Scenario S7 (boundary): Narrow pane
 
 | Input | Outcome |
 | --- | --- |

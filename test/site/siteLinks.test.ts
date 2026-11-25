@@ -24,7 +24,8 @@ test("the site header links the How we ship page from root and nested pages", ()
 });
 
 test("a viewer page brands and links the site relative to its own folder", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S2
   const html = viewerDocument({ dir: "requirements/area/StRS-X-001", level: "use-case", title: "T", shareTitle: "T", description: "d", body: "", crumbs: [] }, { sha: "abc", generatedAt: "" });
   assert.ok(html.includes('src="../../../images/logo.svg" alt="" width="44" height="44"'));
   assert.ok(html.includes('class="site-brand" href="../../../index.html"'));

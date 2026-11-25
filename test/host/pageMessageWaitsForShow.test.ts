@@ -14,7 +14,8 @@ import { sendPreviewMessageForTests, setCurrentActivation } from "../../src/host
 const SOURCE = "---\ntitle: Old\n---\n\n# Title\n\nBody.\n";
 const STALE = "The preview changed while this field was being edited. Reopen the field.";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S10
 test("a page message sent when the queue is ready, while the show is held, is applied after the show", async (t) => {
   const studio = startStudio(t.mock.timers);
   setCurrentActivation(studio.activation);
@@ -63,7 +64,8 @@ test("a page message sent when the queue is ready, while the show is held, is ap
   assert.ok(answers.every((answer) => answer.error !== STALE), `the save was not refused as stale: ${JSON.stringify(answers)}`);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S10
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003#S15
 test("a page message sent with no show pending is handled before any await", async (t) => {
   const studio = startStudio(t.mock.timers);
   setCurrentActivation(studio.activation);

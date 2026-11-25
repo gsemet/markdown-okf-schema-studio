@@ -11,7 +11,7 @@ import { findElements, hasClass, parseHtml, textContent } from "../../core/rende
 const ctx = (value: string, at = value.length) =>
   ({ value, selectionStart: at, selectionEnd: at, scope: "block" as const });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270#S1
 test("the card form writes a {card} with the filled options only", () => {
   const full = cardText({ title: "Decision", header: "Accepted", footer: "Revisit later", link: "https://example.org" });
   assert.equal(
@@ -26,7 +26,7 @@ test("the card form writes a {card} with the filled options only", () => {
   );
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270#S1
 test("the card is inserted after the selection and its body placeholder is selected", () => {
   const edit = cardEdit(ctx("Intro."), { title: "T", header: "", footer: "F", link: "" });
   const written = "Intro." + edit.text;
@@ -34,7 +34,7 @@ test("the card is inserted after the selection and its body placeholder is selec
   assert.equal(written.slice(edit.selectionStart, edit.selectionEnd), "Content");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S1
 test("the grid form writes a {grid} of numbered {grid-item-card}s", () => {
   const { text, titleAt } = gridText({ columns: "1 2 3 3", gutter: "2", cards: "2" });
   assert.equal(
@@ -50,7 +50,7 @@ test("the grid form writes a {grid} of numbered {grid-item-card}s", () => {
   assert.equal(gridText({ columns: "3", gutter: "", cards: "1" }).text.split("\n")[1], "");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S1
 test("the grid is inserted after the selection and the first title is selected", () => {
   const edit = gridEdit(ctx("Intro.\n\nOutro.", 6), { columns: "2", gutter: "", cards: "1" });
   assert.equal(edit.start, 6);
@@ -59,7 +59,8 @@ test("the grid is inserted after the selection and the first title is selected",
   assert.equal(("Intro." + edit.text).slice(edit.selectionStart, edit.selectionEnd), "Card 1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S2
 test("the grid form refuses columns, gutter and card counts out of range", () => {
   assert.equal(validateGrid({ columns: "1 2 3 3", gutter: "2", cards: "3" }), undefined);
   assert.equal(validateGrid({ columns: "2", gutter: "", cards: "24" }), undefined);
@@ -73,8 +74,8 @@ test("the grid form refuses columns, gutter and card counts out of range", () =>
   assert.match(validateGrid({ columns: "2", gutter: "", cards: "25" }) ?? "", /^Cards/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-270#S2
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S2
 test("the registry lists Card and Grid, with their panel, in the MyST palette only", () => {
   const actions = createEditActions(["js"], createMarkdownTableTools(), isSafeOkfColor);
   for (const id of ["card", "grid"]) {
@@ -86,7 +87,7 @@ test("the registry lists Card and Grid, with their panel, in the MyST palette on
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S1
 test("the grid form writes each card's header and footer with the ^^^ and +++ separators, and its link as an option", () => {
   const { text, titleAt } = gridText({
     columns: "2", gutter: "", cards: "3",
@@ -105,7 +106,7 @@ test("the grid form writes each card's header and footer with the ^^^ and +++ se
   assert.equal(text.slice(titleAt, titleAt + 6), "Card 1");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S1
 test("the headers and footers written by the grid form render in their cards", async () => {
   const { text } = gridText({ columns: "2", gutter: "", cards: "2", headers: "Week 1|Week 2", footers: "Behind a flag|" });
   const { html } = await renderMyst(text, { sourcePath: "/virtual/main.md", resolveInclude: () => undefined });
@@ -115,7 +116,8 @@ test("the headers and footers written by the grid form render in their cards", a
   assert.deepEqual(parts("myst-grid-card-footer"), ["Behind a flag"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S1
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-271#S2
 test("the grid form refuses more header, footer or link entries than cards", () => {
   const base = { columns: "2", gutter: "", cards: "2" };
   assert.equal(validateGrid({ ...base, headers: "A|B", footers: "|F", links: "" }), undefined);

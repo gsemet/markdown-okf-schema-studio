@@ -13,6 +13,9 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Fold sections and keep them folded
 user_need: Readers of a long document want to hide the sections they are not
   reading and see the outline of the document, and to come back to the same
   folded view later, without the document being modified.
@@ -55,7 +58,7 @@ stateDiagram-v2
 
 ### Main paths
 
-#### Path 1: Fold sections and keep them folded
+#### Path S1: Fold sections and keep them folded
 
 1. The document is shown with its sections open
    - SwRS-MDOKFSTUDIO-TOOLBAR-003: the reader presses the chevron of a heading, which hides the blocks up to the next heading of the same or a higher level

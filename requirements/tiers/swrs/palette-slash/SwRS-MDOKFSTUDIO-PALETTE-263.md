@@ -16,6 +16,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on: []
+scenarios:
+- id: S1
+  title: An alias finds its command
+- id: S2
+  title: The aliases of every command
+- id: S3
+  title: An alias shared by two commands
+- id: S4
+  title: A command outside its mode or place is not listed
+- id: S5
+  title: A command found by an alias runs as its button
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,7 +44,7 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer types an alternative name after the slash, the extension SHALL list the command that carries that alias among the commands of the current palette mode, as it lists it for its label.
 
-### Scenario (nominal): An alias finds its command
+### Scenario S1 (nominal): An alias finds its command
 | Mode | Typed | Outcome |
 | --- | --- | --- |
 | strict | /hyperlink | Link is the first entry |
@@ -45,7 +56,7 @@ When the writer types an alternative name after the slash, the extension SHALL l
 | GFM | /spoiler | Collapsible is the first entry |
 | MyST | /xref | Reference is the first entry |
 
-### Scenario (boundary): The aliases of every command
+### Scenario S2 (boundary): The aliases of every command
 | Group | Command | Aliases |
 | --- | --- | --- |
 | strict inline | Bold | strong, b |
@@ -85,13 +96,13 @@ When the writer types an alternative name after the slash, the extension SHALL l
 | MyST mode | Figure | fig, image, picture |
 | MyST mode | Key (MyST) | key, kbd, keyboard |
 
-### Scenario (boundary): An alias shared by two commands
+### Scenario S3 (boundary): An alias shared by two commands
 | Mode | Typed | Outcome |
 | --- | --- | --- |
 | MyST | /details | Dropdown is listed before the GitHub Collapsible, because the MyST group wins a near tie |
 | GFM | /todo | the TODO comment is the first entry, because its label is the exact match |
 
-### Scenario (refusal): A command outside its mode or place is not listed
+### Scenario S4 (refusal): A command outside its mode or place is not listed
 | Mode and place | Typed | Outcome |
 | --- | --- | --- |
 | strict, caret outside a colour code | /color | Colour code is not listed |
@@ -99,7 +110,7 @@ When the writer types an alternative name after the slash, the extension SHALL l
 | caret outside a table of the form they convert | the menu is opened | List table and Pipe table are not listed; each appears only with the caret in a table of the form it converts |
 | table cell | the menu is opened | only Bold, Italic, Strikethrough, Colour, Link and Emoji are listed |
 
-### Scenario (nominal): A command found by an alias runs as its button
+### Scenario S5 (nominal): A command found by an alias runs as its button
 - GIVEN the menu lists a command found by one of its aliases
 - WHEN the writer chooses it
 - THEN it runs the same edit as its palette button, and Reference, Citation, Document link, Figure and Image open the same picker or dialog as their buttons

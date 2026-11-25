@@ -18,6 +18,17 @@ derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-041
+scenarios:
+- id: S1
+  title: Empty body shows one Start writing button
+- id: S2
+  title: No Start writing button on a failed or pending render
+- id: S3
+  title: A click opens the editor of the first block
+- id: S4
+  title: The button is hidden while its editor is open
+- id: S5
+  title: The first-block editor is marked
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -36,7 +47,7 @@ default_owner_email: gaetan@xeberon.net
 
 While edit mode is on and the body of a rendered document has no block, the page SHALL show one Start writing button, after the properties table when there is one, in place of the insert points, and open the first-block editor from it on a click.
 
-### Scenario (nominal): Empty body shows one Start writing button
+### Scenario S1 (nominal): Empty body shows one Start writing button
 
 | Input | Outcome |
 | --- | --- |
@@ -47,19 +58,19 @@ While edit mode is on and the body of a rendered document has no block, the page
 - WHEN the page builds its bars
 - THEN the button text is Start writing and its bar has the class sphinx-preview-insert-point--start
 
-### Scenario (refusal): No Start writing button on a failed or pending render
+### Scenario S2 (refusal): No Start writing button on a failed or pending render
 
 - GIVEN an error page with no body blocks in edit mode, or a pending render
 - WHEN the page builds its bars
 - THEN no Start writing button exists; a successful (or recovered) render of an empty document has the button
 
-### Scenario (nominal): A click opens the editor of the first block
+### Scenario S3 (nominal): A click opens the editor of the first block
 
 - GIVEN an empty document in edit mode
 - WHEN the writer clicks Start writing
 - THEN previewEditOpen carries insertAfterLine 0 and line 1, and the button is replaced by the focused editor
 
-### Scenario (nominal): The button is hidden while its editor is open
+### Scenario S4 (nominal): The button is hidden while its editor is open
 
 - GIVEN an empty document
 - WHEN the Start writing editor opens
@@ -69,7 +80,7 @@ While edit mode is on and the body of a rendered document has no block, the page
 - WHEN the writer presses Escape instead
 - THEN the editor closes and the button is visible again
 
-### Scenario (boundary): The first-block editor is marked
+### Scenario S5 (boundary): The first-block editor is marked
 
 | Input | Outcome |
 | --- | --- |

@@ -15,6 +15,13 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-REVIEW-003
+scenarios:
+- id: S1
+  title: The editor opens next to its text, inside the window
+- id: S2
+  title: The editor follows its text on scroll
+- id: S3
+  title: The editor grows
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -33,7 +40,7 @@ default_owner_email: gaetan@xeberon.net
 
 When a reader opens the new comment box or the thread popover with its reply box, the page SHALL place it entirely inside the window, below its anchored text or above it when there is no room below, and SHALL move it with that text on every scroll, even when the text is out of view.
 
-### Scenario (nominal): The editor opens next to its text, inside the window
+### Scenario S1 (nominal): The editor opens next to its text, inside the window
 
 | Given | When | Then |
 | --- | --- | --- |
@@ -42,7 +49,7 @@ When a reader opens the new comment box or the thread popover with its reply box
 | text in view, no room above or below | the editor opens | the editor is moved up so its bottom edge is 8 px above the bottom of the window, and at least 8 px from the top |
 | a window narrower than the editor | the editor opens | the editor is as wide as the window minus 16 px, and at least 8 px from each side |
 
-### Scenario (nominal): The editor follows its text on scroll
+### Scenario S2 (nominal): The editor follows its text on scroll
 
 - GIVEN an open new comment box or thread popover holding a draft
 - WHEN the page, or any scrolling container, scrolls
@@ -50,7 +57,7 @@ When a reader opens the new comment box or the thread popover with its reply box
 - AND WHEN the text scrolls out of view, THEN the editor leaves the window with it and stays open
 - AND WHEN the text scrolls back, THEN the editor is back next to it
 
-### Scenario (boundary): The editor grows
+### Scenario S3 (boundary): The editor grows
 
 When an error line or the Discard question is added to the new comment box, or a Discard question to the thread popover, the editor is placed again so that it stays inside the window.
 

@@ -32,7 +32,7 @@ function press(harness: RuntimeHarness, key: string, target: unknown): boolean {
   return prevented;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S1
 test("empty document: Enter with the Start writing button as target opens the new-block editor", () => {
   const harness = createRuntimeHarness(EMPTY);
   const prevented = press(harness, "Enter", startButtonOf(harness));
@@ -44,7 +44,8 @@ test("empty document: Enter with the Start writing button as target opens the ne
   assert.equal(prevented, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S2
 test("empty document: Enter with the document body or the edit-mode toggle as target opens the editor", () => {
   for (const pick of [
     (harness: RuntimeHarness) => harness.body,
@@ -61,7 +62,7 @@ test("empty document: Enter with the document body or the edit-mode toggle as ta
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S2
 test("empty document: Arrow Down opens the editor from every page target, Arrow Up does nothing", () => {
   for (const pick of [
     (harness: RuntimeHarness) => harness.body,
@@ -83,7 +84,7 @@ test("empty document: Arrow Down opens the editor from every page target, Arrow 
   assert.equal(startButtonOf(harness).getAttribute("data-sphinx-preview-start-selected"), "true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S3
 test("empty document: the keys do nothing with a modifier, in a field, in reading mode, or with blocks", () => {
   const opens = (harness: RuntimeHarness, key: string, event: Record<string, unknown>): boolean => {
     const before = harness.messages.length;
@@ -106,7 +107,7 @@ test("empty document: the keys do nothing with a modifier, in a field, in readin
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S1
 test("empty document: the Start writing point carries the hint line and the selection marker", () => {
   const harness = createRuntimeHarness(EMPTY);
   const point = insertPointAfterLine(harness, 0);
@@ -118,7 +119,8 @@ test("empty document: the Start writing point carries the hint line and the sele
   assert.equal(startButtonOf(harness).tagName, "BUTTON");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-253#S2
 test("a document with blocks: the plus bars carry no hint and no selection marker", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const points = insertPointsOf(harness);

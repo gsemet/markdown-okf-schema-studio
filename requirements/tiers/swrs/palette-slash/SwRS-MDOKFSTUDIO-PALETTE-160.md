@@ -16,6 +16,19 @@ derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-007
 depends_on:
 - SwRS-MDOKFSTUDIO-PALETTE-039
+scenarios:
+- id: S1
+  title: Change
+- id: S2
+  title: Conversion
+- id: S3
+  title: No change
+- id: S4
+  title: Untouched parts are written back byte for byte
+- id: S5
+  title: Options written
+- id: S6
+  title: Caption, legend and outer fence
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -34,26 +47,26 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer applies the figure form with a change, the extension SHALL replace the directive with the rewritten one in one edit that keeps every untouched part byte for byte, and keep the editor open.
 
-### Scenario (nominal): Change
+### Scenario S1 (nominal): Change
 
 - GIVEN a figure whose width is changed
 - WHEN Apply is pressed
 - THEN the directive is replaced in one edit and the editor stays open; the edit range is the whole directive found when the form opened
 
-### Scenario (nominal): Conversion
+### Scenario S2 (nominal): Conversion
 
 - GIVEN a Markdown image converted to a figure
 - WHEN Convert to figure is pressed
 - THEN the image reference is replaced by the figure directive
 
-### Scenario (boundary): No change
+### Scenario S3 (boundary): No change
 
 | Input | Outcome |
 | --- | --- |
 | an untouched form, Apply pressed | the text is not written (no edit event, the document version does not move) and the focus returns to the text box with its selection |
 | a changed width, Apply pressed | the directive is written |
 
-### Scenario (boundary): Untouched parts are written back byte for byte
+### Scenario S4 (boundary): Untouched parts are written back byte for byte
 
 | Input | Outcome |
 | --- | --- |
@@ -65,7 +78,7 @@ When the writer applies the figure form with a change, the extension SHALL repla
 | an option whose value did not change | its original line is kept |
 | an unknown option with an empty value | never dropped |
 
-### Scenario (boundary): Options written
+### Scenario S5 (boundary): Options written
 
 | Input | Outcome |
 | --- | --- |
@@ -73,7 +86,7 @@ When the writer applies the figure form with a change, the extension SHALL repla
 | a figure with no option and a caption, a width typed | the option line is added after the unknown ones and a blank line stays before the caption |
 | options that are new | appended after the unknown options |
 
-### Scenario (boundary): Caption, legend and outer fence
+### Scenario S6 (boundary): Caption, legend and outer fence
 
 | Input | Outcome |
 | --- | --- |

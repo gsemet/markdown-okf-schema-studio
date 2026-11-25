@@ -13,6 +13,11 @@ status: stable
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Scroll and keep the section in view
+- id: S2
+  title: Change the depth of the band
 user_need: As a reader, I always know which section I am in while I scroll a
   long document, without the pinned headings shifting the text or hiding it, and
   I choose how much of the heading path stays visible, from the current heading
@@ -59,7 +64,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Scroll and keep the section in view
+#### Path S1: Scroll and keep the section in view
 
 1. The reader scrolls the document
    - SwRS-MDOKFSTUDIO-TOOLBAR-018: a heading lies at or above the reading line and the sticky band shows it with its parent headings, up to the depth setting
@@ -69,7 +74,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-TOOLBAR-025 (boundary): at the top of the page no shadow is drawn
 3. The current section stays pinned at the top
 
-#### Path 2: Change the depth of the band
+#### Path S2: Change the depth of the band
 
 1. The band shows the current heading path
    - SwRS-MDOKFSTUDIO-TOOLBAR-018: the depth setting is changed while a preview is open, and the page is loaded again with the new depth

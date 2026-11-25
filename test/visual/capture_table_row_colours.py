@@ -124,7 +124,8 @@ def check_handles_above_row(page: Page, table, name: str, failures: list[Failure
     failures.append(Failure(name, f"{covered['covered']} row handles are covered in a hovered table"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-077
+# @tests_req SwRS-MDOKFSTUDIO-CORE-077#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-077#S2
 def check_table_row_colours(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The heading, the even rows and the hovered row have their tints, tested with a real pointer."""
   kind = scenario.get("tableRowColourChecks")

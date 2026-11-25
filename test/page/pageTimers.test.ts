@@ -36,7 +36,8 @@ function openBlockEditor(harness: RuntimeHarness): RuntimeHarness["createdElemen
   return textarea;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-125
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125#S4
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-125#S5
 test("the webview state is written at once, then at most once per 100 ms with the last state", () => {
   const harness = createRuntimeHarness({ virtualClock: true });
   harness.flushFrames();

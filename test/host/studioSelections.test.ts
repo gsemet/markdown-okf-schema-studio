@@ -6,7 +6,7 @@ import { test } from "node:test";
 
 import { STUDIO_SELECTION_WINDOW_MS, StudioSelections } from "../../src/host-vscode/studioSelections";
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-186
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-186#S1
 test("an expected selection is taken once, with its purpose, by uri and line", () => {
   let now = 1000;
   const selections = new StudioSelections(() => now);
@@ -20,7 +20,7 @@ test("an expected selection is taken once, with its purpose, by uri and line", (
   assert.equal(selections.take("file:///a.md", 4), "no-mark");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-186
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-186#S1
 test("an expected selection expires after the window", () => {
   let now = 1000;
   const selections = new StudioSelections(() => now);

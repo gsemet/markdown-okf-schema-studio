@@ -84,7 +84,8 @@ async function check(reportJson: string, diagnostic: (message: string) => void):
 
 for (const [name, report] of [["the frozen use cases", frozenReport], ["the full-ID fixture", fullIdReport]] as const) {
   test(`the breadcrumb, the eyebrow and the pager of ${name} stay inside the page at 1280, 800 and 390 px`, async (t) => {
-    // @tests_req SwRS-MDOKFSTUDIO-CORE-093
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-093#S1
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-093#S2
     const done = await check(report(), (message) => t.diagnostic(message));
     if (done instanceof Error) {
       if (process.env.STUDIO_REQUIRE_CHROMIUM === "1") throw new Error(`Chromium is required (STUDIO_REQUIRE_CHROMIUM=1) and cannot start: ${done.message}`);

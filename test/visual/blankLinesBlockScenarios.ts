@@ -12,7 +12,8 @@ const SIX_FIXTURE = "96-blank-lines-six";
 
 export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
     id: "block-editing/v44-blank-lines-block-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -25,7 +26,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "as the content column, with no Delete block button shown yet (the `bar` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S2
     id: "block-editing/v45-blank-lines-block-selected-dark-900",
     fixture: FIXTURE,
     theme: "dark",
@@ -38,7 +40,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "before the label (the `selected` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
     id: "block-editing/v46-blank-lines-block-reading-light-900",
     fixture: FIXTURE,
     theme: "light",
@@ -49,7 +52,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "blank-line block between them (the `top` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
     id: "block-editing/v47-blank-lines-in-lists-light-900",
     fixture: LIST_FIXTURE,
     theme: "light",
@@ -62,7 +66,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "wide as the item's content, and the blank lines of the fence in the third item show none (the `bar` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-269#S3
     id: "block-editing/v48-blank-lines-in-lists-selected-dark-900",
     fixture: LIST_FIXTURE,
     theme: "dark",
@@ -74,7 +79,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "Down arrow, shows its Delete block button at its left edge, clear of the list item handles (the `selected` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
     id: "block-editing/v49-blank-lines-in-lists-reading-light-900",
     fixture: LIST_FIXTURE,
     theme: "light",
@@ -84,7 +90,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     description: "Light theme, 900 px pane, reading mode of the same file: the list shows no blank-line block (the `top` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
     id: "block-editing/v50-blank-lines-in-lists-typing-light-900",
     fixture: LIST_FIXTURE,
     theme: "light",
@@ -96,7 +103,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "inside the first item, and stays inside an item of the list after text is typed and the autosave ran (the `text` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
     id: "block-editing/v51-blank-lines-in-containers-light-900",
     fixture: CONTAINERS_FIXTURE,
     theme: "light",
@@ -110,7 +118,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "button at the block's left edge (the `bar` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
     id: "block-editing/v52-blank-lines-in-containers-reading-dark-900",
     fixture: CONTAINERS_FIXTURE,
     theme: "dark",
@@ -120,7 +129,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
     description: "Dark theme, 900 px pane, reading mode of the same file: the containers show no blank-line block (the `top` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S5
     id: "block-editing/v53-blank-lines-in-containers-typing-light-900",
     fixture: CONTAINERS_FIXTURE,
     theme: "light",
@@ -132,7 +142,8 @@ export const BLANK_LINES_BLOCK_SCENARIOS: ScenarioDefinition[] = [
       + "the quote, and stays inside the one re-rendered quote after text is typed and the autosave ran (the `text` step).",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
     id: "block-editing/v54-blank-lines-six-light-900",
     fixture: SIX_FIXTURE,
     theme: "light",

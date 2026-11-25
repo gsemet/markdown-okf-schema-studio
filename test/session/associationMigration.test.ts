@@ -56,7 +56,7 @@ function setup(initial: Record<string, unknown>, failOn?: string) {
   return { ...memory, globalState, workspaceState, errors, uiCalls, run };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("user on, workspace not set: the association is in the user settings and the setting is removed", async () => {
   const { values, writes, uiCalls, run } = setup({ [`user|${FILES}`]: true, [`user|${SEARCH}`]: true });
   assert.deepEqual(await run(), ["user"]);
@@ -67,7 +67,7 @@ test("user on, workspace not set: the association is in the user settings and th
   assert.deepEqual(uiCalls, [], "nothing is shown");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("user not set, workspace on: the association is in the workspace settings and the setting is removed", async () => {
   const { values, writes, uiCalls, run } = setup({ [`workspace|${FILES}`]: true });
   assert.deepEqual(await run(), ["workspace"]);
@@ -77,7 +77,7 @@ test("user not set, workspace on: the association is in the workspace settings a
   assert.deepEqual(uiCalls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("user on and workspace on: the association is in both scopes and both settings are removed", async () => {
   const { values, uiCalls, run } = setup({
     [`user|${FILES}`]: true,
@@ -91,7 +91,7 @@ test("user on and workspace on: the association is in both scopes and both setti
   assert.deepEqual(uiCalls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("user on and workspace off: the association goes to the user settings and both values are removed", async () => {
   const { values, uiCalls, run } = setup({ [`user|${FILES}`]: true, [`workspace|${FILES}`]: false });
   assert.deepEqual(await run(), ["user"]);
@@ -101,7 +101,8 @@ test("user on and workspace off: the association goes to the user settings and b
   assert.deepEqual(uiCalls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S2
 test("off or not set in both scopes: no association is written and the leftover values are removed", async () => {
   const { values, writes, uiCalls, run } = setup({
     [`user|${FILES}`]: false,
@@ -114,7 +115,7 @@ test("off or not set in both scopes: no association is written and the leftover 
   assert.deepEqual(uiCalls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("a fresh install writes nothing at all", async () => {
   const { writes, globalState, workspaceState, uiCalls, run } = setup({});
   assert.deepEqual(await run(), []);
@@ -122,14 +123,14 @@ test("a fresh install writes nothing at all", async () => {
   assert.deepEqual([globalState.log, workspaceState.log, uiCalls], [[], [], []]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("the association is written before the setting is removed", async () => {
   const { writes, run } = setup({ [`user|${FILES}`]: true });
   await run();
   assert.deepEqual(writes, [`user|${ASSOCIATIONS}`, `user|${FILES}`]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("a failing association write keeps the setting, is logged, shows nothing, and the other scope still restores", async () => {
   const { values, errors, uiCalls, run } = setup({
     [`user|${FILES}`]: true,
@@ -143,7 +144,7 @@ test("a failing association write keeps the setting, is logged, shows nothing, a
   assert.deepEqual(uiCalls, [], "no notification, no warning, nothing");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("a second run writes nothing", async () => {
   const { writes, run } = setup({ [`user|${FILES}`]: true, [`workspace|${FILES}`]: true });
   await run();
@@ -152,7 +153,7 @@ test("a second run writes nothing", async () => {
   assert.deepEqual(writes, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("a malformed association keeps the setting, writes nothing there and shows nothing; the other retired setting is removed", async () => {
   const { values, writes, errors, uiCalls, run } = setup({
     [`user|${FILES}`]: true,
@@ -168,7 +169,7 @@ test("a malformed association keeps the setting, writes nothing there and shows 
   assert.deepEqual(uiCalls, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("a scope that has another editor for *.md keeps it and the setting is still removed", async () => {
   const { values, writes, run } = setup({
     [`user|${FILES}`]: true,
@@ -179,7 +180,7 @@ test("a scope that has another editor for *.md keeps it and the setting is still
   assert.deepEqual(writes, [`user|${FILES}`]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S2
 test("the state keys the 1.11.0 migration left are removed, and only when they exist", async () => {
   const { globalState, workspaceState, run } = setup({});
   globalState.values.set(OLD_MARK, true);
@@ -189,7 +190,7 @@ test("the state keys the 1.11.0 migration left are removed, and only when they e
   assert.deepEqual(workspaceState.log, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 test("a host without a setting writer restores nothing", async () => {
   const result = await restoreEditorAssociation({
     settingScopes: undefined, globalState: new MemoryStore(), workspaceState: new MemoryStore(), logger: recordingLogger(),

@@ -19,6 +19,11 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-027
+scenarios:
+- id: S1
+  title: nominal
+- id: S2
+  title: boundary
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -39,13 +44,13 @@ default_owner_email: gaetan@xeberon.net
 
 When the page copies a native selection, it SHALL cut the source verbatim from the character under the start edge to the character under the end edge, mapping a code block's characters exactly, an edge in a container's opening line to that line's start or end, a block under a tab item through the nearest mapped element and a card's current side through the block it copies, and adding nothing at either edge while preview.rawCopy.balanceEdges is off; on, see SwRS-MDOKFSTUDIO-BLOCK-278.
 
-### Scenario: nominal
+### Scenario S1: nominal
 
 - GIVEN a selection from a character of one block to a character of another
 - WHEN the copy is taken
 - THEN the clipboard text/plain is the source verbatim from the character under the start to the character under the end
 
-### Scenario: boundary
+### Scenario S2: boundary
 
 - GIVEN an edge that cannot be aligned with the source text
 - WHEN the copy is taken

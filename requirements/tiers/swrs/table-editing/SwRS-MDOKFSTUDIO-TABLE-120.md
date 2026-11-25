@@ -17,6 +17,21 @@ tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TABLE-001
 depends_on: []
+scenarios:
+- id: S1
+  title: Two spreadsheet rows pasted into a cell
+- id: S2
+  title: A grid that fits the table
+- id: S3
+  title: Start in the header row
+- id: S4
+  title: Line endings, empty values and pipes
+- id: S5
+  title: One undo step
+- id: S6
+  title: A single value or a text without a tab
+- id: S7
+  title: A list-table
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -38,22 +53,22 @@ default_owner_email: gaetan@xeberon.net
 
 When the writer pastes into a cell text box a text that holds a tab, the extension SHALL write its values into the cells from the open cell rightwards and downwards, add the missing columns at the right and the missing rows at the end, save the table in one edit and reopen the editor in that cell.
 
-### Scenario (nominal): Two spreadsheet rows pasted into a cell
+### Scenario S1 (nominal): Two spreadsheet rows pasted into a cell
 - GIVEN a table of three columns whose last row is "| Five | row five | erin |" with the cell "row five" open, and the clipboard holds "a\tb\tc\n1\t2\t3\n"
 - WHEN the writer pastes
 - THEN the row reads "| Five | a | b | c |" (one column is added at the right, with an empty header cell), a new last row reads "|  | 1 | 2 | 3 |", no tab character is written, the table is saved in one edit and the editor reopens in the second cell of the "Five" row showing "a"
 
-### Scenario (nominal): A grid that fits the table
+### Scenario S2 (nominal): A grid that fits the table
 - GIVEN a table of two columns and two body rows, the first body cell open, and the clipboard holds "p\tq\nr\ts"
 - WHEN the writer pastes
 - THEN the four cells hold the four values, no row or column is added and no cell outside the grid changes
 
-### Scenario (boundary): Start in the header row
+### Scenario S3 (boundary): Start in the header row
 - GIVEN the header cell of the first column open and a pasted grid of two lines
 - WHEN the writer pastes
 - THEN the first line fills the header row, the second line fills the first body row and the delimiter row is never written
 
-### Scenario (boundary): Line endings, empty values and pipes
+### Scenario S4 (boundary): Line endings, empty values and pipes
 | Pasted text | Outcome |
 | --- | --- |
 | a final line break ("\n", "\r\n" or "\r") | not a row of its own |
@@ -63,17 +78,17 @@ When the writer pastes into a cell text box a text that holds a tab, the extensi
 | a value with a pipe | written \| by the usual cell writing (SwRS-MDOKFSTUDIO-TABLE-091) |
 | a line shorter than the others | only its own values are written |
 
-### Scenario (boundary): One undo step
+### Scenario S5 (boundary): One undo step
 - GIVEN a grid paste that adds a row and a column
 - WHEN the writer undoes once in the source
 - THEN the source holds the table as it was before the paste
 
-### Scenario (refusal): A single value or a text without a tab
+### Scenario S6 (refusal): A single value or a text without a tab
 - GIVEN the clipboard holds "x", or "a\nb" (several lines, no tab)
 - WHEN the writer pastes into the cell text box
 - THEN the paste is native: it is not intercepted, nothing is saved by it and the line breaks of "a\nb" become spaces as before (SwRS-MDOKFSTUDIO-TABLE-091)
 
-### Scenario (boundary): A list-table
+### Scenario S7 (boundary): A list-table
 - GIVEN a plain {list-table} opened in the cell editor and a pasted grid wider than its columns
 - WHEN the writer pastes
 - THEN its rows and columns are added and the table is saved as a list-table in one edit

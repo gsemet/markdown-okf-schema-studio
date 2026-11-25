@@ -20,6 +20,11 @@ verified:
 origin: native
 tier: StRS
 derives_from: []
+scenarios:
+- id: S1
+  title: Open a comment chip
+- id: S2
+  title: Mark a line as TODO
 user_need: As a writer, I see the notes left in the source without opening the
   source, I read the clean text when I do not need the notes, and I mark a line
   as a to-do and unmark it without typing the comment markers.
@@ -70,7 +75,7 @@ sequenceDiagram
 
 ### Main paths
 
-#### Path 1: Open a comment chip
+#### Path S1: Open a comment chip
 
 1. A document holds an HTML comment
    - SwRS-MDOKFSTUDIO-REVIEW-133: the renderer writes a gray chip labelled comment
@@ -82,7 +87,7 @@ sequenceDiagram
    - Option SwRS-MDOKFSTUDIO-REVIEW-152 (nominal): the Comments button hides the gray and thread chips
 3. The comment box shows the comment text
 
-#### Path 2: Mark a line as TODO
+#### Path S2: Mark a line as TODO
 
 1. A block editor is open on a line
    - SwRS-MDOKFSTUDIO-REVIEW-160: the writer runs the TODO action from the edition palette or the slash menu and each touched line is wrapped in a TODO comment
