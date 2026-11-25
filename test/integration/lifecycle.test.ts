@@ -40,8 +40,6 @@ function replaceDocument(document: vscode.TextDocument, text: string): vscode.Wo
   return edit;
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-LIFE-001#S1
-// @accepts_req StRS-MDOKFSTUDIO-LIFE-003#S1
 // @tests_req SwRS-MDOKFSTUDIO-THEME-016#S1
 // @tests_req SwRS-MDOKFSTUDIO-THEME-016#S5
 export async function run(): Promise<void> {

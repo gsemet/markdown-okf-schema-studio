@@ -426,7 +426,6 @@ export async function scenarioEnterContinuesList(page: Page, evidence: Evidence)
  * RI-T32: the edited block keeps its viewport top across the render that follows Save.
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S1
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-228#S6
- * @accepts_req StRS-MDOKFSTUDIO-TABLE-001#S1
  */
 export async function scenarioSaveKeepsBlockInPlace(page: Page, evidence: Evidence): Promise<void> {
   const filler = (count: number, label: string): string[] =>
@@ -768,7 +767,6 @@ export async function scenarioEditAffordances(page: Page, evidence: Evidence): P
 
 /**
  * RI-T16: turning edit mode on keeps the reading layout of paragraphs that are not being edited.
- * @accepts_req StRS-MDOKFSTUDIO-BLOCK-001#S1
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S1
  * @tests_req SwRS-MDOKFSTUDIO-BLOCK-001#S3
  * @tests_req SwRS-MDOKFSTUDIO-LIFE-172#S4
@@ -932,7 +930,6 @@ export async function scenarioTableTab(page: Page, evidence: Evidence): Promise<
 
 /**
  * RI-T18: the table toolbar sits above the table, never covers a cell, and the cell does not jump.
- * @accepts_req StRS-MDOKFSTUDIO-TABLE-008#S1
  * @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
  */
 export async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<void> {

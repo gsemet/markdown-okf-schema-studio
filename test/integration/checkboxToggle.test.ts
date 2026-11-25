@@ -63,7 +63,6 @@ async function capture(
   console.log(`PASS checkbox screenshot: ${id}`);
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-GFM-003#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S3
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S4
 export async function run(): Promise<void> {

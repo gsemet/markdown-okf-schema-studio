@@ -147,7 +147,6 @@ async function readBlocks(page: Page): Promise<{ titles: string[]; card: string[
   }));
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-MYST-016#S1
 // @accepts_req StRS-MDOKFSTUDIO-MYST-016#S2
 /** myst-blocks: version titles, the card and the tab set render in read and edit mode. */
 export async function scenarioMystBlocks(page: Page): Promise<void> {

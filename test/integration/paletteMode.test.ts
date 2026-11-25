@@ -36,7 +36,6 @@ function startMode(html: string): string | undefined {
   return /"initialPaletteMode":"([a-z]+)"/u.exec(html)?.[1];
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-PALETTE-002#S1
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S4
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S5
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-170#S7

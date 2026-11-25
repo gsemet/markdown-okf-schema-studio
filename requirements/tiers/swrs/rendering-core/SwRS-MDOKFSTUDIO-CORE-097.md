@@ -9,8 +9,9 @@ description: 'When a maintainer runs the marker check, it SHALL read the scenari
   on a marker whose #S<n> fragment names a scenario its target does not declare, on
   a marker without a fragment on a target that declares scenarios, on a fragment on
   a target that declares none, on an @accepts_req outside test/integration/ (except
-  for the StRS of the release, the site and the built VSIX) or on a SwRS, and on a
-  @tests_req StRS marker under test/integration/ that is not on the baseline.'
+  for the StRS of the release, the site and the built VSIX) or on a SwRS, on a @tests_req
+  StRS marker under test/integration/ that is not on the baseline, and on an @implements_req
+  marker with a fragment.'
 project: markdown-okf-schema-studio
 scope: rendering-core
 req_lifecycle: proposed
@@ -32,6 +33,8 @@ scenarios:
   title: An acceptance marker targets a SwRS
 - id: S6
   title: A StRS tested in real VS Code
+- id: S7
+  title: An implementation marker names a scenario
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,7 +49,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a maintainer runs the marker check, it SHALL read the scenarios of every requirement and fail, naming the file, the line, the rule and the marker, on a marker whose #S<n> fragment names a scenario its target does not declare, on a marker without a fragment on a target that declares scenarios, on a fragment on a target that declares none, on an @accepts_req outside test/integration/ (except for the StRS of the release, the site and the built VSIX) or on a SwRS, and on a @tests_req StRS marker under test/integration/ that is not on the baseline.
+When a maintainer runs the marker check, it SHALL read the scenarios of every requirement and fail, naming the file, the line, the rule and the marker, on a marker whose #S<n> fragment names a scenario its target does not declare, on a marker without a fragment on a target that declares scenarios, on a fragment on a target that declares none, on an @accepts_req outside test/integration/ (except for the StRS of the release, the site and the built VSIX) or on a SwRS, and on a @tests_req StRS marker under test/integration/ that is not on the baseline. It SHALL also fail with the rule `implements-fragment` on an `@implements_req` marker with a fragment, whether or not its target declares that scenario: an implementation marker names a requirement as a whole, never one of its scenarios.
 
 ### Scenario S1 (nominal): Every marker names a declared scenario
 
@@ -83,6 +86,12 @@ When a maintainer runs the marker check, it SHALL read the scenarios of every re
 - GIVEN a `@tests_req <StRS-ID>#S<n>` under `test/integration/`
 - WHEN the maintainer runs the marker check
 - THEN it fails with `strs-tests-in-integration` unless the file is listed in the `strsTestsInIntegration` baseline at that count, and a listed file that shrinks or gets clean must be lowered or removed
+
+### Scenario S7 (refusal): An implementation marker names a scenario
+
+- GIVEN a requirement that declares the scenario S1 and a source marker `@implements_req <ID>#S1`
+- WHEN the maintainer runs the marker check
+- THEN it fails with `<path>:<line>: implements-fragment: @implements_req <ID>#S1`, while the same marker without the fragment passes
 
 ### Verification notes
 

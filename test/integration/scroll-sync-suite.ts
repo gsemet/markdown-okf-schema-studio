@@ -271,7 +271,6 @@ async function runBlockNavigation(
 }
 
 // @accepts_req StRS-MDOKFSTUDIO-LIFE-010#S1
-// @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-013#S1
 export async function run(): Promise<void> {
   // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
   await withSuiteWatchdog("scroll-sync-suite", runScrollSyncSuite);

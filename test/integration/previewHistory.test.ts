@@ -38,8 +38,6 @@ function historyOf(): NonNullable<ReturnType<typeof getActivePreviewForTests>>["
   return preview.history;
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-009#S1
-// @accepts_req StRS-MDOKFSTUDIO-TOOLBAR-011#S1
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S2
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S3
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059#S7

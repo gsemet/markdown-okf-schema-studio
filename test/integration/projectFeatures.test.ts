@@ -133,7 +133,6 @@ export async function run(): Promise<void> {
     assert.doesNotMatch(rendered.html, /sphinx-myst-liveview-accessibility\.css/u);
     assert.doesNotMatch(rendered.html, /unsafe-inline|default-src \*/iu);
 
-    // @accepts_req StRS-MDOKFSTUDIO-CORE-002#S1
     // A writer composes a document from an included file: the included content is shown in place
     // of the directive, mapped to the directive lines, and the directive itself is not shown.
     assert.doesNotMatch(rendered.html, /:::\{|```\{include\}/u);

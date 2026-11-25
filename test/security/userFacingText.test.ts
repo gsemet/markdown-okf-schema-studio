@@ -128,7 +128,6 @@ test("the literal scanner skips comments and finds strings in templates", () => 
   assert.deepEqual(hits.map((entry) => entry.line), [4, 5]);
 });
 
-// @tests_req StRS-MDOKFSTUDIO-TRUST-012#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-070
 test("no user-facing string literal mentions Sphinx", () => {
   const offenders: string[] = [];

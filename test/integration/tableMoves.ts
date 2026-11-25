@@ -188,7 +188,6 @@ async function activeHandle(page: Page, selector: string): Promise<boolean> {
     frame.locator(selector).evaluate((element) => element === element.ownerDocument.activeElement));
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-TABLE-013#S1
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S4
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-001#S5
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-122#S18
@@ -255,7 +254,6 @@ async function scenarioRawListTable(page: Page): Promise<void> {
   });
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-TABLE-002#S1
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
 /** A body row moves by mouse and by key, with and without a cell editor open. */

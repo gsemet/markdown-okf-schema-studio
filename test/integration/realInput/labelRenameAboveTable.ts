@@ -40,7 +40,6 @@ const CELL = "[data-sphinx-preview-table-cell-editor] textarea";
 /**
  * QA replay 271-c1-1: the Rename label field of a table's label opens above the icon, clear of
  * every cell, and a click on a cell while it is open opens the cell editor in the same click.
- * @accepts_req StRS-MDOKFSTUDIO-MYST-009#S2
  * @tests_req SwRS-MDOKFSTUDIO-MYST-038#S2
  */
 export async function scenarioLabelRenameAboveTable(page: Page): Promise<void> {

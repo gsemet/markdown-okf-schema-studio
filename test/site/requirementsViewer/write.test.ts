@@ -58,7 +58,6 @@ test("the viewer is written under requirements/ with its assets, index and redir
       assert.ok(fs.existsSync(path.join(site, file)), file);
     }
     assert.ok(!fs.existsSync(path.join(site, "requirements", "myst", "StRS-X-002")));
-    // @accepts_req StRS-MDOKFSTUDIO-CORE-008#S1
     // A reviewer reads the site written from a report: its home, an area, a use case and its
     // behaviours, without building anything.
     const home = fs.readFileSync(path.join(site, "requirements", "index.html"), "utf8");

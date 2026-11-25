@@ -257,6 +257,7 @@ export async function scenarioFlushBeforeLink(page: Page, evidence: Evidence): P
 
 /**
  * CR 025: Back across documents, right after typing.
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-006#S2
  */
 export async function scenarioFlushBeforeBack(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25b", async (first, second) => {
@@ -280,6 +281,7 @@ export async function scenarioFlushBeforeBack(page: Page, evidence: Evidence): P
 
 /**
  * CR 025: the preview follows another editor tab, right after typing; the screenshot comes back.
+ * @accepts_req StRS-MDOKFSTUDIO-BLOCK-006#S2
  */
 export async function scenarioFlushBeforeTabSwitch(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25c", async (first, second) => {

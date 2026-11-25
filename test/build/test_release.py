@@ -325,7 +325,6 @@ def test_invalid_version_is_non_mutating(repository: Path, version: str) -> None
     ] == before
 
 
-# @accepts_req StRS-MDOKFSTUDIO-CORE-007#S1
 def test_tag_bump_and_rerun(repository: Path, tmp_path: Path) -> None:
     """Tag only an increased version, and never move an existing remote tag."""
     remote = tmp_path / "remote.git"

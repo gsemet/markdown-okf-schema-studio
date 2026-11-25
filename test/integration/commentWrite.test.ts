@@ -34,7 +34,6 @@ function send(preview: PreviewForTests, type: string, fields: Record<string, unk
 const anchorOf = (line: number, quote: string) => ({ line, endLine: line, quote, prefix: "a ", suffix: " b" });
 const readThreads = (file: string): any[] => JSON.parse(fs.readFileSync(file, "utf8")).threads;
 
-// @accepts_req StRS-MDOKFSTUDIO-REVIEW-003#S1
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S3
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S4
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S3
@@ -222,7 +221,6 @@ export async function run(): Promise<void> {
   }
 }
 
-// @accepts_req StRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
