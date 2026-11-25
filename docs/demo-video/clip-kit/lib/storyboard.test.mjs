@@ -9,6 +9,7 @@ import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.m
 import { EXPECTED as EXPECTED_RADIO } from "../../clips/radio-buttons/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
 import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
+import { EXPECTED as EXPECTED_TABLE } from "../../clips/table-anchors/scenario.mjs";
 import { STAGE as STAGE_THEME } from "../../clips/theme-switch/scenario.mjs";
 import { parseClip, parseClipText, parseSections, validateStory } from "./storyboard.mjs";
 
@@ -32,6 +33,23 @@ const MARKS_THEME = [
   [5.2, 7.0],
   [7.0, 8.8],
 ];
+/** The marks of the shipped table-anchors clip.md: the times of its Mark rows. */
+const MARKS_TABLE = [
+  [7.6, 9.1],
+  [9.1, 10.6],
+];
+/** The stage of the table-anchors clip: one padded pipe table. */
+const STAGE_TABLE = [
+  "# Launch checklist",
+  "",
+  "| Task                | Team  | Due   |",
+  "| ------------------- | ----- | ----- |",
+  "| Write the notes     | Docs  | Mon   |",
+  "| Build the packages  | Build | Tue   |",
+  "| Fix the login bug   | QA    | Today |",
+  "| Publish the release | Docs  | Wed   |",
+  "",
+].join("\n");
 const darwin = { platform: "darwin" };
 
 /** A small valid storyboard, to change one thing at a time. */
@@ -478,4 +496,43 @@ test("the shipped advanced-renderings-tour clip.md reads as the clip the owner r
 test("the stage of the theme-switch scenario is the shipped stage file, byte for byte", () => {
   const stageFile = fileURLToPath(new URL("../../clips/theme-switch/stage/handbook.md", import.meta.url));
   assert.equal(STAGE_THEME, readFileSync(stageFile, "utf8"));
+});
+
+test("the shipped table-anchors clip.md reads as the clip the owner reviews", () => {
+  const tableFile = fileURLToPath(new URL("../../clips/table-anchors/clip.md", import.meta.url));
+  const table = parseClip(tableFile);
+  assert.equal(table.width, 1280);
+  assert.equal(table.height, 720);
+  assert.equal(table.fps, 15);
+  assert.equal(table.length, 12);
+  assert.deepEqual(
+    table.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Drag a row or a column by its handle", "The raw table follows, each cell keeps its spacing"],
+  );
+  assert.equal(table.captions.length, 2);
+  assert.equal(table.captions[0].from, 0);
+  assert.equal(table.captions[0].to, table.captions[1].from);
+  assert.equal(table.captions[1].to, table.length);
+  assert.deepEqual(table.badges, {});
+  assert.equal(table.zoom.id, "raw");
+  assert.deepEqual(
+    table.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  assert.deepEqual(table.marks.map((mark) => [mark.from, mark.to]), MARKS_TABLE);
+  for (const [index, mark] of table.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= table.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= table.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  const filmed = { filmed: table.length, presses: [], zooms: [{ id: "raw", t: 7.1 }], marks: [{ id: "1" }, { id: "2" }] };
+  assert.equal(validateStory(table, filmed, win32).platform, "win32");
+  // The "Expected result" block of clip.md is the scenario's text, character for character.
+  const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(tableFile, "utf8"));
+  assert.ok(block, "clip.md has an Expected result block");
+  assert.equal(`${block[1]}\n`, EXPECTED_TABLE);
+});
+
+test("the shipped table-anchors stage is the padded pipe table the clip films", () => {
+  const stageFile = fileURLToPath(new URL("../../clips/table-anchors/stage/launch-checklist.md", import.meta.url));
+  assert.equal(readFileSync(stageFile, "utf8"), STAGE_TABLE);
 });
