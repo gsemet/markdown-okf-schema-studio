@@ -135,6 +135,18 @@ test("the shipped editing page plays the spreadsheet paste clip as video", async
   }
 });
 
+test("the shipped slash menu page plays the grid clip as video", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  const clip = "docs/demo-video/clips/slash-menu-grid";
+  const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "slash-menu.md"), "utf8");
+  const rendered = await renderMyst(source);
+  const html = clipVideos(rendered.html, "docs/user/slash-menu.md", (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  assert.ok(html.includes(`<video src="../demo-video/clips/slash-menu-grid/slash-menu-grid.webm"`), "the page holds the clip's video");
+  for (const file of ["slash-menu-grid.webm", "slash-menu-grid.gif", "poster.png"]) {
+    assert.ok(fs.existsSync(path.join(EXTENSION_ROOT, clip, file)), file);
+  }
+});
+
 test("a clip's storyboard and stage documents are not site pages", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-095
   assert.equal(isClipSource("docs/demo-video/clips/x/clip.md"), true);
