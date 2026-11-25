@@ -20,8 +20,8 @@ derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-014
 depends_on:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-050
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-050; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

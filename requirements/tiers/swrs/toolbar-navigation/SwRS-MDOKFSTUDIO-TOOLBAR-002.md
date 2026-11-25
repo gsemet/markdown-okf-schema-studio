@@ -16,8 +16,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-TOOLBAR-004
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TOOLBAR-025; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

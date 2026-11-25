@@ -15,8 +15,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-BLOCK-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-014; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

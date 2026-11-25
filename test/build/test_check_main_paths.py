@@ -35,8 +35,8 @@ def req(
     return head + "---\n# T\n\n" + body
 
 
-def section(*lines: str) -> str:
-    return "### Rationale\n\nx\n\n### Main paths\n\n#### Path 1: p\n\n" + "\n".join(lines) + "\n\n<!-- okf:links:start -->\n"
+def section(*lines: str, heading: str = "#### Path 1: p") -> str:
+    return f"### Rationale\n\nx\n\n### Main paths\n\n{heading}\n\n" + "\n".join(lines) + "\n\n<!-- okf:links:start -->\n"
 
 
 def bundle(tmp: Path, strs_body: str, crlf: bool = False, depends: list[str] | None = None) -> Path:
@@ -69,6 +69,15 @@ def test_valid_section_passes(tmp_path: Path) -> None:
     body = section("1. Start", f"   - {P}-A-001: go", f"   - Option {P}-A-006 (refusal): other", "2. End")
     assert run(tmp_path, body) == ([], 1, 2)
     assert cmp.main(["x", str(tmp_path)]) == 0
+
+
+def test_path_with_a_declared_id_is_checked_like_a_numbered_path(tmp_path: Path) -> None:
+    body = section("1. Start", f"   - {P}-A-001: go", f"   - Option {P}-A-006 (refusal): other", "2. End", heading="#### Path S1: p")
+    assert run(tmp_path / "ok", body) == ([], 1, 2)
+    bad = section(f"   - {P}-A-099: go", f"   - {P}-A-005: no", heading="#### Path S1: p")
+    problems, checked, citations = run(tmp_path / "bad", bad)
+    assert checked == 1 and citations == 2 and len(problems) == 2
+    assert "does not exist" in problems[0] and "does not derive from StRS-T-A-001" in problems[1]
 
 
 def test_unknown_id_does_not_exist(tmp_path: Path) -> None:

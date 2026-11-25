@@ -18,8 +18,8 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-PALETTE-015
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-PALETTE-238; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

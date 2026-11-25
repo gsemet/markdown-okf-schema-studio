@@ -21,6 +21,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-076
 - SwRS-MDOKFSTUDIO-CORE-078
 - SwRS-MDOKFSTUDIO-CORE-094
+- SwRS-MDOKFSTUDIO-CORE-097
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -76,4 +77,5 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-CORE-076](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-076.md): CI tags a version change only after a green heavy run of the commit
   - [SwRS-MDOKFSTUDIO-CORE-078](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-078.md): A version ships only with its reviewed release notes
   - [SwRS-MDOKFSTUDIO-CORE-094](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-094.md): The release adds the commit of each changelog line
+  - [SwRS-MDOKFSTUDIO-CORE-097](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-097.md): The marker check refuses a marker that names no declared scenario or sits on the wrong bench
 <!-- okf:links:end -->

@@ -23,8 +23,9 @@ derives_from:
 - StRS-MDOKFSTUDIO-TABLE-006
 depends_on:
 - SwRS-MDOKFSTUDIO-BLOCK-058
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TABLE-123, SwRS-MDOKFSTUDIO-TABLE-124,
+  SwRS-MDOKFSTUDIO-TABLE-125, SwRS-MDOKFSTUDIO-TABLE-126; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

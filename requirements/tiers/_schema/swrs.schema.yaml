@@ -3,7 +3,9 @@ $id: swrs.schema.yaml
 title: okfreq software requirement profile
 description: >-
   SwRS defines observable software behavior derived from an StRS. It carries
-  annotation policy and generated implementation and test coverage fields.
+  annotation policy and generated implementation and test coverage fields. It
+  never carries acceptance evidence: a StRS main path is accepted, a SwRS
+  scenario is tested.
 allOf:
   - $ref: base.schema.yaml
   - type: object
@@ -46,6 +48,12 @@ allOf:
             id_marker: id
             show_line_number: true
         description: Generated exact test-file paths relative to the project root.
+      accepted_in_files:
+        type: array
+        maxItems: 0
+        description: >-
+          Never present. @accepts_req names a StRS main path; mark a SwRS test
+          with @tests_req <SwRS-ID>#S<n>.
       verification_method:
         type: string
         description: Author-selected verification method.
