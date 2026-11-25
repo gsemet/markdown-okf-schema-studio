@@ -1,0 +1,34 @@
+type: object
+title: Note
+additionalProperties: true
+required:
+  - type
+  - title
+  - status
+  - date
+properties:
+  type:
+    const: note
+    description: Document type of the OKF entry.
+  title:
+    type: string
+    minLength: 1
+    description: Short name of the note.
+  description:
+    type: string
+    description: One line on what the note covers.
+  status:
+    enum:
+      - draft
+      - published
+      - retired
+    description: Where the note stands.
+  date:
+    type: string
+    format: date
+    description: Date of the release.
+  tags:
+    type: array
+    items:
+      type: string
+    description: Words to find the note by.

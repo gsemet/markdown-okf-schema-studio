@@ -13,6 +13,8 @@ manually navigating raw YAML. The Markdown body remains a live, editable MyST pr
 
 ![A release note with no schema: a click on the draft value of the status row opens a text box, published is typed and saved, and the frontmatter table and the Status line of the page both read published](../demo-video/clips/okf-frontmatter/okf-frontmatter.gif)
 
+![A note in an OKF Schema bundle: its frontmatter table shows a Description column and type icons, the title badge counts one error for the value "publshed"; a click opens a select with the schema's values, published is picked and saved, the error goes away and the page body reads Status: published](../demo-video/clips/okf-schema-bundle-frontmatter/okf-schema-bundle-frontmatter.gif)
+
 ## Linked-File Annotations
 
 OKF-Schema supports `x-okf-link` annotations in the JSON Schema that allows Studio to display
