@@ -1,12 +1,13 @@
 // Tests of the storyboard parser: the shipped raw copy clip.md, and prepared texts for every refusal.
 // Node built-ins only: no ffmpeg, no VS Code, no network.
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
 import { EXPECTED as EXPECTED_RADIO } from "../../clips/radio-buttons/scenario.mjs";
+import { EXPECTED as EXPECTED_FRONTMATTER, STAGE as STAGE_FRONTMATTER } from "../../clips/okf-frontmatter/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
 import { EXPECTED as EXPECTED_FIGURE } from "../../clips/figure-editor/scenario.mjs";
 import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
@@ -589,4 +590,53 @@ test("the figure-editor stage is the figure the expected result rewrites, with a
   const svg = readFileSync(fileURLToPath(new URL("../../clips/figure-editor/stage/harbour-light.svg", import.meta.url)), "utf8");
   assert.ok(svg.startsWith("<svg"));
   assert.match(svg.split("\n")[0], /width="400" height="240"/u);
+});
+
+test("the shipped okf-frontmatter clip.md reads as the clip the owner reviews", () => {
+  const file = fileURLToPath(new URL("../../clips/okf-frontmatter/clip.md", import.meta.url));
+  const clip = parseClip(file);
+  assert.equal(clip.width, 1280);
+  assert.equal(clip.height, 720);
+  assert.equal(clip.fps, 15);
+  assert.ok(clip.length <= 12, `Length ${clip.length} s is inside 12 s`);
+  assert.deepEqual(
+    clip.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Click a frontmatter value to edit it in place", "The table and the page show the new value"],
+  );
+  assert.equal(clip.captions[0].from, 0);
+  assert.equal(clip.captions[0].to, clip.captions[1].from);
+  assert.equal(clip.captions[1].to, clip.length);
+  assert.deepEqual(Object.keys(clip.badges), ["save"]);
+  assert.equal(clip.zoom.id, "table");
+  assert.deepEqual(
+    clip.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  for (const [index, mark] of clip.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= clip.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= clip.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  const filmed = { filmed: clip.length, presses: [{ id: "save", t: 4.6 }], zooms: [{ id: "table", t: 6.2 }], marks: [{ id: "1" }, { id: "2" }] };
+  assert.equal(validateStory(clip, filmed, win32).platform, "win32");
+  assert.equal(validateStory(clip, filmed, darwin).platform, "darwin");
+  // The "Expected result" block of clip.md is the scenario's text, character for character.
+  const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(file, "utf8"));
+  assert.ok(block, "clip.md has an Expected result block");
+  assert.equal(block[1], EXPECTED_FRONTMATTER);
+});
+
+test("the stage of the okf-frontmatter scenario is the shipped stage file, byte for byte", () => {
+  const stageFile = fileURLToPath(new URL("../../clips/okf-frontmatter/stage/release-note.md", import.meta.url));
+  assert.equal(STAGE_FRONTMATTER, readFileSync(stageFile, "utf8"));
+});
+
+test("the okf-frontmatter clip changes the status line only, on a page with no type and no schema folder", () => {
+  const clipDir = fileURLToPath(new URL("../../clips/okf-frontmatter/", import.meta.url));
+  const stage = readFileSync(`${clipDir}stage/release-note.md`, "utf8").split("\n");
+  const after = `${EXPECTED_FRONTMATTER}\n`.split("\n");
+  assert.equal(after.length, stage.length);
+  const changed = stage.flatMap((line, index) => (line === after[index] ? [] : [[line, after[index]]]));
+  assert.deepEqual(changed, [["status: draft", "status: published"]]);
+  assert.ok(!stage.some((line) => line.startsWith("type:")), "the stage has no type field");
+  assert.equal(existsSync(`${clipDir}stage/_schema`), false, "the clip folder has no stage/_schema folder");
 });
