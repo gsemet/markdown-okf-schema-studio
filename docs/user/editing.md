@@ -177,6 +177,12 @@ environments),
   `{figure}` and opens the same form at once on the caption; Escape keeps the figure as inserted.
   Editing a table cell adds the inline buttons (bold, italic, link, colour, emoji and so on) to the
   row and column bar.
+  Cells copied from a spreadsheet (tab-separated text) and pasted into an open table cell fill the
+  cells from that one, rightwards and downwards; the columns and rows the table lacks are added,
+  in one undo step.
+
+  ![Five lines of tab-separated tasks are copied from a text editor with Ctrl+C / ⌘C and pasted with Ctrl+V / ⌘V into the header cell of a two-column table in Studio: a Due column and three rows are added](../demo-video/clips/paste-spreadsheet-cells/paste-spreadsheet-cells.gif)
+
   MyST `{list-table}` directives render with their title, `:header-rows:`, `:widths:` and
   `:align:`, styled like a pipe table. The table bar has a List table button that turns the pipe
   table into a `{list-table}`; in MyST mode, with the caret in a pipe, `{list-table}` or simple
