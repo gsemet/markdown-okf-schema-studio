@@ -1,9 +1,11 @@
 # Preview Themes
 
-The theme button on the third toolbar row cycles through the current VS Code theme, dark,
+The theme button on the second toolbar row cycles through the current VS Code theme, dark,
 white, and cream. Cream is a warm, low-glare paper palette with clay-coloured links and the theme
 a new workspace starts with. The choice is remembered per workspace. These three captures use the
 same document, viewport, and scroll state.
+
+![The Theme button is clicked four times: the whole page, the admonition, the Mermaid diagram and the Vega-Lite chart turn from Cream through the current theme, Dark and White back to Cream, and the diagram and the chart are drawn again in the new colours](../demo-video/clips/theme-switch/theme-switch.gif)
 
 | Dark | White | Cream |
 | --- | --- | --- |
