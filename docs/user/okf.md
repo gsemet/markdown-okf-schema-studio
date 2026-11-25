@@ -11,6 +11,8 @@ Studio makes that metadata comfortable to use. It turns frontmatter into a prope
 schema descriptions and diagnostics beside each field, and lets you edit typed values without
 manually navigating raw YAML. The Markdown body remains a live, editable MyST preview.
 
+![A release note with no schema: a click on the draft value of the status row opens a text box, published is typed and saved, and the frontmatter table and the Status line of the page both read published](../demo-video/clips/okf-frontmatter/okf-frontmatter.gif)
+
 ## Linked-File Annotations
 
 OKF-Schema supports `x-okf-link` annotations in the JSON Schema that allows Studio to display
