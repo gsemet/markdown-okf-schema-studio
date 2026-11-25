@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Each screenshot of the published gallery now has its own link, `gallery.html#<capture id>`, that opens it
+  directly, stays the same from one CI run to the next, and follows Back and Forward (CR-506 gallery-links, PR #525)
 - New command **Open in Studio at This Line** (Command Palette and the title bar menu of a Markdown text
   editor): it opens the file in a Studio tab at the caret's line and marks it, keeps the text tab, and
   reveals a Studio tab of the file already open in another group instead of opening a second one. In a

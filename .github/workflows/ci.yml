@@ -185,8 +185,8 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
-  # The use case map overlap tests in Chromium: its own job, so that the visual job keeps its time
-  # budget. Nothing consumes its reports, so it announces no artifact.
+  # The use case map overlap tests and the gallery link tests in Chromium: its own job, so that the
+  # visual job keeps its time budget. Nothing consumes its reports, so it announces no artifact.
   viewer-graph:
     runs-on: ubuntu-latest
     permissions:

@@ -285,7 +285,8 @@ assert the widths and the owner's verdicts on Windows, the reference, and are re
 Linux CI: they print the widths and the verdicts and name each difference from Windows, and
 never fail on one), `ci-viewer-graph` (the use case map tests, in a job of their own so that `visual` keeps its time budget: they write the JSON requirements report and check in
 Chromium, in pinned fonts, that no text or pill of any use case map overlaps another at 1280 px and
-at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`) and
+at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`; the same target runs the
+gallery link tests in Chromium) and
 `just ci-report visual`, which reports the real VS Code
 stage as skipped. The real VS Code window jobs (`ci-integration` and the
 `stress` repetitions) are heavy, so they run on every push to `main` and never on a pull request.
@@ -323,9 +324,14 @@ unrelated manual images and future video assets remain untouched. `just site` bu
 evidence, gallery, and static Pages tree. The published `out/site/gallery.html` includes every
 screenshot recursively from `out/reports/e2e/screenshots/`, not just the README selections. Each
 caption shows the sidecar summary. Selecting an image opens the full sidecar on the left and the
-image on the right; on narrow screens the sidecar appears above the image. Historical captures
-remain visible with their original metadata and are not certified as part of the latest passing
-campaign.
+image on the right; on narrow screens the sidecar appears above the image. Each screenshot has its
+own URL, `gallery.html#<capture id>`, which opens it directly, and Back and Forward step through
+the screenshots seen. The capture id is the path below the screenshot root without the file
+extension, with `visual/` dropped (the scenario id, plus `--<step>`) and the run folder of a
+real-window capture dropped (the registry id `<group>/rNN-<slug>`), so it stays the same from one
+CI run to the next; when two captures share an id, only the first in name order keeps it and the
+others take their full path. Historical captures remain visible with their original metadata and
+are not certified as part of the latest passing campaign.
 
 `just site` and `just ci-gallery` first write the requirements report (`just requirements-report`),
 and the published `out/site/requirements/` ("Requirements" in the site navigation) is built from
