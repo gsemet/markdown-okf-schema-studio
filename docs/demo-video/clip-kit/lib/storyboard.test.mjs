@@ -11,6 +11,7 @@ import { EXPECTED as EXPECTED_RADIO } from "../../clips/radio-buttons/scenario.m
 import { EXPECTED as EXPECTED_FRONTMATTER, STAGE as STAGE_FRONTMATTER } from "../../clips/okf-frontmatter/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
 import { EXPECTED as EXPECTED_FIGURE } from "../../clips/figure-editor/scenario.mjs";
+import { EXPECTED as EXPECTED_BUNDLE, FIXED, TYPO } from "../../clips/okf-schema-bundle-frontmatter/scenario.mjs";
 import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
 import { EXPECTED as EXPECTED_TABLE } from "../../clips/table-anchors/scenario.mjs";
 import { STAGE as STAGE_THEME } from "../../clips/theme-switch/scenario.mjs";
@@ -738,4 +739,44 @@ test("the shipped block-editor-modes clip.md reads as the clip the owner reviews
 test("the stage of the block-editor-modes scenario is the shipped stage file, byte for byte", () => {
   const stageFile = fileURLToPath(new URL("../../clips/block-editor-modes/stage/release-plan.md", import.meta.url));
   assert.equal(STAGE_MODES, readFileSync(stageFile, "utf8"));
+});
+
+test("the shipped okf-schema-bundle-frontmatter clip.md reads as the clip the owner reviews", () => {
+  const bundleFile = fileURLToPath(new URL("../../clips/okf-schema-bundle-frontmatter/clip.md", import.meta.url));
+  const bundle = parseClip(bundleFile);
+  assert.equal(bundle.width, 1280);
+  assert.equal(bundle.height, 720);
+  assert.equal(bundle.fps, 15);
+  assert.ok(bundle.length <= 12, `the clip is at most 12 s (${bundle.length})`);
+  assert.deepEqual(
+    bundle.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["The schema types each field: pick a valid value", "Studio validates the value: the error is gone"],
+  );
+  assert.equal(bundle.captions.length, 2);
+  assert.equal(bundle.captions[0].from, 0);
+  assert.equal(bundle.captions[0].to, bundle.captions[1].from);
+  assert.equal(bundle.captions[1].to, bundle.length);
+  assert.deepEqual(Object.keys(bundle.badges), ["save"]);
+  assert.equal(bundle.zoom.id, "table");
+  assert.deepEqual(bundle.marks.map((mark) => mark.id), ["1", "2"]);
+  assert.ok(bundle.marks[0].to <= bundle.marks[1].from, "the marks come in turn");
+  for (const mark of bundle.marks) assert.ok(mark.from >= 0 && mark.to <= bundle.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+  const take = { filmed: bundle.length, presses: [{ id: "save", t: 4.8 }], zooms: [{ id: "table", t: 6.9 }], marks: [{ id: "1" }, { id: "2" }] };
+  assert.equal(validateStory(bundle, take, win32).platform, "win32");
+  assert.equal(validateStory(bundle, take, darwin).platform, "darwin");
+  // The "Expected result" block of clip.md is the scenario's text, character for character.
+  const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(bundleFile, "utf8"));
+  assert.ok(block, "clip.md has an Expected result block");
+  assert.equal(block[1], EXPECTED_BUNDLE);
+});
+
+test("the stage of the okf-schema-bundle-frontmatter clip differs from the expected page by the status line only", () => {
+  const stageFile = fileURLToPath(new URL("../../clips/okf-schema-bundle-frontmatter/stage/notes/release-note.md", import.meta.url));
+  const schemaFile = fileURLToPath(new URL("../../clips/okf-schema-bundle-frontmatter/stage/_schema/note.schema.yaml", import.meta.url));
+  const stage = readFileSync(stageFile, "utf8");
+  assert.equal(stage.split("\n").filter((line) => line === TYPO).length, 1, "the stage holds the typo line once");
+  assert.equal(stage.replace(TYPO, FIXED), `${EXPECTED_BUNDLE}\n`);
+  const schema = readFileSync(schemaFile, "utf8");
+  assert.match(schema, /enum:\n\s+- draft\n\s+- published\n\s+- retired\n/u);
+  assert.ok(!schema.includes("publshed"), "the schema does not allow the typo");
 });
