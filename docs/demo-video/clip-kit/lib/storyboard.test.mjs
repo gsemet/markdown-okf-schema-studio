@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
 import { parseClip, parseClipText, parseSections, validateStory } from "./storyboard.mjs";
 
@@ -180,4 +181,39 @@ test("a storyboard with no Size and no Frame rate is 1920x1080 at 30 fps", () =>
   assert.equal(story.width, 1920);
   assert.equal(story.height, 1080);
   assert.equal(story.fps, 30);
+});
+
+test("the shipped drag-list-item clip.md reads as the clip the owner reviews", () => {
+  const dragFile = fileURLToPath(new URL("../../clips/drag-list-item/clip.md", import.meta.url));
+  const drag = parseClip(dragFile);
+  assert.equal(drag.width, 1280);
+  assert.equal(drag.height, 720);
+  assert.equal(drag.fps, 15);
+  assert.deepEqual(
+    drag.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Drag a list item by its handle, sub-items come along", "The raw text follows, numbers kept in order"],
+  );
+  assert.equal(drag.captions[0].from, 0);
+  assert.equal(drag.captions[0].to, drag.captions[1].from);
+  assert.equal(drag.captions[1].to, drag.length);
+  assert.deepEqual(drag.badges, {});
+  assert.equal(drag.zoom.id, "raw");
+  assert.equal(drag.zoom.holdTo, 9.5);
+  assert.deepEqual(
+    drag.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  assert.deepEqual(drag.marks.map((mark) => [mark.from, mark.to]), [[5, 6.6], [6.6, 8.2]]);
+  for (const [index, mark] of drag.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= drag.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= drag.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  // The "Expected result" block of clip.md is the scenario's text, character for character.
+  const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(dragFile, "utf8"));
+  assert.ok(block, "clip.md has an Expected result block");
+  assert.equal(`${block[1]}\n`, EXPECTED_DRAG);
+  const take = { filmed: drag.length, presses: [], zooms: [{ id: "raw", t: 4.4 }], marks: [{ id: "1" }, { id: "2" }] };
+  const out = validateStory(drag, take, win32);
+  assert.equal(out.platform, "win32");
+  assert.equal(out.fps, 15);
 });

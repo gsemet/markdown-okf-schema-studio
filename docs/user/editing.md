@@ -50,6 +50,9 @@ environments),
   sibling items, or focus it and press Alt+Up or Alt+Down. The item moves with its sub-items, and an
   ordered list keeps its numbers in order. Inside an alert or an admonition, the handles sit left of
   the box.
+
+  ![In edit mode, the second item of an ordered list is dragged by its handle above the first and moves with its two sub-items: the numbers stay in order and the raw Markdown beside follows](../demo-video/clips/drag-list-item/drag-list-item.gif)
+
   The "+" bar under a body block also has up and down arrows that swap the block above the bar
   with its neighbour in one undo step; blocks from an included file are not moved.
   The "+" bar and its arrows show on one block at a time: the one that moved last, by keyboard
