@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-11-25
+
+### Auto width: a code block fits its longest line (CR-508)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-LAYOUT-023 (in Auto a code block is widened until its longest line fits, its border and a caption bar included; an overflowing code block has no 1 px tolerance; nested code blocks stay a Known issue)
+- Reason: the measure used `scrollWidth`, which leaves out the borders while the breakout sets the border box, so a widened code block kept a 2 px scroll bar (and an overflow of up to 3 px was not widened); a captioned code block overflows inside its `pre`, so its figure never broke out
+- Tests: test/page/runtimePageControls.test.ts (T10b code block cases), test/page/codeBlockBreakout.test.ts (real browser)
+
 ## 2026-11-24
 
 ### Site: feature clips play as video

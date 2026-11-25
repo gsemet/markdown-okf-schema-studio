@@ -510,6 +510,104 @@ test("T10b: a layout pass in Auto keeps the sideways scroll of a wide table", ()
   assert.equal(table.scrollLeft, 300, `the table keeps its sideways scroll (scrollLeft ${table.scrollLeft})`);
 });
 
+/** A 700 px column in a 1000 px pane, with nothing in it yet (the `widthModeFixture` geometry). */
+function codeColumn() {
+  const harness = createRuntimeHarness();
+  harness.previewContent.clientWidth = 700;
+  harness.documentElement.clientWidth = 1000;
+  const make = (tag: string, box: number, scrollWidth: number, parent: RuntimeElement = harness.previewContent): RuntimeElement => {
+    const element = new RuntimeElement({}, harness.windowState, 0, 40, tag);
+    element.scrollWidth = scrollWidth;
+    element.rectProvider = () => ({ top: 0, height: 40, left: 0, width: box });
+    parent.appendChild(element);
+    return element;
+  };
+  // A code block as a browser lays it out: its border box, its padding box and its content.
+  const code = (box: number, scrollWidth: number, parent?: RuntimeElement): RuntimeElement => {
+    const element = make("pre", box, scrollWidth, parent);
+    element.clientWidth = 698;
+    return element;
+  };
+  return { harness, make, code };
+}
+
+const breakoutOf = (element: RuntimeElement): string => element.style.getPropertyValue("--sphinx-preview-breakout");
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a code block that breaks out is widened by its border too", () => {
+  const { harness, code } = codeColumn();
+  const block = code(700, 760);
+  harness.widthButton.dispatch("click");
+  assert.equal(block.getAttribute("data-sphinx-preview-wide"), "");
+  // 760 px of content plus the two 1 px borders, minus the column.
+  assert.equal(breakoutOf(block), "62px");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a captioned code block breaks out through its inner code", () => {
+  const { harness, make, code } = codeColumn();
+  const figure = make("figure", 700, 700);
+  code(700, 800, figure);
+  make("figcaption", 700, 700, figure);
+  harness.widthButton.dispatch("click");
+  assert.equal(figure.getAttribute("data-sphinx-preview-wide"), "");
+  assert.equal(breakoutOf(figure), "102px");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a code block that overflows by 1 px still breaks out, a table that gains 1 px does not", () => {
+  const { harness, make, code } = codeColumn();
+  const block = code(700, 699);
+  const table = make("table", 700, 701);
+  harness.widthButton.dispatch("click");
+  assert.equal(block.getAttribute("data-sphinx-preview-wide"), "");
+  assert.equal(breakoutOf(block), "1px");
+  assert.equal(table.getAttribute("data-sphinx-preview-wide"), null);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a code block that fits is not marked at a fractional width", () => {
+  const { harness, code } = codeColumn();
+  const block = code(700.4, 698);
+  harness.previewContent.rectProvider = () => ({ top: 0, height: 100, left: 120, width: 700 });
+  harness.widthButton.dispatch("click");
+  assert.equal(block.getAttribute("data-sphinx-preview-wide"), null);
+  assert.equal(breakoutOf(block), "");
+  assert.equal(block.style.getPropertyValue("--sphinx-preview-breakout-shift"), "");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a code block wider than the available area is capped", () => {
+  const { harness, code } = codeColumn();
+  const block = code(700, 1600);
+  harness.widthButton.dispatch("click");
+  assert.equal(breakoutOf(block), "268px");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a code block inside a list item is not measured", () => {
+  const { harness, make, code } = codeColumn();
+  const list = make("ol", 700, 700);
+  const item = make("li", 660, 660, list);
+  const block = code(660, 900, item);
+  harness.widthButton.dispatch("click");
+  for (const element of [list, item, block]) {
+    assert.equal(element.getAttribute("data-sphinx-preview-wide"), null, element.tagName);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a Mermaid figure is not a code block", () => {
+  const { harness, make, code } = codeColumn();
+  const figure = make("figure", 700, 700);
+  const source = make("details", 700, 700, figure);
+  const block = code(700, 900, source);
+  harness.widthButton.dispatch("click");
+  for (const element of [figure, source, block]) {
+    assert.equal(element.getAttribute("data-sphinx-preview-wide"), null, element.tagName);
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
 test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", () => {
   const harness = createRuntimeHarness();

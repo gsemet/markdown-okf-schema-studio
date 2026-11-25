@@ -296,7 +296,8 @@ def test_ci_visual_runs_the_table_breakout_width_tests_with_chromium_required() 
     breakout = recipe.index("STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout")
     assert visual < breakout < recipe.index("ci-visual: passed")
     scripts = json.loads((ROOT / "package.json").read_text())["scripts"]
-    assert scripts["test:breakout"].endswith("out/test/page/tableBreakout.test.js")
+    breakout_files = "out/test/page/tableBreakout.test.js out/test/page/codeBlockBreakout.test.js"
+    assert scripts["test:breakout"].endswith(breakout_files)
 
 
 def test_ci_viewer_graph_is_its_own_target_and_preflight_runs_it_after_visual() -> None:
