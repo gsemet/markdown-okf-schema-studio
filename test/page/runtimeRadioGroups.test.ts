@@ -227,7 +227,6 @@ function dropFocusOnContentPatch(harness: ReturnType<typeof createRuntimeHarness
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-040#S1
-// @tests_req SwRS-MDOKFSTUDIO-GFM-040#S3
 // @tests_req SwRS-MDOKFSTUDIO-GFM-041#S1
 // @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 test("after a choice with Space or a click and the content patch that follows, the option of the same line and column has the focus", () => {
@@ -262,8 +261,6 @@ test("after a choice with Space or a click and the content patch that follows, t
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S3
 test("a content patch while no option has the focus (an external rewrite) gives the focus to no option", () => {
   const harness = createRuntimeHarness({ radioGroup: ["x", " "], trackFocus: true });
   const focused = (): unknown => (harness.document as { activeElement?: unknown }).activeElement;

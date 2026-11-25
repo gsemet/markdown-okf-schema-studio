@@ -31,7 +31,6 @@ derived_by: []
 implemented_in_files:
 - src/page/features/blockSelectionView.ts
 tested_in_files:
-- test/core/mapping/quoteBlankRuns.test.ts
 - test/page/runtimeBlankLines.test.ts
 - test/page/runtimeBlankLinesContainers.test.ts
 default_owner_email: gaetan@xeberon.net

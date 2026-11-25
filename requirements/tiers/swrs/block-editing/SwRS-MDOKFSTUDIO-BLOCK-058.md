@@ -48,7 +48,6 @@ tested_in_files:
 - test/integration/blockClipboard.test.ts
 - test/integration/blockMove.test.ts
 - test/integration/checkboxToggle.test.ts
-- test/integration/inlineThread.test.ts
 - test/integration/previewEditing.test.ts
 - test/session/blockReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net

@@ -173,7 +173,7 @@ test("CR147: edit mode shows and builds no cards and keeps the green bars; leavi
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S1
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S6
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008#S1
 test("CR147: toggling the diff off removes the cards and restores the default", () => {
   const opened = open();
   toggle(opened);

@@ -195,8 +195,6 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(showIncomingChanges.default, true);
   assert.equal(showIncomingChanges.order, 22);
   assert.match(showIncomingChanges.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
-  // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CODE-039#S2
   // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S1
   // @tests_req SwRS-MDOKFSTUDIO-CODE-040#S4
   for (const [name, order] of [["darkBackground", 23], ["lineNumbers", 24]] as const) {
@@ -459,7 +457,7 @@ test("CR-445: Open as Text is in the palette and the editor title overflow of a 
   assert.notEqual(title[0]!.group, "navigation", "an overflow entry, not a toolbar button");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S1
 test("CR-483: Open in Studio at This Line is a palette and title command for Markdown text editors, with no keybinding and no opening setting", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     contributes: {

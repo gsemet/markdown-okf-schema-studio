@@ -58,7 +58,6 @@ export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
     { name: "cream", theme: "light", mode: "cream" },
     { name: "dark", theme: "dark", mode: undefined },
   ] as const).map((variant, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S2
     // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S4
     // @tests_req SwRS-MDOKFSTUDIO-MYST-100#S1
     // @tests_req SwRS-MDOKFSTUDIO-MYST-098#S1

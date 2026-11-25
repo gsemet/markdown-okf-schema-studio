@@ -1008,7 +1008,6 @@ test("switching the active file retitles the side preview and shows the followin
   assert.doesNotMatch(lastHtml(panel), /Following the active Markdown editor\./u, "the pending message ends with the render");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-024#S2
 test("an Open With tab is titled with the bare file name", async (t) => {
   const studio = start(t);
   const file = writeFile("# Fixed\n", workspaceRoot, `fixed-${process.pid}.md`);

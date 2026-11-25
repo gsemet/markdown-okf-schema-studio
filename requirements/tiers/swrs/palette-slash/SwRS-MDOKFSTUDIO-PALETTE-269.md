@@ -31,7 +31,6 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editPalette.test.ts
 - test/visual/admonitionTypePickerScenarios.ts
-- test/visual/releaseShowcaseScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

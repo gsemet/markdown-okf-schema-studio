@@ -102,7 +102,6 @@ test("frontmatter field patches preserve comments, fences, line endings, and bod
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S3
 test("frontmatter scalar and object edits preserve YAML node metadata", () => {
   const source = [
     "---",
@@ -137,7 +136,6 @@ test("frontmatter scalar and object edits preserve YAML node metadata", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S1
-// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043#S3
 test("frontmatter array edits keep comments attached to reordered items", () => {
   const source = [
     "---",

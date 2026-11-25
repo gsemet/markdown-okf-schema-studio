@@ -113,6 +113,8 @@ test("the SwRS of a test come from the marker block above it or inside its body,
     { name: "first", ids: ["SwRS-X-A-001", "SwRS-X-A-002"], line: 2 },
     { name: "second", ids: [], line: 6 },
   ]);
+  const withFragments = ["// @tests_req SwRS-X-A-004#S1", "// @tests_req SwRS-X-A-004#S2", 'test("third", () => {});'].join("\n");
+  assert.deepEqual(pure.testsOfSource(withFragments), [{ name: "third", ids: ["SwRS-X-A-004"], line: 3 }]);
   const map = pure.swrsByTest({ "core/x/a.test.ts": source }, { "core/x/a.markers.ts": "// @tests_req SwRS-X-A-003 — second\n" });
   assert.deepEqual([...(map.get("core/x/a.test.js::second") ?? [])], ["SwRS-X-A-003"]);
 });

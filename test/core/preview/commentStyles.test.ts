@@ -7,7 +7,6 @@ import { COMMENT_CSS } from "../../../src/core/preview/styles/commentStyles";
 // The comment stylesheet is joined from named parts (chips, incoming changes, review popovers,
 // orphaned comments box, hiding rules, image fit). Splitting it must not change one byte: the length
 // and digest below are those of the former single constant.
-// @tests_req SwRS-MDOKFSTUDIO-CORE-008#S1
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-143#S4
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-143#S6
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-028#S2

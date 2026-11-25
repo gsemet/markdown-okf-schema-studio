@@ -106,7 +106,6 @@ for (const [name, eol] of EOLS) {
     assert.deepEqual(quoteBlankRuns(join(eol, ["> ```", "> a", ">", ">", "> b", "> ```"])), [{ line: 3, endLine: 4 }]);
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S2
   test(`${name}: checkBlankLine accepts every line of a quote run but its first`, () => {
     const text = join(eol, ["> a", ">", ">", ">", "> b", ""]);
     assert.equal(checkBlankLine(text, 3), undefined);
@@ -120,7 +119,6 @@ for (const [name, eol] of EOLS) {
     assert.equal(checkBlankLine(join(eol, ["> a", ">", "> >", "> >", "> b"]), 4), undefined, "another depth above");
   });
 
-  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-267#S1
   test(`${name}: checkBlankLine refuses a line that is not a shown blank line of a quote run`, () => {
     const stale = (text: string, line: number, why: string): void => assert.ok(checkBlankLine(text, line), why);
     stale(join(eol, ["> a", ">", ">", "> b"]), 2, "the first empty quote line is the separator");

@@ -49,7 +49,6 @@ tested_in_files:
 - test/page/runtimeBlockEditorLineEndings.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/lineEndingSave.test.ts
-- test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

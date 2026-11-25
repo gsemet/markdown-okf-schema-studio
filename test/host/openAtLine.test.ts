@@ -19,10 +19,6 @@ function start(t: TestContext): Studio {
   return studio;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S2
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S4
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S2
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-004#S3
 test("an activation with no preview starts no service, the first preview starts them once, a second one does not again", async (t) => {
   const studio = start(t);
   setCurrentActivation(studio.activation);

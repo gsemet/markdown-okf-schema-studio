@@ -37,7 +37,6 @@ implemented_in_files:
 - src/page/features/themeMode.ts
 tested_in_files:
 - test/core/preview/creamTheme.test.ts
-- test/integration/realInput/previewWindow.ts
 - test/page/diagReq.themeZoom.requirements.test.ts
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts

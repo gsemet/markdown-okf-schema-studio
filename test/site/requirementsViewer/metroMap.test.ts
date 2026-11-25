@@ -173,7 +173,6 @@ test("metroSvg draws the backtick spans of a caption in monospace, without the b
 
 test("metroSvg draws a fourth path in the third colour", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S4
   const model = load();
   const four = paths([1, 2, 3, 4].map((index) => `#### Path ${index}: P${index}\n1. S${index}\n   - SwRS-X-01${index}: go ${index}\n2. T${index}\n`).join("\n"));
   const svg = metroSvg(model, four, "requirements/gfm/x");

@@ -22,7 +22,7 @@ test("a pending line is taken once, and only for its own URI", () => {
   assert.equal(pending.has("file:///a.md"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
 test("a pending line past the window is dropped, and one at the window is still taken", () => {
   const { pending, clock } = lines();
   pending.record("file:///a.md", 7);
@@ -46,7 +46,7 @@ test("a second request for the same URI replaces the first, and drop forgets it"
   assert.equal(pending.take("file:///a.md"), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
 test("a line delivered to a live session is not left pending, and one nobody takes is recorded", () => {
   const { pending } = lines();
   const sent: Array<[string, number, number | undefined]> = [];

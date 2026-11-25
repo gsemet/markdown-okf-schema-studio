@@ -59,7 +59,6 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
       + "a small warning icon follows each of the two that cannot be opened.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-GFM-034#S1
     // @tests_req SwRS-MDOKFSTUDIO-GFM-034#S4
     id: `gfm/v0${7 + index}-raw-table-colour-spans-${theme}-900`,
     fixture: "59-raw-table-colour-spans",
@@ -88,8 +87,7 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
     { name: "cream", theme: "dark", mode: "cream" },
   ] as const).flatMap((variant, index) => [
     {
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S1
-      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S3
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002#S5
       id: `table-editing/v0${6 + index}-row-handles-${variant.name}-900`,
       fixture: "56-table-row-handles",
       theme: variant.theme,
@@ -188,8 +186,7 @@ export const SCENARIO_DEFINITIONS_3: ScenarioDefinition[] = [
     description: `Edit mode, ${variant.name} preview, 900 px pane: a pipe table of fourteen columns, wider than the pane and scrolled sideways, keeps the handle of each body row left of the table, outside its scrolling box, visible and centred on its row.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S1
-    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S7
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048#S4
     id: `table-editing/v${24 + index}-table-bar-groups-${theme}-360`,
     fixture: "60-table-bar-groups",
     theme,

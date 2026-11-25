@@ -35,7 +35,6 @@ implemented_in_files:
 tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
-- test/session/heldEditSource.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-TABLE-118

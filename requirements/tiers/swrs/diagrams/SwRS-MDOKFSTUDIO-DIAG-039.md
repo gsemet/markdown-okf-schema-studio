@@ -38,7 +38,6 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/page/rendererBridge.test.ts
-- test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-DIAG-041

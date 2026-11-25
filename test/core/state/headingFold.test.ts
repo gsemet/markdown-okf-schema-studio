@@ -41,7 +41,7 @@ test("a section ends at the next heading of the same or a higher level, and may 
   assert.equal(hasSection([2, 3, undefined], 0), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S1
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-004#S2
 test("the key tells two headings with the same text apart by their occurrence", () => {
   assert.equal(headingFoldKey(2, "Scope", 0), "2|Scope|0");
   assert.notEqual(headingFoldKey(2, "Scope", 0), headingFoldKey(2, "Scope", 1));

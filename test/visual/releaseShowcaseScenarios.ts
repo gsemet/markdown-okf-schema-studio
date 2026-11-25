@@ -43,7 +43,6 @@ export const RELEASE_SHOWCASE_SCENARIOS: ScenarioDefinition[] = [
     ],
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-269#S2
     id: "rendering-core/v27-release-1-3-showcase-cream-1200",
     fixture: "80-release-1-3-showcase",
     theme: "light",

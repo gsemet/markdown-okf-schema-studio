@@ -31,7 +31,6 @@ implemented_in_files:
 - src/core/preview/styles/contentLayoutStyles.markers.ts
 - src/core/preview/styles/tableStyles.markers.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
 - test/core/preview/previewStylesGutter.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 default_owner_email: gaetan@xeberon.net

@@ -122,8 +122,7 @@ test("br, sub, sup, kbd, an image link and details render like on GitHub", async
   assert.equal(textContent(findElement(details, isTag("em"))!), "text");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S2
-// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S6
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071#S7
 test("raw HTML keeps no script, event handler, style, class or script URL", async () => {
   const html = await render([
     "<div align=\"center\" onclick=\"steal()\" style=\"position:fixed\" class=\"evil\" id=\"x\">",

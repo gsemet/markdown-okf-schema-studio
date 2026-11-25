@@ -82,7 +82,6 @@ async function withFixture(
 // @accepts_req StRS-MDOKFSTUDIO-BLOCK-025#S2
 // @accepts_req StRS-MDOKFSTUDIO-BLOCK-016#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-166#S2
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166#S6
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-174#S5
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S5
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S8

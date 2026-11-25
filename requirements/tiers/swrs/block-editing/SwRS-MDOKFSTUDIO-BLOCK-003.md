@@ -37,7 +37,6 @@ implemented_in_files:
 - src/page/modules/textEditing.ts
 - src/session/previewManager.ts
 tested_in_files:
-- test/core/protocol/hostToPage.test.ts
 - test/integration/editKeys.test.ts
 - test/page/modules/editCommandKey.test.ts
 - test/page/modules/selectAllKey.test.ts

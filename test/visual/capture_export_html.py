@@ -24,7 +24,7 @@ FIRST_PANEL = f"{TAB_SET} .myst-tab-panel[data-export-tab='1']"
 SECOND_PANEL = f"{TAB_SET} .myst-tab-panel[data-export-tab='2']"
 
 
-# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S1
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S1
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-136#S2
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S3

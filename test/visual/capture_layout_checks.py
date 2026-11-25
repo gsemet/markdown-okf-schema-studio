@@ -762,7 +762,7 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
     failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
 
 
-# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020#S3
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020#S1
 def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The Width button cycles margin, auto and full; only Auto lets wide blocks leave the column."""
   if not scenario.get("widthModeChecks"):

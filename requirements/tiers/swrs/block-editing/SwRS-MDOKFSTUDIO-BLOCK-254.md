@@ -41,7 +41,6 @@ tested_in_files:
 - test/integration/realInput/blockKeys.ts
 - test/page/modules/structuralCursor.test.ts
 - test/page/runtimeStructuralNavigation.test.ts
-- test/session/listItemEditOpen.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 ---

@@ -92,8 +92,6 @@ test("each rule matches the identity it names, and only that", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S6
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003#S2
 test("the payload checks refuse what the page used to refuse", () => {
   const refused: Array<[HostToPageType, Record<string, unknown>]> = [
     ["previewPropertiesTable", { markup: 42 }],
@@ -127,7 +125,7 @@ test("the payload checks refuse what the page used to refuse", () => {
   }, page), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-181#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-181#S2
 test("previewRevealLine needs a 1-based safe integer line and addresses its render", () => {
   const send = (extra: Record<string, unknown>): boolean =>
     filter.accepts({ type: "previewRevealLine", ...page, ...extra }, page);

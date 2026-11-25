@@ -29,7 +29,6 @@ implemented_in_files:
 - src/core/preview/styles/contentLayoutStyles.markers.ts
 tested_in_files:
 - test/core/preview/previewStylesGutter.test.ts
-- test/page/geometryChecks.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net

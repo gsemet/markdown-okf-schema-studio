@@ -181,7 +181,6 @@ export async function scenarioMystBlocks(page: Page): Promise<void> {
         if (shots !== undefined) await shoot(page, path.join(shots, `read-${name}.png`));
         const blocks = await readBlocks(page);
         // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S4
-        // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S5
         if (JSON.stringify(blocks.titles) !== JSON.stringify(["Added in version 0.47", "Changed in version 0.50", "Deprecated since version 1.0"])) {
           failures.push(`${name}: version titles ${JSON.stringify(blocks.titles)}`);
         }

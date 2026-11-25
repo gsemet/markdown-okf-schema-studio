@@ -59,7 +59,6 @@ test("comment thread text reaches WCAG AA 4.5:1 on its surface in every theme mo
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-002#S2
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-002#S3
 test("the comment popover and boxes never dim their text with opacity", () => {
   const rules = COMMENT_CSS.split("}").filter((rule) =>

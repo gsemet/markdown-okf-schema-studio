@@ -97,7 +97,7 @@ test("a closed details block holding the line is opened first", () => {
   assert.equal(overlays(harness).length, 1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-179#S1
 test("the marker stays when the reader scrolls and is placed again after a layout change", () => {
   const harness = createRuntimeHarness();
   reveal(harness, 50);
@@ -141,7 +141,7 @@ test("in edit mode the marker opens no editor and the overlay is never an edit t
   assert.equal(overlays(harness).length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a page with no mapped block draws nothing", () => {
   const harness = createRuntimeHarness({ emptyBody: true });
   reveal(harness, 5);

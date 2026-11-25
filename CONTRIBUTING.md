@@ -127,7 +127,9 @@ Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render
   shares its name with a live one, but it never reports a live one. A deliberate exception goes in
   `scripts/unused-exports-allowlist.json` with its reason; an entry that is no longer needed fails
   the check.
-- `just check-markers` checks the requirement markers: every in-force, non-exempt SwRS has an
+- `just check-markers` checks the requirement markers (a `#S<n>` fragment names a declared scenario or
+  path; `@implements_req` never has one; see "Scenario and path markers" in the project guidelines):
+  every in-force, non-exempt SwRS has an
   `@implements_req` in a source directory; a marker block (markers with no code line between them)
   names at most 3 requirement IDs; a companion marker file (`*.markers.ts`, or any file under `src/`
   or `test/` with a `// Companion of: <path>` line) names an existing host, marks only existing

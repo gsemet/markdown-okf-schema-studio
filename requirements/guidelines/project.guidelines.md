@@ -38,7 +38,7 @@ step by step, each step backed by the SwRS that moves the user to the next state
 ```markdown
 ### Main paths
 
-#### Path 1: <short name of the path>
+#### Path S1: <short name of the path>
 
 1. <state, in the reader's words>
    - SwRS-<ID>: <what moves the reader to the next state>
@@ -47,13 +47,15 @@ step by step, each step backed by the SwRS that moves the user to the next state
    ...
 3. <final state: the result the user wanted>
 
-#### Path 2: <name>
+#### Path S2: <name>
 
 1. <a state already named in path 1, same words: the paths join there>
    - SwRS-<ID>: ...
 2. <final state>
 ```
 
+- A path heading is `#### Path S<n>: <name>`, numbered S1, S2, S3 in order: the id is how a test
+  names the path (`@accepts_req StRS-<ID>#S<n>`, see "Scenario and path markers").
 - A state is the same state in every path when its text is the same.
 - The first bullet without `Option` is the step to the next state; it is drawn on the path.
 - `Option` bullets are the other outcomes at that state; the scenario kind in brackets, when
@@ -167,6 +169,28 @@ the rules below; the definition comes first.
   `node scripts/check-marker-companions.mjs --update` (the check says so), which also removes the
   entries that reached 0. A new marker list over 3 IDs or a new unnamed companion line is never
   added to the baseline: put the markers at their code or tests.
+
+### Scenario and path markers
+
+okfreq 0.18 declares the scenarios of a SwRS and the paths of a StRS, and a marker names the one it
+checks. `just check-markers` holds these rules (`fragment-undeclared`, `fragment-required`,
+`fragment-unexpected`, `implements-fragment`, `accepts-placement`, `accepts-on-swrs`,
+`strs-tests-in-integration`):
+
+- A SwRS lists its scenarios in the `scenarios:` of its frontmatter, and each has a heading
+  `### Scenario S<n> (<nominal|boundary|refusal>): <title>` with the same id. A StRS lists its paths
+  in `scenarios:` and writes `#### Path S<n>: <name>`.
+- A test names the scenario it checks with `@tests_req <SwRS-ID>#S<n>`, one marker line per
+  scenario (a test that checks two scenarios has two lines). A test that exercises no declared
+  scenario has no marker for that SwRS: never pick a fragment by guess, the scenario stays
+  uncovered and is reported as such.
+- A StRS path walked end to end in real VS Code, under `test/integration/`, is
+  `@accepts_req <StRS-ID>#S<n>`. Only CORE-007, CORE-008 and TRUST-014 may sit under `test/build`,
+  `test/security`, `test/site` or `test/core`. `@accepts_req` never targets a SwRS, and no
+  `@tests_req StRS-...` sits under `test/integration/`.
+- `@implements_req <SwRS-ID>` has no fragment: the code implements the requirement as a whole.
+- A marker on a requirement that declares no `scenarios:` has no fragment either.
+- The 3-ID cap of a marker block counts requirement IDs: the fragments of one ID count once.
 
 ### Approved requirements
 

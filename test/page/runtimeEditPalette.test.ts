@@ -309,7 +309,6 @@ test("P4: a palette taller than 40% of the viewport is not sticky; a small one i
 
 test("P4: the clearance reserve is uncapped at the page top and capped to one bar height when scrolled", () => {
   // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S3
-  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021#S8
   const measure = (scrollY: number): string | undefined => {
     const harness = createRuntimeHarness();
     openBlockEditorWithSource(harness);

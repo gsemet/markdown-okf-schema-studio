@@ -201,7 +201,7 @@ const DEFINITIONS: Shape = {
   ],
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a run in a loose definition shows in its dd; a run between two entries ends the dd above", () => {
   const { harness, elements } = build("13-13 18-18", DEFINITIONS);
@@ -222,7 +222,7 @@ const footnote = (label: number, ...children: Shape[]): Shape => ({
   tag: "li", attrs: { "data-okf-footnote-line": String(label) }, children,
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-268#S6
 test("a footnote run shows in the footnote: in its body, after a label alone, and between two footnotes", () => {
   const section = FOOTNOTES([footnote(60, p(60), p(64)), footnote(70, p(73)), footnote(80, p(80))]);
@@ -240,7 +240,7 @@ test("a footnote run shows in the footnote: in its body, after a label alone, an
   assert.deepEqual(opened(build("72-72", section).harness), { line: 72, endLine: 72, containerLine: 70 });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
 test("a run between a footnote and the body after it shows in the body, after the block above it", () => {
   const section = FOOTNOTES([footnote(20, p(20), p(24))]);
   const { harness } = build("27-27", p(15), section, p(30));
@@ -309,7 +309,6 @@ test("a run inside a folded quote shows nothing, and unfolding shows it", () => 
 const DROPDOWN: Shape = { ...ADMONITION, tag: "details", className: "admonition note dropdown" };
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S3
 test("a run in a closed dropdown shows when it opens and goes when it closes", () => {
   const { harness, elements } = build("14-14", DROPDOWN);
   assert.equal(blankBlocks(harness).length, 0, "closed");
@@ -322,7 +321,6 @@ test("a run in a closed dropdown shows when it opens and goes when it closes", (
   assert.equal(blankBlocks(harness).length, 0, "closed again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
 test("an insertion editor opened in a dropdown stays when the dropdown closes", () => {
   const { harness, elements } = build("14-14", { ...DROPDOWN, attrs: { open: "" } });
   const blank = blankBlocks(harness)[0]!;

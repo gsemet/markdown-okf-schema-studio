@@ -148,7 +148,6 @@ function hostWithWarnings(warnings: string[], logger: MemoryLogger = createMemor
   } as unknown as HostServices;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-002#S1
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-002#S3
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S3
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S5

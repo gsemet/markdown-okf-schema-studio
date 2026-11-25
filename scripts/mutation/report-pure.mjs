@@ -263,7 +263,7 @@ export function redundantTests(kills) {
 
 // --- tests to SwRS -------------------------------------------------------------------------------
 
-const MARKER = /^\s*(?:(?:#|\/\/|\/\*|\*|<!--)\s*)?@tests_req\s+([A-Za-z][A-Za-z0-9_-]*)(?:\s+—\s+(.*))?$/u;
+const MARKER = /^\s*(?:(?:#|\/\/|\/\*|\*|<!--)\s*)?@tests_req\s+([A-Za-z][A-Za-z0-9_-]*)(?:#S[1-9][0-9]*)?(?:\s+—\s+(.*))?$/u;
 const OTHER_MARKER = /^\s*(?:(?:#|\/\/|\/\*|\*|<!--)\s*)?@implements_req\s/u;
 const TEST_CALL = /^\s*(?:test|it)(?:\.(?:skip|todo|only))?\(\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|`((?:[^`\\$]|\\.)*)`)/u;
 const TEST_OPEN = /^\s*(?:test|it)(?:\.(?:skip|todo|only))?\(\s*$/u;

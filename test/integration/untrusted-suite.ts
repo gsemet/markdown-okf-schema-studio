@@ -87,8 +87,8 @@ async function runCaptures(): Promise<void> {
 }
 
 // @accepts_req StRS-MDOKFSTUDIO-TRUST-004#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S5
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S6
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
 /**
  * Restricted Mode loads a local image only from the allowed folders: an image beside the document
  * is shown from a webview address, and an existing image outside the workspace, named by a relative
@@ -153,9 +153,8 @@ async function runRestrictedImages(): Promise<void> {
 }
 
 // @accepts_req StRS-MDOKFSTUDIO-TRUST-001#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S5
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 export async function run(): Promise<void> {
   // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
   await withSuiteWatchdog("untrusted-suite", runUntrustedSuite);

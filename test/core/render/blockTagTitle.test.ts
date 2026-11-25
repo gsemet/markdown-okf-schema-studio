@@ -20,7 +20,6 @@ test("an HTML element block is titled with its real opening tag, attributes incl
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S1
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003#S4
 test("a long opening tag is shortened with an ellipsis and keeps its closing bracket", () => {
   const long = `<div align="center" class="${"x".repeat(80)}" id="top">`;
   const title = openingTagTitle(long)!;

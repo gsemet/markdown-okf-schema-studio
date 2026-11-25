@@ -43,7 +43,6 @@ implemented_in_files:
 - src/session/features/blockEdits.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
-- test/integration/previewEditing.test.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeDetachedSave.test.ts

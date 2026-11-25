@@ -34,8 +34,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/configuration/editorAssociationMigration.test.ts
 - test/host/openAtLine.test.ts
-- test/integration/openAtLine.test.ts
-- test/integration/openAtLineProbe.test.ts
 - test/integration/reverse-migration-suite.ts
 - test/session/associationMigration.test.ts
 default_owner_email: gaetan@xeberon.net

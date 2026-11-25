@@ -106,7 +106,7 @@ test("the cached index is shared by concurrent callers and rebuilt after an inva
   assert.deepEqual(rebuilt.stems(), ["one", "two"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S5
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055#S6
 test("an invalidation during a build discards that build", async () => {
   const f = fixture();
   f.memory.addFile("/ws/a/one.md", "# 1\n");
@@ -138,7 +138,6 @@ test("document-relative, bundle and project links resolve through the port", asy
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S1
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063#S3
 test("a linked file with a BOM and a marker gives its details through the port", async () => {
   const f = fixture();
   f.memory.addFile("/ws/docs/target.md", "\uFEFF---\ntitle: Target\n---\n# Target\n@ref alpha\n");

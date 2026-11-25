@@ -136,7 +136,6 @@ async function scenarioOrderedDragAndUndo(page: Page): Promise<void> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
 /** An item with a sub-list moves with it. */
 async function scenarioSubListDrag(page: Page): Promise<void> {
   const source = lines("# Lists", "", "- alpha", "  - alpha one", "  - alpha two", "- beta", "");
@@ -158,8 +157,7 @@ async function scenarioAlertDrag(page: Page): Promise<void> {
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S7
 /** A drop over an item of another list leaves the document as it was. */
 async function scenarioDropOverAnotherList(page: Page): Promise<void> {
   const source = lines("# Lists", "", "- red", "- green", "", "Between.", "", "- left", "- right", "");

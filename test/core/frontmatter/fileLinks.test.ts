@@ -92,7 +92,6 @@ test("oneOf annotations are collected only when exactly one branch matches", () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S2
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046#S4
 test("conditional, patternProperties, and additionalProperties schemas are traversed", () => {
   const schema: Record<string, unknown> = {
     type: "object",

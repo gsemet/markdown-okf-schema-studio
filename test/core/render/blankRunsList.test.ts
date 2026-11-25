@@ -108,7 +108,7 @@ test("an alert holds its run up to its edges", async () => {
   assert.ok(holds(alert, 2, 3, true));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S2
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-266#S1
 test("an admonition, a closed dropdown and a context-tag panel hold their run, with their mapped paragraphs", async () => {
   const note = await containerOf("```{note}\na\n\n\nb\n```\n", (e) => e.tagName === "aside");
   assert.deepEqual(rangeOf(note), [1, 6]);

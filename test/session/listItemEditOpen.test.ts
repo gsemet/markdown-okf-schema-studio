@@ -90,8 +90,7 @@ const TIGHT_LIST = [
   "",
 ].join("\n");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S8
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S9
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
 test("a wrapped item of a tight list opens on all its lines", async () => {
   const page = await renderMappedPage(TIGHT_LIST, SOURCE_FILE, DOCUMENT_ID);
   const items = page.document.querySelectorAll("li");
@@ -123,8 +122,7 @@ test("a click in a nested list opens the nested item; the rest of the outer item
   assert.deepEqual([outer.tagName, outer.line, outer.endLine], ["LI", 1, 7], "the outer item holds its nested list");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S8
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S9
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
 test("the list itself, outside its items, opens the whole list", async () => {
   const page = await renderMappedPage(CHAPTER, SOURCE_FILE, DOCUMENT_ID);
   const list = page.document.querySelectorAll("ul")[0]!;
@@ -134,7 +132,6 @@ test("the list itself, outside its items, opens the whole list", async () => {
   assert.deepEqual([keyboard.tagName, keyboard.line, keyboard.endLine], ["UL", 3, 18], "the same from the keyboard");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
 test("from the keyboard, an item opens on its lines and a block inside it opens on its own lines", async () => {
   const page = await renderMappedPage(CHAPTER, SOURCE_FILE, DOCUMENT_ID);
   const item = editRangeOf(page, page.document.querySelectorAll("li")[0]!, true);

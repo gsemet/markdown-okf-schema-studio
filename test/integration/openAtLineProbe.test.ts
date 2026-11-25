@@ -248,7 +248,6 @@ async function probeOne(entry: Entry, associated: boolean, warm: boolean): Promi
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-195#S1
 /**
  * CR-483 probe and matrix of section 4 and 7.3: every way of jumping to line 42, under the `*.md`
  * association and by default, with the file not open and with its Studio tab in another group. The

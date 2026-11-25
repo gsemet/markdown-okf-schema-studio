@@ -225,8 +225,7 @@ test("an item of a list in a GitHub alert moves on the list's own lines, its quo
   assert.equal(messagesOf(harness, "previewEditSave")[0]?.editedText, "> - a\n> - c\n> - b\n");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S7
 test("a drop in place, outside the list or over another list requests nothing", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness);
@@ -295,8 +294,7 @@ test("Alt+Down and Alt+Up on a handle move the item by one, nothing at the ends,
   assert.equal(messagesOf(harness, "previewEditOpen").length, 2);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S2
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S6
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-262#S7
 test("a refused source, a source that does not read as the items or a lost answer leaves the document alone", () => {
   const harness = createRuntimeHarness();
   const { items } = fakeList(harness);

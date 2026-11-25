@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
       scrollTop: 88,
       descriptionsCollapsed: true,
     });
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S4
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S1
     await waitFor("the restored serializer render", () => {
       const preview = getActivePreviewForTests();
       return preview?.phase === "ready"
@@ -76,8 +76,7 @@ export async function run(): Promise<void> {
     });
     const missing = getActivePreviewForTests();
     assert.ok(missing);
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S2
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S4
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-062#S1
     assert.equal(missing.status, "missing-source");
     assert.match(missing.html, /restored Markdown source is unavailable/u);
   } finally {
@@ -109,7 +108,6 @@ export async function run(): Promise<void> {
     });
     const roles = getLivePreviewRolesForTests();
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-038#S3
-    // @tests_req SwRS-MDOKFSTUDIO-LIFE-038#S4
     assert.equal(roles.length, 2, "both restored panels keep a live preview session");
     assert.deepEqual(roles.map((role) => role.followsActiveEditor), [false, true]);
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-024#S2

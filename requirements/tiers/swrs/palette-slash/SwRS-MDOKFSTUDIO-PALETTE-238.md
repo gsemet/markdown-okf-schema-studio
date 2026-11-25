@@ -41,7 +41,6 @@ implemented_in_files:
 - src/page/modules/slashMenu.ts
 tested_in_files:
 - test/integration/realInput/textEditing.ts
-- test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
 - test/visual/slashAdmonitionScenarios.ts
 default_owner_email: gaetan@xeberon.net

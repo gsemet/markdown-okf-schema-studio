@@ -772,7 +772,6 @@ test("the table bar draws one rule per group and the cell group carries its own 
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S4
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032#S5
-// @tests_req SwRS-MDOKFSTUDIO-CORE-034#S1
 test("overflowing content tables keep short cells whole and show scroll shadows", () => {
   assert.match(
     PREVIEW_THEME_CSS,

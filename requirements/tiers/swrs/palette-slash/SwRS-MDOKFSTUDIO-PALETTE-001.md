@@ -52,7 +52,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/configuration/editingConfiguration.test.ts
 - test/core/palette/paletteActions.test.ts
-- test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/paletteReq.requirements.test.ts
 - test/page/modules/slashSyntaxCoverage.test.ts

@@ -51,7 +51,6 @@ function shown(diagram: EntryElement): string | undefined {
   return (diagram.querySelector("img") as unknown as { src?: string } | null)?.src;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S2
 test("Mermaid draws only once the page fonts are loaded", async () => {
   const document = new EntryDocument();
   document.diagram("myst-mermaid-diagram", "graph TD; A-->B");

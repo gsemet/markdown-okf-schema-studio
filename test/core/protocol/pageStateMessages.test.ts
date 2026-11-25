@@ -218,10 +218,9 @@ function variantsOf(base: Record<string, unknown>): Record<string, unknown>[] {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-259#S1
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S4
-// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021#S7
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169#S2
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S7
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079#S12
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120#S2
 test("the page-state validators accept exactly what the frozen validator accepted", () => {
   let checked = 0;

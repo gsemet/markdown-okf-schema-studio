@@ -30,7 +30,6 @@ test("an object schema validates a value, and a schema that answers later is not
   assert.equal(validateWithCachedValidator({ $async: true, type: "string" }, "x"), false, "a promise is not true");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S5
 test("a branch validator is compiled once per branch and root, and released with its root", () => {
   const root = { type: "object" };
   const otherRoot = { type: "object" };

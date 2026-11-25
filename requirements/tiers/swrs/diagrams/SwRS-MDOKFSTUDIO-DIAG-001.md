@@ -46,10 +46,8 @@ implemented_in_files:
 - src/session/webview.ts
 tested_in_files:
 - test/build/bundleSplit.test.ts
-- test/core/preview/contentPatch.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/core/render/mystFeatures.test.ts
-- test/integration/projectFeatures.test.ts
 - test/page/diagReq.diagramEdit.requirements.test.ts
 - test/page/mermaidLabelFit.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts

@@ -56,7 +56,6 @@ tested_in_files:
 - test/core/configuration/editingConfiguration.test.ts
 - test/core/state/previewTheme.test.ts
 - test/core/state/previewViewPreferences.test.ts
-- test/integration/lifecycle.test.ts
 - test/integration/paletteMode.test.ts
 - test/integration/reload-suite.ts
 - test/page/diagReq.themeZoom.requirements.test.ts

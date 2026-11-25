@@ -80,7 +80,6 @@ async function withFixture(
  */
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S3
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
 export async function run(): Promise<void> {
   for (const [name, eol] of [["lf", "\n"], ["crlf", "\r\n"]] as const) {
     const original = LINES.join(eol);

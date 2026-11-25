@@ -64,8 +64,6 @@ tested_in_files:
 - test/session/dropFiles.requirements.test.ts
 - test/session/readOnlyFirstLoad.test.ts
 - test/session/readOnlyImagesSession.test.ts
-- test/session/renderReq.labelRename.requirements.test.ts
-- test/session/reviewReqThreads.requirements.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net

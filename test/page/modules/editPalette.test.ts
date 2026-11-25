@@ -263,7 +263,7 @@ function lit(menu: FakeElement): number {
 
 const click = { preventDefault: () => undefined, stopPropagation: () => undefined };
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-078#S3
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-078#S1
 test("T24: the Table button opens a 9 x 9 grid of 81 cells", () => {
   const { root } = openFull();
   button(root, "table").dispatch("click", click);
@@ -1060,10 +1060,6 @@ test("CR038: a refused conversion changes nothing and tells why through notify",
   assert.equal(h.textbox.focused > 0, true, "the focus stays in the text box");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S5
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S6
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-263#S2
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-263#S3
 test("CR038: the slash menu offers the conversion only inside a table of the other form", () => {
   const pipe = openTableConversion("| a |\n| --- |\n| 1 |", 3);
   assert.deepEqual(pipe.palette.menuEntries().map((entry) => entry.id).filter((id) => id.endsWith("Table") && id !== "htmlTable" && id !== "tableCaption"),

@@ -43,7 +43,7 @@ async function resolveStudioTab(studio: Studio, file: string, column = 2): Promi
 const studioTabOf = (studio: Studio, file: string) =>
   studio.manager.latest((session) => session.inStudioTab && session.documentUri === uriOf(file));
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
 test("a Studio tab that opens with a pending line asks its page to reveal it, once; without one it asks nothing", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\n");
@@ -101,7 +101,7 @@ test("a link from a Studio tab that opens a new Studio tab reports studio-create
   assert.equal(studio.activation.studioLines.pending.has(uriOf(target)), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-196#S1
 test("a link, Back or Next to a file whose Studio tab is open in another group reveals that tab in its group, with no second tab", async (t) => {
   const studio = start(t);
   const target = writeFile("# Target\n\nbody\n");
@@ -121,7 +121,7 @@ test("a link, Back or Next to a file whose Studio tab is open in another group r
   assert.equal(studio.activation.studioLines.pending.has(uriOf(target)), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S2
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-198#S1
 test("Open in Studio at This Line opens the Studio view type in the text editor's group at the caret's line and closes no tab", async (t) => {
   const studio = start(t);
   const file = writeFile("# One\n\ntext\nmore\n");

@@ -33,8 +33,6 @@ test("a local image found by the guess is shown, and a link out of the folder is
   assert.ok(built.diagnostics.some((entry) => entry.code === "symlink-escape"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S4
-// @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S6
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S7
 test("an image the guess misses (an unquoted attribute) is found by the sanitizer and shown after a second pass", async () => {

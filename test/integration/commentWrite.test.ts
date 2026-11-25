@@ -225,7 +225,8 @@ export async function run(): Promise<void> {
 // @accepts_req StRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S5
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
 /** T43: a preview in Restricted Mode offers comments and writes the sidecar next to the document. */
 export async function runUntrusted(preview: PreviewForTests, document: vscode.TextDocument): Promise<void> {
   assert.match(preview.html, /"commentsEnabled":true/u, "Restricted Mode offers the Comment button");

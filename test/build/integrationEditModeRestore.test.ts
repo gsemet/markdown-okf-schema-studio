@@ -6,8 +6,6 @@ import test from "node:test";
 const ROOT = path.resolve(__dirname, "../../..");
 const INTEGRATION = path.join(ROOT, "test", "integration");
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S1
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004#S2
 /**
  * CR 152: the real-window scenarios run one after the other in the same window. A scenario that
  * turns edit mode on and leaves it on leaves the next one a page already in edit mode: its

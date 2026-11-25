@@ -119,7 +119,6 @@ export async function run(): Promise<void> {
     (editor) => editor.viewType === "vscode.markdown.preview.editor",
   );
   assert.equal(previewEditor?.priority?.diffEditor, "option");
-  // @tests_req SwRS-MDOKFSTUDIO-LIFE-001#S2
   assert.equal(stockCommandIds.has(COMMAND_ID), false);
   const settingsBefore = snapshotStockSettings();
   const createdDiffFiles: string[] = [];

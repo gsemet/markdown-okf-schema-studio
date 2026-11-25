@@ -128,7 +128,7 @@ async function runPreviewSmoke(): Promise<void> {
 // @accepts_req StRS-MDOKFSTUDIO-TRUST-006#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-011#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S4
 /**
  * A reader opens a document with hostile HTML (an inline script, `on*` attributes, an iframe, an
  * object and a `javascript:` link) in the unsaved buffer of preview.md: the page shows the document,

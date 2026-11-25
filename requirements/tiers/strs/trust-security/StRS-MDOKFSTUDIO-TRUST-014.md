@@ -16,8 +16,6 @@ derives_from: []
 scenarios:
 - id: S1
   title: Install and package from pinned dependencies
-- id: S2
-  title: Lint and draw the use case diagrams
 user_need: As a maintainer, I install on the pinned Node.js version from the
   official registry, and when I package the Studio the bundles the preview loads
   are in the package.
@@ -44,6 +42,7 @@ As a maintainer, I install on the pinned Node.js version from the official regis
 - The built-in PlantUML engine is an exact dependency version because earlier versions carry a copyleft licence.
 - The built-in PlantUML engine and the page runtime are files of the bundle folder, not inline code.
 - The package keeps the folder out/bundle, with the built-in engine bundle and its licence, and leaves out only build leftovers (SwRS-MDOKFSTUDIO-TRUST-092); the pinned dependencies are SwRS-MDOKFSTUDIO-TRUST-075.
+- SwRS-MDOKFSTUDIO-CORE-090 (the requirements lint parses every use case diagram) and SwRS-MDOKFSTUDIO-CORE-087 (the Pages site draws each diagram) derive from this need as the maintainer's build-time checks of the bundle; they are not a step of the install and package path, so no path cites them.
 
 ### Use case diagram
 
@@ -64,14 +63,6 @@ flowchart LR
 2. The Studio is built from pinned, official dependencies
    - SwRS-MDOKFSTUDIO-TRUST-092: the package keeps out/bundle, with the engine bundle and its licence, and leaves out only build leftovers
 3. The package holds the bundles the preview loads
-
-#### Path S2: Lint and draw the use case diagrams
-
-1. A maintainer runs the requirements lint
-   - SwRS-MDOKFSTUDIO-CORE-090: the lint parses the Mermaid fence of every use case diagram and fails naming the file, the line and the use case
-2. Every use case diagram parses
-   - SwRS-MDOKFSTUDIO-CORE-087: the Pages site build draws each diagram as an inline SVG under the user need
-3. The site shows the use case diagrams
 
 <!-- okf:links:start -->
 ### Links

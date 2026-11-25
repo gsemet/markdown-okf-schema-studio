@@ -9,8 +9,7 @@ import type { ScenarioDefinition } from "./scenarioAssertions";
 const THEMES = ["light", "dark"] as const;
 
 export const SLASH_ADMONITION_SCENARIOS: ScenarioDefinition[] = THEMES.map((theme, index) => ({
-  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S1
-  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S5
+  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-238#S4
   id: `palette-slash/v${34 + index}-slash-myst-admonitions-${theme}-900`,
   fixture: "05-long-chapter",
   theme,

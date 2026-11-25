@@ -21,7 +21,6 @@ test("an Explorer drag is recognised and its file addresses read", () => {
   assert.equal(droppedFileUris(data({ "text/uri-list": many })).length, 50);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-004#S1
 test("the insertion bar nearest to the pointer is chosen", () => {
   assert.equal(nearestPointIndex([], 10), -1);
   assert.equal(nearestPointIndex([100, 200, 300], 190), 1);

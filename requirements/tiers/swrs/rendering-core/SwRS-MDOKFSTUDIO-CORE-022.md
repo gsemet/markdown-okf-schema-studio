@@ -42,10 +42,8 @@ implemented_in_files:
 - src/core/render/mystNormalize.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
-- test/core/render/gridToctree.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
-- test/integration/projectFeatures.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

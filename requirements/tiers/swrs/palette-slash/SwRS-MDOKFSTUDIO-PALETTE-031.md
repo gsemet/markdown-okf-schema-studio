@@ -41,12 +41,10 @@ implemented_in_files:
 - src/page/modules/figurePanel.ts
 - src/page/modules/linkPanel.ts
 tested_in_files:
-- test/integration/realInput/textEditing.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/paletteReq.requirements.test.ts
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
-- test/visual/capture_edit_checks.py
 default_owner_email: gaetan@xeberon.net
 ---
 

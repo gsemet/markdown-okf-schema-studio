@@ -52,7 +52,6 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/host/previewTiming.test.ts
 - test/integration/dirtySnapshots.test.ts
-- test/integration/lifecycle.test.ts
 - test/integration/stockCoexistence.test.ts
 - test/node-services/build/buildQueue.test.ts
 - test/page/lifeReq.requirements.test.ts

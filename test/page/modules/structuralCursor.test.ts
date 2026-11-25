@@ -52,7 +52,7 @@ test("CR 157: Left and Escape go up one level; at the top Left stays and Escape 
   assert.deepEqual(structuralMove(doc, undefined, "escape"), { kind: "top" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S2
 test("CR 157: the arrows move cell to cell without wrapping, and a short row clamps the column", () => {
   assert.deepEqual(structuralMove(doc, cell(0, 0), "right"), move(cell(0, 1)));
   assert.deepEqual(structuralMove(doc, cell(0, 2), "right"), { kind: "stay" });
@@ -82,7 +82,6 @@ test("CR 157: Up and Down walk the siblings of a nested block and stop at the ed
   assert.deepEqual(structuralMove(doc, undefined, "down"), { kind: "top" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1
 test("CR 157: a position that names nothing in the tree stays", () => {
   assert.deepEqual(structuralMove(doc, block(9), "right"), { kind: "stay" });
   assert.deepEqual(structuralMove(doc, block(0, 3), "left"), { kind: "stay" });

@@ -44,8 +44,6 @@ function virtualLocator() {
 
 const documentIn = (...segments: string[]) => path.join(ROOT, "docs", ...segments, "a.md");
 
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S3
-// @tests_req SwRS-MDOKFSTUDIO-MYST-066#S4
 test("an answer is trusted for fewer than 2000 ms, and the disk is checked again at exactly 2000 ms", async () => {
   const { disk, locator, put } = virtualLocator();
   put(confText("deflist"), 1);

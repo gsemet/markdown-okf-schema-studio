@@ -94,6 +94,7 @@ export async function run(): Promise<void> {
     assert.match(html, /<img[^>]+src="data:image\/png;base64,/u);
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
     assert.match(html, /<img[^>]+class="myst-mermaid-image"[^>]+src="data:image\/svg\+xml/u);
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S1
     // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-135#S2
     assert.match(html, /href="https:\/\/example\.com\/guide"/u);
     assert.doesNotMatch(html, /href="other\.md"/u);

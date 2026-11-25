@@ -34,7 +34,7 @@ test("removes script elements with their content", () => {
   assert.ok(removed.includes("<script>"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("removes event handler attributes", () => {
   const { html: out, removed } = sanitize('<svg onload="alert(1)"><rect onclick="alert(2)" onmouseover="x()" width="5"/></svg>');
   assert.doesNotMatch(out, /on(?:load|click|mouseover)|alert/u);
@@ -42,7 +42,7 @@ test("removes event handler attributes", () => {
   assert.ok(removed.includes("onload") && removed.includes("onclick"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("removes foreignObject with the HTML inside it", () => {
   const { html: out } = sanitize('<svg><foreignObject width="10" height="10"><div onclick="x()">hello <b>bold</b></div></foreignObject><rect width="1"/></svg>');
   assert.doesNotMatch(out, /foreignObject|hello|<div|<b>/iu);
@@ -57,7 +57,7 @@ test("removes a link to an external page, keeping its content out of the picture
   assert.ok(removed.includes("<a>"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("removes the style element and a style attribute that is not a presentation property", () => {
   const { html: out } = sanitize(
     '<svg><style>@import url(https://evil.test/x.css); rect { fill: red }</style><rect width="2" style="position: fixed; fill: var(--accent); background: url(https://evil.test/a.png)"/></svg>',
@@ -78,7 +78,7 @@ test("drops a use that points outside the picture and keeps one that points at a
   assert.match(out, /<g id="k-dot">/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("removes javascript, data and external URLs from attribute values", () => {
   const { html: out, removed } = sanitize(
     '<svg><rect width="1" fill="url(javascript:alert(1))"/><rect width="2" fill="url(https://evil.test/p.svg#a)"/><rect width="3" stroke="url(data:image/svg+xml,x)"/><path d="M0 0" fill="javascript:alert(1)"/></svg>',
@@ -120,7 +120,7 @@ test("the vocabulary holds the names of the owner's answer and each follows a --
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("title and desc keep only text; an element inside them is dropped", () => {
   const { html: out } = sanitize('<svg><title>Plan <script>x()</script></title><desc><b>bold</b> words</desc></svg>');
   assert.match(out, /<desc>bold words<\/desc>/u);
@@ -150,7 +150,7 @@ test("drops a reference whose id is not an id of the same picture", () => {
   assert.ok(removed.includes("fill"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S3
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-125#S2
 test("a value is an allow-list: no other function than colours, var, url(#id) and transforms, and no scheme", () => {
   const { html: out, removed } = sanitize(
     "<svg><rect width=\"1\" fill=\"image-set('https://e.test/x.png' 1x)\"/><rect width=\"2\" style=\"font-family: src(https://e.test/f)\"/>"
@@ -163,7 +163,7 @@ test("a value is an allow-list: no other function than colours, var, url(#id) an
   assert.ok(removed.includes("fill") && removed.includes("stroke") && removed.includes("style: font-family"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the value check of the final sanitizer accepts a presentation value and refuses a remote one", () => {
   assert.equal(isSafeSvgPresentationValue("url(#a)"), true);
   assert.equal(isSafeSvgPresentationValue("var(--text, rgb(1,2,3))"), true);

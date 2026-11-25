@@ -63,7 +63,6 @@ tested_in_files:
 - test/integration/imagePaste.test.ts
 - test/integration/imagePicker.test.ts
 - test/integration/inlineThread.test.ts
-- test/integration/mystPickers.test.ts
 - test/page/modules/commentCompose.test.ts
 - test/page/modules/commentThreads.test.ts
 - test/page/modules/editPalette.test.ts

@@ -28,7 +28,6 @@ implemented_in_files:
 - src/core/render/mystInlineTransforms.ts
 tested_in_files:
 - test/core/render/mathRenderer.test.ts
-- test/visual/mathScenarios.ts
 - test/visual/scenarioDefinitions3.ts
 default_owner_email: gaetan@xeberon.net
 ---

@@ -10,19 +10,14 @@
     "test/core/protocol/pageStateMessages.test.ts": 5,
     "test/integration/blockClipboard.test.ts": 7,
     "test/integration/blockMove.test.ts": 5,
-    "test/integration/commentAnchors.test.ts": 6,
+    "test/integration/commentAnchors.test.ts": 5,
     "test/integration/commentWrite.test.ts": 8,
-    "test/integration/imagePaste.test.ts": 5,
-    "test/integration/inlineThread.test.ts": 5,
-    "test/integration/lifecycle.test.ts": 5,
+    "test/integration/imagePaste.test.ts": 4,
+    "test/integration/inlineThread.test.ts": 4,
     "test/integration/previewHistory.test.ts": 7,
-    "test/integration/projectFeatures.test.ts": 4,
     "test/integration/reviewComments.test.ts": 4,
-    "test/integration/scroll-sync-suite.ts": 5,
     "test/page/chartCsp.test.ts": 4,
-    "test/site/requirementsViewer/write.test.ts": 4,
-    "test/visual/capture_export_html.py": 4,
-    "test/visual/exportHtmlScenarios.ts": 4
+    "test/visual/capture_export_html.py": 4
   },
   "unnamedCompanionLines": {},
   "strsTestsInIntegration": {}

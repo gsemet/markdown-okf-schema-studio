@@ -164,7 +164,6 @@ test("the snapshot records the shown tab of each tab set and the ticked task box
   assert.deepEqual(snapshot.shownTabs, [1, 0]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-137#S1
 test("taking a snapshot changes nothing on the page", () => {
   const harness = createRuntimeHarness();
   const before = JSON.stringify([

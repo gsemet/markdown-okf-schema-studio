@@ -47,7 +47,6 @@ const CSP_SOURCE = "vscode-webview://csp";
 // The policy of a page
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S4
 test("fonts and media load only from the webview source", () => {
   const policy = createContentSecurityPolicy(CSP_SOURCE, "abc");
   assert.equal(directive(policy, "font-src"), CSP_SOURCE);

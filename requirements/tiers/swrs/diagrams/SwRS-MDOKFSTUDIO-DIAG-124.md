@@ -27,7 +27,6 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/vegaView.ts
 tested_in_files:
-- test/core/preview/contentPatch.test.ts
 - test/page/chartCsp.test.ts
 - test/page/modules/vegaChart.test.ts
 - test/security/package-contract.test.ts

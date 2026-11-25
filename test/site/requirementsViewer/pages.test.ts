@@ -34,9 +34,6 @@ test("one page per active area, use case and behaviour and none for a retired on
 });
 
 test("every relative link resolves from every depth", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S2
   const specs = viewerPages(load(), "/nonexistent-root");
   const folders = new Set(specs.map((spec) => spec.dir));
   const assets = new Set(["requirements/viewer.css", "requirements/viewer.js", "requirements/search-index.js"]);
@@ -125,9 +122,6 @@ test("behaviour page: files at the commit, test kinds, retired rows and the wher
 
 test("without JavaScript the search and Play controls are hidden", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-081#S3
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-084#S2
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S2
   for (const page of viewerPages(load(), "/nonexistent-root")) {
     assert.ok(!viewerDocument(page, FOOTER).includes('id="theme"'), "no page has a Theme button");
     const rule = /<noscript><style>([^<]*)<\/style><\/noscript>/u.exec(viewerDocument(page, FOOTER))?.[1] ?? "";
@@ -192,7 +186,6 @@ test("the line above the map names the paths and what they share", () => {
 test("a full ID is the text of every link to a requirement", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-080#S2
   // @tests_req SwRS-MDOKFSTUDIO-CORE-082#S1
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-083#S1
   const model = load(fullIdReport());
   const useCase = useCasePage(model, model.byId.get(FULL_USE_CASE)!).body;
   assert.ok(useCase.includes(`<span class="id">${FULL_BEHAVIOUR(102)}</span>`), "the list of behaviours");

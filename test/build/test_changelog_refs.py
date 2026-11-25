@@ -108,7 +108,7 @@ def test_two_bullets_get_their_own_commit(tmp_path: Path) -> None:
     assert f"- Second. (commit {two}, PR #2)\n" in text
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S2
 def test_a_second_run_changes_nothing(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     commit_text(repo, changelog_with("- First. (PR #1)\n- Second.\n"))
@@ -149,7 +149,7 @@ def test_a_commit_not_on_the_base_is_refused(tmp_path: Path) -> None:
     assert changelog(repo).read_bytes() == before
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S1
+# @tests_req SwRS-MDOKFSTUDIO-CORE-094#S2
 def test_an_empty_section_changes_nothing(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     before = changelog(repo).read_bytes()

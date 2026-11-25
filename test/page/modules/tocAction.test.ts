@@ -25,7 +25,6 @@ test("the Table of contents action writes [TOC] set apart after the line, the ca
   assert.equal(run("a\n\n", 3).text, "a\n\n[TOC]");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-003#S2
 test("the action is a block-scope palette button and a /toc entry in every mode", () => {
   const action = PALETTE_ACTIONS.toc;
   assert.deepEqual(action.modes, ["strict"]);

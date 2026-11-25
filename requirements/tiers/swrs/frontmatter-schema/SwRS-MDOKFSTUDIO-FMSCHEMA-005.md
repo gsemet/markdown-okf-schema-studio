@@ -43,7 +43,6 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/integration/genericMarkdown.test.ts
 - test/visual/scenarioDefinitions1.ts
-- test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-012

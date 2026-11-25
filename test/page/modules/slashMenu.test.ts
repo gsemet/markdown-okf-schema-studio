@@ -765,7 +765,6 @@ test("P11 r2: choosing the list entries writes the list prefix as one edit", () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-240#S3
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240#S5
 test("P11 r2: in MyST the MyST entry ranks before its GFM equivalent; GFM and exact labels are unchanged", () => {
   const first = (mode: EditActionMode, query: string): string | undefined => {
     const h = setup(mode);

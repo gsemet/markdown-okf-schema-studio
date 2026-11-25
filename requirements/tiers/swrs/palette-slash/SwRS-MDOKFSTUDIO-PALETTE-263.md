@@ -33,7 +33,6 @@ derived_by: []
 implemented_in_files:
 - src/core/palette/paletteActions.ts
 tested_in_files:
-- test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

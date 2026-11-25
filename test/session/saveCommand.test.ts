@@ -155,7 +155,7 @@ test("CR 312: a frontmatter save still being applied is in the document when the
   assert.match(f.saves[0]!.text, /^title: Typed\n/u, "the saved text holds the value");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S1
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-173#S2
 test("CR 312: a page that is not ready, or cannot be reached, has nothing to flush: the document is saved at once", async () => {
   const notReady = fixture();
   notReady.preview.page.readyRequestId = undefined;

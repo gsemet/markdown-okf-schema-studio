@@ -54,7 +54,6 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/diffPreview.test.ts
 - test/integration/diffPreviewScroll.test.ts
-- test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
 - test/page/pageSettings.test.ts
 - test/page/runtimeBundle.test.ts

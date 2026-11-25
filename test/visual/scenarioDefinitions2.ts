@@ -314,7 +314,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S1
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006#S3
     id: "okf-schema-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -380,7 +379,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "The full-width schema diagnostic wraps on a narrow viewport without overflowing its cell.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005#S2
     id: "frontmatter-scroll-feedback",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -571,7 +569,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "README capture, cream theme: the OKF properties table of the demo handbook, resolved from its handbook schema, with type icons and field descriptions.",
   },
   {
-    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-207#S3
     id: "review-annotations/v21-readme-showcase-diff-cream-1000",
     fixture: "54-readme-showcase",
     theme: "light",
@@ -708,8 +705,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "to a label scrolls to it.",
   })),
   ...["white", "dark"].flatMap((mode) => [WIDE, NARROW].map((viewport) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S5
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S6
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067#S1
     id: `frontmatter-link-details-${mode}-${viewport.width}`,
     fixture: "14-frontmatter-links",
     theme: "dark",
@@ -790,9 +786,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Every GFM construct on one page (five alerts, strikethrough, footnotes, task list, aligned table, raw HTML table and details, colour span, autolink), ${theme}, ${width} px pane.`,
   })),
   ...(["dark", "light"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-006#S4
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-006#S5
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S2
     id: `myst/v${20 + index}-myst-gallery-full-${theme}-900`,
     fixture: "38-myst-gallery",
     theme,
@@ -849,7 +842,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S4
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S5
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S4
     id: `diagrams/v${10 + index}-plantuml-builtin-${theme}-900`,
     fixture: "48-plantuml-builtin",
@@ -892,7 +884,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "reads the files like {include} and the built-in engine draws both, with the file text as the source below them.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-DIAG-039#S4
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-046#S1
     id: `diagrams/v${15 + index}-plantuml-include-${theme}-900`,
     fixture: "51-plantuml-include",
@@ -967,8 +958,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the page, text, note panels and headings all use the dark palette.",
   },
   ...([[70, WIDE, "900"], [200, WIDE, "900"], [150, NARROW, "460"]] as const).map(([zoom, viewport, width], index) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-THEME-043#S2
-    // @tests_req SwRS-MDOKFSTUDIO-THEME-043#S3
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-043#S1
     id: `theme-zoom/v${String(9 + index).padStart(2, "0")}-zoom-${zoom}-light-${width}`,
     fixture: "01-handbook-overview",
     theme: "light",
@@ -1257,8 +1247,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined, 30],
     ["light", "cream", 31],
   ] as const).map(([theme, mode, number]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S4
-    // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S8
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S1
     id: `myst/v${number}-conf-warning-banner-${mode ?? theme}-900`,
     fixture: "53-conf-warnings",
     theme,

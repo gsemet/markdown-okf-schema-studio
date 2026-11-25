@@ -18,12 +18,14 @@ export interface PathStep {
 }
 
 export interface MainPath {
+  /** The path id of a `#### Path S<n>: title` heading (`S2`), empty for the older `#### Path <n>: title`. */
+  readonly id: string;
   readonly title: string;
   readonly steps: readonly PathStep[];
 }
 
 const HEADING = /^###\s+Main paths\s*$/mu;
-const PATH_HEADING = /^####\s+Path\s*\d*\s*:?\s*(.*?)\s*$/u;
+const PATH_HEADING = /^####\s+Path(?:\s+(S\d+))?\s*\d*\s*:?\s*(.*?)\s*$/u;
 const STATE = /^\s*\d+\.\s+(.*?)\s*$/u;
 const BULLET = /^\s+-\s+(Option\s+)?(SwRS-[A-Za-z0-9-]+?)(?:\s*\((nominal|boundary|refusal)\))?\s*:\s*(.*?)\s*$/u;
 
@@ -32,12 +34,12 @@ export function parseMainPaths(text: string): MainPath[] {
   const start = HEADING.exec(text);
   if (!start) return [];
   const section = text.slice(start.index + start[0].length);
-  const paths: { title: string; steps: { state: string; via?: PathTransition; options: PathTransition[] }[] }[] = [];
+  const paths: { id: string; title: string; steps: { state: string; via?: PathTransition; options: PathTransition[] }[] }[] = [];
   for (const line of section.split("\n")) {
     if (/^(?:#{1,3}\s|<!--)/u.test(line)) break;
     const heading = PATH_HEADING.exec(line);
     if (heading) {
-      paths.push({ title: heading[1] ?? "", steps: [] });
+      paths.push({ id: heading[1] ?? "", title: heading[2] ?? "", steps: [] });
       continue;
     }
     const current = paths[paths.length - 1];

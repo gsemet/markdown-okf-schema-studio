@@ -163,7 +163,6 @@ test("T45: a small edit of the quote is followed by the fuzzy search", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-107#S2
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-107#S3
 test("T45: a quote that changed by more than 20 percent is orphaned, not guessed", () => {
   const quote = "the scheduler retries the failed upload twice";
   const text = [...filler(30), "the scheduler stops after the first problem", ...filler(5)].join("\n");

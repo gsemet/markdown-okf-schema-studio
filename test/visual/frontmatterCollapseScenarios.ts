@@ -42,7 +42,6 @@ export const FRONTMATTER_COLLAPSE_SCENARIOS: ScenarioDefinition[] = (["light", "
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S1
-    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-090#S4
     id: `frontmatter-schema/v${29 + index * 2}-frontmatter-expanded-again-${theme}-900`,
     fixture: "07-frontmatter",
     theme,

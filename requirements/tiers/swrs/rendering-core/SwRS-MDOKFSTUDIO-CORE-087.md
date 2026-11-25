@@ -29,7 +29,6 @@ derived_by: []
 implemented_in_files:
 - test/site/requirementsViewer/useCaseDiagram.ts
 tested_in_files:
-- test/site/requirementsViewer/model.test.ts
 - test/site/requirementsViewer/pages.test.ts
 - test/site/requirementsViewer/useCaseDiagram.test.ts
 default_owner_email: gaetan@xeberon.net

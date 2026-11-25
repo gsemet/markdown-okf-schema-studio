@@ -198,8 +198,7 @@ test("T42: the block that covers the line is searched, not another with the same
   assert.equal(marks(document)[0].parentNode, second);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S1
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S2
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017#S7
 test("T42: re-applying is idempotent and survives replaced content", () => {
   const { document, comments } = setup();
   const paragraph = document.add("p", { "data-line": "1" }, document.content, "a needle b");

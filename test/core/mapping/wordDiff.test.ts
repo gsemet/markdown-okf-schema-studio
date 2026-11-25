@@ -41,7 +41,6 @@ test("CR147: inserted and deleted words only mark one side", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S5
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009#S6
 test("CR147: an empty side marks all of the other", () => {
   assert.deepEqual(diffWords("", "new text"), { removed: [], added: [{ start: 0, end: 8 }] });
   assert.deepEqual(diffWords("old text", ""), { removed: [{ start: 0, end: 8 }], added: [] });

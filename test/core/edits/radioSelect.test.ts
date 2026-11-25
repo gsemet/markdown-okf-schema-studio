@@ -78,7 +78,6 @@ test("a group whose markers moved, an unknown target or a repeated option is ref
     "a line that is not a radio item");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-GFM-041#S2
 test("a radio marker starts a list item and is followed by a space or a tab", () => {
   assert.equal(radioMarkerColumn("- ( ) a"), 2);
   assert.equal(radioMarkerColumn("  * (x) a"), 4);

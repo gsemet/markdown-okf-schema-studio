@@ -234,7 +234,6 @@ test("with too little room above, the page scrolls up by the missing height, the
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-038#S1
-// @tests_req SwRS-MDOKFSTUDIO-MYST-038#S3
 test("the preview toolbar band counts as the top obstruction", () => {
   // Top inset 60 + 8 = 68; room 100 - 6 - 68 = 26; 54 are missing.
   const t = harness({ row: true, iconTop: 100, scrollY: 300, toolbarBottom: 60 });

@@ -204,8 +204,6 @@ def check_tall_block_scrolled(page: Page, scenario: dict, failures: list[Failure
   close_editor()
 
 
-# @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S3
-# @tests_req SwRS-MDOKFSTUDIO-PALETTE-031#S5
 def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T21: the edition palette above an open block editor."""
   if not scenario.get("editPalette"):

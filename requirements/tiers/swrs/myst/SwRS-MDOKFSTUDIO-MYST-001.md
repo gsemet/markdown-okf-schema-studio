@@ -43,7 +43,6 @@ implemented_in_files:
 - src/core/render/mystBlockTransforms.ts
 - src/core/render/mystNormalize.ts
 tested_in_files:
-- test/core/directives/registry.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/core/render/alertTitle.test.ts
 - test/core/render/cardsTabs.test.ts
@@ -51,7 +50,6 @@ tested_in_files:
 - test/integration/mystBlocksWindow.ts
 - test/visual/cardsTabsScenarios.ts
 - test/visual/scenarioDefinitions1.ts
-- test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-CORE-061

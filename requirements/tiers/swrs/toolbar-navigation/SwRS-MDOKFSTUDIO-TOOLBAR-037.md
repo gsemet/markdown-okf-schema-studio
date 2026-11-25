@@ -51,7 +51,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStylesGutter.test.ts
 - test/page/modules/tocColumn.test.ts
-- test/page/modules/toolbarCollapse.test.ts
 - test/visual/capture_toc_checks.py
 - test/visual/capture_toc_rail.py
 default_owner_email: gaetan@xeberon.net

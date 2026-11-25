@@ -71,7 +71,7 @@ function mapSection(model: ViewerModel, dir: string, paths: readonly MainPath[])
   const summary = mapSummary(model, paths);
   const plays = paths.map((_, index) => `<button class="btn play" type="button" data-play="${index}">Play path ${index + 1}</button>`).join("");
   const startsShared = (index: number): boolean => paths.slice(0, index).some((earlier) => earlier.steps.some((step) => step.state === paths[index]?.steps[0]?.state));
-  const keys = paths.map((path, index) => `<span><i class="lp${Math.min(index, 2) + 1}"></i>path ${index + 1}: ${e(path.title)}${startsShared(index) ? `, starts at <b class="pnum" style="background:${pathColour(index)}">${index + 1}</b>` : ""}</span>`).join(" ");
+  const keys = paths.map((path, index) => `<span><i class="lp${Math.min(index, 2) + 1}"></i>path ${e(path.id || String(index + 1))}: ${e(path.title)}${startsShared(index) ? `, starts at <b class="pnum" style="background:${pathColour(index)}">${index + 1}</b>` : ""}</span>`).join(" ");
   const shares = paths.some((path, index) => paths.slice(0, index).some((earlier) => earlier.steps.some((step) => path.steps.some((other) => other.state === step.state))));
   const ways = paths.length === 1 ? "one <b>path</b> (the coloured line)" : `<b>${paths.length} paths</b>, one per coloured line`;
   const read = `This use case <span class="soft">(StRS)</span> is reached by ${ways}. A path goes from one <b>situation</b> (circle) to the next; each <b>step</b> (pill) is a behaviour <span class="soft">(SwRS)</span> with its own tests.${shares ? " Where paths meet, they share the circle or the step." : ""}`;
@@ -203,7 +203,7 @@ export function behaviourPage(model: ViewerModel, behaviour: Requirement): PageS
   const parent = behaviour.derivesFrom.map((id) => model.byId.get(id)).find((candidate) => candidate?.active && candidate.tier === "StRS");
   const rule = e(behaviour.description).replace(/\bSHALL(?: NOT)?\b/gu, (match) => `<strong>${match}</strong>`);
   const scenarios = behaviour.scenarios.map((scenario) =>
-    `<details class="scn"><summary><span class="k ${kindClass(scenario.kind)}">${e(scenario.kind)}</span>${e(scenario.name)}</summary>${scenarioBody(scenario)}</details>`).join("")
+    `<details class="scn"><summary>${scenario.id ? `<span class="sid">${e(scenario.id)}</span>` : ""}<span class="k ${kindClass(scenario.kind)}">${e(scenario.kind)}</span>${e(scenario.name)}</summary>${scenarioBody(scenario)}</details>`).join("")
     || '<p class="hint">Stated as one rule, without scenarios.</p>';
   const exempt = behaviour.exempt ? `<p class="exempt">Exempt from code and test markers${behaviour.exemptionReason ? `: ${e(behaviour.exemptionReason)}` : "."}</p>` : "";
   const known = behaviour.knownIssues.length > 0

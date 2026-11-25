@@ -76,7 +76,7 @@ test("Apply rewrites the directive in one edit and keeps the other options and t
   assert.equal(panelOf(harness), undefined, "the form closes");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S4
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-272#S1
 test("Apply without a change writes nothing", () => {
   const { harness, textarea, calls } = figureHarness(source, source.indexOf("print"));
   paletteButton(harness, "codeBlock").dispatch("click", click);

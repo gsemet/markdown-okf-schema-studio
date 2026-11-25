@@ -238,7 +238,6 @@ test("a tab shown by the keyboard hides the marker, and showing its tab again dr
   assert.equal(top(overlays(harness)[0]), "1570px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S1
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-178#S2
 test("a later placement never selects a tab", () => {
   const harness = createRuntimeHarness();

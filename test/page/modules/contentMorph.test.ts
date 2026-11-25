@@ -97,7 +97,6 @@ const block = (line: number, end: number, id: number, text: string): string =>
   + `data-sphinx-preview-block="source-block-${id}">${text}</p>`;
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S7
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-069#S8
 test("P-07: the key leaves out the source-position attributes and a hash replaces the HTML", () => {
   assert.equal(morphKey(block(3, 4, 2, "x")), "<p>x</p>");
   assert.equal(morphKey(block(10, 11, 7, "x")), morphKey(block(3, 4, 2, "x")));

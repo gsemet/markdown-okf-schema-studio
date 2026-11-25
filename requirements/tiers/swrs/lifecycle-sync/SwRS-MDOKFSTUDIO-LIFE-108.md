@@ -50,7 +50,6 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/host/diffPreview.requirements.test.ts
-- test/integration/scroll-sync-suite.ts
 - test/integration/sourceMapping.test.ts
 - test/page/pageSettings.test.ts
 - test/page/runtimeScroll.test.ts
