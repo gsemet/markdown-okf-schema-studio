@@ -10,6 +10,13 @@ breaks out (up to the space left of the table of contents, centred) when they do
 cell holds content that cannot shrink (a code block, a long unbroken word). Margin and Full width
 are unchanged: the table scrolls sideways. A table with merged cells, a nested table or no
 rows keeps the older natural-width rule and can still break out.
+
+In Auto width a code block whose longest line does not fit the column widens too, up to the space
+left of the table of contents, centred, so that the line fits without a scroll bar; a captioned
+code block widens with its caption bar. A line wider than that space still scrolls sideways
+inside the block. A code block inside a container (a list, an admonition, a quote, a tab or a
+card) keeps the width of its container and scrolls. Margin and Full width are unchanged.
+
 The capture uses the cream theme.
 
 [![Cream preview in Auto width: a narrow text column with a wide table and a wide figure breaking out of it, centred](../../images/readme/margin-break-cream.png)](../../images/readme/margin-break-cream.png)
