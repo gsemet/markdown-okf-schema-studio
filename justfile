@@ -496,7 +496,7 @@ clip NAME STEP="all" *ARGS:
 
 # Test the feature clip kit's storyboard parser (docs/demo-video/clip-kit/lib/*.test.mjs; no ffmpeg, no VS Code).
 clip-kit-test:
-    fnm exec -- node scripts/node-test.mjs clip-kit "docs/demo-video/clip-kit/lib/*.test.mjs"
+    {{ npm }} run test:clip-kit
 
 # Package the extension as a VSIX.
 package:
