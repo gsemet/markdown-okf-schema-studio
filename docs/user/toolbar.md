@@ -29,6 +29,8 @@ remain), and it never changes the file. It needs the same conditions as the gree
 to Git in a trusted workspace, with `preview.showIncomingChanges` on, which also hides the button
 when off.
 
+![The Diff button marks the blocks changed since the last commit with a green bar, then the Side-by-side button shows each as a card, the last commit on the left and now on the right, with the removed words struck and the added words underlined](../demo-video/clips/diff-side-by-side/diff-side-by-side.gif)
+
 ## Export to HTML
 
 The Export button, or the command **Export to HTML** of the command palette, saves the page as one
