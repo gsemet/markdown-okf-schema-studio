@@ -20,4 +20,6 @@ moved the highlight, so a literal ` /ock` followed by Enter is never swallowed.
 - The menu stays inside the window (it opens above the caret near the bottom), shows "No command"
   when nothing matches, and closes when you leave the text box or scroll the caret out of view.
 
+![In edit mode, /grid is typed on an empty line of a paragraph's text box: the slash menu highlights Grid, Enter opens the Insert grid form, Enter again inserts a MyST grid, and Ctrl+Enter / ⌘Enter renders two cards](../demo-video/clips/slash-menu-grid/slash-menu-grid.gif)
+
 [![The slash menu filtered by /tab in a GFM paragraph editor](../../images/readme/slash-menu.png)](../../images/readme/slash-menu.png)

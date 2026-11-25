@@ -63,4 +63,6 @@ test("the shipped scenarios declare their checks: the drag clip edit mode with n
   assert.deepEqual(resolveChecks(exported.checks), { editMode: "off", paste: false });
   const diff = await import(scenarioOf("diff-side-by-side"));
   assert.deepEqual(resolveChecks(diff.checks), { editMode: "off", paste: false });
+  const grid = await import(scenarioOf("slash-menu-grid"));
+  assert.deepEqual(resolveChecks(grid.checks), { editMode: "on", paste: false });
 });
