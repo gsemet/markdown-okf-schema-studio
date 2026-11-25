@@ -177,6 +177,9 @@ environments),
   (or press Figure with the caret in a `{figure}`): a form edits the source (with Browse), alt text,
   caption, legend, width, alignment and name, and leaves every other option as it was. Figure on a plain paragraph picks an image, writes the
   `{figure}` and opens the same form at once on the caption; Escape keeps the figure as inserted.
+
+  ![In edit mode, Edit figure over a figure opens one form: the caption is retyped, Width set to 40%, Align to Right and Name to fig-harbour-light; Apply writes the new option lines under the kept alt line, and Ctrl+Enter / ⌘Enter shows the smaller figure floating right of the text](../demo-video/clips/figure-editor/figure-editor.gif)
+
   Editing a table cell adds the inline buttons (bold, italic, link, colour, emoji and so on) to the
   row and column bar.
   Cells copied from a spreadsheet (tab-separated text) and pasted into an open table cell fill the

@@ -8,10 +8,14 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { EXPECTED as EXPECTED_DRAG } from "../../clips/drag-list-item/scenario.mjs";
 import { EXPECTED as EXPECTED_RADIO } from "../../clips/radio-buttons/scenario.mjs";
 import { EXPECTED } from "../../clips/raw-copy-balance-edges/scenario.mjs";
+import { EXPECTED as EXPECTED_FIGURE } from "../../clips/figure-editor/scenario.mjs";
 import { EXPECTED as EXPECTED_GRID } from "../../clips/slash-menu-grid/scenario.mjs";
 import { EXPECTED as EXPECTED_TABLE } from "../../clips/table-anchors/scenario.mjs";
 import { STAGE as STAGE_THEME } from "../../clips/theme-switch/scenario.mjs";
 import { parseClip, parseClipText, parseSections, validateStory } from "./storyboard.mjs";
+
+/** The committed length of the figure-editor clip, in seconds. */
+const LENGTH_FIGURE = 12;
 
 const clipFile = fileURLToPath(new URL("../../clips/raw-copy-balance-edges/clip.md", import.meta.url));
 const shipped = parseClip(clipFile);
@@ -535,4 +539,54 @@ test("the shipped table-anchors clip.md reads as the clip the owner reviews", ()
 test("the shipped table-anchors stage is the padded pipe table the clip films", () => {
   const stageFile = fileURLToPath(new URL("../../clips/table-anchors/stage/launch-checklist.md", import.meta.url));
   assert.equal(readFileSync(stageFile, "utf8"), STAGE_TABLE);
+});
+
+test("the shipped figure-editor clip.md reads as the clip the owner reviews", () => {
+  const figureFile = fileURLToPath(new URL("../../clips/figure-editor/clip.md", import.meta.url));
+  const figure = parseClip(figureFile);
+  assert.equal(figure.width, 1280);
+  assert.equal(figure.height, 720);
+  assert.equal(figure.fps, 15);
+  assert.equal(figure.length, LENGTH_FIGURE);
+  assert.ok(figure.length <= 12, "the clip is at most 12 s");
+  assert.deepEqual(
+    figure.captions.map((caption) => caption.text.replaceAll("**", "")),
+    ["Edit figure opens one form for the whole figure", "Apply writes the options into the file"],
+  );
+  assert.equal(figure.captions.length, 2);
+  assert.equal(figure.captions[0].from, 0);
+  assert.equal(figure.captions[0].to, figure.captions[1].from);
+  assert.equal(figure.captions[1].to, figure.length);
+  assert.deepEqual(Object.keys(figure.badges), ["save"]);
+  assert.equal(figure.zoom.id, "figure");
+  assert.deepEqual(
+    figure.marks.map((mark) => mark.id),
+    ["1", "2"],
+  );
+  for (const [index, mark] of figure.marks.entries()) {
+    assert.ok(mark.from >= 0 && mark.to <= figure.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
+    if (index > 0) assert.ok(mark.from >= figure.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
+  }
+  const take = { filmed: figure.length, presses: [{ id: "save", t: 8.6 }], zooms: [{ id: "figure", t: 6.2 }], marks: [{ id: "1" }, { id: "2" }] };
+  assert.equal(validateStory(figure, take, win32).platform, "win32");
+  assert.equal(validateStory(figure, take, darwin).platform, "darwin");
+  // The "Expected result" block of clip.md is the scenario's text, character for character.
+  const block = /^Expected result[^\n]*\n(?:[^\n]*\n)*?```markdown\n([\s\S]*?)\n```/mu.exec(readFileSync(figureFile, "utf8"));
+  assert.ok(block, "clip.md has an Expected result block");
+  assert.equal(block[1], EXPECTED_FIGURE);
+});
+
+test("the figure-editor stage is the figure the expected result rewrites, with a 400x240 SVG", () => {
+  const stage = readFileSync(fileURLToPath(new URL("../../clips/figure-editor/stage/harbour-guide.md", import.meta.url)), "utf8");
+  const part = (text) => text.slice(text.indexOf(":::{figure}"), text.indexOf("\n:::\n", text.indexOf(":::{figure}")) + 5);
+  assert.deepEqual(part(stage).split("\n").slice(0, 4), [":::{figure} harbour-light.svg", ":alt: A lighthouse on a rock at dusk", "", "The harbour light."]);
+  assert.equal(part(stage).split("\n").filter((line) => line.startsWith(":") && !line.startsWith(":::")).length, 1, "only the :alt: option");
+  const expected = part(EXPECTED_FIGURE + "\n").split("\n");
+  assert.equal(expected[0], ":::{figure} harbour-light.svg");
+  assert.equal(expected[1], ":alt: A lighthouse on a rock at dusk");
+  // Same text around the figure: the stage with its figure part replaced is the expected result.
+  assert.equal(stage.replace(part(stage), part(EXPECTED_FIGURE + "\n")), `${EXPECTED_FIGURE}\n`);
+  const svg = readFileSync(fileURLToPath(new URL("../../clips/figure-editor/stage/harbour-light.svg", import.meta.url)), "utf8");
+  assert.ok(svg.startsWith("<svg"));
+  assert.match(svg.split("\n")[0], /width="400" height="240"/u);
 });

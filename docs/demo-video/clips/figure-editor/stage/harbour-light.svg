@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
+  <title>A lighthouse on a rock at dusk</title>
+  <rect width="400" height="240" fill="#f4c27a"/>
+  <rect y="150" width="400" height="90" fill="#3b6e8f"/>
+  <circle cx="300" cy="150" r="34" fill="#f08a4b"/>
+  <rect y="150" width="400" height="90" fill="#3b6e8f" opacity="0.9"/>
+  <path d="M120 240 L150 176 L250 176 L280 240 Z" fill="#5a4a42"/>
+  <path d="M182 176 L190 74 L210 74 L218 176 Z" fill="#fafafa"/>
+  <rect x="185" y="104" width="30" height="14" fill="#c8402f"/>
+  <rect x="183" y="140" width="34" height="14" fill="#c8402f"/>
+  <rect x="186" y="56" width="28" height="18" fill="#ffe9a8"/>
+  <path d="M182 56 L200 38 L218 56 Z" fill="#c8402f"/>
+  <path d="M214 62 L330 40 L330 84 Z" fill="#fff3c4" opacity="0.6"/>
+</svg>
