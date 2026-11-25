@@ -14,7 +14,7 @@
 - The published docs site now plays a feature clip as a looping video where a page shows its GIF; the first one
   shows the raw copy with `balanceEdges` on (PR #501)
 - In Auto width, a code block whose longest line is a little wider than the column now widens until the line
-  fits, instead of keeping a scroll bar; a captioned code block widens too (CR-508 code-auto-width)
+  fits, instead of keeping a scroll bar; a captioned code block widens too (CR-508 code-auto-width, PR #525)
 
 ## 1.12.1 - 2026-11-24
 
