@@ -171,6 +171,19 @@ test("the shipped editing page plays the table handles clip as video", async () 
   }
 });
 
+test("the shipped editing page plays the figure editor clip as video", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  const clip = "docs/demo-video/clips/figure-editor";
+  const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
+  const rendered = await renderMyst(source);
+  const html = clipVideos(rendered.html, "docs/user/editing.md", (repoPath) => fs.existsSync(path.join(EXTENSION_ROOT, repoPath)));
+  assert.ok(html.includes(`<video src="../demo-video/clips/figure-editor/figure-editor.webm"`), "the page holds the clip's video");
+  assert.ok(html.includes(`<video src="../demo-video/clips/paste-spreadsheet-cells/paste-spreadsheet-cells.webm"`), "the paste clip's video is still there");
+  for (const file of ["figure-editor.webm", "figure-editor.gif", "poster.png"]) {
+    assert.ok(fs.existsSync(path.join(EXTENSION_ROOT, clip, file)), file);
+  }
+});
+
 test("the shipped slash menu page plays the grid clip as video", async () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-095
   const clip = "docs/demo-video/clips/slash-menu-grid";
