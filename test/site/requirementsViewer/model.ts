@@ -33,6 +33,19 @@ export interface Scenario {
   readonly blocks: readonly ScenarioBlock[];
 }
 
+/** A path (StRS) or scenario (SwRS) declared in the `scenarios:` frontmatter, with the files the trace names for it. */
+export interface DeclaredScenario {
+  readonly id: string;
+  readonly title: string;
+  /** Files with a `@tests_req <ID>#<id>` marker (from `requirements-trace.json`; empty without it). */
+  readonly testedIn: readonly string[];
+  /** Files with a `@accepts_req <ID>#<id>` marker (from `requirements-trace.json`; empty without it). */
+  readonly acceptedIn: readonly string[];
+}
+
+/** `scenario_markers` of `okfreq trace requirements --json`, by `<requirement id>#<fragment>`. */
+export type TraceMarkers = ReadonlyMap<string, { readonly tests: readonly string[]; readonly accepts: readonly string[] }>;
+
 export interface Requirement {
   readonly id: string;
   readonly tier: "StRS" | "SwRS";
@@ -55,7 +68,12 @@ export interface Requirement {
   readonly testedIn: readonly string[];
   readonly scenarios: readonly Scenario[];
   readonly knownIssues: readonly string[];
-  readonly stakeholderValidated: boolean;
+  /** The paths of a StRS or the scenarios of a SwRS, as declared in `scenarios:` (empty when none). */
+  readonly declared: readonly DeclaredScenario[];
+  /** The StRS status `covered` of the report, under the coverage mode okfreq runs in. */
+  readonly covered: boolean;
+  readonly acceptanceExemption: boolean;
+  readonly acceptanceExemptionReason: string;
   /** The Mermaid source of the `### Use case diagram` section of an active StRS that has one. */
   readonly diagram?: string;
 }
@@ -78,6 +96,12 @@ export interface ScopeStats {
   readonly targets: number;
   readonly implemented: number;
   readonly tested: number;
+  readonly pathsTotal: number;
+  readonly pathsTested: number;
+  readonly pathsAccepted: number;
+  readonly strsCovered: number;
+  readonly scenariosTotal: number;
+  readonly scenariosTested: number;
 }
 
 export interface RetiredStats {
@@ -114,7 +138,17 @@ export interface RequirementsStats {
   readonly exemptions: number;
   readonly knownIssues: number;
   readonly swrsWithKnownIssue: number;
-  readonly strsValidated: number;
+  /** Live StRS paths: declared, with a `@tests_req` marker, with a `@accepts_req` marker (markers need the trace). */
+  readonly pathsTotal: number;
+  readonly pathsTested: number;
+  readonly pathsAccepted: number;
+  /** Live StRS whose report status is `covered`. */
+  readonly strsCovered: number;
+  /** Declared scenarios of live SwRS, and those with a `@tests_req` marker. */
+  readonly scenariosTotal: number;
+  readonly scenariosTested: number;
+  /** False when `requirements-trace.json` was absent: the tested and accepted counts are then 0 and no file is listed. */
+  readonly hasTrace: boolean;
   readonly scopes: readonly ScopeStats[];
 }
 
@@ -153,6 +187,41 @@ function textList(value: unknown): string[] {
 
 function statusOf(value: unknown): string {
   return isRecord(value) ? text(value.status) : "";
+}
+
+/** The `scenarios:` list of a requirement, joined with the trace markers; entries without an id are skipped. */
+function declaredOf(requirementId: string, value: unknown, trace: TraceMarkers): DeclaredScenario[] {
+  if (!Array.isArray(value)) return [];
+  const declared: DeclaredScenario[] = [];
+  for (const item of value) {
+    if (!isRecord(item) || text(item.id) === "") continue;
+    const id = text(item.id);
+    const markers = trace.get(`${requirementId}#${id}`);
+    declared.push({ id, title: text(item.title), testedIn: markers?.tests ?? [], acceptedIn: markers?.accepts ?? [] });
+  }
+  return declared;
+}
+
+/** The trace of `okfreq trace requirements --json`: `scenario_markers` by `<id>#<fragment>`; undefined when unusable. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-069
+export function parseTraceMarkers(raw: string): TraceMarkers | undefined {
+  let trace: unknown;
+  try {
+    trace = JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+  if (!isRecord(trace) || !Array.isArray(trace.scenario_markers)) return undefined;
+  const sets = new Map<string, { tests: Set<string>; accepts: Set<string> }>();
+  for (const marker of trace.scenario_markers) {
+    if (!isRecord(marker) || text(marker.fragment) === "" || text(marker.id) === "" || text(marker.file) === "") continue;
+    const key = `${text(marker.id)}#${text(marker.fragment)}`;
+    const entry = sets.get(key) ?? { tests: new Set<string>(), accepts: new Set<string>() };
+    sets.set(key, entry);
+    if (marker.marker === "tests") entry.tests.add(text(marker.file));
+    else if (marker.marker === "accepts") entry.accepts.add(text(marker.file));
+  }
+  return new Map([...sets].map(([key, entry]) => [key, { tests: [...entry.tests].sort(), accepts: [...entry.accepts].sort() }]));
 }
 
 function increment(map: Map<string, number>, key: string): void {
@@ -321,7 +390,7 @@ export function currentCommit(root: string): string {
 }
 
 /** Build the model from the okfreq report JSON; undefined when it is not a usable report. */
-export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel | undefined {
+export function parseRequirementsReport(raw: string, sha = "main", trace?: TraceMarkers): ViewerModel | undefined {
   let report: unknown;
   try {
     report = JSON.parse(raw);
@@ -330,16 +399,20 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
   }
   if (!isRecord(report) || !Array.isArray(report.requirements)) return undefined;
 
-  const scopes = new Map<string, { strs: number; swrs: number; targets: number; implemented: number; tested: number }>();
+  const scopes = new Map<string, { -readonly [K in Exclude<keyof ScopeStats, "scope">]: ScopeStats[K] }>();
   const scopeOf = (name: string) => {
     let entry = scopes.get(name);
-    if (!entry) scopes.set(name, entry = { strs: 0, swrs: 0, targets: 0, implemented: 0, tested: 0 });
+    if (!entry) scopes.set(name, entry = {
+      strs: 0, swrs: 0, targets: 0, implemented: 0, tested: 0,
+      pathsTotal: 0, pathsTested: 0, pathsAccepted: 0, strsCovered: 0, scenariosTotal: 0, scenariosTested: 0,
+    });
     return entry;
   };
   const activeLifecycles = new Map<string, number>();
   const retiredCount = new Map<string, { strs: number; swrs: number }>();
   let activeStrs = 0, activeSwrs = 0, targets = 0, implemented = 0, tested = 0, fullyTraceable = 0;
-  let exemptions = 0, knownIssues = 0, swrsWithKnownIssue = 0, strsValidated = 0;
+  let exemptions = 0, knownIssues = 0, swrsWithKnownIssue = 0, strsCovered = 0;
+  let pathsTotal = 0, pathsTested = 0, pathsAccepted = 0, scenariosTotal = 0, scenariosTested = 0;
   const requirements: Requirement[] = [];
   const dependsOn = new Map<string, string[]>();
 
@@ -353,7 +426,8 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
     const active = !RETIRED_LIFECYCLES.has(lifecycle);
     const body = text(entry.text);
     const notes = parseKnownIssues(body);
-    const validated = statusOf(entry.stakeholder_test_coverage) === "covered";
+    const covered = statusOf(entry.stakeholder_test_coverage) === "covered";
+    const declared = declaredOf(text(entry.id), frontmatter.scenarios, trace ?? new Map());
     const requirement: Requirement = {
       id: text(entry.id),
       tier,
@@ -374,7 +448,10 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
       testedIn: textList(frontmatter.tested_in_files),
       scenarios: parseScenarios(body),
       knownIssues: notes,
-      stakeholderValidated: validated,
+      declared,
+      covered,
+      acceptanceExemption: frontmatter.acceptance_exemption === true,
+      acceptanceExemptionReason: text(frontmatter.acceptance_exemption_reason),
       ...(active && tier === "StRS" ? diagramOf(body) : {}),
     };
     requirements.push(requirement);
@@ -390,12 +467,21 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
     if (tier === "StRS") {
       activeStrs += 1;
       scope.strs += 1;
-      if (validated) strsValidated += 1;
+      if (covered) { strsCovered += 1; scope.strsCovered += 1; }
+      for (const declaredPath of declared) {
+        pathsTotal += 1; scope.pathsTotal += 1;
+        if (declaredPath.testedIn.length > 0) { pathsTested += 1; scope.pathsTested += 1; }
+        if (declaredPath.acceptedIn.length > 0) { pathsAccepted += 1; scope.pathsAccepted += 1; }
+      }
       continue;
     }
     activeSwrs += 1;
     scope.swrs += 1;
     if (requirement.exempt) exemptions += 1;
+    for (const declaredScenario of declared) {
+      scenariosTotal += 1; scope.scenariosTotal += 1;
+      if (declaredScenario.testedIn.length > 0) { scenariosTested += 1; scope.scenariosTested += 1; }
+    }
     knownIssues += notes.length;
     if (notes.length > 0) swrsWithKnownIssue += 1;
     if (requirement.coverageTarget) {
@@ -443,7 +529,13 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
       exemptions,
       knownIssues,
       swrsWithKnownIssue,
-      strsValidated,
+      pathsTotal,
+      pathsTested,
+      pathsAccepted,
+      strsCovered,
+      scenariosTotal,
+      scenariosTested,
+      hasTrace: trace !== undefined,
       scopes: [...scopes.entries()]
         .sort(([a], [b]) => (areaOrder.get(a) ?? 99) - (areaOrder.get(b) ?? 99) || a.localeCompare(b))
         .map(([scope, row]) => ({ scope, ...row })),
@@ -458,10 +550,21 @@ export function parseRequirementsReport(raw: string, sha = "main"): ViewerModel 
   };
 }
 
+export const TRACE_FILE_NAME = "requirements-trace.json";
+
+/** Read the trace file; a missing or unreadable file gives undefined and never throws. */
+export function loadTraceMarkers(tracePath: string): TraceMarkers | undefined {
+  try {
+    return parseTraceMarkers(fs.readFileSync(tracePath, "utf8"));
+  } catch {
+    return undefined;
+  }
+}
+
 /** Read the report file; a missing or unreadable file gives undefined and never throws. */
 export function loadRequirementsModel(reportPath: string, sha = "main"): ViewerModel | undefined {
   try {
-    return parseRequirementsReport(fs.readFileSync(reportPath, "utf8"), sha);
+    return parseRequirementsReport(fs.readFileSync(reportPath, "utf8"), sha, loadTraceMarkers(path.join(path.dirname(reportPath), TRACE_FILE_NAME)));
   } catch {
     return undefined;
   }

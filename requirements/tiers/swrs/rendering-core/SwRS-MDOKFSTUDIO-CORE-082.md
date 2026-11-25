@@ -6,7 +6,9 @@ title: The site requirements viewer has a page for each behaviour
 description: When a maintainer builds the Pages site, the viewer SHALL write one
   page per active SwRS that shows its rule, where it sits in the paths of its
   use case (naming the use case by its full ID), its scenarios, and the files
-  that implement and test it at the commit of the build.
+  that implement and test it at the commit of the build. With the trace file,
+  the page SHALL list the tests of each declared scenario and mark an untested
+  one missing.
 project: markdown-okf-schema-studio
 scope: rendering-core
 req_lifecycle: proposed
@@ -24,6 +26,8 @@ scenarios:
   title: A table scenario shows its table
 - id: S4
   title: A scenario with steps, a note and a table
+- id: S5
+  title: Each scenario lists its tests
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,7 +45,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a maintainer builds the Pages site, the viewer SHALL write one page per active SwRS that shows its rule, where it sits in the paths of its use case (naming the use case by its full ID), its scenarios, and the files that implement and test it at the commit of the build.
+When a maintainer builds the Pages site, the viewer SHALL write one page per active SwRS that shows its rule, where it sits in the paths of its use case (naming the use case by its full ID), its scenarios, and the files that implement and test it at the commit of the build. When the `requirements-trace.json` is next to the report, the page SHALL list under each declared scenario the test files that name it and mark "missing" a scenario that none names; without that file it SHALL mark no scenario "missing" and list no test per scenario.
 
 ### Scenario S1 (nominal): Behaviour page
 
@@ -67,10 +71,18 @@ When a maintainer builds the Pages site, the viewer SHALL write one page per act
 - WHEN its page is written
 - THEN the card shows the steps in their three columns, the note as a paragraph and the table, in source order
 
+### Scenario S5 (nominal): Each scenario lists its tests
+
+- GIVEN a behaviour that declares scenarios S1 and S2, and a trace that names a test file for S1 only
+- WHEN the site is built
+- THEN the behaviour page lists the test files under S1, and S2 is marked "missing"; with no trace file, no
+  scenario is marked "missing" and no test is listed per scenario
+
 ### Verification notes
 
-- Method: Unit tests "behaviour page: files at the commit, kinds, retired rows" and "a full ID is the text of every link to a requirement" in test/site/requirementsViewer/pages.test.ts and "the model reads scenarios, files and known issues" in model.test.ts. Table and mixed scenarios: "the model reads table scenarios, notes and mixed scenarios in source order" in model.test.ts and "a table scenario shows its table and a mixed scenario shows steps, note and table in order" in pages.test.ts. The guard "no scenario card of the requirements bundle is empty" in bundle.test.ts renders every scenario of the real requirements bundle.
-- Criteria: The links, the kinds and the scenarios match the fixture; no card of the bundle is empty.
+- Method: Unit tests "behaviour page: files at the commit, kinds, retired rows" and "a full ID is the text of every link to a requirement" in test/site/requirementsViewer/pages.test.ts and "the model reads scenarios, files and known issues" in model.test.ts. Table and mixed scenarios: "the model reads table scenarios, notes and mixed scenarios in source order" in model.test.ts and "a table scenario shows its table and a mixed scenario shows steps, note and table in order" in pages.test.ts. The guard "no scenario card of the requirements bundle is empty" in bundle.test.ts renders every scenario of the real requirements bundle. Tests per scenario (S5): "a behaviour page lists the tests of each scenario and marks the untested one missing" in pages.test.ts.
+- Criteria: The links, the kinds and the scenarios match the fixture; no card of the bundle is empty;
+  the tests under each scenario and the "missing" mark match the trace fixture.
 
 <!-- okf:links:start -->
 ### Links

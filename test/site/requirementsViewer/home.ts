@@ -99,17 +99,21 @@ ${renderSnippet("In the test, the marker above the test that checks it:", tested
 function renderStats(model: ViewerModel): string {
   const stats: RequirementsStats = model.stats;
   const titles = new Map(model.areas.map((area) => [area.id, area]));
-  const card = (value: string | number, label: string) => `<div class="req-stat"><strong>${e(String(value))}</strong><span>${e(label)}</span></div>`;
+  const card = (value: string | number, label: string, note = "") =>
+    `<div class="req-stat"><strong>${e(String(value))}</strong><span>${e(label)}</span>${note ? `<small>${e(note)}</small>` : ""}</div>`;
+  /** `part / whole`, or `n/a / whole` when the trace file is missing (the markers cannot be counted without it). */
+  const ratio = (part: number, whole: number) => `${stats.hasTrace ? part : "n/a"}/${whole}`;
+  const cell = (part: number, whole: number) => (stats.hasTrace ? `${part} / ${whole}` : `n/a / ${whole}`);
   const lifecycles = [...stats.activeLifecycles.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([name, count]) => `${count} ${e(name)}`).join(", ");
   const rows = stats.scopes.map((scope) => {
     const area = titles.get(scope.scope);
     const name = area ? `<a href="${dirLink(VIEWER_DIR, areaDir(scope.scope))}">${e(area.title)}</a>` : e(scope.scope);
-    return `<tr><td>${name}</td><td>${scope.strs}</td><td>${scope.swrs}</td><td>${scope.implemented} / ${scope.targets}</td><td>${scope.tested} / ${scope.targets}</td></tr>`;
+    return `<tr><td>${name}</td><td>${scope.strs}</td><td>${scope.swrs}</td><td>${scope.implemented} / ${scope.targets}</td><td>${scope.tested} / ${scope.targets}</td><td>${cell(scope.pathsTested, scope.pathsTotal)}</td><td>${cell(scope.pathsAccepted, scope.pathsTotal)}</td></tr>`;
   }).join("");
   const retiredRows = stats.retired.map((row) => `<tr><td>${e(row.lifecycle)}</td><td>${row.strs}</td><td>${row.swrs}</td></tr>`).join("");
   const generated = stats.generatedAt ? ` Report generated ${e(stats.generatedAt)}.` : "";
   return `<h2>The figures</h2>
-<p class="hint">Counts come from the <code>okfreq generate-report</code> JSON and cover active requirements only (${lifecycles || "none"}); retired ones are counted below.${generated}</p>
+<p class="hint">Counts come from the <code>okfreq generate-report</code> JSON and cover active requirements only (${lifecycles || "none"}); retired ones are counted below.${generated}${stats.hasTrace ? "" : " The trace file was not generated, so the paths and scenarios have no tested or accepted count."}</p>
 <div class="req-stats">
 ${card(stats.activeStrs, "StRS use cases")}
 ${card(stats.activeSwrs, "SwRS behaviours")}
@@ -118,11 +122,15 @@ ${card(percent(stats.tested, stats.targets), `tested (${stats.tested} of ${stats
 ${card(percent(stats.fullyTraceable, stats.targets), `fully traceable (${stats.fullyTraceable})`)}
 ${card(stats.exemptions, "SwRS with a marker exemption")}
 ${card(stats.knownIssues, `known issues in ${stats.swrsWithKnownIssue} SwRS`)}
-${card(`${stats.strsValidated} of ${stats.activeStrs}`, "StRS with a stakeholder validation test")}
+${card(`${ratio(stats.pathsTested, stats.pathsTotal)}`, "StRS paths tested",
+  "A path counts as tested only where a simulated walk of it exists; no simulated walk is written for every path.")}
+${card(`${ratio(stats.pathsAccepted, stats.pathsTotal)}`, "StRS paths accepted", "Walked end to end in real VS Code (or on the bench of its product).")}
+${card(`${stats.strsCovered}/${stats.activeStrs}`, "StRS covered", "Follows okfreq's current coverage mode.")}
+${card(`${ratio(stats.scenariosTested, stats.scenariosTotal)}`, "SwRS scenarios tested")}
 </div>
 <h3>Per area</h3>
-<div class="req-table-wrap"><table class="req-table"><thead><tr><th>Area</th><th>StRS</th><th>SwRS</th><th>Implemented</th><th>Tested</th></tr></thead><tbody>${rows}</tbody>
-<tfoot><tr><td>Total</td><td>${stats.activeStrs}</td><td>${stats.activeSwrs}</td><td>${stats.implemented} / ${stats.targets}</td><td>${stats.tested} / ${stats.targets}</td></tr></tfoot></table></div>
+<div class="req-table-wrap"><table class="req-table"><thead><tr><th>Area</th><th>StRS</th><th>SwRS</th><th>Implemented</th><th>Tested</th><th>Paths tested</th><th>Paths accepted</th></tr></thead><tbody>${rows}</tbody>
+<tfoot><tr><td>Total</td><td>${stats.activeStrs}</td><td>${stats.activeSwrs}</td><td>${stats.implemented} / ${stats.targets}</td><td>${stats.tested} / ${stats.targets}</td><td>${cell(stats.pathsTested, stats.pathsTotal)}</td><td>${cell(stats.pathsAccepted, stats.pathsTotal)}</td></tr></tfoot></table></div>
 <h3>Retired requirements</h3>
 <p class="hint">Kept for their identifiers, never counted above and exempt from markers; the History button shows them.</p>
 <div class="req-table-wrap"><table class="req-table"><thead><tr><th>Lifecycle</th><th>StRS</th><th>SwRS</th></tr></thead><tbody>${retiredRows || '<tr><td colspan="3">None</td></tr>'}</tbody></table></div>`;

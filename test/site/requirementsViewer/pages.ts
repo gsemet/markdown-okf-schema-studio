@@ -1,7 +1,7 @@
 import { escapeHtml, plainText, shareDescription } from "../socialCard";
 import { kindClass, mapSummary, metroList, metroSvg, pathColour, plural, scenarioDots, testCount } from "./layout";
 import { citedIds, type MainPath } from "./mainPaths";
-import { behavioursOf, replacementsOf, retiredBehavioursOf, type Area, type Requirement, type Scenario, type ViewerModel } from "./model";
+import { behavioursOf, replacementsOf, retiredBehavioursOf, type Area, type DeclaredScenario, type Requirement, type Scenario, type ViewerModel } from "./model";
 import { VIEWER_DIR, areaDir, blobUrl, dirLink, pageLink, requirementDir } from "./urls";
 import type { PageSpec } from "./shell";
 
@@ -88,6 +88,27 @@ function mapSection(model: ViewerModel, dir: string, paths: readonly MainPath[])
 <p class="facts">${summary.html}</p>`;
 }
 
+/** The paths a StRS declares (`S<n>` and title), each with the files that test it and the files that accept it. */
+// @implements_req SwRS-MDOKFSTUDIO-CORE-080
+function declaredPathsSection(model: ViewerModel, useCase: Requirement): string {
+  if (useCase.declared.length === 0) return "";
+  const files = (list: readonly string[]): string => (list.length === 0 ? '<p class="hint">None.</p>' : fileList(model, list, true));
+  // The waiver comes from the report, not from the trace: its reason shows with or without one.
+  const waiver = useCase.acceptanceExemption ? `<p><span class="tag waived">waived</span> ${e(useCase.acceptanceExemptionReason)}</p>` : "";
+  const rows = useCase.declared.map((declared) => {
+    const detail = model.stats.hasTrace
+      ? `<div class="cols"><section><h3>Tested by <small>${declared.testedIn.length}</small></h3>${files(declared.testedIn)}</section>`
+        + `<section><h3>Accepted by <small>${waiver ? "waived" : declared.acceptedIn.length}</small></h3>${waiver || files(declared.acceptedIn)}</section></div>`
+      : waiver;
+    return `<div class="path-row"><p class="path-name"><span class="sid">${e(declared.id)}</span>${e(declared.title)}${useCase.acceptanceExemption ? ' <span class="tag waived">waived</span>' : ""}</p>${detail}</div>`;
+  }).join("");
+  const note = model.stats.hasTrace ? "" : '<p class="hint">The trace file was not generated, so the files that test or accept each path are not listed.</p>';
+  return `<h2>Paths <small>${useCase.declared.length}</small></h2>
+<p class="hint">A path is tested by a simulated walk. It is accepted in real VS Code or, for the use cases of the release, the site and the built VSIX, by the test closest to that product. Each marker names the path by its <code>S&lt;n&gt;</code> id.</p>
+${note}${rows}
+`;
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-CORE-080
 // @implements_req SwRS-MDOKFSTUDIO-CORE-093
 export function useCasePage(model: ViewerModel, useCase: Requirement): PageSpec {
@@ -112,7 +133,7 @@ export function useCasePage(model: ViewerModel, useCase: Requirement): PageSpec 
 <h1>${e(useCase.title)}</h1>
 <blockquote class="need">${e(useCase.userNeed)}</blockquote>
 ${diagram}${map}
-<h2>Behaviours of this use case</h2>
+${declaredPathsSection(model, useCase)}<h2>Behaviours of this use case</h2>
 <div class="blist">${behaviours.map((behaviour) => behaviourRow(model, dir, behaviour, onMap)).join("")}${retired.join("")}</div>
 `;
   return {
@@ -202,8 +223,15 @@ export function behaviourPage(model: ViewerModel, behaviour: Requirement): PageS
   const area = areaOf(model, behaviour.scope);
   const parent = behaviour.derivesFrom.map((id) => model.byId.get(id)).find((candidate) => candidate?.active && candidate.tier === "StRS");
   const rule = e(behaviour.description).replace(/\bSHALL(?: NOT)?\b/gu, (match) => `<strong>${match}</strong>`);
-  const scenarios = behaviour.scenarios.map((scenario) =>
-    `<details class="scn"><summary>${scenario.id ? `<span class="sid">${e(scenario.id)}</span>` : ""}<span class="k ${kindClass(scenario.kind)}">${e(scenario.kind)}</span>${e(scenario.name)}</summary>${scenarioBody(scenario)}</details>`).join("")
+  const declaredOf = (scenario: Scenario): DeclaredScenario | undefined => (scenario.id ? behaviour.declared.find((candidate) => candidate.id === scenario.id) : undefined);
+  const scenarios = behaviour.scenarios.map((scenario) => {
+    const declared = declaredOf(scenario);
+    const missing = declared && model.stats.hasTrace && declared.testedIn.length === 0 ? ' <span class="tag missing">missing</span>' : "";
+    const tests = declared && model.stats.hasTrace
+      ? `<div class="scn-tests"><b>Tested by</b>${fileList(model, declared.testedIn, true)}</div>`
+      : "";
+    return `<details class="scn"><summary>${scenario.id ? `<span class="sid">${e(scenario.id)}</span>` : ""}<span class="k ${kindClass(scenario.kind)}">${e(scenario.kind)}</span>${e(scenario.name)}${missing}</summary>${scenarioBody(scenario)}${tests}</details>`;
+  }).join("")
     || '<p class="hint">Stated as one rule, without scenarios.</p>';
   const exempt = behaviour.exempt ? `<p class="exempt">Exempt from code and test markers${behaviour.exemptionReason ? `: ${e(behaviour.exemptionReason)}` : "."}</p>` : "";
   const known = behaviour.knownIssues.length > 0
