@@ -4,4 +4,6 @@
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002 — --sphinx-preview-content-max-width
 // @implements_req SwRS-MDOKFSTUDIO-THEME-031 — html[data-sphinx-preview-theme-mode="cream"]
 // @implements_req SwRS-MDOKFSTUDIO-THEME-043 — --sphinx-preview-zoom
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084 — --sphinx-preview-issue-error-background
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-023 — --sphinx-preview-issue-warning
 export {};

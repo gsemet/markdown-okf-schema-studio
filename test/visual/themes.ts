@@ -20,6 +20,26 @@ const SHARED: Record<string, string> = {
   "--vscode-editor-font-family": "'SF Mono', Menlo, Consolas, monospace",
 };
 
+/**
+ * The status colours of Default Light Modern and Default Dark Modern, for a scenario that checks
+ * that the page takes the colours of the VS Code theme (`render.themeVariables`). They are not in
+ * `THEMES`, so no other page changes. Each differs from the fallback of the stylesheet, so such a
+ * check fails when a rule ignores the theme. Light Modern's own warning colour (#bf8803) is that
+ * fallback: the warning colour of its lists (`list.warningForeground`) stands in for it.
+ */
+export const STATUS_THEME_VARIABLES = {
+  light: {
+    "--vscode-errorForeground": "#f85149",
+    "--vscode-inputValidation-errorBackground": "#f2dede",
+    "--vscode-editorWarning-foreground": "#855f00",
+  },
+  dark: {
+    "--vscode-errorForeground": "#f85149",
+    "--vscode-inputValidation-errorBackground": "#5a1d1d",
+    "--vscode-editorWarning-foreground": "#cca700",
+  },
+} as const;
+
 export const THEMES: PreviewTheme[] = [
   {
     id: "dark",

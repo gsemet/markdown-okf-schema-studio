@@ -36,6 +36,8 @@ scenarios:
   title: No underline during an edit
 - id: S9
   title: Marked name cell in edit mode
+- id: S10
+  title: Marked rows in a forced preview mode
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,6 +46,7 @@ implemented_in_files:
 - src/core/frontmatter/okfFrontmatter.ts
 - src/core/frontmatter/propertiesTable.ts
 - src/core/frontmatter/schemaValidator.ts
+- src/core/preview/styles/pageChromeStyles.markers.ts
 - src/core/preview/styles/propertiesStyles.markers.ts
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
@@ -72,7 +75,7 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 
 - GIVEN a schema with a number maximum 5 and a date-time format, and a document with values 9 and x for those fields
 - WHEN the preview is rendered
-- THEN each of the two rows shows its name in the error colour on a light red background and a wavy underline in the error colour under its value, every violation is reported (not only the first) and their tooltips read must be <= 5 and must match format "date-time"
+- THEN each of the two rows shows its name in the error colour on a red-tinted background and a wavy underline in the error colour under its value, every violation is reported (not only the first) and their tooltips read must be <= 5 and must match format "date-time"
 
 ### Scenario S2 (nominal): 2020-12 keywords and formats
 
@@ -104,7 +107,7 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 
 - GIVEN `markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties` true, a schema declaring type and title, and a document that also sets titel
 - WHEN the preview is rendered
-- THEN the row titel carries the warning "Unknown field; it is not declared in the "{type}" schema." and is shown with its name in the warning colour on a light background of that colour and a wavy underline in the warning colour under its value, and the badge counts one warning
+- THEN the row titel carries the warning "Unknown field; it is not declared in the "{type}" schema." and is shown with its name in the warning colour on a tinted background of that colour and a wavy underline in the warning colour under its value, and the badge counts one warning
 
 ### Scenario S7 (boundary): Cases without an issue
 
@@ -130,14 +133,22 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 - WHEN the pointer is over its name cell
 - THEN the cell takes the hover background of the other editable cells and the name keeps the colour of its severity
 
+### Scenario S10 (boundary): Marked rows in a forced preview mode
+
+- GIVEN a field row with an error or a warning and the preview in the Dark, White or Cream mode, on a dark or on a light VS Code theme
+- WHEN the preview is rendered
+- THEN the name, its background and the underline of the value take their colours from the palette of the mode, whatever the VS Code theme: the background is as light or as dark as the page, the name has a contrast of at least 3:1 against what is painted behind it, and the row looks the same on both VS Code themes
+
 ### Known issues
 
 - Known issue: messages are not translated and unknown schema keywords are ignored without notice.
 - Known issue: the "must NOT have additional properties" error is not attached to the field row (the validator reports it at the document root), so the undeclared row itself carries no underline.
+- Known issue: in the Dark, White or Cream mode the whole-document error row takes its text colour from the palette of the mode but its background from the VS Code theme, so on a VS Code theme of the opposite lightness its text is hard to read.
 
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-FMEDIT-028: the field action menu reads the data-okf-additional-properties flag and then lists no "Custom key..." entry.
+- SwRS-MDOKFSTUDIO-THEME-025: a forced mode looks the same on a dark and on a light VS Code theme.
 
 ### Verification notes
 
@@ -148,8 +159,10 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 - Method: test/core/preview/fieldIssueStyles.test.ts, tests `a field row with an error has a red name cell and a red wavy underline under its value` and `a field row with a warning has the same marks in the warning colour` (how the rows are marked: violations mark their field rows; strict setting).
 - Method: test/core/preview/fieldIssueStyles.test.ts, test `a value cell that is being edited drops the issue underline` (no underline during an edit).
 - Method: test/core/preview/fieldIssueStyles.test.ts, test `in edit mode the name cell of an error or warning row highlights under the pointer` (marked name cell in edit mode).
-- Method: test/visual/scenarioDefinitions2.ts, visual scenarios `v32-field-issue-rows-light-900` and `v33-field-issue-rows-dark-900` (how the rows are marked: violations mark their field rows; strict setting).
-- Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently. The validator collects all errors, so each violation gets its own row or underline. An error or warning field row is marked like the whole-document error row: its name cell takes the severity colour on a light background of that colour and its value a wavy underline in that colour; the value text keeps its colour, and an info-severity field row keeps the plain look. While a value is being edited its cell has no underline, so the editor and its field menu are not underlined. In edit mode, while the pointer is over the name cell of an error or warning row whose name can be edited, the hover background of the other editable cells replaces the severity background and the name keeps its severity colour. The empty required row has value null and is flagged required. The whole-document row is an info-style row with the error severity and spans every visible column. The strict setting has no effect on the closed-schema error; one row is reported per undeclared key, including type when the schema does not declare it. The strict warning applies only when a schema matched, is independent of the schema's own additionalProperties, and a generic table never warns. The whole-document scenario (minProperties) has no test (probed against the analysis).
+- Method: test/core/preview/fieldIssueStyles.test.ts, test `in a forced preview mode the marked field rows take every colour from the mode's palette` (marked rows in a forced preview mode; the colours are computed from the shipped stylesheet with the tokens of a dark and of a light VS Code theme, not in a browser).
+- Method: test/core/preview/fieldIssueStyles.test.ts, test `the mode that follows the VS Code theme keeps the theme tokens, and the palette colours stay on these rows` (violations mark their field rows; strict setting: in the Current mode the colours are the theme tokens; also that only the Dark, White and Cream palettes set other row colours and that the whole-document error row keeps its look; computed from the shipped stylesheet, not in a browser).
+- Method: test/visual/scenarioDefinitions2.ts, visual scenarios `v32-field-issue-rows-light-900` and `v33-field-issue-rows-dark-900` (how the rows are marked: violations mark their field rows; strict setting; in a browser, in the Current mode, with the status colours a light and a dark VS Code theme set).
+- Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently. The validator collects all errors, so each violation gets its own row or underline. An error or warning field row is marked like the whole-document error row: its name cell takes the severity colour on a tinted background of that colour and its value a wavy underline in that colour; the value text keeps its colour, and an info-severity field row keeps the plain look. In the Current mode those colours are the VS Code theme's, with a fallback where the page sets none; in the Dark, White and Cream modes they come from the palette of the mode, and the whole-document error row keeps the VS Code theme's error background. While a value is being edited its cell has no underline, so the editor and its field menu are not underlined. In edit mode, while the pointer is over the name cell of an error or warning row whose name can be edited, the hover background of the other editable cells replaces the severity background and the name keeps its severity colour. The empty required row has value null and is flagged required. The whole-document row is an info-style row with the error severity and spans every visible column. The strict setting has no effect on the closed-schema error; one row is reported per undeclared key, including type when the schema does not declare it. The strict warning applies only when a schema matched, is independent of the schema's own additionalProperties, and a generic table never warns. The whole-document scenario (minProperties) has no test (probed against the analysis).
 
 <!-- okf:links:start -->
 ### Links

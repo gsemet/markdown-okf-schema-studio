@@ -64,13 +64,15 @@ export interface ScenarioRenderOptions {
    * request id of the page are added to each message unless `data` sets them.
    */
   readonly hostMessages?: readonly HostMessage[];
+  /** CR-513: VS Code theme variables (`--vscode-*`) the page gets on top of those of its theme. */
+  readonly themeVariables?: Readonly<Record<string, string>>;
 }
 
 const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
   "trusted", "restrictedReads", "strictAdditionalProperties", "propertiesTable",
   "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "commentsEnabled", "hostMessages",
   "codeBlocksDarkBackground", "codeBlocksLineNumbers", "rawCopyBalanceEdges",
-  "freshWorkspace", "mystExtensions", "fixturesWorkspace",
+  "freshWorkspace", "mystExtensions", "fixturesWorkspace", "themeVariables",
 ];
 
 /**

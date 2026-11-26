@@ -3,6 +3,7 @@
  */
 import { LINK_HINT_SCENARIOS } from "./linkHintScenarios";
 import { RELEASE_SHOWCASE_SCENARIOS } from "./releaseShowcaseScenarios";
+import { STATUS_THEME_VARIABLES } from "./themes";
 import {
   BACK_ENABLED_ASSERTIONS,
   BLOCK_SELECTION_ASSERTIONS,
@@ -10,7 +11,7 @@ import {
   CJK_RTL_ASSERTIONS,
   CODE_BLOCK_CAPTION_ASSERTIONS,
   COMMENT_LIST_ASSERTIONS,
-  FIELD_ISSUE_ROW_ASSERTIONS,
+  fieldIssueRowAssertions,
   FIRST_GAP_SCENARIOS,
   FORCED_DARK_ASSERTIONS,
   FRESH_WORKSPACE_ASSERTIONS,
@@ -56,7 +57,7 @@ import {
   RESTRICTED_PAGE_EDIT_ON_ASSERTIONS,
   REVIEW_THREAD_OPEN_ASSERTIONS,
   REVIEW_THREAD_RESOLVED_ASSERTIONS,
-  SCHEMA_WARNING_ROW_ASSERTIONS,
+  schemaWarningRowAssertions,
   type ScenarioDefinition,
   STRICT_FIELD_ASSERTIONS,
   THREADS_MESSAGE,
@@ -958,11 +959,11 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     theme: "light",
     ...WIDE,
     scroll: { kind: "top" as const },
-    render: { strictAdditionalProperties: true as const },
-    contentAssertions: FIELD_ISSUE_ROW_ASSERTIONS,
+    render: { strictAdditionalProperties: true as const, themeVariables: STATUS_THEME_VARIABLES.light },
+    contentAssertions: fieldIssueRowAssertions("light"),
     description: "A schema-typed document with a value outside its list and an undeclared field, with the strict setting on, "
-      + "light theme: the error row and the warning row each show the name in the colour of their severity on a light "
-      + "background, with a wavy underline under the value.",
+      + "light theme: the error row and the warning row each show the name in the theme's colour of their severity on a "
+      + "tinted background, with a wavy underline under the value.",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S1
@@ -972,11 +973,11 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     theme: "dark",
     ...WIDE,
     scroll: { kind: "top" as const },
-    render: { strictAdditionalProperties: true as const },
-    contentAssertions: FIELD_ISSUE_ROW_ASSERTIONS,
+    render: { strictAdditionalProperties: true as const, themeVariables: STATUS_THEME_VARIABLES.dark },
+    contentAssertions: fieldIssueRowAssertions("dark"),
     description: "A schema-typed document with a value outside its list and an undeclared field, with the strict setting on, "
-      + "dark theme: the error row and the warning row each show the name in the colour of their severity on a light "
-      + "background, with a wavy underline under the value.",
+      + "dark theme: the error row and the warning row each show the name in the theme's colour of their severity on a "
+      + "tinted background, with a wavy underline under the value.",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S5
@@ -985,9 +986,10 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     theme: "light",
     ...WIDE,
     scroll: { kind: "top" as const },
-    contentAssertions: SCHEMA_WARNING_ROW_ASSERTIONS,
-    description: "A document whose schema cannot be parsed, light theme: one warning row in the warning colour on a light "
-      + "background spans the table and holds its message, and the badge counts one warning.",
+    render: { themeVariables: STATUS_THEME_VARIABLES.light },
+    contentAssertions: schemaWarningRowAssertions("light"),
+    description: "A document whose schema cannot be parsed, light theme: one warning row in the theme's warning colour on a "
+      + "tinted background spans the table and holds its message, and the badge counts one warning.",
   },
   {
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S5
@@ -996,9 +998,10 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     theme: "dark",
     ...WIDE,
     scroll: { kind: "top" as const },
-    contentAssertions: SCHEMA_WARNING_ROW_ASSERTIONS,
-    description: "A document whose schema cannot be parsed, dark theme: one warning row in the warning colour on a light "
-      + "background spans the table and holds its message, and the badge counts one warning.",
+    render: { themeVariables: STATUS_THEME_VARIABLES.dark },
+    contentAssertions: schemaWarningRowAssertions("dark"),
+    description: "A document whose schema cannot be parsed, dark theme: one warning row in the theme's warning colour on a "
+      + "tinted background spans the table and holds its message, and the badge counts one warning.",
   },
   // P9 B5 (a): theme, zoom, trust, layout, toolbar, block and palette states of the extension.
   {

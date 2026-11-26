@@ -181,27 +181,33 @@ export const PROPERTIES_CSS = `
 }
 
 /* Issues. A whole-document error or warning row spans the table and wraps its message. It takes the
-   colour of its severity on a light background of it, and so does the name cell of a field row with
+   colour of its severity on a tinted background of it, and so does the name cell of a field row with
    an error or a warning, whose value gets a wavy underline in that colour (the value text keeps its
-   own colour). Info rows keep the plain look. The key column keeps its wrapping rules. */
+   own colour). Info rows keep the plain look. The key column keeps its wrapping rules.
+   The --sphinx-preview-issue-* colours are set by the Dark, White and Cream palettes only
+   (pageChromeStyles): in the Current mode the field rows and the warning rows read the theme tokens. */
 #sphinx-myst-preview-content [data-okf-properties] .okf-info-row.okf-error th,
 #sphinx-myst-preview-content [data-okf-properties] .okf-info-row.okf-warning th {
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
-#sphinx-myst-preview-content [data-okf-properties] .okf-info-row.okf-error th,
-#sphinx-myst-preview-content [data-okf-properties] tr[data-okf-field].okf-error > th {
+#sphinx-myst-preview-content [data-okf-properties] .okf-info-row.okf-error th {
   color: var(--studio-errorForeground, #f14c4c);
   background: var(--studio-inputValidation-errorBackground, rgba(235, 80, 80, 0.12));
 }
 
+#sphinx-myst-preview-content [data-okf-properties] tr[data-okf-field].okf-error > th {
+  color: var(--studio-errorForeground, #f14c4c);
+  background: var(--sphinx-preview-issue-error-background, var(--studio-inputValidation-errorBackground, rgba(235, 80, 80, 0.12)));
+}
+
 #sphinx-myst-preview-content [data-okf-properties] .okf-info-row.okf-warning th,
 #sphinx-myst-preview-content [data-okf-properties] tr[data-okf-field].okf-warning > th {
-  color: var(--studio-editorWarning-foreground, #bf8803);
+  color: var(--sphinx-preview-issue-warning, var(--studio-editorWarning-foreground, #bf8803));
   /* Fallback first: an engine without color-mix() drops the second declaration. */
   background: rgba(191, 136, 3, 0.14);
-  background: color-mix(in srgb, var(--studio-editorWarning-foreground, #bf8803) 14%, transparent);
+  background: color-mix(in srgb, var(--sphinx-preview-issue-warning, var(--studio-editorWarning-foreground, #bf8803)) 14%, transparent);
 }
 
 /* The severity background above is set under an id, so it outranks the hover highlight of the edit
@@ -217,7 +223,7 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content [data-okf-
 }
 
 #sphinx-myst-preview-content [data-okf-properties] tr[data-okf-field] > td.okf-warning {
-  text-decoration: underline wavy var(--studio-editorWarning-foreground, #bf8803);
+  text-decoration: underline wavy var(--sphinx-preview-issue-warning, var(--studio-editorWarning-foreground, #bf8803));
   text-underline-offset: 0.2em;
 }
 

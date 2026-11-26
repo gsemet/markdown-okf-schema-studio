@@ -3,7 +3,12 @@ import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfig
 
 // @implements_req SwRS-MDOKFSTUDIO-THEME-025
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-002
-/** The Dark, White and Cream palettes: each forced mode sets the whole `--studio-*` palette itself. */
+/**
+ * The Dark, White and Cream palettes: each forced mode sets the whole `--studio-*` palette itself.
+ * The `--sphinx-preview-issue-*` colours are those of the frontmatter rows with an error or a warning
+ * (propertiesStyles), which would otherwise read the VS Code theme's warning colour and error
+ * background.
+ */
 const FORCED_THEME_MODES_CSS = `html[data-sphinx-preview-theme-mode="dark"],
 html[data-sphinx-preview-theme-mode="dark"] body {
   color-scheme: dark;
@@ -27,6 +32,8 @@ html[data-sphinx-preview-theme-mode="dark"] body {
   --studio-button-background: #0e639c;
   --studio-button-foreground: #ffffff;
   --studio-errorForeground: #f48771;
+  --sphinx-preview-issue-error-background: rgba(244, 135, 113, 0.14);
+  --sphinx-preview-issue-warning: #cca700;
   --studio-descriptionForeground: #a8a8a8;
   --studio-textLink-foreground: #3794ff;
   --studio-focusBorder: #007fd4;
@@ -72,6 +79,8 @@ html[data-sphinx-preview-theme-mode="white"] body {
   --studio-button-background: #005fb8;
   --studio-button-foreground: #ffffff;
   --studio-errorForeground: #b5200d;
+  --sphinx-preview-issue-error-background: rgba(181, 32, 13, 0.1);
+  --sphinx-preview-issue-warning: var(--studio-charts-yellow);
   --studio-descriptionForeground: #5f5f5f;
   --studio-textLink-foreground: #006ab1;
   --studio-focusBorder: #005fb8;
@@ -131,6 +140,8 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   --studio-button-secondaryBackground: #e8e0d2;
   --studio-button-secondaryForeground: #3a372f;
   --studio-errorForeground: #b3261e;
+  --sphinx-preview-issue-error-background: rgba(179, 38, 30, 0.12);
+  --sphinx-preview-issue-warning: var(--studio-charts-yellow);
   --studio-charts-blue: #2f6690;
   --studio-charts-green: #34703f;
   --studio-charts-purple: #6b4a8a;
