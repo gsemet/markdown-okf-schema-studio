@@ -265,7 +265,7 @@ test("a page over the size bound tells the user, sends nothing and leaves the bu
   assert.equal(attributes.has("aria-busy"), false, "the button is free again");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
 test("a gradient of a chart view is written local to the file: url(<page URL>#id) becomes url(#id)", () => {
   const { document, window, chartElements, otherElements } = stubs({
     chartAttributes: [

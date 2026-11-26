@@ -119,6 +119,7 @@ const hiddenTooltip = (page: Page): Promise<unknown> => page.waitForFunction(() 
 }, undefined, { timeout: 5_000 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S5
 test("a theme change draws the charts again in the new colours, and changing back shows the same view", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light");
   if (!opened) {
@@ -155,8 +156,6 @@ test("a theme change draws the charts again in the new colours, and changing bac
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 test("two identical charts each get their own view", async (t) => {
   const chart = CHART_DOCUMENT.slice(CHART_DOCUMENT.indexOf("```vega-lite"), CHART_DOCUMENT.indexOf("A Vega line chart"));
   const opened = await openChartPage(`${chart}\n${chart}`, FILES, "light", "cream");
@@ -176,7 +175,7 @@ test("two identical charts each get their own view", async (t) => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("hovering a mark shows its fields, the box follows the page colours, and leaving hides it", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
@@ -234,7 +233,7 @@ test("hovering a mark shows its fields, the box follows the page colours, and le
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("a chart with tooltip null shows no box, and the box border is stronger on a dark page", async (t) => {
   const quiet = CHART_SHOWCASE_DOCUMENT.replace('"mark": "bar",\n  "encoding"', '"mark": { "type": "bar", "tooltip": null },\n  "encoding"');
   assert.match(quiet, /"tooltip": null/u, "the first chart carries the opt-out");
@@ -267,7 +266,7 @@ test("a chart with tooltip null shows no box, and the box border is stronger on 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("in the current mode the box border is stronger over a VS Code dark theme, and in the White theme it is the page border", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "current");
   if (!opened) {
@@ -318,7 +317,6 @@ test("in the current mode the box border is stronger over a VS Code dark theme, 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
 test("a chart with an input binding draws no input widget", async (t) => {
   const bound = ["```vega-lite", JSON.stringify({
     width: 200,
@@ -347,7 +345,7 @@ test("a chart with an input binding draws no input widget", async (t) => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("on a narrow page the scaled chart still finds the mark under the pointer and shows the box", async (t) => {
   const opened = await openPreviewPage(CHART_DOCUMENT, FILES, "light", "cream", "vega", { viewport: { width: 300, height: 1300 } });
   if (!opened) {
@@ -371,7 +369,7 @@ test("on a narrow page the scaled chart still finds the mark under the pointer a
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S3
 test("a chart in error has no view and shows no hover box", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
@@ -393,7 +391,7 @@ test("a chart in error has no view and shows no hover box", async (t) => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("the chart text follows the page text size, and the Quarter labels are horizontal", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
@@ -433,7 +431,7 @@ test("the chart text follows the page text size, and the Quarter labels are hori
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
 test("the Chart source section is hidden in the preview, in reading and edit mode, and the broken chart keeps its message", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
@@ -458,7 +456,7 @@ test("the Chart source section is hidden in the preview, in reading and edit mod
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
 test("the HTML export shows each Chart source section again, closed, and keeps the charts as inline SVG", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
@@ -487,7 +485,7 @@ test("the HTML export shows each Chart source section again, closed, and keeps t
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-128
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-128#S1
 test("the HTML export keeps each chart as inline SVG with local gradients, no hover box and no script", async (t) => {
   const opened = await openChartPage(CHART_EXPORT_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
@@ -535,7 +533,7 @@ test("the HTML export keeps each chart as inline SVG with local gradients, no ho
 
 const posted = (page: Page): Promise<Array<{ type: string; activation?: string }>> => page.evaluate(() => (window as unknown as { __posted: Array<{ type: string; activation?: string }> }).__posted);
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("in the page runtime a chart redraws with the zoom, opens the editor in edit mode and reveals in reading mode", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream", { pageRuntime: true });
   if (!opened) {
@@ -578,7 +576,8 @@ test("in the page runtime a chart redraws with the zoom, opens the editor in edi
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009#S3
 test("in the page runtime the find skips the chart text, and a content patch keeps the drawn views", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream", { pageRuntime: true });
   if (!opened) {

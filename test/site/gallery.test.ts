@@ -76,7 +76,7 @@ test("gallery tolerates missing artifacts without inventing passing evidence", (
 });
 
 test("a visual capture takes its scenario and step id", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-096
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-096#S2
   withCaptures(["visual/block-editing/v01-x-light-900.png", "visual/block-editing/v01-x-light-900--typed.png"], (root) => {
     assert.equal(captureId("visual/block-editing/v01-x-light-900.png"), "block-editing/v01-x-light-900");
     assert.equal(captureId("visual/block-editing/v01-x-light-900--typed.png"), "block-editing/v01-x-light-900--typed");
@@ -87,7 +87,7 @@ test("a visual capture takes its scenario and step id", () => {
 });
 
 test("a real-window capture keeps its id and URL whatever the suffix of its run folder", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-096
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-096#S2
   for (const suite of SUITES) {
     const pages = ["AbC123", "zZ9-other"].map((suffix) => {
       let html = "";
@@ -100,7 +100,7 @@ test("a real-window capture keeps its id and URL whatever the suffix of its run 
 });
 
 test("any other capture takes its path as id, percent-encoded by segment in the fragment", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-096
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-096#S2
   assert.equal(captureId("real run/checkpoint.png"), "real run/checkpoint");
   assert.equal(captureHref("real run/checkpoint"), "#real%20run/checkpoint");
   assert.equal(captureId("orphan.webp"), "orphan");
@@ -111,7 +111,7 @@ test("any other capture takes its path as id, percent-encoded by segment in the 
 });
 
 test("two captures of one id keep unique ids, the first in name order the short one", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-096
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-096#S3
   const prefix = RUN_FOLDER_PREFIX["real-input"];
   withCaptures([`${prefix}BBB/gfm/r01-task.png`, `${prefix}AAA/gfm/r01-task.png`, "visual/gfm/v01-x-light-900.png"], (root) => {
     const html = buildGallery(root);
@@ -127,7 +127,6 @@ test("two captures of one id keep unique ids, the first in name order the short 
 });
 
 test("the gallery page carries the unknown-id notice and the history handling of the viewer", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-096
   withCaptures(["orphan.png"], (root) => {
     const html = buildGallery(root);
     assert.ok(html.includes('<p class="status" role="status" data-capture-missing hidden></p><section class="gallery">'));
@@ -140,7 +139,6 @@ test("the gallery page carries the unknown-id notice and the history handling of
 });
 
 test("an id holding HTML characters is escaped in the page", () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-096
   // Windows allows no < nor " in a file name; the Linux run covers them.
   const name = process.platform === "win32" ? "a&'b" : "a&'<b>\"c";
   const escaped = process.platform === "win32" ? "a&amp;&#39;b" : "a&amp;&#39;&lt;b&gt;&quot;c";

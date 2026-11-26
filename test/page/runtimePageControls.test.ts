@@ -541,7 +541,7 @@ function codeColumn() {
 
 const breakoutOf = (element: RuntimeElement): string => element.style.getPropertyValue("--sphinx-preview-breakout");
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
 test("T10b: a code block that breaks out is widened by its border too", () => {
   const { harness, code } = codeColumn();
   const block = code(700, 760);
@@ -551,7 +551,7 @@ test("T10b: a code block that breaks out is widened by its border too", () => {
   assert.equal(breakoutOf(block), "62px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
 test("T10b: a captioned code block breaks out through its inner code", () => {
   const { harness, make, code } = codeColumn();
   const figure = make("figure", 700, 700);
@@ -562,7 +562,8 @@ test("T10b: a captioned code block breaks out through its inner code", () => {
   assert.equal(breakoutOf(figure), "102px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S5
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
 test("T10b: a code block that overflows by 1 px still breaks out, a table that gains 1 px does not", () => {
   const { harness, make, code } = codeColumn();
   const block = code(700, 699);
@@ -573,7 +574,7 @@ test("T10b: a code block that overflows by 1 px still breaks out, a table that g
   assert.equal(table.getAttribute("data-sphinx-preview-wide"), null);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
 test("T10b: a code block that fits is not marked at a fractional width", () => {
   const { harness, code } = codeColumn();
   const block = code(700.4, 698);
@@ -584,7 +585,7 @@ test("T10b: a code block that fits is not marked at a fractional width", () => {
   assert.equal(block.style.getPropertyValue("--sphinx-preview-breakout-shift"), "");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
 test("T10b: a code block wider than the available area is capped", () => {
   const { harness, code } = codeColumn();
   const block = code(700, 1600);
@@ -592,7 +593,7 @@ test("T10b: a code block wider than the available area is capped", () => {
   assert.equal(breakoutOf(block), "268px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
 test("T10b: a code block inside a list item is not measured", () => {
   const { harness, make, code } = codeColumn();
   const list = make("ol", 700, 700);
@@ -604,7 +605,6 @@ test("T10b: a code block inside a list item is not measured", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
 test("T10b: a Mermaid figure is not a code block", () => {
   const { harness, make, code } = codeColumn();
   const figure = make("figure", 700, 700);

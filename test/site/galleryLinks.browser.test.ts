@@ -146,7 +146,9 @@ function writeFixtureSite(siteRoot: string): void {
 }
 
 test("each screenshot of the gallery has its own link, followed by Back, Forward and a direct load", async (t) => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-096
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-096#S1
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-096#S4
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-096#S5
   let browser: Browser;
   try {
     browser = await chromium.launch();

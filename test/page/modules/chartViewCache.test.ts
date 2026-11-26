@@ -10,7 +10,7 @@ class FakeView {
   finalize(): void { this.finalized += 1; }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S5
 test("a chart drawn under its key is kept, a detached view of the key is reused, anything else is rendered", () => {
   const cache = createChartViewCache<FakeView>(4);
   assert.deepEqual(cache.plan(undefined, "a"), { action: "render" }, "first draw");
@@ -21,7 +21,6 @@ test("a chart drawn under its key is kept, a detached view of the key is reused,
   assert.deepEqual(cache.plan(undefined, "other"), { action: "render" });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 test("a view still attached to a chart is never reused: two identical charts each get their own view", () => {
   const cache = createChartViewCache<FakeView>(4);
   const first = new FakeView(false);
@@ -31,7 +30,6 @@ test("a view still attached to a chart is never reused: two identical charts eac
   assert.deepEqual(cache.plan(undefined, "a"), { action: "reuse", entry: first }, "once its chart left the page it is reusable");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 test("the cache holds at most 16 views by default, and an evicted detached view is finalized, an attached one is not", () => {
   const cache = createChartViewCache<FakeView>();
   const views = Array.from({ length: 18 }, (_, index) => new FakeView(index !== 1));
@@ -44,7 +42,6 @@ test("the cache holds at most 16 views by default, and an evicted detached view 
   assert.equal(cache.holds("k2", views[2]!), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 test("the least recently used view goes first: a reused one is refreshed", () => {
   const cache = createChartViewCache<FakeView>(2);
   const a = new FakeView(true);
@@ -57,7 +54,6 @@ test("the least recently used view goes first: a reused one is refreshed", () =>
   assert.equal(a.finalized, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 test("storing a view under a key that holds another one finalizes the old one when it is detached", () => {
   const cache = createChartViewCache<FakeView>(4);
   const detached = new FakeView(true);

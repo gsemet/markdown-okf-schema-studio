@@ -54,7 +54,8 @@ const violationsOf = (frame: Frame): Promise<string[] | undefined> =>
  * after one theme change (a redraw under a `securitypolicyviolation` listener) it is still one, the pointer
  * on a bar shows the hover detail with its fields and the page recorded no violation. The window is shot
  * with the box shown (`live-chart-hover.png` in the evidence folder), then captured as the registry asks.
- * @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+ * @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
+ * @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
  */
 export async function scenarioLiveChart(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-live-chart", CHART_DOCUMENT, async (document) => {

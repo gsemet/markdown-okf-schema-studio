@@ -28,6 +28,12 @@ scenarios:
   title: A theme change draws again
 - id: S3
   title: An invalid specification
+- id: S4
+  title: A hover shows the fields of the mark
+- id: S5
+  title: A theme change shows the cached view
+- id: S6
+  title: The text sizes follow the page
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -44,6 +50,7 @@ tested_in_files:
 - test/page/chartCsp.test.ts
 - test/page/modules/chartError.test.ts
 - test/page/modules/chartTooltip.test.ts
+- test/page/modules/chartViewCache.test.ts
 - test/page/modules/vegaChart.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -66,24 +73,6 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 - WHEN the page background and foreground change to a dark theme
 - THEN each chart is drawn again with the new colours
 
-### Scenario (nominal): A hover shows the fields of the mark
-
-- GIVEN a drawn Vega-Lite grouped bar chart in the Cream theme, a Vega chart whose symbol mark encodes a tooltip and whose line mark does not, and a Vega-Lite chart whose mark sets tooltip to null
-- WHEN the pointer rests on a bar, then leaves it, then rests on a symbol, a line mark and the chart with tooltip null, then the page scrolls with the box shown
-- THEN the box lists one row per field of the bar (Quarter, Product, Revenue (k$) and the legend title) in the text of the page, its background is the page background and its text size is the legend label size, the box hides when the pointer leaves or the page scrolls or its content is replaced, the symbol shows its row, the line and the chart with tooltip null show no box, the border is stronger in the dark modes, and no policy violation is logged
-
-### Scenario (nominal): A theme change shows the cached view
-
-- GIVEN charts drawn in one theme, then another theme
-- WHEN the first theme returns
-- THEN the second theme gives a new view and the return gives the very same svg element as the first drawing
-
-### Scenario (nominal): The text sizes follow the page
-
-- GIVEN a chart with a colour legend and a discrete x axis, on a page whose body text is 14 px, and a spec that sets its own config legend label size
-- WHEN the chart is drawn, then the Markdown font size is set to 18 px and the preview is zoomed to 150 %
-- THEN the legend label is 13 px, the axis label 11.9 px and the title 16.1 px, the discrete x labels are horizontal, the subtitle has the label colour, the charts are drawn again with larger text at 18 px (legend label 16.7) and at 150 % (legend label 19.5 at 14 px), a body size that does not parse gives 13, and the spec's own label size wins over the page-relative one
-
 ### Scenario S3 (refusal): An invalid specification
 
 - GIVEN a chart whose text is not valid JSON or YAML, or that Vega-Lite or Vega rejects
@@ -94,6 +83,24 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 | --- | --- |
 | JSON or YAML specification | the same chart |
 | an image mark with a url | refused with a message; data:image pictures are drawn |
+
+### Scenario S4 (nominal): A hover shows the fields of the mark
+
+- GIVEN a drawn Vega-Lite grouped bar chart in the Cream theme, a Vega chart whose symbol mark encodes a tooltip and whose line mark does not, and a Vega-Lite chart whose mark sets tooltip to null
+- WHEN the pointer rests on a bar, then leaves it, then rests on a symbol, a line mark and the chart with tooltip null, then the page scrolls with the box shown
+- THEN the box lists one row per field of the bar (Quarter, Product, Revenue (k$) and the legend title) in the text of the page, its background is the page background and its text size is the legend label size, the box hides when the pointer leaves or the page scrolls or its content is replaced, the symbol shows its row, the line and the chart with tooltip null show no box, the border is stronger in the dark modes, and no policy violation is logged
+
+### Scenario S5 (nominal): A theme change shows the cached view
+
+- GIVEN charts drawn in one theme, then another theme
+- WHEN the first theme returns
+- THEN the second theme gives a new view and the return gives the very same svg element as the first drawing
+
+### Scenario S6 (nominal): The text sizes follow the page
+
+- GIVEN a chart with a colour legend and a discrete x axis, on a page whose body text is 14 px, and a spec that sets its own config legend label size
+- WHEN the chart is drawn, then the Markdown font size is set to 18 px and the preview is zoomed to 150 %
+- THEN the legend label is 13 px, the axis label 11.9 px and the title 16.1 px, the discrete x labels are horizontal, the subtitle has the label colour, the charts are drawn again with larger text at 18 px (legend label 16.7) and at 150 % (legend label 19.5 at 14 px), a body size that does not parse gives 13, and the spec's own label size wins over the page-relative one
 
 ### Related requirements
 
