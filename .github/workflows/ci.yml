@@ -42,7 +42,7 @@ on:
 env:
   STUDIO_NPM: npm --registry=https://registry.npmjs.org/
   # One end-to-end campaign id per workflow run, shared by the visual, integration and acceptance
-  # jobs; each job records its own real start time. The attempt number is left out on purpose: re-running
+  # jobs (visual in two parts); each job records its own real start time. The attempt number is left out on purpose: re-running
   # only the failed jobs must keep the same id, or the report job would see two campaigns.
   # Artifact names are the opposite: each ends with the attempt that uploaded it, because after
   # "Re-run failed jobs" a download by a fixed name returned the attempt-1 artifact. A job whose
@@ -149,9 +149,9 @@ jobs:
       - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
-      # Only the jobs "visual", "viewer-graph" and "gallery" install Ubuntu packages (just dev-ci visual); "visual"
-      # keeps their archives in a cache (the others only restore it) so a slow mirror cannot stall
-      # them. The key changes only when the package set changes.
+      # Only the jobs "visual", "visual-2", "viewer-graph" and "gallery" install Ubuntu packages (just dev-ci visual);
+      # "visual" keeps their archives in a cache (the others only restore it) so a slow mirror cannot
+      # stall them. The key changes only when the package set changes.
       # The key names the runner image (ImageOS, for example ubuntu24), so a new image release
       # starts its own archive set. ImageOS is a runner variable, which the env context does not
       # see until it is written to GITHUB_ENV.
@@ -176,7 +176,7 @@ jobs:
         with:
           path: .cache/apt-archives
           key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}-${{ hashFiles('.cache/apt-archives/*.deb') }}
-      - run: just ci-visual
+      - run: just ci-visual 1
       - name: Publish reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -185,8 +185,58 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
+  # The second part of the visual stage, side by side with "visual", so that each stays inside its
+  # time budget. "report" merges the two parts.
+  visual-2:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    outputs:
+      artifact: e2e-visual-2-attempt-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
+        with:
+          just-version: 1.58.0
+      # Like "gallery", this job only restores the Ubuntu package archives that the visual job saves.
+      # The key names the runner image (ImageOS, for example ubuntu24), so a new image release
+      # starts its own archive set. ImageOS is a runner variable, which the env context does not
+      # see until it is written to GITHUB_ENV.
+      - name: Name the runner image for the package cache
+        run: echo "RUNNER_IMAGE_OS=${ImageOS:-unknown}" >> "$GITHUB_ENV"
+      - name: Restore Ubuntu package archives
+        id: apt-archives
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .cache/apt-archives
+          key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}
+          restore-keys: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}-
+      - run: just dev-ci visual
+      - run: just ci-visual 2
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: e2e-visual-2-attempt-${{ github.run_attempt }}
+          path: out/reports/
+          if-no-files-found: warn
+
   # The use case map overlap tests and the gallery link tests in Chromium: its own job, so that the
-  # visual job keeps its time budget. Nothing consumes its reports, so it announces no artifact.
+  # visual jobs keep their time budget. Nothing consumes its reports, so it announces no artifact.
   viewer-graph:
     runs-on: ubuntu-latest
     permissions:
@@ -486,7 +536,7 @@ jobs:
           if-no-files-found: warn
 
   report:
-    needs: [release-check, visual, integration, acceptance]
+    needs: [release-check, visual, visual-2, integration, acceptance]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
@@ -517,12 +567,20 @@ jobs:
       # visual (not re-run) keeps its attempt-1 artifact and integration has a new one. `pattern`
       # with an exact name, not `name`: a missing artifact (skipped or timed-out job) downloads
       # nothing, and ci-report then says which stage is missing. The `if`: an empty pattern would
-      # download every artifact of the run (a job that never started has no outputs).
+      # download every artifact of the run (a job that never started has no outputs). The two visual
+      # parts merge into one tree, and ci-report merges their manifests.
       - name: Download the visual stage reports
         if: needs.visual.outputs.artifact != ''
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: ${{ needs.visual.outputs.artifact }}
+          path: out/reports/
+          merge-multiple: true
+      - name: Download the visual part 2 reports
+        if: needs.visual-2.outputs.artifact != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: ${{ needs.visual-2.outputs.artifact }}
           path: out/reports/
           merge-multiple: true
       - name: Download the integration stage reports
@@ -608,7 +666,7 @@ jobs:
   # the integration and acceptance stages, and on a version change tag-release requires every heavy
   # job (CI rules 13 and 14).
   checks:
-    needs: [static, static-windows, visual, viewer-graph, report]
+    needs: [static, static-windows, visual, visual-2, viewer-graph, report]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:

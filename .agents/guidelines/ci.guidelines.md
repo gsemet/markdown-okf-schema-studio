@@ -148,18 +148,19 @@ the failed jobs of the same run; no new commit and no manual tag are needed.
    and the same push event, so `tag-release` tags that commit when everything is green.
 4. Artifacts per attempt: every artifact name of `ci.yml` ends with `-attempt-<n>`
    (`github.run_attempt`), and a job whose artifact is consumed later reports that name in its
-   `artifact` output (`visual`, `integration`, `report`). Consumers download that output, never a
-   fixed name: after "Re-run failed jobs", a download by a fixed name returned the attempt-1
-   artifact. A job that is not re-run keeps its outputs, so `report` merges the attempt-1 visual
-   stage with the re-run integration stage, and Pages (`reports_artifact`, or
+   `artifact` output (`visual`, `visual-2`, `integration`, `report`). Consumers download that
+   output, never a fixed name: after "Re-run failed jobs", a download by a fixed name returned the
+   attempt-1 artifact. A job that is not re-run keeps its outputs, so `report` merges the attempt-1
+   visual stage with the re-run integration stage, and Pages (`reports_artifact`, or
    `scripts/select_e2e_run.py`, which picks the newest attempt of `studio-reports`) uses the newest
-   merged reports. The `acceptance` shards upload `e2e-acceptance-<group>-attempt-<n>` and the job
-   outputs the pattern that covers them: `report` downloads each artifact into its own folder, and
-   `scripts/select-acceptance-attempts.mjs` (first step of `just ci-report`) keeps the newest
-   attempt of each group, never an older one when the newest holds no report. All stages carry the
-   run id pinned by the workflow (`STUDIO_E2E_RUN_ID`), so `report` accepts them however far apart
-   they started; the two-hour limit applies only to local campaigns. Keep each upload and its
-   download consistent (test/build/test_workflows.py).
+   merged reports. The two visual parts are two jobs, each with its own output, and `ci-report`
+   merges their manifests first (`test/visual/merge_parts.py`). The `acceptance` shards upload
+   `e2e-acceptance-<group>-attempt-<n>` and the job outputs the pattern that covers them: `report`
+   downloads each artifact into its own folder, and `scripts/select-acceptance-attempts.mjs` (a step
+   of `just ci-report`) keeps the newest attempt of each group, never an older one when the newest
+   holds no report. All stages carry the run id pinned by the workflow (`STUDIO_E2E_RUN_ID`), so
+   `report` accepts them however far apart they started; the two-hour limit applies only to local
+   campaigns. Keep each upload and its download consistent (test/build/test_workflows.py).
 5. Once the tag exists, re-run only the failed jobs (`release`, `pages`). Never re-run all jobs
    then: `tag-release` would find the tag, output none, and skip `release` and `pages`. A failed
    publication is re-run in the Release VSIX run; in the CI run, re-run only `release` (if the

@@ -249,7 +249,8 @@ def named(*names: str, expired: tuple[str, ...] = ()) -> list[dict]:
     return [{"name": name, "expired": name in expired} for name in names]
 
 
-ATTEMPT_1 = ("e2e-visual-attempt-1", "e2e-integration-attempt-1", f"{ACCEPTANCE}-attempt-1", "studio-reports-attempt-1")
+ATTEMPT_1 = ("e2e-visual-attempt-1", "e2e-visual-2-attempt-1", "e2e-integration-attempt-1", f"{ACCEPTANCE}-attempt-1",
+             "studio-reports-attempt-1")
 
 
 def chosen(artifacts: list[dict], jobs=GOOD_JOBS) -> tuple[int, str] | None:
@@ -298,8 +299,30 @@ def test_a_report_older_than_a_stage_artifact_is_rejected() -> None:
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_artifacts_without_an_attempt_suffix_are_not_used() -> None:
     # Before the attempt suffix, a name could hold any attempt: such a run falls back to the suite.
-    assert chosen(named("e2e-visual", "e2e-integration", ACCEPTANCE, "studio-reports")) is None
-    assert chosen(named("studio-reports-attempt-0", "e2e-visual-attempt-1", "e2e-integration-attempt-1", f"{ACCEPTANCE}-attempt-1")) is None
+    assert chosen(named("e2e-visual", "e2e-visual-2", "e2e-integration", ACCEPTANCE, "studio-reports")) is None
+    assert chosen(named("studio-reports-attempt-0", "e2e-visual-attempt-1", "e2e-visual-2-attempt-1",
+                        "e2e-integration-attempt-1", f"{ACCEPTANCE}-attempt-1")) is None
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
+@pytest.mark.parametrize("part", ["e2e-visual", "e2e-visual-2"])
+def test_a_run_without_the_reports_of_a_visual_part_is_not_selected(part: str) -> None:
+    without = named(*(name for name in ATTEMPT_1 if name != f"{part}-attempt-1"))
+    assert chosen(without) is None
+    assert f"no {part}-attempt-<n>" in (check(run(3, "3"), artifacts=without) or "")
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
+def test_a_visual_part_re_run_after_the_report_makes_the_reports_stale() -> None:
+    stale = named(*ATTEMPT_1, "e2e-visual-2-attempt-2")
+    assert chosen(stale) is None
+    problem = check(run(3, "3"), artifacts=stale) or ""
+    assert "studio-reports-attempt-1 is older than e2e-visual-2-attempt-2" in problem
+    merged = named(*ATTEMPT_1, "e2e-visual-2-attempt-2", "studio-reports-attempt-2")
+    assert chosen(merged) == (3, "studio-reports-attempt-2")
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1

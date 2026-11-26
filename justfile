@@ -212,7 +212,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py test/build/test_no_merge_commits.py test/build/test_changelog_refs.py test/build/test_unpack_vsix.py
+    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py test/build/test_no_merge_commits.py test/build/test_changelog_refs.py test/build/test_unpack_vsix.py test/build/test_visual_parts.py
 
 # Check that the current version has valid release notes under docs/releases-notes/.
 release-notes-check:
@@ -316,16 +316,37 @@ ci-static:
         exit 1
     fi
 
-# CI job "visual": the visual end-to-end stage, reports under out/reports/e2e, then the table
-# breakout width tests in Chromium (which must start: STUDIO_REQUIRE_CHROMIUM=1), report under
-# out/reports/breakout/. Both run even when the first fails, so one run reports both.
-ci-visual:
+# CI jobs "visual" (PART=1) and "visual-2" (PART=2): one part of the visual end-to-end stage,
+# reports under out/reports/e2e; part 1 then runs the table breakout width tests in Chromium (which
+# must start: STUDIO_REQUIRE_CHROMIUM=1), report under out/reports/breakout/. With no PART (local
+# runs, preflight): empty the screenshot folder and the first-gap and width-margins reports, run both
+# parts and merge their manifests into the full run's. Parts run one by one pass `ci-report` only
+# under a pinned STUDIO_E2E_RUN_ID, as in CI. Every step runs even when an earlier one fails, so one
+# run reports all.
+ci-visual PART="":
     #!/usr/bin/env bash
     set -uo pipefail
+    part={{ quote(PART) }}
+    case "$part" in
+        "" | 1 | 2) ;;
+        *) echo "usage: just ci-visual [1|2]; got '$part'" >&2; exit 2 ;;
+    esac
     eval "$(node scripts/e2e-campaign.mjs begin visual)"
     failed=0
-    {{ npm }} run test:visual || failed=1
-    STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout || failed=1
+    if [ -z "$part" ]; then
+        rm -rf out/reports/e2e/screenshots out/reports/visual/first-gap out/reports/visual/width-margins
+        mkdir -p out/reports/e2e/screenshots
+    fi
+    if [ "$part" != 2 ]; then
+        {{ npm }} run test:visual -- --part 1 || failed=1
+        STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout || failed=1
+    fi
+    if [ "$part" != 1 ]; then
+        {{ npm }} run test:visual -- --part 2 || failed=1
+    fi
+    if [ -z "$part" ]; then
+        uv run --no-sync --group docs python test/visual/merge_parts.py || failed=1
+    fi
     if [ "$failed" = 0 ]; then
         echo "ci-visual: passed"
     else
@@ -445,7 +466,8 @@ ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0" $STUDIO_TOC_LOOP_S
     fi
 
 # CI job "report": merge the visual, integration and acceptance outputs into the review index and
-# e2e manifest; of each acceptance group, the newest downloaded attempt counts.
+# e2e manifest. It first merges the two parts of the visual stage into the full run's manifest
+# (test/visual/merge_parts.py); of each acceptance group, the newest downloaded attempt counts.
 # STAGES=visual: the real VS Code stages did not run (the pull request path of CI); they are
 # reported as skipped and only the visual stage counts.
 ci-report STAGES="all":
@@ -457,6 +479,7 @@ ci-report STAGES="all":
         *) echo "ci-report: STAGES must be all or visual, got {{ STAGES }}" >&2; exit 2 ;;
     esac
     failed=0
+    uv run --no-sync --group docs python test/visual/merge_parts.py || failed=1
     {{ npm }} run compile || failed=1
     {{ npm }} run review:finish -- $only || failed=1
     node scripts/select-acceptance-attempts.mjs || failed=1
