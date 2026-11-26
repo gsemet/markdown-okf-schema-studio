@@ -13,6 +13,7 @@ import {
 } from "../extensionApi";
 import { E2E_SCREENSHOT_ROOT } from "../../reportPaths";
 import { injectToggleDelay } from "../../shared/tocLoop";
+import { FrameLookupLog, frameUrlSkipReason, scanWebviewFrames } from "../../shared/webviewFrames";
 import { readLayoutFacts, readRoutingCounts } from "./clickRouting";
 import { realWindowBounds } from "../realWindowViewport";
 import { RealWindowEvidence } from "../evidence";
@@ -44,6 +45,9 @@ export async function connectWorkbench(): Promise<{ browser: Browser; page: Page
  */
 const detachedFrameError = /frame.*detach|execution context was destroyed|cannot find context with specified id/iu;
 
+/** The frame lookups of findCurrentFrame, for the message of a wait that times out. */
+const frameLookups = new FrameLookupLog();
+
 /**
  * Polls `predicate` until it returns true. A detached-frame error counts as false and polling
  * continues; any other error is rethrown.
@@ -54,6 +58,7 @@ export async function waitFor(
   timeoutMs = 10_000,
 ): Promise<void> {
   const deadline = Date.now() + timeoutMs;
+  const lookupsBefore = frameLookups.mark();
   while (Date.now() < deadline) {
     let satisfied = false;
     try {
@@ -64,7 +69,8 @@ export async function waitFor(
     if (satisfied) return;
     await new Promise<void>((resolve) => setTimeout(resolve, 25));
   }
-  throw new Error(`Timed out waiting for ${description}.`);
+  // A wait that looked for the Studio frame (findCurrentFrame) also says which frames it saw.
+  throw new Error(`Timed out waiting for ${description}.${frameLookups.describeSince(lookupsBefore)}`);
 }
 
 export function createFixture(prefix: string, files: Record<string, string>): {
@@ -121,29 +127,39 @@ export async function waitForRender(
 
 /**
  * The visible webview frame showing the host's current render, or undefined if none is ready.
+ * Frames are picked by URL first (shared/webviewFrames.ts): in CI run 45706313890 (attempt 2), a
+ * bounded call on a frame whose URL was empty (no document committed) did not return there.
  * Each Playwright call is bounded (about 10 s) and named: a call stuck on a hidden or detaching
  * frame fails the step with its name, instead of hanging to the step budget (CI run 43500084136).
  */
 export async function findCurrentFrame(page: Page): Promise<Frame | undefined> {
   const preview = getActivePreviewForTests();
-  if (preview === undefined) return undefined;
-  for (const frame of page.frames()) {
-    try {
-      if (await frameCall("locator.count", frame, frame.locator("#sphinx-myst-preview-content").count()) === 0) continue;
-      const element = await frameCall("frame.frameElement", frame, frame.frameElement());
-      if (!await frameCall("isVisible", frame, element.isVisible())) continue;
-      const root = frame.locator("html");
-      // Requests and versions restart per webview, so a second visible Studio webview can carry the
-      // same version and request id. The document id tells the two apart.
-      if (await frameCall("getAttribute document-id", frame, root.getAttribute("data-sphinx-preview-document-id")) !== preview.documentUri) continue;
-      if (await frameCall("getAttribute document-version", frame, root.getAttribute("data-sphinx-preview-document-version")) !== String(preview.documentVersion)) continue;
-      if (await frameCall("getAttribute request-id", frame, root.getAttribute("data-sphinx-preview-request-id")) !== String(preview.requestId)) continue;
-      return frame;
-    } catch (error) {
-      if (!detachedFrameError.test(String(error))) throw error;
-    }
+  const scan = await scanWebviewFrames(page.frames(), async (frame) =>
+    preview === undefined ? "no active preview in the host" : currentRenderMismatch(frame, preview));
+  frameLookups.record(scan);
+  return scan.found;
+}
+
+/** Why a webview frame does not show this render, or undefined when it does. */
+async function currentRenderMismatch(
+  frame: Frame,
+  preview: NonNullable<ReturnType<typeof getActivePreviewForTests>>,
+): Promise<string | undefined> {
+  try {
+    if (await frameCall("locator.count", frame, frame.locator("#sphinx-myst-preview-content").count()) === 0) return "no preview content";
+    const element = await frameCall("frame.frameElement", frame, frame.frameElement());
+    if (!await frameCall("isVisible", frame, element.isVisible())) return "hidden";
+    const root = frame.locator("html");
+    // Requests and versions restart per webview, so a second visible Studio webview can carry the
+    // same version and request id. The document id tells the two apart.
+    if (await frameCall("getAttribute document-id", frame, root.getAttribute("data-sphinx-preview-document-id")) !== preview.documentUri) return "other document id";
+    if (await frameCall("getAttribute document-version", frame, root.getAttribute("data-sphinx-preview-document-version")) !== String(preview.documentVersion)) return "other document version";
+    if (await frameCall("getAttribute request-id", frame, root.getAttribute("data-sphinx-preview-request-id")) !== String(preview.requestId)) return "other request id";
+    return undefined;
+  } catch (error) {
+    if (!detachedFrameError.test(String(error))) throw error;
+    return "detached while read";
   }
-  return undefined;
 }
 
 /** Bound of one Playwright call of the frame lookup: normally milliseconds, never a step budget. */
@@ -213,13 +229,18 @@ export async function currentPreviewFrame(page: Page): Promise<Frame> {
     return result !== undefined;
   }).catch(async (error: unknown) => {
     const preview = getActivePreviewForTests();
-    const frames = await Promise.all(page.frames().map(async (frame) => ({
-      url: frame.url(), root: await frameCall("html evaluate (failure dump)", frame, frame.locator("html").evaluate((element) => ({
-        version: element.getAttribute("data-sphinx-preview-document-version"),
-        requestId: element.getAttribute("data-sphinx-preview-request-id"),
-        documentId: element.getAttribute("data-sphinx-preview-document-id"),
-      }))).catch(() => undefined),
-    })));
+    const frames = await Promise.all(page.frames().map(async (frame) => {
+      const url = frame.url();
+      const skipped = frameUrlSkipReason(url);
+      if (skipped !== undefined) return { url, skipped };
+      return {
+        url, root: await frameCall("html evaluate (failure dump)", frame, frame.locator("html").evaluate((element) => ({
+          version: element.getAttribute("data-sphinx-preview-document-version"),
+          requestId: element.getAttribute("data-sphinx-preview-request-id"),
+          documentId: element.getAttribute("data-sphinx-preview-document-id"),
+        }))).catch(() => undefined),
+      };
+    }));
     throw new Error(`${String(error)} Expected preview: ${JSON.stringify({
       documentUri: preview?.documentUri, version: preview?.documentVersion, requestId: preview?.requestId,
     })}; frames: ${JSON.stringify(frames)}`);
