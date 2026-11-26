@@ -139,3 +139,39 @@ test("a span next to the frontmatter cannot cross it", () => {
   assert.ok("refused" in (move(text, [1, 7], [9, 9]) as object));
   assert.equal(move(text, [5, 7], [9, 9]), "---\ntitle: x\n---\n\nC\n\nA\n\nB\n");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S7
+test("two blocks of an alert body swap and keep the quote's empty line between them", () => {
+  assert.equal(move("> [!NOTE]\n> A\n>\n> B\n\nC\n", [2, 2], [4, 4]), "> [!NOTE]\n>\n> B\n>\n> A\n\nC\n");
+  assert.equal(move("> [!NOTE]\r\n>\r\n> A\r\n>\r\n> B\r\n", [3, 3], [5, 5]),
+    "> [!NOTE]\r\n>\r\n> B\r\n>\r\n> A\r\n");
+  assert.equal(move("- item\n\n   > [!TIP]\n   >\n   > A\n   >\n   > B\n", [5, 5], [7, 7]),
+    "- item\n\n   > [!TIP]\n   >\n   > B\n   >\n   > A\n", "an alert indented in a list item");
+  assert.equal(move("> [!NOTE]\n>\n> A\n>\n> > quoted\n", [3, 3], [5, 5]),
+    "> [!NOTE]\n>\n> > quoted\n>\n> A\n", "a nested quote moves whole");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S7
+test("a separator added inside a quote carries the quote prefix", () => {
+  assert.equal(move("> [!NOTE]\n>\n> A\n> - x\n", [3, 3], [4, 4]), "> [!NOTE]\n>\n> - x\n>\n> A\n");
+  assert.equal(move("   > [!NOTE]\n   > A\n   > - x\n   > ```\n   > c\n   > ```\n", [2, 2], [3, 3]),
+    "   > [!NOTE]\n   >\n   > - x\n   >\n   > A\n   >\n   > ```\n   > c\n   > ```\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S7
+test("blocks that are not in the same quote are refused", () => {
+  const OUT_OF_DATE = { refused: "The preview is out of date. Refresh it and try again." };
+  const twoQuotes = "> [!NOTE]\n> A\n\n> [!TIP]\n> B\n";
+  assert.deepEqual(move(twoQuotes, [2, 2], [5, 5]), OUT_OF_DATE, "two alerts");
+  assert.deepEqual(move("A\n\n> [!NOTE]\n>\n> B\n", [1, 1], [5, 5]), OUT_OF_DATE, "a quoted block and a top-level one");
+  assert.deepEqual(move("> [!NOTE]\n>\n> A\n\nB\n", [3, 3], [5, 5]), OUT_OF_DATE);
+  assert.equal(move("A\n\n> [!NOTE]\n> B\n", [1, 1], [3, 4]), "> [!NOTE]\n> B\n\nA\n", "a whole alert is a top-level block");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S4
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S7
+test("two blocks of an admonition body swap, with a blank line where one would touch a fence", () => {
+  for (const [open, close] of [[":::{note}", ":::"], ["```{note}", "```"]] as const) {
+    assert.equal(move(`${open}\nA\n\n- x\n${close}\n`, [2, 2], [4, 4]), `${open}\n\n- x\n\nA\n\n${close}\n`, open);
+  }
+});

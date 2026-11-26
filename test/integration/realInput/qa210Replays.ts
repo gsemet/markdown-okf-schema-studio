@@ -129,7 +129,8 @@ const ALERT_DOCUMENT = [
 // @tests_req SwRS-MDOKFSTUDIO-GFM-009#S10
 /**
  * QA 210 c3-1: an unquoted line that continues the paragraph of a GitHub alert (CommonMark lazy
- * continuation) renders inside the alert, and a click in the alert opens an editor that holds it.
+ * continuation) renders inside the alert, and a click on the alert's title opens an editor that holds
+ * it with the whole alert (a click on the body paragraph opens that paragraph alone).
  */
 export async function scenarioAlertLazyContinuation(page: Page): Promise<void> {
   await withDocument("realinput-qa210-c3-1", ALERT_DOCUMENT, async (document) => {
@@ -145,7 +146,7 @@ export async function scenarioAlertLazyContinuation(page: Page): Promise<void> {
         "no paragraph outside the alert holds the lazy line");
     });
     await setEditMode(page, true);
-    await withCurrentFrame(page, (frame) => frame.locator(`${alert} p`, { hasText: "Line one" }).click());
+    await withCurrentFrame(page, (frame) => frame.locator(`${alert} > .admonition-title`).click());
     await waitForEditor(page, BLOCK_EDITOR);
     const text = await withCurrentFrame(page, (frame) => frame.locator(BLOCK_EDITOR).inputValue());
     assert.ok(text.includes("> [!NOTE]") && text.includes(LAZY_LINE),
@@ -445,8 +446,9 @@ const CRLF_DOCUMENT = [
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S2
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234#S3
 /**
- * QA 210 ux-35 (campaign 001 guard): in a CRLF document, two lines typed in an alert editor and
- * saved by a click elsewhere reach the buffer with CRLF line endings, and no stale status shows.
+ * QA 210 ux-35 (campaign 001 guard): in a CRLF document, two lines typed in the editor of an alert's
+ * paragraph and saved by a click elsewhere reach the buffer with CRLF line endings, and no stale
+ * status shows.
  */
 export async function scenarioCrlfAlertEditKeepsLineEndings(page: Page): Promise<void> {
   await withDocument("realinput-qa210-ux-35", CRLF_DOCUMENT, async (document) => {
@@ -462,7 +464,7 @@ export async function scenarioCrlfAlertEditKeepsLineEndings(page: Page): Promise
     await typeText(page, "New line inside.");
     await waitFor("the autosave to bring both typed lines to the buffer", () =>
       /Edited\.\r\n(?:> ?)?New line inside\./u.test(bufferText(document)));
-    assert.equal(await blockEditorCount(page), 1, "the alert editor is still open after the autosave");
+    assert.equal(await blockEditorCount(page), 1, "the editor of the alert's paragraph is still open after the autosave");
     await withCurrentFrame(page, async (frame) => {
       assert.doesNotMatch(await frame.locator("body").innerText(), /stale/iu, "no stale status after the autosave");
     });

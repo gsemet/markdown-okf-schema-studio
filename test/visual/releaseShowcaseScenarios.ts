@@ -52,9 +52,15 @@ export const RELEASE_SHOWCASE_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     editMode: true,
     toolbarState: "collapsed" as const,
-    // The click lands mid-way along the note body, so ArrowUp puts the caret at the end of `:::{note}`
-    // and one ArrowLeft puts it on the type.
-    pageActions: [{ click: `${MAIN} aside.admonition.note > p:last-child`, waitMs: 400 }, { press: "ArrowUp" }, { press: "ArrowLeft", waitMs: 400 }],
+    // The click on the note title opens the whole directive. Control+Home then ArrowDown put the caret at
+    // the start of its second line; two ArrowLeft go back to the end of `:::{note}` and onto the type.
+    pageActions: [
+      { click: `${MAIN} aside.admonition.note > .admonition-title`, waitMs: 400 },
+      { press: "Control+Home" },
+      { press: "ArrowDown" },
+      { press: "ArrowLeft" },
+      { press: "ArrowLeft", waitMs: 400 },
+    ],
     description: "Release 1.3 hero, cream theme, edit mode, 1200 px: a plan with a three-card grid (headers and footers) and a captioned code block stays rendered while its note is open with the admonition type list at the caret.",
     contentAssertions: [
       { message: "the grid shows three cards with their headers", selector: `${MAIN} .myst-grid .myst-grid-card-header`, count: 3, visible: true },

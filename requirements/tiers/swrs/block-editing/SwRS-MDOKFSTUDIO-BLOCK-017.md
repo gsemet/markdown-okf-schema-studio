@@ -71,6 +71,8 @@ While edit mode is on, the page SHALL outline with a dashed line the element tha
 | the list itself, outside its items | the whole list |
 | a table cell | the cell |
 | a fence | the code block |
+| a paragraph or a list item in the body of an admonition or an alert | the pointed paragraph or item |
+| the title or the frame of an admonition or an alert | the whole admonition |
 | any other mapped block | the mapped block |
 
 ### Scenario S3 (boundary): Pointer or focus leaves
@@ -119,6 +121,7 @@ Only the links whose plain click opens the block editor (SwRS-MDOKFSTUDIO-BLOCK-
 - Method: test/integration/realInput/editorWidgets.ts (scenarioEditAffordances, screenshot block-editing/r12: hovering a list item and the outlined element per target); visual scenarios block-editing/v06, v07 and v08 share the same assertions.
 - Method: test/page/blockReq.requirements.test.ts (`hovering a link inside a paragraph outlines the paragraph, like the text around it`: link inside a paragraph row).
 - Method: test/page/blockReq.requirements.test.ts (`the hover outline skips the properties table and an open editor, and outlines a block inside a link`: targets that are not outlined and the block inside a link row).
+- Method: test/page/blockReq.requirements.test.ts (`the hover outline of an admonition is the pointed body block, and the admonition over its title or frame`: the two admonition and alert rows of the outlined element table).
 - Method: visual scenarios block-editing/v29, v30, v33 and v34 in test/visual/linkEditModeScenarios.ts (the pointer over the link of a link-only paragraph outlines the paragraph; over the body of a linked card, the body paragraph only). The text cursor over a link is not asserted.
 - Method: test/core/preview/blockReq.requirements.test.ts (`mapped blocks show the text cursor in edit mode only`: text cursor table).
 - Method: test/page/linkEditModeClick.test.ts (`edit mode: hovering a link in a comment-thread body shows no edit outline and keeps the pointer cursor`, `edit mode: hovering a link of the properties table shows no edit outline and keeps the pointer cursor`, `edit mode: hovering a link inside a paragraph outlines the paragraph and gives it the text cursor`, `edit mode stylesheet: only links a plain click edits get the text cursor; every other link keeps its pointer`: links whose click keeps its own behaviour and the link rows of the text cursor table).

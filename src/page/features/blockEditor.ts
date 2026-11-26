@@ -181,6 +181,20 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     return top ?? undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-130
+  /**
+   * What the move chord of a list item's editor moves: the top-level block that holds the item,
+   * or, inside an admonition, the outermost list of the admonition's body that holds it.
+   */
+  function listMovedFor(item: HTMLElement): HTMLElement | undefined {
+    if (!rt.blocks.admonitionAround(item)) return topLevelBlockOf(item);
+    let list: HTMLElement | undefined;
+    for (let node: HTMLElement | null = item; node && ["UL", "OL", "LI"].includes(node.tagName); node = node.parentElement) {
+      if (node.tagName !== "LI") list = node;
+    }
+    return list;
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
   /**
    * True when the editor's block is a top-level body block (not the properties section) or a list
@@ -208,8 +222,9 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     const blocks = rt.blocks.topLevelMappedBlocks();
     let from: HTMLElement | undefined = edit.target;
     // The editor of a list item, or of a block inside one, steps to the item before or after that
-    // item in its list, then past the top-level block that holds the list. Every other editor
-    // steps between top-level blocks only, and an inner block leaves the key to the text box.
+    // item in its list, then past the top-level block that holds the list; a list inside an
+    // admonition keeps the key at its edges. Every other editor steps between top-level blocks
+    // only, and an inner block leaves the key to the text box.
     const item = edit.target.tagName === "LI" ? edit.target
       : edit.target.parentElement?.tagName === "LI" ? edit.target.parentElement : undefined;
     if (item) {
@@ -218,6 +233,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       let sibling = sideways(item);
       while (sibling && sibling.tagName !== "LI") sibling = sideways(sibling);
       if (sibling) return sibling as HTMLElement;
+      if (rt.blocks.admonitionAround(item)) return undefined;
       from = topLevelBlockOf(item);
     }
     const index = from ? blocks.indexOf(from) : -1;
@@ -242,10 +258,11 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     if (!edit || edit.finishing || event.repeat || rt.blockMoves.inFlight()) return true;
     if (edit.selectedCell || edit.insertAfterLine !== undefined || control !== edit.textarea) return true;
     const edited = edit.target;
-    // The editor of a list item moves the whole list that holds it, as the list's editor did
-    // before items were edited one by one; the editor reopens on the moved list.
-    const target = edited.tagName === "LI" ? topLevelBlockOf(edited) : edited;
-    if (!target || !rt.blockMoves.bodyBlockNeighbour(target, direction)) return true;
+    // The editor of a list item moves the whole list that holds it (inside an admonition, within
+    // it), as the list's editor did before items were edited one by one; the editor reopens on
+    // the moved list.
+    const target = edited.tagName === "LI" ? listMovedFor(edited) : edited;
+    if (!target || !rt.blockMoves.moveNeighbour(target, direction)) return true;
     const offset = Number.isSafeInteger(control.selectionStart) ? control.selectionStart as number : 0;
     const editedText = textBoxText(edit.textarea, edit);
     if (editedText === edit.originalText && !edit.hasAutosavedChange) {

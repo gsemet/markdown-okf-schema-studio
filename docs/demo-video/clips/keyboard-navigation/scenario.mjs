@@ -1,9 +1,10 @@
 // The scenario of the clip: the mouse is never used. In Studio's reading mode on a release plan, E turns edit mode
 // on, Down selects the heading then a note admonition, Enter opens the whole admonition in its source editor and
 // Escape closes it unchanged. The clip zooms on the admonition: Right goes inside it (its sentence), Down reaches its
-// list, Right goes inside the list (its first item). Enter on that item opens the whole admonition in its editor
-// (the feature's behaviour, see clip.md); the caret goes to the end of "Friday" by keyboard, the word delete key removes
-// it, "Thursday" is typed and the save chord closes the editor; an orange mark outlines the saved item.
+// list, Right goes inside the list (its first item), Down the second item, Right inside it (its own text), Down its
+// sub-list and Right inside that (the sub-item "the VSIX"). Enter opens that sub-item alone in its editor, the caret at
+// the end of its line; the word delete key removes "VSIX", "extension" is typed and the save chord closes the editor;
+// an orange mark outlines the saved sub-item.
 // The text of every caption, badge and time is in clip.md, not here.
 
 /** Clip-relative file to workspace-relative file. */
@@ -39,7 +40,10 @@ export const STAGE = [
 ].join("\n");
 
 /** The text of release-plan.md after the save: one word changed. */
-export const EXPECTED = STAGE.replace("on Friday", "on Thursday");
+export const EXPECTED = STAGE.replace("  - the VSIX", "  - the extension");
+
+/** The sub-item the walk ends on: its line in the file, as its editor holds it. */
+const SUB_ITEM_LINE = "  - the VSIX";
 
 /**
  * The word delete key. Never ControlOrMeta: that is Cmd+Backspace on macOS, which deletes to the start of the line.
@@ -178,13 +182,19 @@ export async function setup(t) {
   await t.sleep(800);
 }
 
-/** The filmed action, eleven badged key presses (plus unbadged caret moves and the typed word), none of them a pointer move. */
+/** The filmed action, fifteen badged key presses (plus the typed word), none of them a pointer move. */
 export async function run(t) {
   const { page } = t;
   const start = Date.now();
   const until = (seconds) => t.sleep(Math.max(0, start + seconds * 1000 - Date.now()));
   const only = (state) => (state.selected.length === 1 ? state.selected[0] : null);
-  const isFirstItem = (element, text) => element && element.tag === "li" && element.text === text;
+  const isElement = (element, tag, text) => element && element.tag === tag && element.text === text;
+  /** Presses `key` at `seconds` and waits for the one selected element to be a `tag` that reads `text`. */
+  const walk = async (seconds, key, badge, tag, text, what) => {
+    await until(seconds);
+    await t.press(key, badge);
+    await expectState(t, 1000, what, (state) => isElement(only(state), tag, text));
+  };
 
   // 1. E turns edit mode on.
   await until(0.6);
@@ -267,88 +277,83 @@ export async function run(t) {
   t.keyFrame("list-selected");
 
   // 8. Right goes inside the list, to its first item.
-  await until(11.8);
-  await t.press("ArrowRight", "right");
-  await expectState(t, 1000, "Right on the list did not select its first item", (state) => isFirstItem(only(state), "Tag the release on Friday"));
-  await until(12.4);
+  await walk(11.8, "ArrowRight", "right", "li", "Tag the release on Friday", "Right on the list did not select its first item");
+  await until(12.6);
   t.keyFrame("item-selected");
 
-  // 9. Enter on the selected item opens the whole admonition in its editor (a finding, see clip.md), the caret at the end.
-  await until(13.4);
-  await t.press("Enter", "enter");
-  const item = await expectState(t, 1000, "Enter did not open the admonition's editor from its first item", async (state, frame) => {
-    const box = await boxState(frame);
-    if (!box || !box.value.startsWith(":::{note} Before the release") || !box.value.trimEnd().endsWith(":::")) return null;
-    return box.focused && box.start === box.end && box.start === box.value.trimEnd().length ? box : null;
-  });
-  t.record("itemEnterEditor", item.value);
+  // 9. Down selects the second item, the one with the sub-list.
+  await walk(13.4, "ArrowDown", "down", "li", "Build the packages the VSIX the docs site", "Down from the first item did not select the second item");
   await until(14.2);
-  t.keyFrame("admonition-editor-2");
+  t.keyFrame("second-item-selected");
 
-  // 10. The caret goes to the end of "Friday" by keyboard (Up x5, Right to the end of the line): plain presses with no badge, like the typed text.
-  await until(14.6);
-  const itemLine = [":::{note} Before the release", SENTENCE, "", "- Tag the release on Friday"].join(String.fromCharCode(10));
-  // Home and End do not move the caret in the filmed window (End jumped to the end of the whole text): Up x5 reaches the item line, Right walks to the end of "Friday".
-  const steps = [];
-  for (let i = 0; i < 5; i++) {
-    await page.keyboard.press("ArrowUp");
-    await t.sleep(50);
-  }
-  const before = await boxState(await t.frameOf());
-  if (!before) throw new Error("the admonition editor closed while the caret moved");
-  steps.push(before.start);
-  for (let i = before.start; i < itemLine.length; i++) {
-    await page.keyboard.press("ArrowRight");
-    await t.sleep(20);
-  }
-  t.record("caretSteps", steps);
-  await expectState(t, 1000, `the caret is not at the end of 'Tag the release on Friday' (${steps.join(" ")})`, async (state, frame) => {
+  // 10. Right goes inside that item, to its own text.
+  await walk(15.0, "ArrowRight", "right", "p", "Build the packages", "Right on the second item did not select its own text");
+
+  // 11. Down reaches the sub-list.
+  await walk(16.6, "ArrowDown", "down", "ul", "the VSIX the docs site", "Down from the item's text did not select the sub-list");
+  await until(17.4);
+  t.keyFrame("sublist-selected");
+
+  // 12. Right goes inside the sub-list, to its first item.
+  await walk(18.2, "ArrowRight", "right", "li", "the VSIX", "Right on the sub-list did not select its first item");
+  await until(19.0);
+  t.keyFrame("subitem-selected");
+
+  // 13. Enter opens that sub-item alone, the caret at the end of its line.
+  await until(19.8);
+  await t.press("Enter", "enter");
+  const item = await expectState(t, 1000, "Enter on the sub-item did not open the editor of its line alone", async (state, frame) => {
     const box = await boxState(frame);
-    return box && box.start === box.end && box.start === itemLine.length && box.value.startsWith(itemLine) ? box : null;
+    if (!box || box.value.trimEnd() !== SUB_ITEM_LINE) return null;
+    return box.focused && box.start === box.end && box.start === SUB_ITEM_LINE.length ? box : null;
   });
+  t.record("subItemEditor", item.value);
+  await until(20.6);
+  t.keyFrame("subitem-editor");
 
-  // The word delete key removes "Friday" only.
-  await until(16.0);
+  // 14. The word delete key removes "VSIX" only.
+  await until(21.4);
   await t.press(DELETE_WORD, "delete-word");
-  await expectState(t, 1000, "the word delete did not leave the item ending with 'on'", async (state, frame) => {
+  await expectState(t, 1000, "the word delete did not leave the line ending with 'the'", async (state, frame) => {
     const box = await boxState(frame);
-    return box && !box.value.includes("Friday") && box.value.split("\n").map((line) => line.trimEnd()).includes("- Tag the release on") && box.value.includes("Build the packages") ? box : null;
+    return box && box.value.trimEnd() === "  - the" ? box : null;
   });
 
-  // 11. "Thursday" is typed, with no badge.
-  await until(16.5);
-  await page.keyboard.type("Thursday", { delay: 75 });
-  await expectState(t, 1000, "the admonition editor does not hold '- Tag the release on Thursday'", async (state, frame) => {
+  // "extension" is typed, with no badge.
+  await until(21.9);
+  await page.keyboard.type("extension", { delay: 75 });
+  await expectState(t, 1000, "the editor does not hold '  - the extension'", async (state, frame) => {
     const box = await boxState(frame);
-    return box && box.value.split("\n").includes("- Tag the release on Thursday") ? box : null;
+    return box && box.value.trimEnd() === "  - the extension" ? box : null;
   });
-  await until(17.3);
+  await until(23.0);
   t.keyFrame("word-changed");
 
-  // 12. The save chord closes the editor, the first item reads "Thursday".
-  await until(17.8);
+  // 15. The save chord closes the editor, the sub-item reads "the extension".
+  await until(23.4);
   await t.press("ControlOrMeta+Enter", "save");
-  await expectState(t, 3000, "the save did not close the editor with the first item reading Thursday", async (state, frame) => {
+  await expectState(t, 3000, "the save did not close the editor with the sub-item reading 'the extension'", async (state, frame) => {
     if (state.boxOpen) return null;
-    return frame.evaluate(() => [...document.querySelectorAll("#sphinx-myst-preview-content .admonition li")].some((li) => (li.textContent ?? "").trim().startsWith("Tag the release on Thursday")));
+    return frame.evaluate(() => (document.querySelector("#sphinx-myst-preview-content .admonition li li")?.textContent ?? "").trim() === "the extension");
   });
 
-  // 13. Mark 1 on that item, then the zoom out.
-  await until(18.3);
+  // 16. Mark 1 on that sub-item, then the zoom out.
+  await until(23.9);
   const frame1 = await t.frameOf();
-  const li = await t.rectOf(frame1.locator("#sphinx-myst-preview-content .admonition li").first());
+  const li = await t.rectOf(frame1.locator("#sphinx-myst-preview-content .admonition li li").first());
   t.mark("1", { x: li.x - 6, y: li.y - 6, w: li.w + 12, h: li.h + 12 });
-  await until(19.5);
+  await until(25.5);
   t.unmark("1");
-  await until(19.7);
+  await until(25.7);
   t.unzoom("admonition");
 
-  // 14. The loop seam fallback: a last Escape moves the selection up to the list.
+  // 17. The loop seam fallback: a last Escape clears the selection ring, which the save leaves on
+  // the whole admonition.
   if (LOOP_FALLBACK) {
-    await until(19.8);
+    await until(25.8);
     await t.press("Escape", "escape");
   }
-  await until(20.0);
+  await until(26.0);
 }
 
 /** release-plan.md on disk (auto-save is on) must be the stage with one word changed, and no editor stays open. */
@@ -362,5 +367,5 @@ export async function verify(t) {
     text = t.workspaceFile("release-plan.md");
   }
   if (text !== EXPECTED) throw new Error(`release-plan.md does not hold the expected text. On disk: ${JSON.stringify(text)}`);
-  return { itemEnterEditor: t.notes.itemEnterEditor };
+  return { subItemEditor: t.notes.subItemEditor };
 }

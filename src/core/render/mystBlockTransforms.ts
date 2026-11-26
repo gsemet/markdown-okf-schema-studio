@@ -6,6 +6,7 @@
 
 import { parseFragment } from "parse5";
 
+import { unmapBlocksUnder } from "./mystBoxLines";
 import { MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
 import type { MystNode, RawHtmlNode } from "./mystNode";
 
@@ -256,21 +257,44 @@ export function offsetNodeLines(node: MystNode, offset: number): void {
   }
 }
 
+/**
+ * The lines before the body of a directive: where its value stands, line for line, between the
+ * directive's first and last lines. The parser strips the blank lines around the value and rewrites
+ * some option lines; undefined when the value stands nowhere as written.
+ */
+function bodyLineOffset(node: MystNode, sourceLines: readonly string[]): number | undefined {
+  const start = node.position?.start?.line;
+  const end = node.position?.end?.line;
+  if (start === undefined || end === undefined || node.data?.included === true) return undefined;
+  const body = (node.value ?? "").split(/\r\n|\r|\n/u).map((line) => line.trim());
+  const stands = (offset: number): boolean => body.every((line, index) => {
+    const source = sourceLines[offset + index] ?? "";
+    return line === "" ? /^[ \t>]*$/u.test(source) : source.trimEnd().endsWith(line);
+  });
+  for (let offset = start; offset + body.length <= end; offset += 1) {
+    if (stands(offset)) return offset;
+  }
+  return undefined;
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-MYST-001
 /**
  * Renders `{versionadded}`, `{versionchanged}` and `{deprecated}` as admonitions titled with the
- * version, their body parsed.
+ * version, their body parsed. A body whose source lines cannot be found maps no block.
  */
 export function expandVersionAdmonitions(
   node: MystNode,
   mystParse: MystEngine["mystParse"],
+  sourceLines: readonly string[],
 ): void {
   for (const child of node.children ?? []) {
     const name = child.name?.toLowerCase();
     const title = name ? VERSION_ADMONITION_TITLES[name] : undefined;
     if (child.type === "mystDirective" && name && title) {
       const body = mystParse(child.value ?? "", MYST_PARSE_OPTIONS);
-      offsetNodeLines(body, child.position?.start?.line ?? 0);
+      const offset = bodyLineOffset(child, sourceLines);
+      offsetNodeLines(body, offset ?? child.position?.start?.line ?? 0);
+      if (offset === undefined) unmapBlocksUnder(body);
       child.type = "admonition";
       child.kind = name;
       child.class = name;
@@ -284,7 +308,7 @@ export function expandVersionAdmonitions(
         }],
       });
     }
-    expandVersionAdmonitions(child, mystParse);
+    expandVersionAdmonitions(child, mystParse, sourceLines);
   }
 }
 

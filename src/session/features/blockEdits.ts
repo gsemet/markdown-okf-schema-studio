@@ -5,7 +5,9 @@
  */
 
 import { matchLineEndings } from "../../core/edits/lineEndings";
-import { READ_ONLY_FILE, planBlockTextEdit, planEmptiedBlockRemoval } from "../../core/edits/sourceEdits";
+import {
+  READ_ONLY_FILE, planAlertPlaceholder, planBlockTextEdit, planEmptiedBlockRemoval,
+} from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
 import { checkBlankLine, checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
@@ -405,13 +407,19 @@ export class BlockEditController {
     if (preview.edits.active !== edit || edit.applying) {
       return;
     }
-    const editedText = edit.pendingText === undefined
+    const typed = edit.pendingText === undefined
       ? undefined
       : matchLineEndings(edit.pendingText, edit.lastSavedText, preview.document?.getText(), true);
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
     // An emptied top-level block or list item, committed: it is deleted with its separator, in one edit.
-    const deleting = editedText !== undefined && edit.finalRequested && edit.deleteWhenEmpty === true
-      && !edit.insertion && !edit.cancelRequested && editedText.trim() === "";
+    const deleting = typed !== undefined && edit.finalRequested && edit.deleteWhenEmpty === true
+      && !edit.insertion && !edit.cancelRequested && typed.trim() === "";
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
+    // Any other emptied block of an alert body is written as the alert's prefix line.
+    const placeholder = typed?.trim() === "" && !deleting && !edit.insertion && !edit.cancelRequested && preview.document
+      ? planAlertPlaceholder(preview.document.getText(), edit.sourceStartOffset, edit.lastSavedText, edit.originalText)
+      : undefined;
+    const editedText = placeholder ?? typed;
     if (editedText === undefined || (editedText === edit.lastSavedText && !deleting)) {
       edit.pendingText = undefined;
       if (edit.finalRequested) {

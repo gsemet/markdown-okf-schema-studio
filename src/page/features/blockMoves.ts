@@ -26,6 +26,8 @@ interface BlockMoveFlight {
   mode: "edit" | "focus" | "select";
   caretOffset: number | undefined;
   line: number;
+  /** The moved block is inside a top-level block (a block of an admonition). */
+  inner: boolean;
   version: number;
   timer: number;
   newLine?: number;
@@ -34,6 +36,7 @@ interface BlockMoveFlight {
 /** The last single-block move sent, to send it once more when the host held an older render. */
 interface SentMove {
   line: number;
+  inner: boolean;
   direction: "up" | "down";
   revision: number;
   retried: boolean;
@@ -68,7 +71,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     const other = rt.blocks.blockRange(neighbour);
     const top = (block.closest?.("pre") || block).getBoundingClientRect?.().top;
     if (!span) {
-      lastMove = { line: own.line, direction, revision: context.revision, retried: retrying };
+      lastMove = { line: own.line, inner: isInner(block), direction, revision: context.revision, retried: retrying };
     } else {
       lastMove = undefined;
     }
@@ -115,8 +118,8 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     const pending = staleRetry;
     if (!pending) return;
     dropStaleRetry();
-    const block = rt.blocks.bodyBlockAtLine(pending.move.line);
-    const neighbour = block && bodyBlockNeighbour(block, pending.move.direction);
+    const block = movedBlockAtLine(pending.move.line, pending.move.inner);
+    const neighbour = block && moveNeighbour(block, pending.move.direction);
     retrying = true;
     let sent = false;
     try {
@@ -150,20 +153,56 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     return neighbour;
   }
 
+  const isInner = (block: HTMLElement): boolean => !rt.blocks.topLevelMappedBlocks().includes(block);
+
+  // A direct block of an admonition has no element between them, but the `pre` of its own code.
+  function isDirectBlock(block: Element, admonition: Element): boolean {
+    const holder = block.tagName === "CODE" && block.parentElement?.tagName === "PRE" ? block.parentElement : block;
+    return holder.parentElement === admonition;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-130
+  // The block a move swaps `block` with: the body neighbour of a top-level block, else, for a
+  // direct block of an admonition, the direct block of that admonition before or after it.
+  function moveNeighbour(block: HTMLElement, direction: "up" | "down"): HTMLElement | undefined {
+    if (!isInner(block)) return bodyBlockNeighbour(block, direction);
+    const admonition = block.parentElement ? rt.blocks.admonitionAround(block.parentElement) : undefined;
+    if (!admonition || !isDirectBlock(block, admonition)) return undefined;
+    const siblings = rt.blocks.mappedChildren(admonition);
+    const index = siblings.indexOf(block);
+    const neighbour = index < 0 ? undefined : siblings[index + (direction === "up" ? -1 : 1)];
+    if (!neighbour || !isDirectBlock(neighbour, admonition)) return undefined;
+    return rt.blocks.isIncludedBlock(block) || rt.blocks.isIncludedBlock(neighbour) ? undefined : neighbour;
+  }
+
+  // The block that starts at `line`: a body block, or with `inner` the outermost block inside one.
+  function movedBlockAtLine(line: number, inner: boolean): HTMLElement | undefined {
+    if (!inner) return rt.blocks.bodyBlockAtLine(line);
+    let level = rt.blocks.topLevelMappedBlocks();
+    while (level.length > 0) {
+      level = level.flatMap((block) => rt.blocks.mappedChildren(block));
+      const found = level.find((block) => rt.blocks.blockRange(block).line === line);
+      if (found) return found;
+    }
+    return undefined;
+  }
+
   function requestBlockMove(block: HTMLElement, direction: "up" | "down", mode: "edit" | "focus",
     caretOffset?: number): boolean {
     if (blockMoveInFlight) return false;
-    const neighbour = bodyBlockNeighbour(block, direction);
+    const neighbour = moveNeighbour(block, direction);
     if (!neighbour || !postBlockMove(block, neighbour, direction)) return false;
-    startBlockMoveFlight(mode, caretOffset, rt.blocks.blockRange(block).line);
+    startBlockMoveFlight(mode, caretOffset, block);
     return true;
   }
 
-  function startBlockMoveFlight(mode: BlockMoveFlight["mode"], caretOffset: number | undefined, line: number): void {
+  function startBlockMoveFlight(mode: BlockMoveFlight["mode"], caretOffset: number | undefined,
+    block: HTMLElement): void {
     blockMoveInFlight = {
       mode,
       caretOffset,
-      line,
+      line: rt.blocks.blockRange(block).line,
+      inner: isInner(block),
       version: context.revision,
       timer: window.setTimeout(() => {
         blockMoveInFlight = undefined;
@@ -231,7 +270,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     const freeIndex = start === anchorIndex ? end : start;
     const first = blocks[start]!;
     if (!postBlockMove(first, neighbour, direction, blockSelection.range())) return false;
-    startBlockMoveFlight("select", undefined, rt.blocks.blockRange(first).line);
+    startBlockMoveFlight("select", undefined, first);
     setPendingMoveSelection({
       anchor: anchorIndex + step,
       target: freeIndex + step,
@@ -276,25 +315,27 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     if (!flight || flight.newLine === undefined || context.revision === flight.version) return;
     if (!state.editMode) return;
     clearBlockMoveInFlight();
-    settleBlockMove(rt.blocks.bodyBlockAtLine(flight.newLine), flight);
+    settleBlockMove(movedBlockAtLine(flight.newLine, flight.inner), flight);
   }
 
   // A refused move says why next to the bar it came from.
   function finishMoveRefusal(reason: string | undefined): void {
     const flight = clearBlockMoveInFlight();
     if (flight?.mode === "select") setPendingMoveSelection(undefined);
-    else if (flight) settleBlockMove(rt.blocks.bodyBlockAtLine(flight.line), flight);
+    else if (flight) settleBlockMove(movedBlockAtLine(flight.line, flight.inner), flight);
     if (reason === undefined) return;
     const points = rt.insertPoints.points();
     let point = points.find((candidate) =>
       candidate.getAttribute("data-sphinx-move-pending") === "true");
     points.forEach((candidate) => candidate.removeAttribute("data-sphinx-move-pending"));
     // A key press marks no bar: the reason goes to the bar under the block (or selection) moved.
+    // A block inside an admonition has no bar of its own: the bar of the top-level block holding it.
     const line = flight?.line ?? lastMove?.line;
     if (!point && (flight || line !== undefined)) {
-      const moved = flight?.mode === "select"
+      let moved = flight?.mode === "select"
         ? (blockSelection.isActive() ? rt.selection.syncSelectionModel()[blockSelection.endIndex!] : undefined)
-        : (line === undefined ? undefined : rt.blocks.bodyBlockAtLine(line));
+        : (line === undefined ? undefined : movedBlockAtLine(line, (flight ?? lastMove!).inner));
+      while (moved?.parentElement && isInner(moved)) moved = moved.parentElement;
       point = points.find((candidate) => rt.insertPoints.moves.get(candidate)?.block === moved);
     }
     if (!point) return;
@@ -363,7 +404,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
   return {
     inFlight: () => Boolean(blockMoveInFlight),
     requestBlockMove,
-    bodyBlockNeighbour,
+    moveNeighbour,
     moveChordDirection,
     updateMoveLabels,
     addMoveButtons,

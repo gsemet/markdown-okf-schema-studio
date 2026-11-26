@@ -156,6 +156,35 @@ test("the hover outline skips the properties table and an open editor, and outli
   assert.deepEqual(outlined(), [], "nothing is outlined while the pointer is over the open editor");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S2
+test("the hover outline of an admonition is the pointed body block, and the admonition over its title or frame", () => {
+  const harness = createRuntimeHarness();
+  turnEditModeOn(harness);
+  const mappedAt = (line: number, endLine: number, tag: string): RuntimeElement => {
+    const element = new RuntimeElement({
+      "data-sphinx-source-file": "/workspace/active.md",
+      "data-sphinx-source-line": String(line),
+      "data-sphinx-source-end-line": String(endLine),
+    }, harness.windowState, line * 10, 20, tag);
+    harness.mappings.push(element);
+    return element;
+  };
+  const admonition = mappedAt(60, 64, "aside");
+  admonition.setAttribute("class", "admonition note");
+  const title = new RuntimeElement({ class: "admonition-title" }, harness.windowState, 600, 20, "p");
+  admonition.appendChild(title);
+  const paragraph = mappedAt(61, 61, "p");
+  admonition.appendChild(paragraph);
+  const outlinedOn = (target: RuntimeElement): RuntimeElement[] => {
+    harness.dispatchDocument("mouseover", { target });
+    return harness.mappings.filter((element) => element.getAttribute("data-sphinx-preview-edit-hover") !== null);
+  };
+  assert.deepEqual(outlinedOn(paragraph), [paragraph], "a paragraph of the body is outlined on its own");
+  assert.deepEqual(outlinedOn(title), [admonition], "the title outlines the whole admonition");
+  assert.deepEqual(outlinedOn(paragraph), [paragraph]);
+  assert.deepEqual(outlinedOn(admonition), [admonition], "the frame outlines the whole admonition");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-017#S5
 // CR 217 changed the rule: the link used to leave the paragraph without outline.
 test("hovering a link inside a paragraph outlines the paragraph, like the text around it", () => {

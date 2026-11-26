@@ -132,6 +132,7 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 | Input | Outcome |
 | --- | --- |
 | The host answers ok false with a reason to a move requested from a bar | A status element with role status and the reason appears next to that bar and disappears after 6 s; the pending mark is cleared |
+| The host refuses a move asked by the chord from the editor of a block inside an admonition or an alert | The reason appears next to the insert point bar of the admonition (of the top-level block that holds it, for a nested admonition), and disappears after 6 s |
 | The host answers ok true | No status is shown; the page is re-rendered |
 
 ### Scenario S9 (nominal): The actions show on one block, the one that moved last
@@ -182,6 +183,7 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - Method: test/integration/blockActionsFollowSelection.test.ts (real window, cream and dark preview themes): the computed opacity of the bars and the outline after a keyboard move and after a pointer move.
 - Method: Unit test `T36: a refused move says why next to the bar; a result of another context is ignored` in test/page/runtimeBlockMoves.test.ts (both scenarios; the differing requestId case is the one run, the document and revision rows follow from the same addressing rule); the addressing rule is `previewBlockMoveResult: render` in src/core/protocol/hostToPage.ts.
 - Method: Unit test `T36: a move refused as stale is sent once more after the next render, before any message` in test/page/runtimeBlockMoves.test.ts (the stale scenario).
+- Method: Unit test `a refused move inside an admonition says why next to the admonition's insert point` in test/page/runtimeBlockMoves.test.ts (the admonition row of the reason scenario, on a MyST admonition and a GitHub alert).
 - Criteria: Two buttons with data-sphinx-move up and down per body bar. The disabled attribute is set when the neighbour is missing. addMoveButtons is called only for body bars. The stylesheet hides the buttons under the open-editor attribute. postBlockMove returns false when an editor is open. The status lives 6000 ms.
 - Criteria: createHostMessageFilter accepts the message only for the render the page shows.
 

@@ -26,6 +26,32 @@ function stripQuote(line: string): string {
   return line.replace(/^\s*>\s?/u, "");
 }
 
+/** The alert a marker line opens: its indentation, its admonition and its title; else undefined. */
+function readAlertMarker(line: string): { indent: string; kind: string; title: string | undefined } | undefined {
+  const bracket = line.match(ALERT_MARKER);
+  const marker = bracket ?? line.match(GITHUB_BOLD_ALERT_MARKER);
+  const kind = marker ? GITHUB_ALERT_TYPES.get(marker[2].toUpperCase()) : undefined;
+  return marker && kind ? { indent: marker[1], kind, title: bracket?.[3] } : undefined;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
+/**
+ * The prefix (indentation and `>`) of the GitHub alert whose body holds the zero-based lines
+ * `from` to `to`: each of them carries it, and an alert marker line above them opens the quote
+ * that holds them. Undefined for any other lines.
+ */
+export function alertBodyPrefix(lines: readonly string[], from: number, to: number): string | undefined {
+  for (let above = from - 1; above >= 0 && lines[above]!.trim() !== ""; above -= 1) {
+    const marker = readAlertMarker(lines[above]!);
+    if (!marker) continue;
+    const prefix = `${marker.indent}>`;
+    const holds = blockQuoteEnd(lines, above, marker.indent.length) >= to
+      && lines.slice(from, to + 1).every((line) => line.startsWith(prefix));
+    return holds ? prefix : undefined;
+  }
+  return undefined;
+}
+
 /** The rewritten text and, when an alert was rewritten, where each of its lines comes from. */
 export interface ExpandedGithubAlerts {
   readonly text: string;
@@ -67,27 +93,21 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
       continue;
     }
 
-    const alertMarker = line.match(ALERT_MARKER);
-    const colonOpen = alertMarker ? undefined : line.match(COLON_OPEN);
+    const marker = readAlertMarker(line);
+    const colonOpen = marker ? undefined : line.match(COLON_OPEN);
     const colonClose = colonOpen ? undefined : line.match(COLON_CLOSE);
     if (colonClose && colonFences.length > 0 && colonClose[1].length >= colonFences[colonFences.length - 1]) {
       colonFences.pop();
     } else if (colonOpen) {
       colonFences.push(colonOpen[1].length);
     }
-    const boldMarker = line.match(GITHUB_BOLD_ALERT_MARKER);
-    const marker = alertMarker ?? boldMarker;
-    const kind = alertMarker
-      ? GITHUB_ALERT_TYPES.get(alertMarker[2].toUpperCase())
-      : boldMarker ? GITHUB_ALERT_TYPES.get(boldMarker[2].toUpperCase()) : undefined;
-    if (!marker || !kind) {
+    if (!marker) {
       push(index, line);
       continue;
     }
 
     rewritten = true;
-    const indent = marker[1];
-    const title = alertMarker?.[3];
+    const { indent, kind, title } = marker;
     // The alert runs over its quoted lines and its lazy continuation lines (CommonMark).
     const end = blockQuoteEnd(lines, index, indent.length);
     // A colon fence closes at the first colon line at least as long as the container's own, and
@@ -166,7 +186,8 @@ export function alertLineMapper(expanded: ExpandedGithubAlerts, firstLine = 1): 
  * Maps the source lines of a tree parsed from `expanded.text` back to the lines of the input
  * text (see `alertLineMapper`): the positions of every node and the `data-line` /
  * `data-end-line` attributes a pass has already set. The admonition of each rewritten alert is
- * flagged `githubAlert`, so the page can open the whole alert in one block editor.
+ * flagged `githubAlert`: the flag lets the title or the frame open the whole alert in one block
+ * editor.
  */
 export function mapAlertSourceLines(root: MystNode, expanded: ExpandedGithubAlerts, firstLine = 1): void {
   if (!expanded.sourceLines) return;

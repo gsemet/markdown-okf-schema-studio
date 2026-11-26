@@ -7,7 +7,8 @@ description: When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused
   body block in edit mode, the page SHALL request the move of that block and
   focus the block at its new place, and the move chord in the text box of a
   block editor does the same after saving the edit and reopens the editor with
-  the caret where it was.
+  the caret where it was; inside an admonition or an alert the chord moves the
+  edited direct block among the blocks of that admonition.
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -35,10 +36,13 @@ scenarios:
   title: The move chord in the text box moves the block and reopens its editor
 - id: S7
   title: The move chord is always consumed in the text box
+- id: S8
+  title: The move chord in the editor of a block inside an admonition
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/render/mystBoxLines.ts
 - src/page/features/blockEditor.ts
 - src/page/features/blockMoves.ts
 tested_in_files:
@@ -47,6 +51,7 @@ tested_in_files:
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditorLineEndings.test.ts
 - test/page/runtimeBlockMoves.test.ts
+- test/session/boxBlockSourceLines.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -54,7 +59,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused body block in edit mode, the page SHALL request the move of that block and focus the block at its new place, and the move chord in the text box of a block editor does the same after saving the edit and reopens the editor with the caret where it was.
+When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused body block in edit mode, the page SHALL request the move of that block and focus the block at its new place, and the move chord in the text box of a block editor does the same after saving the edit and reopens the editor with the caret where it was; inside an admonition or an alert the chord moves the edited direct block among the blocks of that admonition.
 
 ### Scenario S1 (nominal): Alt+Arrow on a focused block or insert point
 
@@ -116,9 +121,26 @@ The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewh
 | AltGr with an arrow, on a layout where AltGr reports Ctrl and Alt together | The key stays native and moves the caret; AltGraph is never part of the chord |
 | Option or Alt with an arrow, without Cmd or Ctrl (or without Cmd+Alt on macOS) | The key stays native and moves the caret by word; the chord itself is Cmd+Alt on macOS and Ctrl+Alt elsewhere |
 
+### Scenario S8 (nominal): The move chord in the editor of a block inside an admonition
+
+A direct block of an admonition or an alert is a block of its body with no element between them (the code of a code block counts with its frame).
+
+| Input | Outcome |
+| --- | --- |
+| The chord down in the editor of an item of a list in the body of a MyST admonition, a paragraph after the list | The item is saved if changed, the list and the paragraph swap inside the admonition, the fence and the title stay, and the list's editor opens at its new place with the caret at the same offset |
+| The same from the editor of the list, of a paragraph or of a code block of the body | That list, paragraph or code block swaps with its neighbour inside the admonition and its editor reopens |
+| The same in a GitHub alert, also an alert indented in a list item | The same; every line keeps its quote prefix |
+| An item of a nested sub-list | The outermost list of the admonition's body moves, with all its items |
+| The chord again in the editor that reopened, and again | The block moves one more place each time, until the first or last place of the body |
+| The block is the first of the body and the chord is up, or the last and the chord is down | The key is consumed and nothing happens; the block never leaves the admonition |
+| A block in the body of an admonition nested in another; the inner admonition opened whole | The block moves among the inner admonition's blocks only; the inner admonition moves among the outer one's blocks |
+| The editor of a block inside a list item of the admonition; the editor of an item of a list inside a block quote, a card or a grid of the admonition | The key is consumed and nothing moves |
+| The edited block, or the block it would swap with, is not a direct block, as a `{table}` with a caption, held in a figure that carries no source line | The key is consumed and nothing moves |
+| The edited block, or the block it would swap with, is a directive of the body (`{mermaid}`, `{math}`, `{code-block}` with or without a caption, `{list-table}`, `{csv-table}`, a nested one-line admonition) or a bare LaTeX environment | The two blocks swap whole, opening line to closing line; no line enters a fence |
+
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-BLOCK-109: the arrows of an insert point and the reason shown for a refused move.
+- SwRS-MDOKFSTUDIO-BLOCK-109: the arrows of an insert point and the reason shown for a refused move, also for a move refused inside an admonition.
 - SwRS-MDOKFSTUDIO-BLOCK-156: Alt+Arrow with a block selection moves the whole selection.
 - SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewBlockMove.
 
@@ -130,7 +152,9 @@ The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewh
 - Method: test/page/blockReq.requirements.test.ts: `a keyboard move that never lands is forgotten after five seconds` (scenario 5).
 - Method: test/integration/realInput/markers.ts: real-input scenario scenarioBlockMoveKeys (screenshots block-editing/r21 for scenario 1 and block-editing/r22 for scenario 6).
 - Method: test/page/runtimeBlockMoves.test.ts (`T37: Alt+ArrowDown on a focused block and Alt+ArrowUp on its bar button post the move`, changed: the refusal after a key press shows its reason) and test/page/blockReq.requirements.test.ts (`a keyboard move that never lands is forgotten after five seconds`, changed: the flight timer is replaced by the six-second reason timer).
-- Criteria: A single message per key press. blockOfTarget returns the block of the bar. inFlight blocks requestBlockMove. moveChordDirection and the target checks of the keydown listener return no move for other chords. blockMoveInFlight is undefined after a refusal and after 5000 ms. The pending navigation carries direction and caretOffset. closeBlockEdit(true) precedes requestBlockMove. moveBlockFromEditor returns true for every handled chord.
+- Method: test/page/runtimeBlockMoves.test.ts, on a MyST admonition and a GitHub alert (scenario 8): `the chord in the editor of a block of an admonition moves it among the blocks of that admonition`, `the chord stops at the edge of an admonition body and leaves a block that is not a direct one`, `after a move inside an admonition the block's editor reopens, and the chord moves it again to the edge` and `with unsaved text the chord in an admonition saves, moves the list, then reopens its editor`. The quote prefixes the host keeps are checked by SwRS-MDOKFSTUDIO-BLOCK-117; the `{table}` with a caption is not exercised by a test.
+- Method: test/session/boxBlockSourceLines.test.ts, with the neighbour `moveNeighbour` gives on the rendered page, moved by the real `PreviewManager`: every directive of an admonition and of an alert, a `{list-table}`, a `{csv-table}`, a LaTeX environment and a nested one-line admonition swap whole with the blocks beside them (scenario 8).
+- Criteria: A single message per key press. blockOfTarget returns the block of the bar. inFlight blocks requestBlockMove. moveChordDirection and the target checks of the keydown listener return no move for other chords. blockMoveInFlight is undefined after a refusal and after 5000 ms. The pending navigation carries direction and caretOffset. closeBlockEdit(true) precedes requestBlockMove. moveBlockFromEditor returns true for every handled chord. moveNeighbour gives the neighbour of every move, a body block's or a direct block's inside its admonition, and a move in flight finds its block again whether it is top-level or inner.
 
 <!-- okf:links:start -->
 ### Links

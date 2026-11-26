@@ -32,6 +32,8 @@ scenarios:
   title: Moving down and then up restores the document
 - id: S6
   title: A list mapped up to its trailing blank line
+- id: S7
+  title: Two blocks inside one quote prefix
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -92,6 +94,17 @@ When the host moves a block past its neighbour, it SHALL replace only the lines 
 | A list followed by a blank line, sent with the range the renderer maps for it (the list's lines and that blank line), moved down or up past a heading | The blank lines at the end of the range are dropped first; the move is done and no "The preview is out of date" refusal is shown |
 | A range that is only blank lines | Refused as a range that does not match the document |
 
+### Scenario S7 (boundary): Two blocks inside one quote prefix
+
+Inside a block quote, a line holding only the quote's markers is a blank line.
+
+| Input | Outcome |
+| --- | --- |
+| Two blocks of a GitHub alert body with a `>` line between them, swapped | The blocks swap and the `>` line stays as it is |
+| The same in an alert indented in a list item | The same; every line keeps its indentation and its marker |
+| A swap that needs an added separator line, as for two blocks that touch | The added line carries the quote prefix without a trailing space (`>`, or the indentation then `>`) |
+| Blocks that are not under the same quote prefix: two alerts, or a block of an alert and a block outside it | Refused as a range that does not match the document |
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-124: the host refuses ranges that do not match the document, blocks in the frontmatter and text between the blocks.
@@ -103,6 +116,7 @@ When the host moves a block past its neighbour, it SHALL replace only the lines 
 - Method: test/core/mapping/blockMove.test.ts: `swaps two blocks and keeps the separator and the final line break`, `only the lines from the first block to the second block change` and `reports the new first line of each block` (scenario 1), `several blank lines between the blocks are kept as they are` (scenario 2), `keeps CRLF line breaks, inside the blocks and between them` (scenario 3), `glued blocks get a blank line instead of merging into one paragraph` and `a block glued to its neighbours stays apart after the move` (scenario 4), `move down then up restores the document` (scenario 5).
 - Method: test/core/edits/sourceEdits.test.ts: `a block move swaps the blocks in one edit and gives the moved block's new first line` (scenario 1).
 - Method: test/core/edits/sourceEdits.test.ts: `a list mapped up to its trailing blank line moves like any block` (scenario 6).
+- Method: test/core/mapping/blockMove.test.ts: `two blocks of an alert body swap and keep the quote's empty line between them`, `a separator added inside a quote carries the quote prefix`, `blocks that are not in the same quote are refused` (scenario 7) and `two blocks of an admonition body swap, with a blank line where one would touch a fence` (scenario 4, inside the body of a MyST admonition).
 - Method: test/integration/blockMove.test.ts: the move in the real host (scenarios 1 and 5, down then up), and `runMappedRanges`, a document with a frontmatter, headings and a list moved with the ranges the renderer maps (scenario 6).
 - Criteria: Applying the edit gives the expected text and the reported new first line. No two blocks that were separate become one paragraph. Identity for blank-separated blocks.
 

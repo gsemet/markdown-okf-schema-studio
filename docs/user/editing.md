@@ -45,7 +45,13 @@ environments),
   or Cmd/Ctrl+Enter; Cancel or Escape restores the original block. Tables and frontmatter support
   keyboard navigation, row creation, and focused field editing.
   A click on a list item edits that item only; a click on the list itself, outside its items,
-  edits the whole list. From the keyboard, select the list, press Right to go to its items and
+  edits the whole list. In an admonition or a GitHub alert, a click on a paragraph or a list item
+  of its body edits that paragraph or item, and a click on its title or its frame edits the whole
+  admonition or alert. A directive written in that body (a `{mermaid}` diagram, a `{math}` formula,
+  a `{code-block}`) edits and moves as a whole, fence lines included. Text written on a directive's
+  opening line is no block of its own there: the body of `:::{warning} Text`, or a card title,
+  edits its whole directive, and a `{table}` caption the admonition around it.
+  From the keyboard, select the list, press Right to go to its items and
   Right again to go to the blocks of an item, Left to go back up, and Enter to edit the selected
   list, item or block.
   In edit mode each list item also has a handle on its left, as table rows do: drag it among its
@@ -123,13 +129,18 @@ environments),
   Escape at the top level clears the selection as before.
   A list has three levels: the list, its items, and the blocks inside an item. Right goes from a
   selected list to its first item and from an item to its first block, Left goes back up, and Enter
-  edits the selected list, item or block. In the editor of an item, Down at the end and Up at the
-  start open the next or previous item of the list, then the block after or before the list; the
-  editor of a block inside an admonition keeps these keys at its edges. In the editor of an item,
+  edits the selected list, item or block. Enter on an admonition or an alert selected as a whole
+  opens all of it, and on an element reached inside it with the arrows opens that element only.
+  In the editor of an item, Down at the end and Up at the start open the next or previous item of
+  the list, then the block after or before the list. Inside an admonition or an alert they stop at
+  the list: at the end of the last item and at the start of the first, the caret stays, as it does
+  at the edges of the editor of any other block of its body. In the editor of an item,
   Cmd+Alt+Up/Down (Ctrl+Alt elsewhere) saves the item and moves the whole list, whose editor then
-  opens.
+  opens. In the editor of a block of an admonition or an alert (for an item or a list, the whole
+  list), the same keys move that block among the blocks of the admonition, never out of it. Erasing
+  a paragraph or an item of an alert keeps the alert, with an empty `>` line in its place.
 
-  ![In edit mode, from the keyboard only: E turns edit mode on, Down selects a note admonition, Enter opens it and Escape closes it, Right goes inside it, Down reaches its list, Right selects the first item, Enter opens the admonition editor, one word of the item is changed and Ctrl+Enter saves](../demo-video/clips/keyboard-navigation/keyboard-navigation.gif)
+  ![In edit mode, from the keyboard only: E turns edit mode on, Down selects a note admonition, Enter opens it whole and Escape closes it, Right goes inside it, Down reaches its list, the arrows go down to an item of a nested sub-list, Enter opens that item alone, one word is changed and Ctrl+Enter saves](../demo-video/clips/keyboard-navigation/keyboard-navigation.gif)
 
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.

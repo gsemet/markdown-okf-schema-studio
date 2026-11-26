@@ -36,10 +36,13 @@ scenarios:
   title: A narrow pane
 - id: S8
   title: A block near the top of the pane keeps its first lines uncovered
+- id: S9
+  title: An editor on one block inside an admonition
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/preview/styles/admonitionEditStyles.ts
 - src/core/preview/styles/contentLayoutStyles.markers.ts
 - src/core/preview/styles/editPaletteStyles.ts
 - src/page/features/blockSourceEditor.ts
@@ -57,6 +60,7 @@ tested_in_files:
 - test/page/modules/caretReveal.test.ts
 - test/page/runtimeEditPalette.test.ts
 - test/session/toolbarReq.requirements.test.ts
+- test/visual/alertEditingScenarios.ts
 - test/visual/capture_edit_checks.py
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
@@ -167,8 +171,15 @@ The page does not follow the scroll that an applied edit causes in the text edit
 
 The distance is measured when the editor opens and when the layout changes (resize, the palette changing height, the frame becoming taller or shorter than the viewport), never while the user scrolls. A frame taller than the viewport reserves nothing: a reserve taken for a short frame is given back when the frame grows past the viewport, so the bar stays attached to the frame.
 
+### Scenario S9 (boundary): An editor on one block inside an admonition
+
+- GIVEN an admonition of a directive, which scrolls its own overflow when no editor is open in it, and an editor on one paragraph or one list item of its body (SwRS-MDOKFSTUDIO-BLOCK-014)
+- WHEN the block editor opens
+- THEN the admonition lets its overflow show while it holds the editor, and the palette ends above the text box, covering none of it
+
 ### Verification notes
 
+- Method: visual scenarios block-editing/v57-admonition-body-opens-pointed-paragraph-dark-900 and block-editing/v59-admonition-keyboard-opens-first-item-dark-900 (scenario 9: the palette's bottom edge is not below the top of the text box).
 - Method: test/page/runtimeEditPalette.test.ts (palette above the frame, when a palette exists, a tall palette stays in the flow: the palette sits in a host above the block editor frame and not inside it, no palette before the source arrives and none after the editor closes, the palette appears in the insertion editor, the table cell editor and the frontmatter editors get no palette, the host wraps the frame and goes with it also on a content patch, the host takes the first-block clearance class and swallows clicks like the frame, a palette taller than 40% of the viewport is not sticky and a small one is)
 - Method: test/page/runtimeEditPalette.test.ts (the caret is kept in view: the key release of a typed key does not measure the caret again when the text, the caret and the scroll did not change since the reveal of its input; a caret move does)
 - Method: test/page/modules/caretReveal.test.ts (the caret is kept in view: a caret under the stuck palette is scrolled down to just below it, a caret below the viewport is brought back in, a clear caret or a palette that is not stuck needs no scroll, the caret rect is one line high even when the rest of the text spans many lines)

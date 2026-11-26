@@ -9,7 +9,8 @@ description: When edit mode is on and no editor is open, the page SHALL move the
   a list item to its first inner block, the whole page to its first block) and
   one level up with ArrowLeft or Escape, move a selected table cell with the
   four arrow keys without wrapping, and open with Enter the editor of the
-  selected cell, list item or block of a list item.
+  selected element only (the selected cell, list, list item, block of a list
+  item, or inner block of an admonition, alert, card or tab set).
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -28,6 +29,8 @@ scenarios:
   title: Walking a list
 - id: S4
   title: Keys that belong to other controls
+- id: S5
+  title: Walking an admonition
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,6 +44,8 @@ tested_in_files:
 - test/integration/realInput/blockKeys.ts
 - test/page/modules/structuralCursor.test.ts
 - test/page/runtimeStructuralNavigation.test.ts
+- test/session/alertBlockEditOpen.test.ts
+- test/visual/alertEditingScenarios.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -49,7 +54,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When edit mode is on and no editor is open, the page SHALL move the keyboard selection one level down with ArrowRight (a table to its first cell, an admonition, card or tab to its first inner block, a list to its first item, a list item to its first inner block, the whole page to its first block) and one level up with ArrowLeft or Escape, move a selected table cell with the four arrow keys without wrapping, and open with Enter the editor of the selected cell, list item or block of a list item.
+When edit mode is on and no editor is open, the page SHALL move the keyboard selection one level down with ArrowRight (a table to its first cell, an admonition, card or tab to its first inner block, a list to its first item, a list item to its first inner block, the whole page to its first block) and one level up with ArrowLeft or Escape, move a selected table cell with the four arrow keys without wrapping, and open with Enter the editor of the selected element only (the selected cell, list, list item, block of a list item, or inner block of an admonition, alert, card or tab set).
 
 ### Scenario S1 (nominal): Right goes down, Left and Escape go up
 
@@ -89,6 +94,19 @@ A click on a list item opens the item, not the block under the click (SwRS-MDOKF
 | Any of these keys with edit mode off, an editor open, or inside a text box, a field or the properties table | Not handled here |
 | Any of these keys with Shift, Alt, Ctrl or Cmd | Not handled here (Shift extends a run, BLOCK-140; Alt moves, BLOCK-156) |
 
+### Scenario S5 (nominal): Walking an admonition
+
+- GIVEN edit mode on, no editor open, and an admonition selected by the keyboard whose body holds a paragraph and a list of items, one with a nested sub-list
+- WHEN the writer presses Enter; or ArrowRight, then Enter; or ArrowRight, ArrowDown, ArrowRight, then Enter; or goes on down to an item of the nested sub-list, then Enter; or comes back to the admonition with ArrowLeft, then Enter
+- THEN each Enter opens the selected element only, on its own lines:
+
+| Selected admonition | Enter on the admonition | Enter on its paragraph | Enter on an item | Enter on a nested item | Back on the admonition |
+| --- | --- | --- | --- | --- | --- |
+| a MyST admonition (`{note}`) | the whole directive, opening fence to closing fence | the paragraph | that item | that nested item on its own line | the whole directive again |
+| a GitHub alert (`> [!NOTE]`), its lines with their quote markers | the whole alert, marker line to last quoted line | the paragraph | that item | that nested item on its own line | the whole alert again |
+
+In a tab set the first inner block is the tab panel, whose content is not mapped: Enter on it opens the tab item.
+
 ### Verification notes
 
 - Method: test/page/modules/structuralCursor.test.ts, unit tests of the model (down, up, grid moves with edge stops and column clamping, whole-document start, unknown positions).
@@ -96,6 +114,7 @@ A click on a list item opens the item, not the block under the click (SwRS-MDOKF
 - Method: test/page/runtimeStructuralNavigation.test.ts (`Right walks a list down to its items and their blocks, Enter edits the selected level, Left goes back up`: list scenario) and test/session/listItemEditOpen.test.ts (`from the keyboard, an item opens on its lines and a block inside it opens on its own lines`: the ranges on Markdown rendered like the preview, the tight item paragraph).
 - Method: test/visual/scenarioDefinitions1.ts, visual scenarios block-editing/v20 (light) and v21 (dark): Down then Right leaves the first header cell outlined, with no editor open.
 - Method: test/integration/realInput/blockKeys.ts, real VS Code window: Right into the first cell and Escape back to the table block.
+- Method: walking-an-admonition scenario: test/page/runtimeStructuralNavigation.test.ts (`CR 157: Enter on an inner block opens that block's editor`, `Enter on an admonition selected as a whole opens the whole admonition, also after coming back to it`, `Right, Down, Right walk into a list item of an admonition and Enter opens that item only`, `the arrows walk on into a nested sub-list of an admonition and Enter opens that sub-item only`, on an admonition and a GitHub alert), test/session/alertBlockEditOpen.test.ts (`Enter on an element of ... reached with the arrows opens that element only`: the ranges on Markdown rendered like the preview) and the visual scenario block-editing/v59-admonition-keyboard-opens-first-item-dark-900 in test/visual/alertEditingScenarios.ts.
 - Criteria: The structural listener of features/blockSelectionView.ts runs before the plain-key listener and the page input; the model is modules/structuralCursor.ts; Enter on an inner block calls `openMappedEditor` with `exact`, so `editingElementFor` (src/page/features/mappedBlocks.ts) gives a block inside a list item its own range (sourceRangeForInnerBlock) instead of the item's.
 
 <!-- okf:links:start -->

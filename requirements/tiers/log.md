@@ -2,6 +2,18 @@
 
 ## 2026-11-26
 
+### Enter and click in an admonition open the selected element
+
+Reason: CR-514, the owner's answers of 2026-11-26. All requirements below are `proposed`; StRS-MDOKFSTUDIO-BLOCK-003 is unchanged.
+
+- Reversed: the 2026-10-29 entry "A click in the body of a GitHub alert opens the whole alert". A click on a paragraph or a list item in the body of a MyST admonition or a GitHub alert opens that paragraph or item on its own lines; only the title or the frame opens the whole admonition or alert (SwRS-MDOKFSTUDIO-BLOCK-014 S1 and S3, BLOCK-017 S2, BLOCK-262 S5). SwRS-MDOKFSTUDIO-GFM-009 has no normative change.
+- Changed: Enter opens the editor of the selected element only, also inside an admonition or an alert (SwRS-MDOKFSTUDIO-BLOCK-254, new scenario S5; in a tab set the first inner block is the tab panel and Enter opens the tab item).
+- Changed (block editor in an admonition or an alert): the move chord moves the edited direct block among the admonition's blocks and a refusal shows next to the admonition's insert point (SwRS-MDOKFSTUDIO-BLOCK-130 new scenario S8, BLOCK-109 S8, BLOCK-262 S2); the host swaps two blocks of one quote prefix (BLOCK-117 new scenario S7; blocks under different prefixes are refused with the reason it already gives for ranges that do not match the document); the arrows at the edges of a list inside an admonition keep the editor (BLOCK-079 S6).
+- Changed (emptied block of an alert body): the placeholder line an erased block leaves is the alert's prefix alone, so the alert stays whole (SwRS-MDOKFSTUDIO-BLOCK-264 S4, new scenario S5).
+- Fixed (found while capturing the new visual scenarios): an admonition of a directive scrolls its own overflow, so the sticky palette of an editor opened inside it covered the text box; it lets its overflow show while it holds the editor (SwRS-MDOKFSTUDIO-PALETTE-021, new scenario S9).
+- Fixed (second review round): inside an admonition, an alert, a callout or a dropdown no block maps a fence line of a directive around it, and what a directive builds without a position maps that directive's lines, so a click, Enter, an erased editor or the move chord acts on a whole directive and never cuts a fence (SwRS-MDOKFSTUDIO-BLOCK-014 S3, BLOCK-130 S8). Text written on a directive's opening line (a one-line body, a card title, a table caption) is no block of its own there (BLOCK-260, new scenario S7); the body of a version admonition maps the lines it is written on (SwRS-MDOKFSTUDIO-MYST-001 S4). Outside a box nothing changes.
+- Clarified: a block of an alert body with a lazy continuation line writes an empty placeholder line (SwRS-MDOKFSTUDIO-BLOCK-264 S4).
+
 ### Frontmatter: rows with an error or a warning are coloured (CR-513)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-FMSCHEMA-084 (an error or warning field row shows its name in the severity colour on a tinted background of that colour and a wavy underline in that colour under its value; info field rows keep the plain look; new scenario S8, a value cell being edited has no underline; new scenario S9, in edit mode a marked name cell highlights under the pointer like the other editable cells and keeps its severity colour; new scenario S10, in the Dark, White and Cream modes the marked rows take their colours from the palette of the mode, whatever the VS Code theme; new known issue, the whole-document error row still takes the VS Code theme's background in those modes), SwRS-MDOKFSTUDIO-FMSCHEMA-023 (the "Schema could not be parsed" warning row is shown in the warning colour on a tinted background, across the table, with its text wrapped; new scenario S10, its colours in the Dark, White and Cream modes come from the palette of the mode)

@@ -28,6 +28,8 @@ scenarios:
   title: A grid card inside a quote
 - id: S6
   title: A grid card inside a list item
+- id: S7
+  title: A card inside an admonition or an alert
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,6 +43,7 @@ tested_in_files:
 - test/core/render/gridCardTitleSourceLine.test.ts
 - test/page/linkEditModeClick.test.ts
 - test/security/html-policy.test.ts
+- test/session/boxBlockSourceLines.test.ts
 - test/visual/gridCardEditingScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -49,7 +52,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the writer clicks the title of a grid card or of a card, with or without a `:link:` option, in edit mode, the preview SHALL open the block editor on the directive line of that card (the `:::{grid-item-card}` or `:::{card}` line that holds the title), and when the writer clicks the text of its `:header:` or `:footer:` option, on that option's own line, rendering the title and the option text as inline text so that a leading "2." stays literal.
+When the writer clicks the title of a grid card or of a card, with or without a `:link:` option, in edit mode, the preview SHALL open the block editor on the directive line of that card (the `:::{grid-item-card}` or `:::{card}` line that holds the title), and when the writer clicks the text of its `:header:` or `:footer:` option, on that option's own line, rendering the title and the option text as inline text so that a leading "2." stays literal. Inside an admonition or an alert, the title opens the whole card instead (scenario 7).
 
 The renderer SHALL mark the title (a linked title too), the `:header:` text and the `:footer:` text as one-line card parts with `data-single-line`, never the body or a block found one-line by its line range, and the sanitizer SHALL keep that marker next to the source mapping.
 
@@ -90,6 +93,12 @@ The renderer SHALL mark the title (a linked title too), the `:header:` text and 
 - WHEN the writer clicks a card title or body in edit mode
 - THEN the editor opens on that card's own directive line or body line, as for the same grid outside the list, never on the line above
 
+### Scenario S7 (boundary): A card inside an admonition or an alert
+
+- GIVEN a `{card}` titled on its directive line, with `:header:` and `:footer:` options, in the body of an admonition or a GitHub alert
+- WHEN the writer clicks the title, the header text or the footer text in edit mode
+- THEN the title is no block of its own there: its click opens the whole card, opening fence to closing fence (SwRS-MDOKFSTUDIO-BLOCK-014); the header and the footer open their own option lines, as outside
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-014: in edit mode the stretched link of a card no longer covers the card
@@ -102,6 +111,7 @@ The renderer SHALL mark the title (a linked title too), the `:header:` text and 
 - Method: test/core/render/gridCardTitleSourceLine.test.ts renders quoted and unquoted grids and cards (blank first body line, one and two quote levels, backtick fence, `:gutter:`) and checks the `data-line` of the card, its title and its body (`a quoted grid whose body starts with a blank quoted line maps its card, title and body to their own lines`, `a doubly quoted grid whose body starts with a blank quoted line maps its card, title and body to their own lines`, `a quoted standalone card with a backtick fence and a blank first body line maps its card, title and body to their own lines`).
 - Method: the same test file renders grids, a standalone card and a tab set written in a list item (bullet `-` and `*`, ordered `1.` and `10.`, nested item, list item inside a quote, quote inside a list item, blank first body line, cards on the next line, `:gutter:`, opener on its own indented line) and checks the `data-line` of the card, its title and its body (`a bullet grid whose body starts with a blank line maps its card, title and body to their own lines`, `a two-digit ordered grid whose body starts with a blank line maps its card, title and body to their own lines`, `a standalone card in a list item with a blank first body line maps its card, title and body to their own lines`, `a tab panel of a tab set written in a list item maps to its directive line`).
 - Method: the same test file renders the same documents with a tab after the list marker (`-<TAB>`, `*<TAB>`, `1.<TAB>`, nested, inside a quote, `- <TAB>`) and with cards indented by a tab, on a grid, a standalone card and a tab set, and checks the same `data-line` values (`a dash-tab grid with cards indented 4 spaces maps its card, title and body to their own lines`, `a dash-space grid with cards indented by a tab maps its card, title and body to their own lines`, `a tab panel of a tab set behind a tab list marker maps to its directive line`).
+- Method: test/session/boxBlockSourceLines.test.ts, answered by the real `PreviewManager`: the title of a card inside an admonition opens the whole card (scenario 7). The header and footer lines of a card inside an admonition are not asserted there.
 - Method: test/core/render/gridCardTitleSourceLine.test.ts checks that only the header, footer and title lines carry `data-single-line`, and test/security/html-policy.test.ts that the sanitizer keeps it.
 - Criteria: every mapped node of a title or option carries exactly the line of its directive or option line, and a leading number stays in the text.
 

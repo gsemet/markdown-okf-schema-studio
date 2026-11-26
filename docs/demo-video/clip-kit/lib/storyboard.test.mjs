@@ -850,10 +850,12 @@ test("the shipped keyboard-navigation clip.md reads as the clip the owner review
   assert.equal(keyboard.marks[0].id, "1");
   assert.ok(keyboard.marks[0].from >= 0 && keyboard.marks[0].to <= keyboard.zoom.holdTo, "mark 1 is inside the zoom hold");
   assert.equal(keyboard.expectedPaste, null);
-  const ids = ["edit", "down", "down", "enter", "escape", "right", "down", "right", "enter", "delete-word", "save"];
+  const ids = ["edit", "down", "down", "enter", "escape", "right", "down", "right", "down", "right", "down", "right", "enter", "delete-word", "save"];
+  // The times of the presses in the storyboard, up to Enter on the sub-item, the word delete and the save.
+  const times = [0.6, 2.2, 3.6, 5.2, 7.0, 8.6, 10.2, 11.8, 13.4, 15.0, 16.6, 18.2, 19.8, 21.4, 23.4];
   const filmed = {
     filmed: keyboard.length,
-    presses: ids.map((id, index) => ({ id, t: 0.6 + index * 1.6 })),
+    presses: ids.map((id, index) => ({ id, t: times[index] })),
     zooms: [{ id: "admonition", t: 8.0 }],
     marks: [{ id: "1" }],
   };
@@ -866,12 +868,12 @@ test("the shipped keyboard-navigation clip.md reads as the clip the owner review
 test("the stage of the keyboard-navigation scenario is the shipped stage file, and the save changes one word", () => {
   const stageFile = fileURLToPath(new URL("../../clips/keyboard-navigation/stage/release-plan.md", import.meta.url));
   assert.equal(STAGE_KEYBOARD, readFileSync(stageFile, "utf8"));
-  assert.equal(STAGE_KEYBOARD.split("Friday").length - 1, 1, "Friday occurs once");
+  assert.equal(STAGE_KEYBOARD.split("  - the VSIX").length - 1, 1, "the sub-item occurs once");
   const before = STAGE_KEYBOARD.split("\n");
   const after = EXPECTED_KEYBOARD.split("\n");
   assert.equal(after.length, before.length);
   const changed = before.flatMap((line, index) => (line === after[index] ? [] : [index + 1]));
-  assert.deepEqual(changed, [6]);
-  assert.equal(before[5], "- Tag the release on Friday");
-  assert.equal(after[5], "- Tag the release on Thursday");
+  assert.deepEqual(changed, [8]);
+  assert.equal(before[7], "  - the VSIX");
+  assert.equal(after[7], "  - the extension");
 });

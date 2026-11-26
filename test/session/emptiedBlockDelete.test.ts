@@ -54,6 +54,54 @@ for (const [name, eol] of EOLS) {
   });
 }
 
+for (const [name, eol] of EOLS) {
+  const lines = (...parts: string[]): string => parts.map((part) => part + eol).join("");
+  // The page sends an erased text box as the line break the box left out.
+  const erased = { editId: "e1", editedText: eol };
+  const alert = lines("> [!NOTE]", "> First paragraph.", ">", "> Second paragraph.", "", "After.");
+  const emptied = lines("> [!NOTE]", ">", ">", "> Second paragraph.", "", "After.");
+  const held = { ...erased, line: 2, endLine: 2, originalText: lines("> First paragraph.") };
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S5
+  test(`${name}: an erased paragraph of an alert body leaves the alert's prefix, so the alert stays whole`, async () => {
+    const run = fixture({ text: alert });
+    await run.send("previewEditSave", { ...held, final: true });
+    assert.equal(run.document.getText(), emptied);
+    assert.equal(run.applyCalls.length, 1);
+    const bare = fixture({ text: alert });
+    await bare.send("previewEditSave", { ...held, editedText: "", final: true });
+    assert.equal(bare.document.getText(), emptied, "a text with no line break at all");
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S5
+  test(`${name}: an autosave of the empty text writes the alert's prefix once`, async () => {
+    const run = fixture({ text: alert });
+    await run.send("previewEditSave", { ...held, final: false });
+    assert.equal(run.document.getText(), emptied);
+    await run.send("previewEditSave", { ...held, final: false });
+    await run.send("previewEditSave", { ...held, final: true });
+    assert.equal(run.document.getText(), emptied);
+    assert.equal(run.applyCalls.length, 1, "no second write");
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S5
+  test(`${name}: an erased item of an alert indented in a list item leaves the indented prefix`, async () => {
+    const text = lines("- item", "", "   > [!TIP]", "   >", "   > - a", "   > - b");
+    const run = fixture({ text });
+    await run.send("previewEditSave",
+      { ...erased, line: 5, endLine: 5, originalText: lines("   > - a"), final: true });
+    assert.equal(run.document.getText(), lines("- item", "", "   > [!TIP]", "   >", "   >", "   > - b"));
+  });
+
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S4
+  test(`${name}: an erased paragraph of a MyST admonition still writes an empty line`, async () => {
+    const run = fixture({ text: lines(":::{note}", "First paragraph.", "", "Second paragraph.", ":::") });
+    await run.send("previewEditSave",
+      { ...erased, line: 2, endLine: 2, originalText: lines("First paragraph."), final: true });
+    assert.equal(run.document.getText(), lines(":::{note}", "", "", "Second paragraph.", ":::"));
+  });
+}
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S4
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-265#S5
 test("previewBlocksDelete of the last block pins nothing, and refusals change nothing", async () => {
