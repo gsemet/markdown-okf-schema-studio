@@ -5,8 +5,9 @@ uuid: f9310a4d-88e3-46e4-a8c5-6d882ce844a8
 title: "Moves and clipboard edits are refused for ranges that do not match the document"
 description: "When the ranges of a block move, the range of a copy or a cut, or the
   line of a paste do not match the document, or a move or a clipboard edit reaches
-  into the frontmatter, or text lies between the two blocks of a move, the host SHALL
-  answer with the reason of that case and change nothing."
+  into the frontmatter, or text lies between the two blocks of a move, or a move would
+  start the body of an admonition or an alert with a block that hides it or becomes
+  its title, the host SHALL answer with the reason of that case and change nothing."
 project: markdown-okf-schema-studio
 scope: block-editing
 req_lifecycle: proposed
@@ -35,18 +36,22 @@ scenarios:
   title: Text between the two blocks of a move
 - id: S6
   title: Ranges that match the document
+- id: S7
+  title: A move that would spoil an admonition as its first block
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/mapping/blockMove.ts
 - src/core/mapping/blockRange.ts
+- src/core/mapping/boxFirstBlock.ts
 tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/core/mapping/blockMove.test.ts
 - test/core/mapping/blockRange.test.ts
 - test/integration/blockClipboard.test.ts
 - test/integration/blockMove.test.ts
+- test/session/boxBlockSourceLines.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -54,7 +59,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the ranges of a block move, the range of a copy or a cut, or the line of a paste do not match the document, or a move or a clipboard edit reaches into the frontmatter, or text lies between the two blocks of a move, the host SHALL answer with the reason of that case and change nothing.
+When the ranges of a block move, the range of a copy or a cut, or the line of a paste do not match the document, or a move or a clipboard edit reaches into the frontmatter, or text lies between the two blocks of a move, or a move would start the body of an admonition or an alert with a block that hides it or becomes its title, the host SHALL answer with the reason of that case and change nothing.
 
 ### Scenario S1 (refusal): Move ranges that do not match the document
 
@@ -102,6 +107,22 @@ When the ranges of a block move, the range of a copy or a cut, or the line of a 
 | Two blocks with only blank lines between them | The move is planned |
 | A copy of body lines | The copy is done |
 
+### Scenario S7 (refusal): A move that would spoil an admonition as its first block
+
+The body below is that of a MyST admonition (`{note}` and its kinds, `{admonition}`), a `{dropdown}`, a version admonition, a Quarto callout or a GitHub alert. The first place is the one under the opening or marker line, also below the directive's options and blank lines. The move is refused whichever of its two blocks the writer moves.
+
+| Input | Outcome |
+| --- | --- |
+| A move that gives the first place of such a body to a block that starts with a line of three dashes or more, indented no further than the opening | Refused with "A --- line cannot start an admonition or an alert: its content would not show." |
+| A move that gives the first place to a heading, in an admonition directive with no argument on its opening line, or in a callout | Refused with "A heading cannot start this admonition: it would become its title." |
+| `***` or an indented `---` moved to the first place, or `---` moved below a comment or a link definition that starts the body | The move is done |
+| A heading moved to the first place of an admonition with an argument on its opening line, a `{dropdown}`, a version admonition or a GitHub alert | The move is done |
+
+### Known issues
+
+- Known issue (CR-514): a paragraph that is only bold text, moved to the first place of an admonition without a title, becomes its title; the move is not refused.
+- Known issue (CR-514): erasing the block above a `---` line at the start of such a body leaves that line first, and the body does not show.
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-117: the move that these checks guard
@@ -116,7 +137,8 @@ When the ranges of a block move, the range of a copy or a cut, or the line of a 
 - Method: test/integration/blockMove.test.ts (overlap and blank edge, frontmatter; the text between the blocks is not checked here).
 - Method: test/core/mapping/blockRange.test.ts (copy, cut and paste ranges and the frontmatter: `spanText refuses bad ranges and the frontmatter`, `cut refuses the frontmatter and bad ranges`, `paste refuses an empty clipboard, the frontmatter and stale lines` with its blank-line assertion changed to an accepted paste, `paste still refuses a blank line with no body above it and a no-break-space line`); test/core/edits/sourceEdits.test.ts (`copy and cut still refuse blank-only, blank-first and out-of-range spans`, `a selection ending on a no-break-space line is refused, not shortened`).
 - Method: test/integration/blockClipboard.test.ts (blank line, bounds, frontmatter).
-- Criteria: planBlockMove returns the refusal for each move case; checkSpan and planPaste return the refusal for each clipboard case; the reason text equals the one in the table; the trailing CommonMark blank lines of a copy or cut range are dropped before checkSpan; planPaste moves a CommonMark-blank anchor under a body line before planInsertion.
+- Method: test/session/boxBlockSourceLines.test.ts, answered by the real `PreviewManager` (scenario 7): with the neighbour `moveNeighbour` gives on the rendered page, `the chord is refused when it would start a box with a block that spoils it: ...` (a colon and a backtick admonition, a dropdown, a version admonition, a block of options, a body on the opening line, a note in a list item, both alert markers, a bare `{admonition}`, a callout; both directions) and `the chord still moves a rule or a heading to a first place that renders it`.
+- Criteria: planBlockMove returns the refusal for each move case (the first place of an admonition body is read from the source lines by firstBlockRefusal); checkSpan and planPaste return the refusal for each clipboard case; the reason text equals the one in the table; the trailing CommonMark blank lines of a copy or cut range are dropped before checkSpan; planPaste moves a CommonMark-blank anchor under a body line before planInsertion.
 
 <!-- okf:links:start -->
 ### Links

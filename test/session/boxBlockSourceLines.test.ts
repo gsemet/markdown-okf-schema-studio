@@ -59,8 +59,8 @@ async function load(source: string) {
     return { range, originalText: answer?.originalText };
   }
 
-  /** The move chord on `block`: the document after the move, or undefined when nothing is sent. */
-  async function chord(block: MappedElement, direction: Direction): Promise<string | undefined> {
+  /** The move chord on `block`: the host's answers and the document, or undefined when nothing is sent. */
+  async function sendChord(block: MappedElement, direction: Direction) {
     const neighbour = moves.moveNeighbour(block as never, direction);
     if (!neighbour) return undefined;
     const own = blocks.blockRange(block as never);
@@ -70,11 +70,18 @@ async function load(source: string) {
       line: own.line, endLine: own.endLine,
       neighbourLine: other.line, neighbourEndLine: other.endLine, direction,
     });
-    assert.deepEqual(run.of("previewBlockMoveResult").map(({ ok, reason }) => [ok, reason]), [[true, undefined]]);
-    return run.document.getText();
+    const answers = run.of("previewBlockMoveResult").map(({ ok, reason }) => [ok, reason]);
+    return { answers, document: run.document.getText() };
   }
 
-  return { page, blocks, box, inner, rangeOf, open, chord };
+  /** The move chord on `block`: the document after the move, or undefined when nothing is sent. */
+  async function chord(block: MappedElement, direction: Direction): Promise<string | undefined> {
+    const sent = await sendChord(block, direction);
+    if (sent) assert.deepEqual(sent.answers, [[true, undefined]]);
+    return sent?.document;
+  }
+
+  return { page, blocks, box, inner, rangeOf, open, sendChord, chord };
 }
 
 /** The innermost first descendant of `element`: where a pointer over its content lands. */
@@ -492,6 +499,68 @@ test("a table caption and a card title written on an opening line are no blocks 
   assert.deepEqual((await loaded.open(byText("Card title"), false)).range, [7, 9], "the whole card");
 });
 
+/** A block of a list item with a directive of the item around it or after it, and its own lines. */
+const BESIDE_A_NESTED_DIRECTIVE = [
+  ["the text of an item above a captioned {table}", "Step one", [2, 3],
+    ["- Step one", "", "  ```{table} Caption", "  | a |", "  | - |", "  ```"]],
+  ["a {figure} caption in a list", "Caption text", [5, 5],
+    ["- item", "", "  ```{figure} x.png", "  Caption text", "  ```", "", "- next item"]],
+  ["the body of a {card} in a list", "Card body.", [5, 5],
+    ["- item", "", "  ```{card} Card title", "  Card body.", "  ```"]],
+  ["the wrapped text of a tight item above a {note}", "Step one", [2, 3],
+    ["- Step one", "  wrapped", "  ```{note}", "  Nested.", "  ```"]],
+] as const;
+
+for (const [name, value, range, body] of BESIDE_A_NESTED_DIRECTIVE) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`in an admonition or an alert, Enter on ${name} opens and erases no fence line`, async () => {
+    for (const source of [
+      text("::::{note}", ...body, "::::", "", "After."),
+      text("> [!NOTE]", ...body.map((line) => (line ? `> ${line}` : ">")), "", "After."),
+    ]) {
+      const loaded = await load(source);
+      const block = loaded.page.document.querySelectorAll(MAPPINGS_SELECTOR)
+        .filter((element) => element.textContent.trim().startsWith(value)).at(-1)!;
+      const opened = await loaded.open(block, true);
+      assert.deepEqual(opened.range, [...range], source);
+      assert.equal(opened.originalText, linesOf(source, [...range]), source);
+
+      const run = fixture({ text: source });
+      await run.send("previewEditSave", {
+        editId: "e1", line: range[0], endLine: range[1], originalText: opened.originalText,
+        editedText: "", final: true, deleteWhenEmpty: true,
+      });
+      const fences = (document: string): string[] => document.split("\n").filter((line) => /```|:::/u.test(line));
+      assert.notEqual(run.document.getText(), source, "the block is erased");
+      assert.deepEqual(fences(run.document.getText()), fences(source), `every fence line stays: ${source}`);
+    }
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+test("in an admonition, text after a code block of a tight item opens that item", async () => {
+  const source = text(
+    ":::{note}",
+    "- item",
+    "  - sub",
+    "    ```python",
+    "    x",
+    "    ```",
+    "    after code",
+    "    more after",
+    "- last",
+    ":::",
+  );
+  const loaded = await load(source);
+  const after = loaded.page.document.querySelectorAll("li")
+    .find((element) => element.textContent.trim().startsWith("sub"))!;
+  const paragraphs = after.children.filter((element) => element.textContent.includes("after code"));
+  assert.equal(paragraphs.length, 1);
+  assert.deepEqual((await loaded.open(deepest(paragraphs[0]!), true)).range, [3, 8]);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
 // @tests_req SwRS-MDOKFSTUDIO-MYST-001#S4
 test("the body of a version admonition opens its own lines, wherever it starts", async () => {
@@ -535,4 +604,65 @@ test("a version admonition body whose source lines cannot be found opens the who
   const loaded = await load(source);
   const opened = await loaded.open(loaded.page.elementWithText("Under a block of options."), false);
   assert.deepEqual(opened.range, [1, 6]);
+});
+
+const HIDDEN_BODY = "A --- line cannot start an admonition or an alert: its content would not show.";
+const TAKEN_AS_TITLE = "A heading cannot start this admonition: it would become its title.";
+
+/** Boxes whose second block may not become the first, with the reason. */
+const REFUSED_FIRST_BLOCKS = [
+  ["a colon note, ---", text(":::{note}", "Before.", "", "---", "", "After.", ":::"), HIDDEN_BODY],
+  ["a backtick warning with a title, ----", text("```{warning} T", "Before.", "", "----", "```"), HIDDEN_BODY],
+  ["a dropdown, ---", text(":::{dropdown} T", "Before.", "", "---", ":::"), HIDDEN_BODY],
+  ["a version admonition, ---", text(":::{versionadded} 1.0", "", "Before.", "", "---", ":::"), HIDDEN_BODY],
+  ["a note with a block of options, a heading",
+    text(":::{note}", "---", "class: x", "---", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a note with a body on its opening line, ---", text(":::{note} Text", "", "Before.", "", "---", ":::"), HIDDEN_BODY],
+  ["a note in a list item, ---", text("- item", "", "  :::{note}", "  Before.", "", "  ---", "  :::"), HIDDEN_BODY],
+  ["a GitHub alert, ---", text("> [!NOTE]", "> Before.", ">", "> ---"), HIDDEN_BODY],
+  ["a bold-marker alert, ---", text("> **Warning**", "> Before.", ">", "> ---"), HIDDEN_BODY],
+  ["a colon note, a heading", text(":::{note}", "Before.", "", "## Head", ":::"), TAKEN_AS_TITLE],
+  ["a backtick tip with options, an underlined heading",
+    text("```{tip}", ":class: x", "", "Before.", "", "Head", "====", "```"), TAKEN_AS_TITLE],
+  ["a bare {admonition}, a heading", text(":::{admonition}", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a callout with a title, a heading", text("::: {.callout-tip title=\"T\"}", "Before.", "", "# Head", ":::"),
+    TAKEN_AS_TITLE],
+] as const;
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S7
+for (const [name, source, reason] of REFUSED_FIRST_BLOCKS) {
+  test(`the chord is refused when it would start a box with a block that spoils it: ${name}`, async () => {
+    const loaded = await load(source);
+    const [first, second] = loaded.inner(loaded.box());
+    for (const [block, direction] of [[first!, "down"], [second!, "up"]] as const) {
+      assert.deepEqual(await loaded.sendChord(block, direction),
+        { answers: [[false, reason]], document: source }, direction);
+    }
+  });
+}
+
+/** Moves that give a rule or a heading a first place that renders it: the lines of the two blocks. */
+const ACCEPTED_FIRST_BLOCKS = [
+  ["*** in a note", text(":::{note}", "Before.", "", "***", ":::"), 2, 4],
+  ["an indented --- in a note", text(":::{note}", "Before.", "", " ---", ":::"), 2, 4],
+  ["a heading in a warning with a title", text(":::{warning} T", "Before.", "", "# Head", ":::"), 2, 4],
+  ["a heading in a dropdown", text(":::{dropdown}", "Before.", "", "# Head", ":::"), 2, 4],
+  ["a heading in a GitHub alert", text("> [!NOTE]", "> Before.", ">", "> # Head"), 2, 4],
+  ["a heading under a body on the opening line", text(":::{note} Text", "", "Before.", "", "# Head", ":::"), 3, 5],
+  ["--- under a comment", text(":::{note}", "<!-- c -->", "Before.", "", "---", ":::"), 3, 5],
+  ["--- under a link definition",
+    text(":::{note}", "[a]: http://example.com", "", "Before.", "", "---", ":::"), 4, 6],
+  ["--- at the top level, under a closed note", text(":::{note}", "In.", ":::", "", "Before.", "", "---"), 5, 7],
+] as const;
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S7
+test("the chord still moves a rule or a heading to a first place that renders it", async () => {
+  for (const [name, source, upper, lower] of ACCEPTED_FIRST_BLOCKS) {
+    const run = fixture({ text: source });
+    await run.send("previewBlockMove", {
+      line: lower, endLine: lower, neighbourLine: upper, neighbourEndLine: upper, direction: "up",
+    });
+    assert.deepEqual(run.of("previewBlockMoveResult").map(({ ok, reason }) => [ok, reason]), [[true, undefined]], name);
+    assert.equal(run.document.getText(), swapped(source, [upper, upper], [lower, lower]), name);
+  }
 });

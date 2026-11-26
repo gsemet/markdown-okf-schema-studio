@@ -36,6 +36,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/styles/editModeStyles.ts
+- src/core/render/mystBoxLines.ts
 - src/page/features/blockSelectionView.ts
 - src/page/features/mappedBlocks.ts
 - src/page/features/structuralNavigationView.ts
@@ -45,6 +46,7 @@ tested_in_files:
 - test/page/modules/structuralCursor.test.ts
 - test/page/runtimeStructuralNavigation.test.ts
 - test/session/alertBlockEditOpen.test.ts
+- test/session/boxBlockSourceLines.test.ts
 - test/visual/alertEditingScenarios.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
@@ -83,7 +85,7 @@ Escape returns the selection to the table block. Enter opens the cell editor thr
 
 - GIVEN edit mode on, no editor open and a list selected by the keyboard, whose first item (lines 80 to 83, line 83 blank) holds two paragraphs (lines 80 and 82) and whose second item holds one paragraph (lines 84 and 85)
 - WHEN the writer presses ArrowRight, then Enter; or ArrowRight twice, ArrowDown, then Enter; or ArrowRight twice, ArrowLeft twice, then Enter
-- THEN ArrowRight selects the first item and Enter opens it on lines 80 to 83; ArrowRight on the item selects its first paragraph, ArrowDown the second, and Enter opens that paragraph only, on lines 82 to 83 (a block mapped to one line reaches the line before the next block of the item, or the end of the item, so a paragraph of a tight item keeps all its wrapped lines); ArrowLeft goes back to the item, then to the list, and Enter on the list opens the whole list, lines 80 to 85
+- THEN ArrowRight selects the first item and Enter opens it on lines 80 to 83; ArrowRight on the item selects its first paragraph, ArrowDown the second, and Enter opens that paragraph only, on lines 82 to 83 (a block mapped to one line reaches the line before the next block of the item, or the end of the item, so a paragraph of a tight item keeps all its wrapped lines; inside an admonition or an alert such a range never holds a fence line of a directive around the block, so the text of an item above a nested `{table}` stops above it and a `{figure}` caption opens on its own line); ArrowLeft goes back to the item, then to the list, and Enter on the list opens the whole list, lines 80 to 85
 
 A click on a list item opens the item, not the block under the click (SwRS-MDOKFSTUDIO-BLOCK-014): only the keyboard reaches a block inside an item.
 
@@ -114,8 +116,8 @@ In a tab set the first inner block is the tab panel, whose content is not mapped
 - Method: test/page/runtimeStructuralNavigation.test.ts (`Right walks a list down to its items and their blocks, Enter edits the selected level, Left goes back up`: list scenario) and test/session/listItemEditOpen.test.ts (`from the keyboard, an item opens on its lines and a block inside it opens on its own lines`: the ranges on Markdown rendered like the preview, the tight item paragraph).
 - Method: test/visual/scenarioDefinitions1.ts, visual scenarios block-editing/v20 (light) and v21 (dark): Down then Right leaves the first header cell outlined, with no editor open.
 - Method: test/integration/realInput/blockKeys.ts, real VS Code window: Right into the first cell and Escape back to the table block.
-- Method: walking-an-admonition scenario: test/page/runtimeStructuralNavigation.test.ts (`CR 157: Enter on an inner block opens that block's editor`, `Enter on an admonition selected as a whole opens the whole admonition, also after coming back to it`, `Right, Down, Right walk into a list item of an admonition and Enter opens that item only`, `the arrows walk on into a nested sub-list of an admonition and Enter opens that sub-item only`, on an admonition and a GitHub alert), test/session/alertBlockEditOpen.test.ts (`Enter on an element of ... reached with the arrows opens that element only`: the ranges on Markdown rendered like the preview) and the visual scenario block-editing/v59-admonition-keyboard-opens-first-item-dark-900 in test/visual/alertEditingScenarios.ts.
-- Criteria: The structural listener of features/blockSelectionView.ts runs before the plain-key listener and the page input; the model is modules/structuralCursor.ts; Enter on an inner block calls `openMappedEditor` with `exact`, so `editingElementFor` (src/page/features/mappedBlocks.ts) gives a block inside a list item its own range (sourceRangeForInnerBlock) instead of the item's.
+- Method: walking-an-admonition scenario: test/page/runtimeStructuralNavigation.test.ts (`CR 157: Enter on an inner block opens that block's editor`, `Enter on an admonition selected as a whole opens the whole admonition, also after coming back to it`, `Right, Down, Right walk into a list item of an admonition and Enter opens that item only`, `the arrows walk on into a nested sub-list of an admonition and Enter opens that sub-item only`, on an admonition and a GitHub alert), test/session/alertBlockEditOpen.test.ts (`Enter on an element of ... reached with the arrows opens that element only`: the ranges on Markdown rendered like the preview), test/session/boxBlockSourceLines.test.ts (the list scenario inside an admonition and an alert: `... Enter on ... opens and erases no fence line` and `in an admonition, text after a code block of a tight item opens that item`) and the visual scenario block-editing/v59-admonition-keyboard-opens-first-item-dark-900 in test/visual/alertEditingScenarios.ts.
+- Criteria: The structural listener of features/blockSelectionView.ts runs before the plain-key listener and the page input; the model is modules/structuralCursor.ts; Enter on an inner block calls `openMappedEditor` with `exact`, so `editingElementFor` (src/page/features/mappedBlocks.ts) gives a block inside a list item its own range (sourceRangeForInnerBlock) instead of the item's; inside an admonition or an alert that function takes the block's lines as the renderer mapped them (mapBoxSourceLines in src/core/render/mystBoxLines.ts, SwRS-MDOKFSTUDIO-BLOCK-014) and extends nothing.
 
 <!-- okf:links:start -->
 ### Links

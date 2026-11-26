@@ -34,6 +34,9 @@ function readAlertMarker(line: string): { indent: string; kind: string; title: s
   return marker && kind ? { indent: marker[1], kind, title: bracket?.[3] } : undefined;
 }
 
+/** True when `line` is the marker line of a GitHub alert. */
+export const isAlertMarkerLine = (line: string): boolean => readAlertMarker(line) !== undefined;
+
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
 /**
  * The prefix (indentation and `>`) of the GitHub alert whose body holds the zero-based lines

@@ -165,7 +165,53 @@ function ownerUnder(node: MystNode, synthesised: boolean, scope: Scope): MystNod
   return DIRECTIVE_NODES.has(node.type) ? node.position : undefined;
 }
 
+function writeEndLine(node: MystNode, lines: Lines, endLine: number): void {
+  const properties = node.data?.hProperties as Record<string, unknown> | undefined;
+  if (properties && typeof properties["data-line"] === "number") {
+    delete properties["data-single-line"];
+    properties["data-end-line"] = endLine;
+    return;
+  }
+  node.position = { start: node.position?.start ?? { line: lines.start }, end: { ...node.position?.end, line: endLine } };
+}
+
+/** The children of a list item whose lines stay as they are: no block of their own, or a comment. */
+const NOT_SPANNED = new Set(["text", "html", "okfComment"]);
+
+/** The first line of `node`, else of the first node under it that has one. */
+function firstLine(node: MystNode): number | undefined {
+  if (node.type === "text") return undefined;
+  return renderedLines(node, undefined)?.start
+    ?? (node.children ?? []).map(firstLine).find((line) => line !== undefined);
+}
+
+/**
+ * Gives each block a list item holds directly, and that renders on one line, all of its lines: up
+ * to the line before the next block of the item (a directive from its opening fence), else to the
+ * end of the item, and never across a fence. The first paragraph of a tight item has no position:
+ * it starts where the item does. A later paragraph without a position has no known first line, so
+ * it is no block of its own.
+ */
+function spanItemBlocks(item: MystNode, fences: readonly Fence[]): void {
+  const children = item.children ?? [];
+  for (const [index, child] of children.entries()) {
+    if (NOT_SPANNED.has(child.type) || child.data?.noSourceLine === true) continue;
+    if (child.type === "paragraph" && index > 0 && !renderedLines(child, undefined)) {
+      unmap(child);
+      continue;
+    }
+    const lines = renderedLines(child, item.position?.start?.line);
+    if (!lines || lines.end > lines.start) continue;
+    const next = children.slice(index + 1).map(firstLine).find((line) => line !== undefined && line > lines.start);
+    const endLine = next === undefined ? item.position?.end?.line : next - 1;
+    if (endLine === undefined || endLine <= lines.end) continue;
+    const whole = { start: lines.start, end: endLine };
+    if (!fences.some((fence) => cutsFence(whole, fence))) writeEndLine(child, lines, endLine);
+  }
+}
+
 function visit(node: MystNode, scope: Scope, sourceLines: readonly string[]): void {
+  if (scope.inBox && node.type === "listItem") spanItemBlocks(node, scope.fences);
   for (const child of node.children ?? []) {
     const synthesised = child.position === undefined;
     if (scope.inBox) {
@@ -186,6 +232,7 @@ function visit(node: MystNode, scope: Scope, sourceLines: readonly string[]): vo
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-130
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
 /**
  * Makes every mapped block of a box the whole source of its element: what a directive builds takes
  * the lines of that directive, and a block that is only a part of one and holds one of its fence

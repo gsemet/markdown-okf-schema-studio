@@ -142,10 +142,12 @@ environments),
   list), the same keys move that block among the blocks of the admonition, never out of it. Some
   blocks do not move: one inside a list item, a quote, a card or a grid of the box (an item of a
   list in such a quote, card or grid too), and the table of a `{table}` directive, with or without
-  a caption; a block next to that table does not move past it either. Erasing a paragraph or an
-  item of an alert keeps the alert, with an empty `>` line in its place. If the erased block holds
-  a lazy continuation line (a line without the `>`), an empty line is written instead, and the
-  quoted lines after it are no longer part of the alert.
+  a caption; a block next to that table does not move past it either. A move that would put a
+  `---` line first in the body, or a heading first in an admonition without a title or in a
+  callout, is refused with a reason: the content would not show, or the heading would become the
+  title. Erasing a paragraph or an item of an alert keeps the alert, with an empty `>` line in its
+  place. If the erased block holds a lazy continuation line (a line without the `>`), an empty
+  line is written instead, and the quoted lines after it are no longer part of the alert.
 
   ![In edit mode, from the keyboard only: E turns edit mode on, Down selects a note admonition, Enter opens it whole and Escape closes it, Right goes inside it, Down reaches its list, the arrows go down to an item of a nested sub-list, Enter opens that item alone, one word is changed and Ctrl+Enter saves](../demo-video/clips/keyboard-navigation/keyboard-navigation.gif)
 
