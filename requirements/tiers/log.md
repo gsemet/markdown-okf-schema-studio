@@ -15,6 +15,8 @@ Reason: CR-514, the owner's answers of 2026-11-26. All requirements below are `p
 - Clarified: a block of an alert body with a lazy continuation line writes an empty placeholder line (SwRS-MDOKFSTUDIO-BLOCK-264 S4).
 - Clarified (third review round): the table of a `{table}` directive of a box, with or without a caption, is no direct block, so neither it nor its neighbour moves past it (SwRS-MDOKFSTUDIO-BLOCK-130 S8). The header and footer of a card inside a box are now tested (BLOCK-260 S7).
 - Fixed (third review round): an admonition left open at the end of the file no longer takes the closing fence of a block inside it for its own, so that block stays a block of its own, whole (SwRS-MDOKFSTUDIO-BLOCK-014 S3, BLOCK-130 S8; no normative change).
+- Fixed (fourth review round): inside an admonition or an alert, Enter on a block held directly by a list item no longer takes the opening or closing line of a directive around it: the renderer gives that block its lines, to the line before the next block of the item or the end of the item and never across a fence, and a later paragraph of an item whose first line is not known is no block of its own (SwRS-MDOKFSTUDIO-BLOCK-014 S3, new table row; BLOCK-254 S3).
+- Changed (fourth review round): the host refuses a move that would give the first place of an admonition or alert body to a `---` line, or the first place of an admonition without a title, or of a callout, to a heading (SwRS-MDOKFSTUDIO-BLOCK-124 statement and new scenario S7, with two known issues; BLOCK-130 related requirements).
 
 ### Frontmatter: rows with an error or a warning are coloured (CR-513)
 

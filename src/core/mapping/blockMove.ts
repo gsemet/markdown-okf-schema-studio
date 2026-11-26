@@ -1,5 +1,6 @@
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { blockQuoteEnd } from "../syntax/blockQuoteRange";
+import { firstBlockRefusal } from "./boxFirstBlock";
 
 /** A block as the preview maps it: 1-based, inclusive source lines. */
 export interface BlockLines {
@@ -101,8 +102,9 @@ const OUT_OF_DATE = "The preview is out of date. Refresh it and try again.";
  * glue a block to its new neighbour (they were glued before, or the separator was empty). Inside a
  * quote a line holding only its markers is blank, and an added line carries them. Refused: ranges
  * that overlap, are unordered or out of bounds, blocks inside the frontmatter, blocks that start or
- * end on a blank line, blocks that are not in the same quote, and non-blank text between the blocks
- * (a comment, a link definition): moving it would be a guess.
+ * end on a blank line, blocks that are not in the same quote, non-blank text between the blocks
+ * (a comment, a link definition): moving it would be a guess, and a block that would spoil an
+ * admonition as its first block (`firstBlockRefusal`).
  */
 export function planBlockMove(
   text: string,
@@ -140,6 +142,10 @@ export function planBlockMove(
     return {
       refused: "Text between the two blocks (a comment or a link definition) prevents the move.",
     };
+  }
+  const spoiled = firstBlockRefusal(lines.map((line) => line.text), first.line, second);
+  if (spoiled) {
+    return { refused: spoiled };
   }
   const eolA = blockA[blockA.length - 1].eol;
   const eolB = blockB[blockB.length - 1].eol;

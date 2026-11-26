@@ -141,6 +141,7 @@ A direct block of an admonition or an alert is a block of its body with no eleme
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-109: the arrows of an insert point and the reason shown for a refused move, also for a move refused inside an admonition.
+- SwRS-MDOKFSTUDIO-BLOCK-124: the host refuses a move that would start an admonition body with a block that hides it or becomes its title.
 - SwRS-MDOKFSTUDIO-BLOCK-156: Alt+Arrow with a block selection moves the whole selection.
 - SwRS-MDOKFSTUDIO-BLOCK-259: the accepted shape of previewBlockMove.
 

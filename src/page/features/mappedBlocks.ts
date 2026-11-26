@@ -148,10 +148,11 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
   // The lines of a block inside a list item, edited on its own from the keyboard. The paragraph of
   // a tight item is mapped to its first line only: a block mapped to one line reaches the line
-  // before the next mapped block of the item, or the end of the item.
+  // before the next mapped block of the item, or the end of the item. Inside an admonition or an
+  // alert the renderer maps each block to all its lines, so its own lines are taken as they are.
   function sourceRangeForInnerBlock(block: Element, item: Element): { line: number; endLine: number } | undefined {
     const span = spanOf([block], block);
-    if (!span || span.endLine > span.line) return span;
+    if (!span || span.endLine > span.line || admonitionAround(block)) return span;
     const itemEnd = Number(item.getAttribute("data-sphinx-source-end-line"));
     const next = mappedChildren(item).map((child) => Number(child.getAttribute("data-sphinx-source-line")))
       .filter((line) => line > span.line)
