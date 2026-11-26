@@ -25,6 +25,16 @@ const ZOOM_HOLD_WIDE = 9.6;
 /** The committed length of the figure-editor clip, in seconds. */
 const LENGTH_FIGURE = 12;
 
+/** The committed hold of the export-html clip's zoom, in seconds. */
+const ZOOM_HOLD_EXPORT = 17.0;
+
+/** The marks of the shipped export-html clip.md: the times of its Mark rows. */
+const MARKS_EXPORT = [
+  [12.0, 13.2],
+  [14.2, 15.2],
+  [15.4, 16.6],
+];
+
 const clipFile = fileURLToPath(new URL("../../clips/raw-copy-balance-edges/clip.md", import.meta.url));
 const shipped = parseClip(clipFile);
 
@@ -338,10 +348,12 @@ test("the shipped export-html clip.md reads as the clip the owner reviews", () =
   assert.deepEqual(clip.badges, { palette: "Ctrl+Shift+P / ⇧⌘P" });
   assert.equal(clip.expectedPaste, null);
   assert.equal(clip.zoom.id, "page");
+  assert.equal(clip.zoom.holdTo, ZOOM_HOLD_EXPORT);
   assert.deepEqual(
     clip.marks.map((mark) => mark.id),
     ["1", "2", "3"],
   );
+  assert.deepEqual(clip.marks.map((mark) => [mark.from, mark.to]), MARKS_EXPORT);
   for (const [index, mark] of clip.marks.entries()) {
     assert.ok(mark.from >= 0 && mark.to <= clip.zoom.holdTo, `mark ${mark.id} is inside the zoom hold`);
     if (index > 0) assert.ok(mark.from >= clip.marks[index - 1].to, `mark ${mark.id} starts after the previous mark ends`);
