@@ -260,12 +260,17 @@ export async function run(t) {
   t.record("tableShape", shape);
   if (!same(shape)) throw new Error(`the paste did not give the expected table. The page shows ${JSON.stringify(shape)}`);
 
-  // The cell editor of TABLE-120 may or may not be reopened on "Task" after a synthetic paste (the take varies, and the
-  // reopen is covered by the real-input integration test). The clip claims nothing about it, but an open editor
-  // widens the first column and hides "Due": when it is open, a click on Done closes it before the zoom.
+  // TABLE-120 reopens the cell editor on "Task" after the paste (a real-input integration test covers it). The first
+  // takes of this clip found it closed; that miss did not reproduce in runs on a branch whose product code (src/,
+  // sphinx/) is identical to that of commit 3478f09. The clip claims nothing about it, but an open editor widens the
+  // first column and hides "Due": the take waits for the editor until 4.4 s, and when it is open a click on Done
+  // closes it before the zoom.
   await until(4.0);
   const done = frame.locator(`${CELL_EDITOR} button[aria-label="Done editing"]`);
-  if ((await done.count()) > 0) {
+  while ((await done.count()) === 0 && Date.now() < start + 4400) await t.sleep(50);
+  const openAfterPaste = (await done.count()) > 0;
+  t.record("cellEditorOpenAfterPaste", openAfterPaste);
+  if (openAfterPaste) {
     const doneBox = await box(done.first());
     await t.moveTo(doneBox.x + doneBox.w / 2, doneBox.y + doneBox.h / 2, 0.3);
     await until(4.4);

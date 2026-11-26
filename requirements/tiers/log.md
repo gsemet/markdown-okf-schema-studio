@@ -2,6 +2,12 @@
 
 ## 2026-11-26
 
+### Grid paste from a header cell: the missed editor reopen did not reproduce (CR-512)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-TABLE-120, verification notes only (the behaviour and its scenarios are unchanged; the real-window method names `scenarioTableGridPasteFromHeader`, scenario S3)
+- Outcome: cannot reproduce. The first takes of the clip paste-spreadsheet-cells found the cell editor closed after the paste; the real-window runs and the clip takes, made on a branch whose product code (`src/`, `sphinx/`) is identical to that of commit `3478f09`, all found it reopened in the header cell
+- Tests: test/integration/realInput/tableGridPaste.ts
+
 ### Scenario coverage of the trust and security behaviours (CR-505, round 3)
 
 - Changed (`proposed`, markers and tests): every scenario of the live, non-exempt SwRS of trust-security has at least one `@tests_req ...#S<n>` marker; the 18 scenarios that had none are covered by new unit tests or by existing tests that walk them. No scenario is pruned, no scenario text or normative text changes, no approved requirement is touched, and no file under `src/` changes.

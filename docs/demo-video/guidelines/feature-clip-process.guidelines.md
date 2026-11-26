@@ -91,7 +91,10 @@ only, no Python and no symbolic link.
   `keyFrame(name)` (names a moment of the take: `render` writes `frames/<name>.png` at it; the name
   is lowercase, starts with a letter and is unique) and `workspaceFile(name)` (read a workspace file
   from disk). A scenario may drive a drag with the exposed `ev("click", ...)`, `page.mouse.down()`,
-  `moveTo` and `page.mouse.up()`.
+  `moveTo` and `page.mouse.up()`. After a `press`, `run` waits with a deadline for the state it films
+  rather than reading the page once (the first takes of `paste-spreadsheet-cells` found the cell
+  editor closed after the paste; that miss did not reproduce in runs on a branch whose product code
+  (`src/`, `sphinx/`) is identical to that of commit `3478f09`).
 - **Pacing**: cursor moves of 600 to 900 ms, eased; 400 ms pause before a click or a chord; zoom in
   and out over 600 ms, at most 2x.
 - **VS Code**: the kit downloads a pinned version (`DEFAULT_CODE_VERSION` in `lib/platform.mjs`)
