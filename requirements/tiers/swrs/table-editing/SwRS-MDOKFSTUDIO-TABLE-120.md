@@ -100,7 +100,7 @@ When the writer pastes into a cell text box a text that holds a tab, the extensi
 ### Verification notes
 - Method: test/page/modules/tableGridPaste.test.ts (the grid read from the text and written into the model: fitting grid, added column and row, header start, pipe, list-table).
 - Method: test/page/runtimeTableCellPaste.test.ts (the paste event of the cell text box: default prevented, one final save, pending navigation to the start cell; a single value and a multi-line text without a tab are left to the native paste).
-- Method: test/integration/realInput/tableGridPaste.ts (a real paste of spreadsheet cells, no tab in the source, one undo) and the visual scenario table-editing/v32-grid-paste-light-900.
+- Method: test/integration/realInput/tableGridPaste.ts, in a real window: `scenarioTableGridPaste` (a real paste of spreadsheet cells into a body cell, no tab in the source, one undo) and `scenarioTableGridPasteFromHeader` (scenario S3: the rows of the clip paste-spreadsheet-cells pasted into the header cell "Task" without Select all fill the table, and the editor is open in that header cell, still open once the page has settled); and the visual scenario table-editing/v32-grid-paste-light-900.
 - Criteria: The serialized table after the paste, the single final save, and the source after one undo.
 
 <!-- okf:links:start -->

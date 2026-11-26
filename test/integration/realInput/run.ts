@@ -63,7 +63,7 @@ import { scenarioTableEscapeKeepsCellsLeft } from "./tableEscape";
 import { scenarioLabelRenameAboveTable } from "./labelRenameAboveTable";
 import { scenarioTableTabRow } from "./tableTabRow";
 import { scenarioRawCopy } from "./rawCopy";
-import { scenarioTableGridPaste } from "./tableGridPaste";
+import { scenarioTableGridPaste, scenarioTableGridPasteFromHeader } from "./tableGridPaste";
 import { scenarioTableInContainer } from "./tableInContainer";
 import { scenarioTableShortDelimiter } from "./tableShortDelimiter";
 import { scenarioColumnMoveKeepsBlockIdAtRowEnd, scenarioTailedTableMovesAndOpensCellEditor } from "./tableRowTokens";
@@ -112,6 +112,8 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "table-insert-slash": (page) => scenarioTableInsertFromSlash(page),
   // CR 464: on demand too; a step of the trusted suite that ignores the page of the round, like checkbox-toggle.
   "diff-preview-scroll": async () => runDiffPreviewScroll(),
+  // CR 512: on demand too.
+  "table-grid-paste-header": scenarioTableGridPasteFromHeader,
   // "wide-table-tab" is out of the stress table: its LASTCELL click was unstable (under investigation).
 };
 
@@ -237,7 +239,10 @@ export async function run(): Promise<void> {
       "label-rename-above-table": () => scenarioLabelRenameAboveTable(page),
       "table-tab-row": () => scenarioTableTabRow(page),
       "table-short-delimiter": () => scenarioTableShortDelimiter(page),
-      "table-grid-paste": () => scenarioTableGridPaste(page),
+      "table-grid-paste": async () => {
+        await scenarioTableGridPaste(page);
+        await scenarioTableGridPasteFromHeader(page);
+      },
       "raw-copy": () => scenarioRawCopy(page),
       "table-in-container": () => scenarioTableInContainer(page),
       "table-row-tokens": async () => {
@@ -307,6 +312,8 @@ export async function run(): Promise<void> {
     await scenarioTableShortDelimiter(page);
     // QA replay 271-c5-2: a spreadsheet paste into a cell fills the cells from it.
     await scenarioTableGridPaste(page);
+    // CR-512: the same from a header cell, with the rows the table does not have yet.
+    await scenarioTableGridPasteFromHeader(page);
     // CR-480: a Select all and a copy put the Markdown on the clipboard.
     await scenarioRawCopy(page);
     // QA replay 271-c3-3: a table inside a quote, an alert or an admonition opens the cell editor.

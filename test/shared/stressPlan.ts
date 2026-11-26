@@ -104,8 +104,10 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
  * 44958907144, green on 44951690958 attempt 2 with the same code); on demand, because a 22nd default
  * scenario would pass the deadline margin, it is proved by repetition
  * (`-f stress_scenarios=diff-preview-scroll`).
+ * CR 512: "table-grid-paste-header" (the reopen after a grid paste from a header cell), on demand
+ * for the same margin; it is proved by repetition (`-f stress_scenarios=table-grid-paste-header`).
  */
-export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["table-insert-slash", "diff-preview-scroll"];
+export const STRESS_ON_DEMAND_SCENARIOS: readonly string[] = ["table-insert-slash", "diff-preview-scroll", "table-grid-paste-header"];
 
 /**
  * The plan of one window. `STUDIO_STRESS_SCENARIOS` may name scenarios of either window (unknown

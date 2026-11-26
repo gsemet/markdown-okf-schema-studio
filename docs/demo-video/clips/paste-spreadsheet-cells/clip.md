@@ -39,7 +39,7 @@ tab-separated text on the clipboard, which is what the table cell reads.
 | Field | Content |
 | --- | --- |
 | Time | 0 to 4.7 s (drag 0.3 to 1.8 s, copy at 2.0 s, click on the cell "Task" at 3.2 s, paste at 3.8 s) |
-| Shot *(filmed)* | Studio on `release-checklist.md` (left), `tasks.tsv` (right). The mouse drags over the five lines of `tasks.tsv`. Copy chord. The pointer moves to the table and clicks its header cell "Task": the cell editor opens. Paste chord. The table grows to 3 columns ("Due" added) and 5 lines (3 rows added). If the cell editor is open after the paste, a click on Done at 4.4 s closes it. |
+| Shot *(filmed)* | Studio on `release-checklist.md` (left), `tasks.tsv` (right). The mouse drags over the five lines of `tasks.tsv`. Copy chord. The pointer moves to the table and clicks its header cell "Task": the cell editor opens. Paste chord. The table grows to 3 columns ("Due" added) and 5 lines (3 rows added). The take waits for the cell editor until 4.4 s; if it is open, a click on Done closes it, at 4.4 s, or up to about 0.3 s later (the pointer's move to the button) when the editor appears late. |
 | Text 1 *(on screen)* | Copy cells from a sheet, **paste** into a table |
 | Badge copy *(on screen)* | Ctrl+C / ⌘C |
 | Badge paste *(on screen)* | Ctrl+V / ⌘V |
@@ -84,7 +84,11 @@ on) is exactly this text:
 - The paste goes from the clicked cell: clicking the header cell "Task" makes the header and the
   existing row take the same values again; only "Due" and the three rows are new, which the marks
   show.
-- The cell editor may or may not reopen in "Task" after the paste (it varies from take to take with synthetic input; the real-input integration test covers the reopen). The clip makes no claim about it: when it is open, a click on Done closes it before the zoom, because an open editor widens the first column and hides "Due".
+- The cell editor reopens in "Task" after the paste (the real-input integration test covers it).
+  The first takes of this clip found it closed; that miss did not reproduce in runs on a branch
+  whose product code (`src/`, `sphinx/`) is identical to that of commit `3478f09`. The clip makes
+  no claim about it: the take waits for the editor until 4.4 s, and when it is open a click on Done
+  closes it before the zoom, because an open editor widens the first column and hides "Due".
 - The clip ends with the larger table and starts with the small one: the loop seam is the kit's
   cross-fade back to the first frame.
 - The raw screencast runs at about 7.3 frames per second: the selection grows
