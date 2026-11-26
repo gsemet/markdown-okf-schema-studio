@@ -19,7 +19,7 @@ Linux hosts may also need Playwright system libraries; install those using your 
 package manager or run `uv run --group docs playwright install-deps chromium` with the required
 permissions. Integration tests download their isolated VS Code test runtime on first use.
 The full visual campaign also requires `plantuml` and Graphviz on `PATH` for its successful
-diagram cases. In GitHub Actions only the visual job installs them, with Playwright's system
+diagram cases. In GitHub Actions only the visual jobs install them, with Playwright's system
 libraries, through `just dev-ci visual`, from cached Ubuntu package archives; on macOS use
 `brew install plantuml graphviz`.
 
@@ -286,21 +286,24 @@ Privacy & Security > Automation; allow it, or the run fails with a message that 
 permission.
 
 CI runs the same stages as parallel jobs, each calling one target after `just dev-ci`:
-`just ci-static` (`check-no-merge-commits` against the target branch, justfile format, `check`, `audit`, `sphinx-check`), `just ci-visual`,
+`just ci-static` (`check-no-merge-commits` against the target branch, justfile format, `check`, `audit`, `sphinx-check`),
+`just ci-visual 1` and `just ci-visual 2` (the jobs `visual` and `visual-2`, one part of the screenshot
+campaign each, in parallel; `just ci-visual` runs both parts one after the other, then merges them),
 `just ci-viewer-graph`, `just ci-integration`, `just ci-acceptance <group>` (the `acceptance` job,
-one shard per e2e group that has an acceptance file), then `just ci-report` (merges the visual,
+one shard per e2e group that has an acceptance file), then `just ci-report` (first merges the two
+visual parts into one run manifest, index and machine-check report, then merges the visual,
 integration and acceptance outputs into the review index, `out/reports/e2e/e2e-manifest.json` and
-`out/reports/acceptance/acceptance-manifest.json`; it fails when a stage manifest, or the manifest
-of an acceptance group, is missing or failed) and `just ci-gallery` (gallery and site from the
-existing outputs, no E2E re-run).
+`out/reports/acceptance/acceptance-manifest.json`; it fails when a visual part, a stage manifest, or
+the manifest of an acceptance group, is missing or failed) and `just ci-gallery` (gallery and site
+from the existing outputs, no E2E re-run).
 On a pull request, CI runs only the simulated tests, which make up the required `checks` job:
-`ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual`
-(Playwright/Chromium against a mock host, then the table breakout width tests, run with
+`ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual` (in two jobs:
+Playwright/Chromium against a mock host, and in part 1 then the table breakout width tests, run with
 `STUDIO_REQUIRE_CHROMIUM=1` so that a Chromium that cannot start fails them; the `static` jobs
 have no Chromium and skip those tests; their report is under `out/reports/breakout/`; the tests
 assert the widths and the owner's verdicts on Windows, the reference, and are report-only on
 Linux CI: they print the widths and the verdicts and name each difference from Windows, and
-never fail on one), `ci-viewer-graph` (the use case map tests, in a job of their own so that `visual` keeps its time budget: they write the JSON requirements report and check in
+never fail on one), `ci-viewer-graph` (the use case map tests, in a job of their own so that the visual jobs keep their time budget: they write the JSON requirements report and check in
 Chromium, in pinned fonts, that no text or pill of any use case map overlaps another at 1280 px and
 at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`; the same target runs the
 gallery link tests in Chromium) and
@@ -331,8 +334,11 @@ after a host theme change. Failed rounds are counted, not fatal, and the job is 
 `out/reports/e2e/toc-loop-summary.json` is rewritten after each round.
 `just preflight` calls these targets in sequence. Each stage records its own start time and they share
 a run id, so `just ci-visual`, `just ci-viewer-graph`, `just ci-integration`, `just ci-acceptance`
-and `just ci-report` also work one by one; `just clean` starts a fresh campaign. `just dev-ci` is
-for CI machines only: `npm ci` replaces `node_modules`.
+and `just ci-report` also work one by one; `just clean` starts a fresh campaign. The two visual
+parts are the exception: without a pinned `STUDIO_E2E_RUN_ID`, `just ci-report` refuses a visual
+stage whose parts ran one by one, so that an older part never passes beside a newer one; run
+`just ci-visual` with no part. `just dev-ci` is for CI machines only: `npm ci` replaces
+`node_modules`.
 
 The focused site and gallery commands are:
 
@@ -462,7 +468,7 @@ Real VS Code integration scenarios remain serial. The Pages workflow builds `out
 
 ### Static scenarios that hold on CI
 
-The visual job renders on Linux, whose fonts are wider than the macOS ones, so a scenario that
+The visual jobs render on Linux, whose fonts are wider than the macOS ones, so a scenario that
 passes locally can fail on CI when it depends on text metrics:
 
 - A fixture line that must fit on one line at a width keeps a margin of at least one word; it
@@ -767,12 +773,14 @@ is recovered in the same CI run, with no new commit and no manual tag:
 	`-attempt-<n>` (for example `studio-reports-attempt-2`), and each consumer downloads the name
 	that the producing job reports. `report` therefore merges the attempt-1 visual stage with the
 	re-run integration stage, and Pages uses the merged reports of the newest attempt that ran
-	`report`. A download by a fixed name would return the attempt-1 artifact. Each acceptance
-	shard uploads `e2e-acceptance-<group>-attempt-<n>`, and `report` keeps the newest attempt of
-	each group (`scripts/select-acceptance-attempts.mjs`). The visual, integration and acceptance
-	stages of one CI run form one campaign however far apart they started, so a
-	re-run hours or days later still passes `report`. To fetch the reports of a run by hand, use
-	`just site-from-run <run-id>`, which picks the newest attempt.
+	`report`. A download by a fixed name would return the attempt-1 artifact. The visual stage comes
+	from two artifacts, `e2e-visual-attempt-<n>` and `e2e-visual-2-attempt-<n>`, one per part, and
+	`report` merges their manifests first. Each acceptance shard uploads
+	`e2e-acceptance-<group>-attempt-<n>`, and `report` keeps the newest attempt of each group
+	(`scripts/select-acceptance-attempts.mjs`). The visual, integration and acceptance stages of one
+	CI run form one campaign however far apart they started, so a re-run hours or days later still
+	passes `report`. To fetch the reports of a run by hand, use `just site-from-run <run-id>`, which
+	picks the newest attempt.
 5. Once the tag exists, only re-run the failed jobs. Re-running `tag-release` then finds the
 	existing tag, outputs no tag and skips `release` and `pages`. A failed publication is re-run
 	in the Release VSIX run; in the CI run, re-run only `release` (if the dispatch itself failed)

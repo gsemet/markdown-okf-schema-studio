@@ -128,8 +128,8 @@ jobs:
             echo "$selection" >> "$GITHUB_OUTPUT"
           fi
           echo "Reports from: ${selection:-none (the suite runs below)}"
-      # The merged reports artifact holds the three stages (e2e-visual, e2e-integration and the
-      # e2e-acceptance shards): it alone is enough.
+      # The merged reports artifact holds the three stages (e2e-visual with e2e-visual-2,
+      # e2e-integration and the e2e-acceptance shards): it alone is enough.
       - name: Fetch the end-to-end reports of the calling run
         id: download-caller
         if: steps.reports.outputs.from_caller == 'true'

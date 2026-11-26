@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import glob
-import hashlib
 import json
 import os
 import pathlib
@@ -29,6 +28,7 @@ from datetime import datetime, timezone
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
+from capture_report import fail_identical_images, identical_images, report_names, result_counts, write_reports
 from capture_support import (
   CheckTrace,
   EXTENSION_ROOT,
@@ -420,6 +420,25 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
     return results, failures
 
 
+# The groups of the two parts of the campaign (``--part``), which CI runs side by side in the jobs
+# `visual` and `visual-2`; in the order of test/shared/e2eGroups.ts, every group in exactly one part.
+VISUAL_PARTS = {
+    1: ("rendering-core", "code-blocks", "gfm", "myst", "diagrams", "frontmatter-schema", "frontmatter-editing",
+        "layout-width"),
+    2: ("theme-zoom", "toolbar-navigation", "block-editing", "palette-slash", "table-editing", "review-annotations",
+        "lifecycle-sync", "trust-security"),
+}
+
+
+# @implements_req SwRS-MDOKFSTUDIO-CORE-076
+def parts_problem(group_ids: list[str]) -> str | None:
+    """What keeps the parts from covering each of these groups exactly once, naming the groups."""
+    listed = [group for groups in VISUAL_PARTS.values() for group in groups]
+    wrong = [f"group {group!r} is in {listed.count(group) or 'no'} part{'s' if listed.count(group) > 1 else ''}"
+             for group in group_ids if listed.count(group) != 1]
+    return f"VISUAL_PARTS must list every group exactly once: {'; '.join(wrong)}" if wrong else None
+
+
 def main() -> int:
     visual_started_at = datetime.now(timezone.utc).isoformat()
     parser = argparse.ArgumentParser(description="Capture the MyST preview screenshot scenarios.")
@@ -439,7 +458,13 @@ def main() -> int:
         dest="group_ids",
         help="Capture only the scenarios of this group; may be specified more than once.",
     )
+    parser.add_argument(
+        "--part", type=int, choices=sorted(VISUAL_PARTS),
+        help="Capture one part of the full campaign (CI jobs visual and visual-2); merge_parts.py merges them.",
+    )
     arguments = parser.parse_args()
+    if arguments.part and (arguments.scenario_ids or arguments.group_ids):
+        parser.error("--part cannot be combined with --scenario or --group")
 
     if not MANIFEST.exists():
         print(f"missing {MANIFEST}; run `npm run visual:render` first", file=sys.stderr)
@@ -448,7 +473,13 @@ def main() -> int:
     page_directory = pathlib.Path(manifest["pageDirectory"])
     all_scenarios = manifest["scenarios"]
     groups = {group["id"]: group for group in manifest.get("groups", [])}
+    problem = parts_problem(list(groups))
+    if problem:
+        print(problem, file=sys.stderr)
+        return 2
     requested_groups = set(arguments.group_ids or [])
+    if arguments.part:
+        requested_groups = set(VISUAL_PARTS[arguments.part]) & set(groups)
     unknown_groups = requested_groups - set(groups)
     if unknown_groups:
         print(f"unknown group ID(s): {', '.join(sorted(unknown_groups))}", file=sys.stderr)
@@ -466,7 +497,9 @@ def main() -> int:
             legacy_to_id[alias] = legacy_to_id[canonical]
     requested_ids = {legacy_to_id.get(identifier, identifier) for identifier in arguments.scenario_ids or []}
     requested_ids |= {scenario["id"] for scenario in all_scenarios if scenario["group"] in requested_groups}
-    partial = bool(arguments.scenario_ids or requested_groups)
+    partial = bool(arguments.part or arguments.scenario_ids or requested_groups)
+    # A partial or part run keeps every file of the other scenarios.
+    selective = bool(requested_ids or arguments.part)
     known_ids = {scenario["id"] for scenario in all_scenarios}
     unknown_ids = requested_ids - known_ids
     if unknown_ids:
@@ -474,13 +507,17 @@ def main() -> int:
         return 2
     scenarios = [
         scenario for scenario in all_scenarios
-        if not requested_ids or scenario["id"] in requested_ids
+        if not selective or scenario["id"] in requested_ids
     ]
     canonical_ids = {scenario["screenshotOf"] for scenario in scenarios if scenario.get("screenshotOf")}
     scenarios = [scenario for scenario in all_scenarios if scenario in scenarios or scenario["id"] in canonical_ids]
 
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
-    if requested_ids:
+    if arguments.part:
+        # A part that stops before its end must not leave its earlier files to the merge.
+        for name in report_names(part=arguments.part):
+            (SCREENSHOT_DIR / name).unlink(missing_ok=True)
+    if selective:
         for scenario in scenarios:
             for extension in (".png", ".txt", ".json"):
                 (VISUAL_SCREENSHOT_DIR / f"{scenario['id']}{extension}").unlink(missing_ok=True)
@@ -490,7 +527,8 @@ def main() -> int:
     else:
         # The whole visual tree is regenerated; the flat files of the pre-B2a layout are purged too.
         for stale in [*VISUAL_SCREENSHOT_DIR.rglob("*.png"), *VISUAL_SCREENSHOT_DIR.rglob("*.txt"), *VISUAL_SCREENSHOT_DIR.rglob("*.json"),
-                      *SCREENSHOT_DIR.glob("*.png"), *SCREENSHOT_DIR.glob("*.txt"), *SCREENSHOT_DIR.glob("*.json")]:
+                      *SCREENSHOT_DIR.glob("*.png"), *SCREENSHOT_DIR.glob("*.txt"), *SCREENSHOT_DIR.glob("*.json"),
+                      *SCREENSHOT_DIR.glob("*.part-*.md")]:
             stale.unlink()
         for report_directory in (FIRST_GAP_REPORT_DIR, WIDTH_BREAK_REPORT_DIR):
             for stale in report_directory.rglob("*.json"):
@@ -511,19 +549,8 @@ def main() -> int:
     results.sort(key=lambda result: scenario_order[result["id"]])
 
     # Every PNG of the run is hashed: the scenario PNGs and their step PNGs (H1).
-    image_hashes: dict[str, list[str]] = {}
-    for result in results:
-      for capture in result.get('captures', []):
-        digest = hashlib.sha256((SCREENSHOT_DIR / capture['file']).read_bytes()).hexdigest()
-        image_hashes.setdefault(digest, []).append(capture['file'])
-    duplicate_images = [files for files in image_hashes.values() if len(files) > 1]
-    owner_of_file = {capture['file']: result for result in results for capture in result.get('captures', [])}
-    for files in duplicate_images:
-      detail = f"unintended identical PNGs: {', '.join(files)}"
-      failures.append(Failure('campaign', detail))
-      for result in {id(owner_of_file[name]): owner_of_file[name] for name in files}.values():
-        result['failures'].append(detail)
-        result['status'] = 'failed'
+    duplicate_images = identical_images(SCREENSHOT_DIR, results)
+    failures.extend(Failure('campaign', detail) for detail in fail_identical_images(results, duplicate_images))
     run_manifest = {
       "runId": os.environ.get("STUDIO_E2E_RUN_ID"),
       "campaignStartedAt": os.environ.get("STUDIO_E2E_STARTED_AT"),
@@ -539,58 +566,19 @@ def main() -> int:
       "limitations": manifest.get("limitations"),
       "status": "failed" if failures else "passed",
       "partial": partial,
-      "scenarioCount": len(results),
-      "pngCount": sum(len(result.get("captures", [])) for result in results),
-      "stepPngCount": sum(1 for result in results for capture in result.get("captures", []) if capture["step"]),
+      **result_counts(results),
       "workerCount": worker_count,
-      "screenshotCount": sum(bool(result.get("capture")) for result in results),
-      "passedScenarioCount": sum(result['status'] == 'passed' for result in results),
-      "failedScenarioCount": sum(result['status'] == 'failed' for result in results),
       "failureCount": len(failures),
       "failures": [{"page": failure.page, "detail": failure.detail} for failure in failures],
       "duplicateImages": duplicate_images,
       "results": results,
       "completedAt": datetime.now(timezone.utc).isoformat(),
+      **({"part": arguments.part} if arguments.part else {}),
     }
-    # A partial run (--scenario, --group) must not replace the manifest, the index and the machine
-    # report of the full campaign (they would list a subset): it writes `.partial` companions.
-    suffix_json = "run-manifest.partial.json" if partial else "run-manifest.json"
-    (SCREENSHOT_DIR / suffix_json).write_text(json.dumps(run_manifest, indent=2) + "\n", encoding="utf-8")
-    scenario_by_id = {scenario["id"]: scenario for scenario in all_scenarios}
-    machine_rows = []
-    for result in results:
-      for check in result.get("finalState", {}).get("machineChecks") or []:
-        if check["applicable"] and not check["pass"]:
-          mode = "required" if check["id"] in scenario_by_id[result["id"]].get("machineChecks", []) else "report-only"
-          machine_rows.append(f"| {result['id']} | {check['id']} | {mode} | {check['detail'].replace('|', '/')} |")
-    machine_report = ["# Machine checks", "",
-         "Failing applicable geometry checks per scenario. `required` checks fail the run; "
-         "`report-only` checks are recorded and do not.", "",
-         f"Scenarios: {len(results)}; failing applicable checks: {len(machine_rows)}.", ""]
-    if machine_rows:
-      machine_report.extend(["| Scenario | Check | Mode | Detail |", "| --- | --- | --- | --- |", *machine_rows])
-    else:
-      machine_report.append("No failing applicable checks.")
-    (SCREENSHOT_DIR / ("MACHINE-CHECKS.partial.md" if partial else "MACHINE-CHECKS.md")).write_text("\n".join(machine_report) + "\n", encoding="utf-8")
-    index = ["# Visual Review", "", f"Run status: **{run_manifest['status']}**", "",
-         "Machine checks: [MACHINE-CHECKS.md](MACHINE-CHECKS.md) (failing applicable geometry checks)", "",
-         f"Revision: `{run_manifest['revision']}`", "", f"See [run manifest]({suffix_json}) for command, dirty status and assertions.",
-         "", str(manifest.get("limitations", "Static generated HTML with mock host.")), ""]
-    group = None
-    for result in results:
-      if result["group"] != group:
-        group = result["group"]
-        index.extend([f"## {groups[group]['title']} (`{group}`)", ""])
-      canonical = result.get("screenshotOf") or result["id"]
-      alias = f" (alias of {canonical}; assertions retained)" if result.get("screenshotOf") else ""
-      if result.get("screenshotOf") is None and not result.get("capture"):
-        index.append(f"{result['sequence']}. **{result['status']}** {result['id']} (assertion-only: no screenshot)")
-      else:
-        index.append(f"{result['sequence']}. **{result['status']}** [{result['id']}](visual/{canonical}.png) [notes](visual/{canonical}.json){alias}")
-      index.append(f"   {result['expectedContent']}")
-      for detail in result["failures"]:
-        index.append(f"   Failure: {detail}")
-    (SCREENSHOT_DIR / ("INDEX.partial.md" if partial else "INDEX.md")).write_text("\n".join(index) + "\n", encoding="utf-8")
+    # A partial run (--scenario, --group) or a part run (--part) must not replace the manifest, the
+    # index and the machine report of the full campaign (they would list a subset): it writes
+    # `.partial` or `.part-N` companions.
+    write_reports(SCREENSHOT_DIR, manifest, run_manifest)
     if failures:
         print("\nrendering checks failed:", file=sys.stderr)
         for failure in failures:

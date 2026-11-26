@@ -25,6 +25,7 @@ scopes:
       - skills
       - scripts
       - test/site
+      - test/visual
     test_dirs:
       - test
       - sphinx/tests

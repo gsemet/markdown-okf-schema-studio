@@ -1,8 +1,9 @@
 """Pick the CI run whose end-to-end reports the Pages site is built from.
 
 The run must be the newest heavy run of the exact commit that finished green, whose heavy jobs all
-succeeded (not skipped) and that still holds the report artifacts: ``e2e-visual``,
-``e2e-integration``, ``e2e-acceptance-<group>`` for every acceptance shard and ``studio-reports``.
+succeeded (not skipped) and that still holds the report artifacts: ``e2e-visual`` and
+``e2e-visual-2`` (the two parts of the visual stage), ``e2e-integration``,
+``e2e-acceptance-<group>`` for every acceptance shard and ``studio-reports``.
 The heavy jobs are ``integration``, ``stress`` and every shard of the acceptance matrix (a job named
 ``acceptance (<group>)``, at least one). A heavy run is either a manual one (workflow ``ci.yml``,
 event ``workflow_dispatch``) or the release push: the ``push`` run on ``main`` of a version change,
@@ -43,7 +44,7 @@ EVENTS = (EVENT, PUSH_EVENT)
 REPORTS_ARTIFACT = "studio-reports"
 # One artifact per acceptance shard, e2e-acceptance-<group>.
 ACCEPTANCE_ARTIFACT = "e2e-acceptance"
-STAGE_ARTIFACTS = ("e2e-visual", "e2e-integration", ACCEPTANCE_ARTIFACT)
+STAGE_ARTIFACTS = ("e2e-visual", "e2e-visual-2", "e2e-integration", ACCEPTANCE_ARTIFACT)
 REQUIRED_ARTIFACTS = (*STAGE_ARTIFACTS, REPORTS_ARTIFACT)
 ATTEMPT_NAME = re.compile(r"^(?P<base>.+)-attempt-(?P<attempt>[1-9][0-9]*)$")
 # A run is a heavy run only when every heavy job succeeded; a push without a version change skips

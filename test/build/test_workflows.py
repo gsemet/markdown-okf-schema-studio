@@ -294,15 +294,112 @@ def test_preflight_skips_only_the_stages_that_need_linux_or_macos_on_windows() -
     assert "visual, viewer-graph, integration, acceptance, report and gallery stages skipped on Windows" in skipped
 
 
-def test_ci_visual_runs_the_table_breakout_width_tests_with_chromium_required() -> None:
-    justfile = (ROOT / "justfile").read_text()
-    recipe = justfile.split("\nci-visual:")[1].split("\n\n")[0]
-    visual = recipe.index("run test:visual")
-    breakout = recipe.index("STUDIO_REQUIRE_CHROMIUM=1 {{ npm }} run test:breakout")
-    assert visual < breakout < recipe.index("ci-visual: passed")
+def _ci_visual(tmp_path: Path, part: str, red: str = "") -> tuple["subprocess.CompletedProcess[str]", list[str]]:
+    """Run `just ci-visual PART` in ``tmp_path``, with npm and uv replaced by scripts that log each
+    call; the npm call that contains ``red`` fails."""
+    import shutil
+    import subprocess
+
+    (tmp_path / "scripts").mkdir(exist_ok=True)
+    for script in ("e2e-campaign.mjs", "run-e2e.mjs"):
+        shutil.copy(ROOT / "scripts" / script, tmp_path / "scripts")
+    (tmp_path / "fake-npm.sh").write_text(
+        'echo "npm $* chromium=${STUDIO_REQUIRE_CHROMIUM:-}" >> calls\n'
+        'echo "$STUDIO_E2E_STARTED_AT" >> campaign-starts\n'
+        'if [[ -n "$RED" && "$*" == *"$RED"* ]]; then exit 1; fi\n', newline="\n")
+    (tmp_path / "bin").mkdir(exist_ok=True)
+    fake_uv = tmp_path / "bin" / "uv"
+    fake_uv.write_text('#!/usr/bin/env bash\necho "uv $*" >> calls\n', newline="\n")
+    fake_uv.chmod(0o755)
+    calls = tmp_path / "calls"
+    calls.write_text("")
+    result = subprocess.run(
+        ["just", "--justfile", str(ROOT / "justfile"), "--working-directory", str(tmp_path), "ci-visual", part],
+        env={**os.environ, "PATH": f"{tmp_path / 'bin'}{os.pathsep}{os.environ['PATH']}",
+             "STUDIO_NPM": "bash fake-npm.sh", "RED": red, "STUDIO_REQUIRE_CHROMIUM": ""},
+        capture_output=True,
+        text=True,
+    )
+    return result, calls.read_text().splitlines()
+
+
+PART_1_CALLS = ["npm run test:visual -- --part 1 chromium=", "npm run test:breakout chromium=1"]
+PART_2_CALLS = ["npm run test:visual -- --part 2 chromium="]
+MERGE_CALL = "uv run --no-sync --group docs python test/visual/merge_parts.py"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
+@pytest.mark.parametrize(("part", "expected"), [("1", PART_1_CALLS), ("2", PART_2_CALLS),
+                                                ("", [*PART_1_CALLS, *PART_2_CALLS, MERGE_CALL])])
+def test_ci_visual_runs_the_table_breakout_width_tests_with_chromium_required(
+    tmp_path: Path, part: str, expected: list[str]
+) -> None:
+    # What an earlier run left behind, in the folders a full run (capture.py, no --part) purges.
+    stale = [tmp_path / "out/reports" / name for name in (
+        "e2e/screenshots/run-manifest.part-1.json",
+        "visual/first-gap/rendering-core/v00-removed.json",
+        "visual/width-margins/layout-width/v00-removed.json",
+    )]
+    render_manifest = tmp_path / "out/reports/visual/manifest.json"
+    for path in [*stale, render_manifest]:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}")
+    result, calls = _ci_visual(tmp_path, part)
+    assert result.returncode == 0 and "ci-visual: passed" in result.stdout, result.stderr
+    assert calls == expected
+    # Only the run of both parts removes them; a part job keeps what it holds.
+    assert [path.exists() for path in stale] == [bool(part)] * len(stale)
+    assert render_manifest.exists()
+    campaign = json.loads((tmp_path / "out/reports/e2e/campaign-visual.json").read_text())
+    assert campaign["command"] == "just ci-visual"
+    # Every npm step, the two parts of a run with no part included, carries the one campaign start.
+    starts = (tmp_path / "campaign-starts").read_text().splitlines()
+    assert starts == [campaign["startedAt"]] * (len(expected) - (MERGE_CALL in expected))
     scripts = json.loads((ROOT / "package.json").read_text())["scripts"]
     breakout_files = "out/test/page/tableBreakout.test.js out/test/page/codeBlockBreakout.test.js"
     assert scripts["test:breakout"].endswith(breakout_files)
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
+def test_ci_visual_runs_every_step_and_fails_when_one_is_red(tmp_path: Path) -> None:
+    result, calls = _ci_visual(tmp_path, "", red="--part 1")
+    assert calls == [*PART_1_CALLS, *PART_2_CALLS, MERGE_CALL]
+    assert result.returncode == 1 and "ci-visual: FAILED" in result.stderr
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
+@pytest.mark.parametrize("part", ["3", "0", "1 2", "all"])
+def test_ci_visual_refuses_another_part(tmp_path: Path, part: str) -> None:
+    result, calls = _ci_visual(tmp_path, part)
+    assert result.returncode == 2, result.stderr
+    assert f"usage: just ci-visual [1|2]; got '{part}'" in result.stderr
+    assert calls == [] and not (tmp_path / "out").exists()
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
+def test_the_report_target_merges_the_visual_parts_before_anything_reads_the_run_manifest() -> None:
+    recipe = (ROOT / "justfile").read_text().split("\nci-report ")[1].split("\n\n")[0]
+    merge = recipe.index(f"{MERGE_CALL} || failed=1")
+    assert merge < recipe.index("{{ npm }} run compile") < recipe.index("{{ npm }} run review:finish")
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
+def test_the_visual_stage_runs_in_two_jobs_each_within_its_time_budget() -> None:
+    jobs = _ci_jobs()
+    for name, part in (("visual", 1), ("visual-2", 2)):
+        job = jobs[name]
+        assert job["timeout-minutes"] == 15
+        assert "needs" not in job and "if" not in job, f"{name}: the parts run side by side, on every run"
+        runs = [s["run"] for s in job["steps"] if "just ci-visual" in str(s.get("run", ""))]
+        assert runs == [f"just ci-visual {part}"]
+        assert name in _needs(jobs["report"]) and name in _needs(jobs["checks"])
+    restores = {name: [s["with"] for s in jobs[name]["steps"] if "actions/cache/restore@" in str(s.get("uses", ""))]
+                for name in ("visual", "visual-2")}
+    assert restores["visual-2"] == restores["visual"] and len(restores["visual"]) == 1
+    # One job saves the Ubuntu package archives; the second part only restores them.
+    assert not any("actions/cache/save@" in str(s.get("uses", "")) for s in jobs["visual-2"]["steps"])
+    upload = next(s for s in jobs["visual-2"]["steps"] if UPLOAD in str(s.get("uses", "")))
+    assert upload["if"] == "always()"
 
 
 def test_ci_viewer_graph_is_its_own_target_and_preflight_runs_it_after_visual() -> None:
@@ -314,7 +411,7 @@ def test_ci_viewer_graph_is_its_own_target_and_preflight_runs_it_after_visual() 
     json_recipe = justfile.split("\nrequirements-report-json:")[1].split("\n\n")[0]
     assert "--output-json" in json_recipe and "--output-summary-md" not in json_recipe
     assert "status" not in json_recipe
-    visual = justfile.split("\nci-visual:")[1].split("\n\n")[0]
+    visual = justfile.split('\nci-visual PART="":')[1].split("\n\n")[0]
     assert "viewer-graph" not in visual and "requirements-report" not in visual
     preflight = justfile.split("\npreflight: ")[1].split("\n\n")[0]
     assert preflight.index("just ci-visual") < preflight.index("just ci-viewer-graph") < preflight.index("just ci-integration")
@@ -326,10 +423,11 @@ def test_the_viewer_graph_job_has_its_own_time_budget_and_gates_the_checks() -> 
     assert job["timeout-minutes"] == 15
     runs = [s["run"] for s in job["steps"] if "run" in s]
     assert "just ci-viewer-graph" in runs
-    assert "just ci-visual" not in runs
+    assert not any(run.startswith("just ci-visual") for run in runs)
     assert _uploads(jobs)["viewer-graph"] == ["reports-viewer-graph" + ATTEMPT_SUFFIX]
     assert "viewer-graph" in _needs(jobs["checks"])
-    assert "just ci-viewer-graph" not in [s.get("run") for s in jobs["visual"]["steps"]]
+    for name in ("visual", "visual-2"):
+        assert "just ci-viewer-graph" not in [s.get("run") for s in jobs[name]["steps"]]
 
 
 def _locked_screen_run(tmp_path: Path, *arguments: str) -> "subprocess.CompletedProcess[str]":
@@ -848,7 +946,7 @@ def test_stress_blocks_only_a_version_change() -> None:
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_report_merges_the_real_window_stage_of_every_push_to_main() -> None:
     job = _ci_jobs()["report"]
-    assert {"visual", "integration", "acceptance"} <= set(_needs(job))
+    assert {"visual", "visual-2", "integration", "acceptance"} <= set(_needs(job))
     step = next(s for s in job["steps"] if "just ci-report" in str(s.get("run", "")))
     mode = re.search(r"\$\{\{(.*)\}\}", step["run"]).group(1)
     assert _run_if(mode, _context("push", bump="true")) == "all"
@@ -1048,8 +1146,9 @@ def test_every_ci_artifact_name_carries_the_attempt() -> None:
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
-@pytest.mark.parametrize(("job", "base"), [("visual", "e2e-visual"), ("integration", "e2e-integration"),
-                                           ("acceptance", "e2e-acceptance"), ("report", "studio-reports")])
+@pytest.mark.parametrize(("job", "base"), [("visual", "e2e-visual"), ("visual-2", "e2e-visual-2"),
+                                           ("integration", "e2e-integration"), ("acceptance", "e2e-acceptance"),
+                                           ("report", "studio-reports")])
 def test_a_consumed_artifact_is_announced_by_its_job(job: str, base: str) -> None:
     import importlib.util
 
@@ -1092,16 +1191,19 @@ def test_every_ci_download_names_the_artifact_of_the_job_it_needs() -> None:
             else:
                 assert announced in uploads[producer]
             assert "run-id" not in step["with"], f"{name}: downloads from another run"
-    assert seen >= 4  # report (visual, integration, acceptance) and gallery
+    assert seen >= 5  # report (visual, visual-2, integration, acceptance) and gallery
 
 
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S8
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
 def test_report_merges_each_stage_from_the_attempt_that_produced_it() -> None:
     job = _ci_jobs()["report"]
     steps = _downloads(job["steps"])
     patterns = [s["with"]["pattern"] for s in steps]
-    assert patterns == [f"${{{{ needs.{stage}.outputs.artifact }}}}" for stage in ("visual", "integration", "acceptance")]
+    stages = ("visual", "visual-2", "integration", "acceptance")
+    assert patterns == [f"${{{{ needs.{stage}.outputs.artifact }}}}" for stage in stages]
     *steps, shards = steps
     patterns = patterns[:-1]
     # The acceptance shards are not merged: ci-report keeps the newest attempt of each group.
@@ -1115,13 +1217,21 @@ def test_report_merges_each_stage_from_the_attempt_that_produced_it() -> None:
         # ci-report says which stage is missing; merge-multiple writes into out/reports/ directly.
         assert step["with"]["path"] == "out/reports/" and step["with"]["merge-multiple"] is True
         assert "*" not in step["with"]["pattern"]
-    # Integration failed on attempt 1 and was re-run: visual keeps attempt 1, integration is attempt 2.
+    # Integration failed on attempt 1 and was re-run: the visual parts keep attempt 1, integration
+    # is attempt 2.
     rerun = {"needs.visual.outputs.artifact": "e2e-visual-attempt-1",
+             "needs.visual-2.outputs.artifact": "e2e-visual-2-attempt-1",
              "needs.integration.outputs.artifact": "e2e-integration-attempt-2"}
-    assert [_run_if(p, rerun) for p in patterns] == ["e2e-visual-attempt-1", "e2e-integration-attempt-2"]
+    assert [_run_if(p, rerun) for p in patterns] == [
+        "e2e-visual-attempt-1", "e2e-visual-2-attempt-1", "e2e-integration-attempt-2"]
+    # Only the second visual part was re-run: each part from its own newest attempt.
+    part_rerun = {**rerun, "needs.visual-2.outputs.artifact": "e2e-visual-2-attempt-2",
+                  "needs.integration.outputs.artifact": "e2e-integration-attempt-1"}
+    assert [_run_if(p, part_rerun) for p in patterns] == [
+        "e2e-visual-attempt-1", "e2e-visual-2-attempt-2", "e2e-integration-attempt-1"]
     # An empty pattern would download every artifact: a job without an output (integration
     # skipped, a job that never started) downloads nothing.
-    for step, producer in zip(steps, ("visual", "integration")):
+    for step, producer in zip(steps, ("visual", "visual-2", "integration"), strict=True):
         assert _run_if(step["if"], rerun)
         assert not _run_if(step["if"], {**rerun, f"needs.{producer}.outputs.artifact": ""})
 
