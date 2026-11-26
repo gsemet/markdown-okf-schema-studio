@@ -4,9 +4,9 @@
 
 ### Frontmatter: rows with an error or a warning are coloured (CR-513)
 
-- Changed (`proposed`): SwRS-MDOKFSTUDIO-FMSCHEMA-084 (an error or warning field row shows its name in the severity colour on a light background of that colour and a wavy underline in that colour under its value; info field rows keep the plain look; a value cell being edited has no underline), SwRS-MDOKFSTUDIO-FMSCHEMA-023 (the "Schema could not be parsed" warning row is shown in the warning colour on a light background, across the table, with its text wrapped)
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-FMSCHEMA-084 (an error or warning field row shows its name in the severity colour on a light background of that colour and a wavy underline in that colour under its value; info field rows keep the plain look; new scenario S8, a value cell being edited has no underline; new scenario S9, in edit mode a marked name cell highlights under the pointer like the other editable cells and keeps its severity colour), SwRS-MDOKFSTUDIO-FMSCHEMA-023 (the "Schema could not be parsed" warning row is shown in the warning colour on a light background, across the table, with its text wrapped)
 - Reason: a field with a validation error was only signalled by the badge of the table title: no rule styled the field rows or the whole-document warning row
-- Tests: test/core/preview/fieldIssueStyles.test.ts, test/visual/frontmatterIssueRowScenarios.ts (v32 to v35)
+- Tests: test/core/preview/fieldIssueStyles.test.ts, test/visual/scenarioDefinitions2.ts (v32 to v35)
 
 ### Auto width: only top-level blocks widen (CR-511)
 

@@ -49,7 +49,6 @@ tested_in_files:
 - test/core/frontmatter/schemaRegistry.test.ts
 - test/core/preview/fieldIssueStyles.test.ts
 - test/integration/previewEditingSchemaSteps.ts
-- test/visual/frontmatterIssueRowScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -143,7 +142,7 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 - Method: test/core/frontmatter/schemaRegistry.test.ts (schema that cannot be compiled: the same error is reported at every analysis).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario in dark and light, 900 px and 460 px (schema that cannot be compiled, compile failure in a narrow preview).
 - Method: test/core/preview/fieldIssueStyles.test.ts, test `a warning row about the whole document takes the warning colour and wraps its message` (how the warning row is shown: schema that cannot be parsed).
-- Method: test/visual/frontmatterIssueRowScenarios.ts, visual scenarios `v34-schema-warning-row-light-900` and `v35-schema-warning-row-dark-900` (how the warning row is shown: schema that cannot be parsed).
+- Method: test/visual/scenarioDefinitions2.ts, visual scenarios `v34-schema-warning-row-light-900` and `v35-schema-warning-row-dark-900` (how the warning row is shown: schema that cannot be parsed).
 - Criteria: Only comment stripping is supported: trailing commas, unquoted keys and single-quote conversions are not. Only a node made of a single `$ref` key is inlined; a missing target leaves a reference to the schema root. The summary is 0 errors, 1 warning, 0 infos for a JSON or JSON5 failure, and the fields are listed in source order without documentation. The standard JSON-pointer scenario has no test (probed against the resolver).
 
 <!-- okf:links:start -->

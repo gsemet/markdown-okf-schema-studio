@@ -314,7 +314,7 @@ export const SCHEMA_WARNING_ROW_ASSERTIONS: ContentAssertion[] = [
   { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
   { message: "the row takes the warning colour on a light background of it", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
     expr: textAndBackgroundHue(`${SCHEMA_WARNING_ROW} th`, WARNING_HUE) },
-  { message: "the row spans every column of the table and wraps its message inside it", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
+  { message: "the row spans every column of the table, is as wide as it and holds its message", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
     expr: `(() => { const cell = document.querySelector('${SCHEMA_WARNING_ROW} th'); const table = cell.closest('table'); const columns = [...table.querySelectorAll('thead th')].filter((header) => getComputedStyle(header).display !== 'none').length; return cell.colSpan === columns && Math.abs(cell.getBoundingClientRect().width - table.getBoundingClientRect().width) <= 2 && cell.scrollWidth <= cell.clientWidth + 1; })()` },
 ];
 

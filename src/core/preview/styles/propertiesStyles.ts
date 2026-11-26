@@ -204,6 +204,13 @@ export const PROPERTIES_CSS = `
   background: color-mix(in srgb, var(--studio-editorWarning-foreground, #bf8803) 14%, transparent);
 }
 
+/* The severity background above is set under an id, so it outranks the hover highlight of the edit
+   cells: a marked name cell takes the same highlight under the pointer and keeps its text colour. */
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content [data-okf-properties] tr[data-okf-field].okf-error > th[data-okf-edit-cell]:hover,
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content [data-okf-properties] tr[data-okf-field].okf-warning > th[data-okf-edit-cell]:hover {
+  background: var(--studio-list-hoverBackground, rgba(128, 128, 128, 0.12));
+}
+
 #sphinx-myst-preview-content [data-okf-properties] tr[data-okf-field] > td.okf-error {
   text-decoration: underline wavy var(--studio-errorForeground, #f14c4c);
   text-underline-offset: 0.2em;
