@@ -1,7 +1,7 @@
 ---
 title: Feature clip export-html
 status: draft for the owner's review
-date: 2026-11-25
+date: 2026-11-26
 ---
 
 # Feature clip: export-html
@@ -47,17 +47,17 @@ Pictures: ![The top of the page in Cream: the heading and the card grid](frames/
 
 | Field | Content |
 | --- | --- |
-| Time | 0 to 5.8 s (wheel scroll from 0.6 s; the wide table in the middle of the view from 1.6 to 2.4 s; the flowchart and the bar chart in view from 3.2 to 3.8 s; on to the end of the page by 5.0 s; the pointer moves to the Export button from 5.0 s) |
+| Time | 0 to 5.8 s (wheel scroll from 0.6 s; the wide table in the middle of the view from 1.6 to 2.4 s; the flowchart and the bar chart in view from 3.2 to 3.8 s; on to the end of the page by 5.0 s; the pointer moves to the Export button from 5.1 s) |
 | Shot *(filmed)* | Studio on `platform-report.md` in Cream, at the top: the heading and a grid of three cards. The pointer, over the page, scrolls it with the mouse wheel in small steps. The 16-column table comes into view: it is wider than the text column above it and centred on the page. The scroll goes on past the flowchart and the bar chart, the sequence diagram and the line chart, the small on-call table (inside the column) and the last card grid. Then the pointer moves to the Export button of the floating toolbar. |
 | Text 1 *(on screen)* | A long page, with a **wide table**, diagrams and charts |
 
 ## 2. Export, then open the file
 
-Pictures: ![The save dialog](frames/save-dialog.png) ![The Integrated Browser opened](frames/browser-opened.png) ![The exported page at the top](frames/exported.png)
+Pictures: ![The save dialog](frames/save-dialog.png) ![The command that opens the Integrated Browser, just before it appears](frames/browser-opened.png) ![The exported page at the top](frames/exported.png)
 
 | Field | Content |
 | --- | --- |
-| Time | 5.8 to 10.0 s (click Export at 6.0 s, Enter in the save dialog at 7.0 s, command palette at 7.6 s, "Browser: Open Integrated Browser" chosen at 8.6 s, the address entered at 9.4 s, the page shown at 9.9 s) |
+| Time | 5.8 to 10.0 s (click Export at 6.0 s, Enter in the save dialog at 7.0 s, command palette at 7.6 s, "Browser: Open Integrated Browser" typed and chosen, the browser on screen from 9.3 s, the address entered at 9.4 s, the page shown at 10.0 s) |
 | Shot *(filmed)* | The pointer clicks the Export button ("Export to HTML"). VS Code's save dialog opens at the top with `platform-report.html` proposed; Enter. Studio's confirmation is dismissed off the shot. Command palette chord; "Open Integrated Browser" is typed and chosen; `http://localhost:5170/platform-report.html` is typed in its address bar; Enter. The Integrated Browser shows the exported page at its top, in Cream: the heading and the card grid, as at frame 0. |
 | Text 2 *(on screen)* | **Export** it to one HTML file |
 | Badge palette *(on screen)* | Ctrl+Shift+P / ⇧⌘P |
@@ -68,11 +68,11 @@ Pictures: ![Zoom on the page](frames/03-zoomed.png) ![Mark 1 on the wide table](
 
 | Field | Content |
 | --- | --- |
-| Time | 10.0 to 18.0 s (zoom from 10.2 s, held to 17.0 s; wheel scroll in the browser from 10.8 to 11.6 s to the wide table, then from 13.2 to 13.8 s to the flowchart and the bar chart; then back to the start for the loop) |
-| Shot *(filmed)* | Zoom (at most 2x, about 1.25x so the wide table fits) on the browser's page. The pointer scrolls the exported page with the wheel: the 16-column table breaks out of the column exactly as in Studio; then the flowchart and the bar chart, drawn, in the Cream colours. |
+| Time | 10.0 to 18.0 s (zoom from 10.2 s, held to 17.0 s; wheel scroll in the browser sent from 10.8 s to the wide table, then from 13.2 s to the flowchart and the bar chart, the filmed picture changing at 12.0 and 14.1 s; then back to the start for the loop) |
+| Shot *(filmed)* | Zoom (at most 2x, about 1.25x so the wide table fits) on the browser's page. The pointer scrolls the exported page with the wheel, and the filmed window shows each of the two scrolls as one cut, not as motion: first the 16-column table, breaking out of the column exactly as in Studio; then the flowchart and the bar chart, drawn, in the Cream colours. |
 | Zoom | page, hold to 17.0 s |
-| Mark 1 *(on screen)* | Orange outline around the wide table, 11.8 to 13.0 s |
-| Mark 2 *(on screen)* | Orange outline around the flowchart, 14.0 to 15.2 s |
+| Mark 1 *(on screen)* | Orange outline around the wide table, 12.0 to 13.2 s |
+| Mark 2 *(on screen)* | Orange outline around the flowchart, 14.2 to 15.2 s |
 | Mark 3 *(on screen)* | Orange outline around the bar chart, 15.4 to 16.6 s |
 | Text 3 *(on screen)* | The browser shows the **same page**, diagrams drawn |
 
@@ -88,31 +88,41 @@ Integrated Browser's page):
   `src` or `href` to a local file.
 - Its `<html>` carries `data-sphinx-preview-theme-mode="cream"` and
   `data-sphinx-preview-width="auto"`; the wide table's wrapper keeps `data-sphinx-preview-wide`.
-- The two Mermaid diagrams, the Vega-Lite chart and the Vega chart are embedded: four
-  `data:image/svg+xml` images (`img.myst-mermaid-image` and `img.myst-vega-image`).
-- In the Integrated Browser: those four images are loaded (`complete`, `naturalWidth` above 0); the
-  wide table's width equals its width in Studio within 2 px, it is wider than a paragraph, and its
-  right edge is inside the view (no sideways scroll of the page).
+- The two Mermaid diagrams are embedded as two `data:image/svg+xml` images (`img.myst-mermaid-image`);
+  the Vega-Lite chart and the Vega chart are embedded as two inline `.myst-vega-view > svg` (no
+  chart `img`, no hover box element, no script).
+- In the Integrated Browser: the two Mermaid images are loaded (`complete`, `naturalWidth` above 0)
+  and the two chart `svg` have a box; the wide table's width equals its width in Studio within 2 px,
+  it is wider than a paragraph, and its right edge is inside the view (no sideways scroll of the
+  page).
+- No chart hover box shows in Studio on camera: the pointer rests right of every chart, and none is
+  shown at the start and after each Studio scroll.
 - `platform-report.md` on disk is byte for byte `stage/platform-report.md`.
 
 ## Review notes
 
 Values below are measured by the take (`check.json`, the take's notes) on Windows.
 
-- **Measured times of the take.** Filmed 18.075 s, retimed to 18.0 s (playback rate 1.004, inside
-  0.77 to 1.3); raw screencast 28.4 fps, 513 frames, 30 fps after retiming. The click on Export at
-  6.0 s, the save dialog at 6.2 s, Enter at 7.0 s, the palette at 7.6 s, the address bar focused at
-  9.1 s, the address typed at 9.3 s and entered at 9.4 s, the page shown at 9.9 s, the zoom at
-  10.2 s (held to 17.0 s), mark 1 from 11.8 to 13.0 s, mark 2 from 14.0 to 15.2 s, mark 3 from
-  15.4 to 16.6 s, the end at 18.0 s. These are the times written in the tables above.
-- **Key frames.** `top` (0.3 s: the heading and the first card grid, Cream, reading mode), `wide-table`
-  (2.0 s: the 16-column table broken out of the 720 px column, centred, the sticky band above),
-  `diagrams` (3.5 s: the flowchart and the bar chart drawn), `save-dialog` (6.2 s: the save dialog
-  proposing `platform-report.html`, the Export tooltip), `browser-opened` (9.1 s: the palette with
-  "Open Integrated Browser" typed, the `Ctrl Shift P / ⇧⌘P` badge fading), `exported` (9.9 s: the
-  exported page at its top in the Integrated Browser), `03-zoomed`, `04-mark-1`, `05-mark-2` and
-  `06-mark-3` (the zoom and the three marks, each on its block). Not checked by the author: motion,
-  rhythm, the loop as watched.
+- **Measured times of the take.** Filmed 18.076 s, retimed to 18.0 s (playback rate 1.004, inside
+  0.77 to 1.3); raw screencast 28.3 fps, 512 frames, 30 fps after retiming. The click on Export at
+  6.0 s, the save dialog at 6.3 s, Enter at 7.0 s, the palette at 7.6 s, the browser on screen from
+  9.3 s, the address entered at 9.4 s, the page shown at 10.0 s, the zoom at 10.2 s (held to 17.0 s), the
+  browser's picture changing at 12.0 s (the wide table) and 14.1 s (the diagrams), the end at 18.0 s.
+- **Mark times.** The render draws each mark at the times of its Mark row above (mark 1 from 12.0
+  to 13.2 s, mark 2 from 14.2 to 15.2 s, mark 3 from 15.4 to 16.6 s) and takes only the mark's
+  rectangle from the take. The committed take logged other times: 11.87 to 13.08 s, 14.07 to
+  15.27 s and 15.47 to 16.66 s of its 18.076 filmed seconds. Marks 1 and 2 were moved after the
+  take, by a render, so that each starts after its cut. The scenario now calls the marks at the
+  Mark rows' times, so a retake logs those.
+- **Key frames.** `top` (0.4 s: the heading and the first card grid, Cream, reading mode), `wide-table`
+  (2.1 s: the 16-column table broken out of the 720 px column, centred, the sticky band above),
+  `diagrams` (3.6 s: the flowchart and the bar chart drawn), `save-dialog` (6.3 s: the save dialog
+  proposing `platform-report.html`, the Export tooltip), `browser-opened` (9.2 s: the filmed picture
+  still shows the palette with "Open Integrated Browser" typed; the browser appears at 9.3 s),
+  `exported` (10.0 s: the exported
+  page at its top in the Integrated Browser), `03-zoomed`, `04-mark-1`, `05-mark-2` and `06-mark-3`
+  (the zoom and the three marks, each on its block). Not checked by the author: motion, rhythm, the
+  loop as watched.
 - **Length past 12 s.** Three beats: the scroll through the page (about 6 s), the export and the
   browser opening (4 s), the same page with three marks (8 s). The kit allows up to 30 s since the
   CR `clip-the-advanced-renderings-tour` (kit and recipe), which this CR follows
@@ -145,16 +155,33 @@ Values below are measured by the take (`check.json`, the take's notes) on Window
   width mode" in `docs/user/toolbar.md`). The breakout is frozen in pixels, so the browser must be
   at least as wide as Studio's view: the browser opens as a tab of the same editor group, full
   width; the check compares the two widths.
-- **Diagrams and charts in the file.** Mermaid and Vega render in the preview as `<img>` with a
-  `data:` SVG source, and the export keeps a `data:` image as it is (`embedImages` in
-  `exportContent.ts`; "Local images and the Mermaid, PlantUML and Vega diagrams are embedded").
-  The file has no script, so nothing is drawn again in the browser: the pictures are the ones
-  Studio drew, in the Cream colours.
+- **Diagrams and charts in the file.** Mermaid renders in the preview as an `<img>` with a `data:`
+  SVG source, and the export keeps a `data:` image as it is (`embedImages` in
+  `src/core/export/exportContent.ts`). A Vega chart renders as a live inline
+  `.myst-vega-view > svg`, which the export keeps as it is, with its gradient references made local
+  (`takeExportSnapshot`, `src/page/modules/exportSnapshot.ts`); see "Local images and the Mermaid,
+  PlantUML and Vega diagrams are embedded" in `docs/user/toolbar.md`. The file has no script, so
+  nothing is drawn again in the browser and a chart has no hover detail there: the drawings are the
+  ones Studio drew, in the Cream colours.
+- **The chart hover detail.** In Studio a Vega-Lite mark under the pointer shows its fields in a
+  small box. The pointer rests right of every chart and never crosses one while Studio is on screen,
+  so no box is filmed; `setup` checks that every chart ends left of the pointer and `run` checks that
+  no box is shown after each Studio scroll.
+- **One visible difference: "Chart source".** The preview hides a chart's source block and the
+  exported sheet shows it, closed (`src/core/preview/styles/contentBlockStyles.ts`,
+  `src/core/export/exportStyles.ts`, SwRS-MDOKFSTUDIO-DIAG-121). So the browser has a "Chart source"
+  line under a chart that Studio does not show; under the bar chart it sits partly behind the
+  caption. A diagram has its "Diagram source" line in both.
 - **Scrolling.** The scroll is a CDP mouse wheel at the pointer (`t.page.mouse.wheel` in Studio,
-  the browser page's `mouse.wheel` in the Integrated Browser), in small steps so it reads as a
-  smooth scroll. The kit has no scroll helper and logs no wheel event; none is needed (the
-  screencast films the result). Both scrolls used the wheel (`scrollStudio` and `scrollBrowser` are
-  `wheel` in the take's notes); the fallback, a smooth `scrollTo` in the page, was not needed.
+  the browser page's `mouse.wheel` in the Integrated Browser), in small steps. The kit has no
+  scroll helper and logs no wheel event. Both scrolls used the wheel (`scrollStudio` and
+  `scrollBrowser` are `wheel` in the take's notes); the fallback, a smooth `scrollTo` in the page,
+  was not needed. In Studio the clip shows a smooth scroll. In the browser it does not: the filmed
+  window sent no new frame while the browser's page scrolled (of the take's 512 frames only two come
+  after 11 s of it, at 12.0 and 14.1 s of the take), so each browser scroll shows as one cut, at
+  12.0 and 14.1 s of the clip. Marks 1 and 2 start after their cut, so no outline is drawn over the
+  wrong block. For the owner: keep the cuts, or ask for a follow-up in the clip kit that films the
+  browser's page itself.
 - **The sticky heading band.** While Studio scrolls, its sticky band shows the current heading at
   the top of the view. It is Studio's reading aid, outside the page's content, so the exported
   file has none: the browser part does not show it. The captions say "same page", not "same
@@ -170,9 +197,9 @@ Values below are measured by the take (`check.json`, the take's notes) on Window
   title bar at the top of the zoomed browser frames (`03-zoomed` to `06-mark-3`).
 - **The GIF budget** (3 MB): scrolling changes most of the frame, unlike the merged clip (1.49 MB at
   12 s). The recipe's ladder applies; if none fits, the scroll in
-  Studio is shortened (back to this file), never shipped heavier. The render used ladder step 1
-  (10 fps, 960 px, 128 colours): 2,976,631 bytes, under the 3 MB limit (`check.json`), so beat 1
-  was not shortened.
+  Studio is shortened (back to this file), never shipped heavier. The render used ladder step 0
+  (12 fps, 960 px, 128 colours): 3,071,217 bytes (2.93 MB), under the 3 MB limit (`check.json`),
+  so beat 1 was not shortened.
 - The take runs with `CLIP_SCRATCH` set to a folder without the user name (the save dialog shows
   the workspace path), as in the merged scenario.
 - The badge `⇧⌘P` is drawn as one keycap, as in the merged clip.

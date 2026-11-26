@@ -29,6 +29,13 @@ export const checks = { editMode: "off", paste: false };
 const STAGE_FILE = new URL("stage/platform-report.md", import.meta.url);
 const EXPORT = "[data-sphinx-preview-export]";
 const CONTENT = "#sphinx-myst-preview-content";
+/** The drawing of a chart: a live SVG view in Studio, the same inline svg in the exported file. */
+const CHART = ".myst-vega-view > svg";
+/**
+ * Where the pointer rests on camera, in workbench page coordinates: the blank right side of the content, right of every
+ * chart, so no chart hover box shows while Studio scrolls (checked in setup).
+ */
+const PARK = { x: 900, y: 420 };
 /** The length of the clip, as in clip.md. */
 const END = 18.0;
 
@@ -147,31 +154,39 @@ function breaksOut(where, measure) {
   if (service.right > measure.inner + 0.5) throw new Error(`${where}: the Service table's right edge ${service.right} px is outside the view (${measure.inner} px)`);
 }
 
-/** In a preview frame: the two Mermaid and the two Vega blocks are drawn (rendered state with their image), one vega-lite and one vega. */
+/** In a preview frame: the two Mermaid and the two Vega blocks are drawn (rendered state with their drawing: an image for Mermaid, the live `.myst-vega-view > svg` for a chart), one vega-lite and one vega. */
 const drawn = (frame) =>
-  frame.evaluate(() => {
-    const read = (selector, image) => [...document.querySelectorAll(selector)].map((block) => ({ state: block.getAttribute("data-render-state"), image: !!block.querySelector(image), kind: block.getAttribute("data-myst-chart-kind") }));
+  frame.evaluate((chartSelector) => {
+    const read = (selector, drawing) => [...document.querySelectorAll(selector)].map((block) => ({ state: block.getAttribute("data-render-state"), drawing: !!block.querySelector(drawing), kind: block.getAttribute("data-myst-chart-kind") }));
     const mermaid = read(".myst-mermaid-diagram", "img.myst-mermaid-image");
-    const vega = read(".myst-vega-diagram", "img.myst-vega-image");
-    const ready = (blocks) => blocks.every((block) => block.state === "rendered" && block.image);
+    const vega = read(".myst-vega-diagram", chartSelector);
+    const ready = (blocks) => blocks.every((block) => block.state === "rendered" && block.drawing);
     const kinds = vega.map((block) => block.kind).sort();
     const ok = mermaid.length === 2 && vega.length === 2 && ready(mermaid) && ready(vega) && kinds[0] === "vega" && kinds[1] === "vega-lite";
     return { ok, found: { mermaid, vega } };
-  });
+  }, CHART);
 
-/** In the browser page: the four drawings are images that loaded. */
-async function imagesLoaded(view) {
-  const found = await view.evaluate(() => {
-    const read = (selector) => [...document.querySelectorAll(selector)].map((image) => image.complete && image.naturalWidth > 0);
-    return { mermaid: read("img.myst-mermaid-image"), vega: read("img.myst-vega-image") };
-  });
-  if (found.mermaid.length !== 2 || found.vega.length !== 2 || ![...found.mermaid, ...found.vega].every(Boolean)) throw new Error(`the browser page does not show four loaded drawings: ${JSON.stringify(found)}`);
+/** In the browser page: the two Mermaid drawings are images that loaded and the two charts are inline svg with a box. */
+async function drawingsLoaded(view) {
+  const found = await view.evaluate((chartSelector) => {
+    const mermaid = [...document.querySelectorAll("img.myst-mermaid-image")].map((image) => image.complete && image.naturalWidth > 0);
+    const vega = [...document.querySelectorAll(chartSelector)].map((svg) => svg.getBoundingClientRect().width > 0 && svg.getBoundingClientRect().height > 0);
+    return { mermaid, vega };
+  }, CHART);
+  if (found.mermaid.length !== 2 || found.vega.length !== 2 || ![...found.mermaid, ...found.vega].every(Boolean)) throw new Error(`the browser page does not show two loaded Mermaid images and two chart svg: ${JSON.stringify(found)}`);
+}
+
+/** A chart's hover box in the Studio preview must never be in a filmed frame: throws when one is shown. */
+async function noHoverBox(t, when) {
+  const frame = await t.frameOf();
+  const shown = await frame.evaluate(() => [...document.querySelectorAll(".myst-vega-tooltip:not([hidden])")].map((box) => box.textContent));
+  if (shown.length) throw new Error(`a chart hover box shows in Studio ${when}: ${JSON.stringify(shown)}`);
 }
 
 /** The distance to scroll to bring `kind` ("wide", "flow-bar" or "end") to the middle of the view, read in a frame or page. */
 const distanceTo = (target, kind) =>
   target.evaluate(
-    ([what, contentSelector]) => {
+    ([what, contentSelector, chartSelector]) => {
       const scroller = document.scrollingElement ?? document.documentElement;
       if (what === "end") return scroller.scrollHeight - innerHeight - scroller.scrollTop;
       const content = document.querySelector(contentSelector) ?? document.body;
@@ -185,15 +200,15 @@ const distanceTo = (target, kind) =>
         ({ top, bottom } = wrapper.getBoundingClientRect());
       } else {
         const flow = content.querySelector("img.myst-mermaid-image");
-        const bar = content.querySelector("img.myst-vega-image");
-        if (!flow || !bar) throw new Error("no flowchart or bar chart image");
+        const bar = content.querySelector(chartSelector);
+        if (!flow || !bar) throw new Error("no flowchart image or bar chart svg");
         top = flow.getBoundingClientRect().top;
         bottom = bar.getBoundingClientRect().bottom;
       }
       // Centred; a span taller than the view starts below the sticky band instead.
       return bottom - top + 80 <= innerHeight ? (top + bottom) / 2 - innerHeight / 2 : top - 80;
     },
-    [kind, CONTENT],
+    [kind, CONTENT, CHART],
   );
 
 /**
@@ -311,8 +326,19 @@ export async function setup(t) {
   if (answer.status !== 200) throw new Error(`the local server answers ${answer.status} for platform-report.md`);
 
   // Off the toolbar and off every block (the blank right side of the content): no tooltip at frame 0 or at the loop seam.
-  await t.moveTo(900, 420, 0.1);
+  // Right of every chart too, and every on-camera pointer path in Studio stays right of it: no chart hover box.
+  const charts = [];
+  for (const svg of await frame.locator(CHART).all()) {
+    const box = await svg.boundingBox(); // main page coordinates
+    if (!box) throw new Error("a chart svg has no box in Studio");
+    charts.push(box.x + box.width);
+  }
+  const chartsRight = Math.max(...charts);
+  t.record("pointerClearOfCharts", { park: PARK.x, chartsRight });
+  if (!(chartsRight < PARK.x)) throw new Error(`the parked pointer (x ${PARK.x}) is not right of the charts (right edge ${chartsRight})`);
+  await t.moveTo(PARK.x, PARK.y, 0.1);
   await t.sleep(800);
+  await noHoverBox(t, "at the start");
 }
 
 /** The filmed action: scroll Studio, Export, the save dialog, the Integrated Browser on the file, the zoom with its three marks. */
@@ -330,15 +356,18 @@ export async function run(t) {
   await until(0.6);
   await scrollBy(t, "studio", await distanceTo(frame, "wide"), 1.0);
   await until(2.0);
+  await noHoverBox(t, "over the wide table");
   t.keyFrame("wide-table");
   await until(2.4);
   frame = await t.frameOf();
   await scrollBy(t, "studio", await distanceTo(frame, "flow-bar"), 0.8);
   await until(3.5);
+  await noHoverBox(t, "over the flowchart and the bar chart");
   t.keyFrame("diagrams");
   await until(3.8);
   frame = await t.frameOf();
   await scrollBy(t, "studio", await distanceTo(frame, "end"), 1.0);
+  await noHoverBox(t, "at the end of the page");
 
   // Beat 2: Export, the save dialog, the Integrated Browser.
   await until(5.0);
@@ -375,7 +404,7 @@ export async function run(t) {
   }
   t.record("toastLeft", await toast.count());
   // Away from the Export button, so its tooltip does not show.
-  await t.moveTo(900, 420, 0.4);
+  await t.moveTo(PARK.x, PARK.y, 0.4);
   await until(7.6);
   await t.press("ControlOrMeta+Shift+P", "palette");
   await t.sleep(300);
@@ -409,8 +438,8 @@ export async function run(t) {
   t.record("timing", timing);
   t.keyFrame("exported");
 
-  // The same page in the browser: four loaded drawings, the wide table breaking out at Studio's width.
-  await imagesLoaded(view);
+  // The same page in the browser: the four drawings there, the wide table breaking out at Studio's width.
+  await drawingsLoaded(view);
   const browser = await wideOf(view);
   const browserWide = browserWideOf(browser);
   t.record("browserWide", browserWide);
@@ -439,19 +468,20 @@ export async function run(t) {
   };
   const toWorkbench = (r) => ({ x: area.x + r.x * area.k, y: area.y + r.y * area.k, w: r.w * area.k, h: r.h * area.k });
 
+  // The filmed picture shows each browser scroll as one cut, about 1 s after it is sent (12.0 and 14.1 s in the
+  // committed take), so marks 1 and 2 start after their cut. The mark times are those of clip.md's Mark rows.
   await until(10.8);
   await scrollBy(t, view, await distanceTo(view, "wide"), 0.8);
   const wide = toWorkbench((await wideOf(view)).service.rect);
-  await until(11.8);
+  await until(12.0);
   t.mark("1", inside(1, air(wide)));
-  await until(13.0);
+  await until(13.2);
   t.unmark("1");
 
-  await until(13.2);
   await scrollBy(t, view, await distanceTo(view, "flow-bar"), 0.6);
   const flow = await inWorkbench(view, area, "img.myst-mermaid-image");
-  const bar = await inWorkbench(view, area, "img.myst-vega-image");
-  await until(14.0);
+  const bar = await inWorkbench(view, area, CHART);
+  await until(14.2);
   t.mark("2", inside(2, air(flow)));
   await until(15.2);
   t.unmark("2");
@@ -517,20 +547,22 @@ export async function verify(t) {
     const widthMode = /<html[^>]*data-sphinx-preview-width="([^"]*)"/iu.exec(html)?.[1];
     if (widthMode !== "auto") throw new Error(`the exported <html> carries width mode ${widthMode}, expected auto`);
     if (!html.includes("data-sphinx-preview-wide")) throw new Error("the exported file holds no data-sphinx-preview-wide (the wide table's wrapper)");
-    // The drawings are <img> whose src is a data: URL of the SVG.
+    // The Mermaid drawings are <img> whose src is a data: URL of the SVG; the charts are inline svg (no hover box, no script).
     const images = [...html.matchAll(/<img\b[^>]*>/giu)].map((match) => match[0]);
-    for (const kind of ["myst-mermaid-image", "myst-vega-image"]) {
-      const own = images.filter((image) => new RegExp(`class="[^"]*\\b${kind}\\b`, "iu").test(image));
-      if (own.length !== 2) throw new Error(`the exported file holds ${own.length} img.${kind}, expected 2`);
-      for (const image of own) {
-        const src = /\ssrc\s*=\s*"([^"]*)"/iu.exec(image)?.[1] ?? "";
-        if (!src.startsWith("data:image/svg+xml")) throw new Error(`an img.${kind} of the exported file has the src ${src.slice(0, 40)}, expected data:image/svg+xml`);
-      }
+    const mermaidImages = images.filter((image) => /class="[^"]*\bmyst-mermaid-image\b/iu.test(image));
+    if (mermaidImages.length !== 2) throw new Error(`the exported file holds ${mermaidImages.length} img.myst-mermaid-image, expected 2`);
+    for (const image of mermaidImages) {
+      const src = /\ssrc\s*=\s*"([^"]*)"/iu.exec(image)?.[1] ?? "";
+      if (!src.startsWith("data:image/svg+xml")) throw new Error(`an img.myst-mermaid-image of the exported file has the src ${src.slice(0, 40)}, expected data:image/svg+xml`);
     }
+    if (/<img\b[^>]*\bmyst-vega-/iu.test(html)) throw new Error("the exported file holds a chart as an img");
+    const chartSvgs = [...html.matchAll(/<div\b[^>]*class="[^"]*\bmyst-vega-view\b[^"]*"[^>]*>\s*<svg\b/giu)];
+    if (chartSvgs.length !== 2) throw new Error(`the exported file holds ${chartSvgs.length} .myst-vega-view > svg, expected 2`);
+    if (/<[a-z][^>]*\bclass="[^"]*\bmyst-vega-tooltip\b/iu.test(html) || /<[a-z][^>]*\brole="tooltip"/iu.test(html)) throw new Error("the exported file holds a chart hover box");
     const address = `http://localhost:${port}/platform-report.html`;
     const view = t.context.pages().find((candidate) => candidate.url() === address);
     if (!view) throw new Error(`the Integrated Browser page ${address} is gone`);
-    await imagesLoaded(view);
+    await drawingsLoaded(view);
     const browserWide = browserWideOf(await wideOf(view));
     if (t.workspaceFile("platform-report.md") !== readFileSync(STAGE_FILE, "utf8")) throw new Error("platform-report.md on disk is not the clip's stage file");
     return { size: html.length, themeMode, widthMode, studioWide, browserWide, port };

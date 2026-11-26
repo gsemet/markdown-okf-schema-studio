@@ -10,7 +10,7 @@
     "codec": "h264",
     "pixFmt": "yuv420p",
     "audioStreams": 0,
-    "bytes": 1051474,
+    "bytes": 1031168,
     "crf": "master (crf 18)"
   },
   "webm": {
@@ -20,27 +20,27 @@
     "fps": 15,
     "codec": "vp9",
     "audioStreams": 0,
-    "bytes": 630271
+    "bytes": 625566
   },
   "gif": {
     "width": 960,
-    "fps": 10,
-    "bytes": 2976631,
+    "fps": 12,
+    "bytes": 3071217,
     "loopCount": 0,
-    "ladderStep": 1,
+    "ladderStep": 0,
     "colors": 128,
     "step": {
-      "step": 1,
-      "fps": 10,
+      "step": 0,
+      "fps": 12,
       "width": 960,
       "colors": 128
     }
   },
-  "loopSeamSsim": 0.989751,
+  "loopSeamSsim": 0.990385,
   "take": {
-    "rawFps": 28.4,
-    "screencastFrames": 513,
-    "filmedSeconds": 18.075,
+    "rawFps": 28.3,
+    "screencastFrames": 512,
+    "filmedSeconds": 18.076,
     "playbackRate": 1.004,
     "checks": {
       "editMode": "off",
@@ -107,7 +107,7 @@
     {
       "name": "mp4 at most 10 MB",
       "ok": true,
-      "value": "1.00 MB",
+      "value": "0.98 MB",
       "detail": "crf master (crf 18)"
     },
     {
@@ -137,13 +137,13 @@
     {
       "name": "gif width and fps are the ladder's",
       "ok": true,
-      "value": "960 px, 10/1",
-      "detail": "ladder step 1"
+      "value": "960 px, 12/1",
+      "detail": "ladder step 0"
     },
     {
       "name": "gif at most 3 MB",
       "ok": true,
-      "value": "2.84 MB",
+      "value": "2.93 MB",
       "detail": ""
     },
     {
@@ -155,7 +155,7 @@
     {
       "name": "loop seam SSIM at least 0.98 and below 1.0",
       "ok": true,
-      "value": "0.98975",
+      "value": "0.99038",
       "detail": ""
     },
     {
@@ -174,7 +174,7 @@
       "name": "screencast at least the storyboard's frame rate after retiming",
       "ok": true,
       "value": "30 (retimed by ffmpeg)",
-      "detail": "raw 28.4 fps, storyboard 15 fps"
+      "detail": "raw 28.3 fps, storyboard 15 fps"
     },
     {
       "name": "playback rate inside 0.77 to 1.3",
