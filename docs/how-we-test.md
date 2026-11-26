@@ -50,7 +50,7 @@ One example, from the `trust-security` area:
 | Contract | `sphinx/tests`, `test/core/render/*.contract.ts` (no such file today) | `just contracts`, `just sphinx-check` | `static`, `static-windows`; every pull request | SwRS scenario (no contract test carries a marker today) | `@tests_req <SwRS-ID>#S<n>` |
 | Security | `test/security` | `just security`, `just audit` | `static`, `static-windows`; every pull request | SwRS scenario; may accept a TRUST-014 path | `@tests_req <SwRS-ID>#S<n>`; `@accepts_req <StRS-ID>#S<n>` allowed for TRUST-014 |
 | Release and tooling | `test/build/*.py` | `just release-tests` | `static`, `static-windows`; every pull request | SwRS scenario; may accept a CORE-007 path | `@tests_req <SwRS-ID>#S<n>`; `@accepts_req <StRS-ID>#S<n>` allowed for CORE-007 |
-| Simulated bench | `test/visual`, `test/page/tableBreakout.test.ts`, `test/page/codeBlockBreakout.test.ts`, `test/site/requirementsViewer/*.browser.test.ts`, `test/site/galleryLinks.browser.test.ts` | `just ci-visual`, `just ci-viewer-graph` | `visual`, `viewer-graph`; every pull request | SwRS scenario; StRS path **tested** | `@tests_req <SwRS-ID>#S<n>`, `@tests_req <StRS-ID>#S<n>` |
+| Simulated bench | `test/visual`, `test/page/tableBreakout.test.ts`, `test/page/codeBlockBreakout.test.ts`, `test/site/requirementsViewer/*.browser.test.ts`, `test/site/galleryLinks.browser.test.ts` | `just ci-visual`, `just ci-viewer-graph` | `visual`, `visual-2`, `viewer-graph`; every pull request | SwRS scenario; StRS path **tested** | `@tests_req <SwRS-ID>#S<n>`, `@tests_req <StRS-ID>#S<n>` |
 | Real VS Code integration | `test/integration` | `just ci-integration` | `integration`; push to `main`, heavy dispatch | SwRS scenario; StRS path **accepted** (suites that walk one) | `@tests_req <SwRS-ID>#S<n>`, `@accepts_req <StRS-ID>#S<n>` |
 | Acceptance | `test/integration/acceptance` | `just ci-acceptance [GROUP]` | `acceptance` (one shard per group with a file); push to `main`, heavy dispatch | StRS path **accepted** | `@accepts_req <StRS-ID>#S<n>` |
 | Stress | `test/shared/stressPlan.ts` | `just ci-stress [REPEAT]` | `stress`; push to `main`, heavy dispatch | that a passing test passes every time | none |
@@ -112,7 +112,8 @@ The tests of `test/security`, and the online npm audit of the production depende
 ### Release and tooling tests
 
 The Python tests of `test/build`: the release, the CI workflows, the run selection, the plugin
-manifests and other repository checks (guideline isolation, main paths, merge commits, changelog).
+manifests, the visual checks (their two parts and the table bar layout), the unpacking of the built
+VSIX and other repository checks (guideline isolation, main paths, merge commits, changelog).
 
 - Command: `just release-tests`. `just check` runs it.
 - CI job: `static` and `static-windows`, through `just ci-static`, on every pull request.
@@ -126,8 +127,10 @@ mock host, and its screenshots feed the gallery. The table and code block breako
 the gallery link tests of `test/site` also run in Chromium.
 
 - Command: `just ci-visual` (visual scenarios and breakout tests); `just ci-viewer-graph` (use case
-  map and gallery link tests).
-- CI job: `visual` and `viewer-graph`, on every pull request.
+  map and gallery link tests). The visual scenarios come in two parts: `just ci-visual 1` runs the
+  first part and the breakout tests, `just ci-visual 2` the second part. With no part,
+  `just ci-visual` runs both and merges their reports.
+- CI job: `visual` (part 1), `visual-2` (part 2) and `viewer-graph`, on every pull request.
 - Marker: `@tests_req <SwRS-ID>#S<n>`; a simulated walk of a StRS path carries
   `@tests_req <StRS-ID>#S<n>`.
 
@@ -164,7 +167,9 @@ The other groups have no acceptance file yet.
 ### Stress
 
 The flake-prone real-window scenarios of `test/shared/stressPlan.ts` run again and again, `REPEAT`
-times, in a trusted window and then in a Restricted Mode window.
+times, in a trusted window and then in a Restricted Mode window. Some scenarios of that file are not
+part of a default run: they run only when `STUDIO_STRESS_SCENARIOS` (the `stress_scenarios` input of
+a manual dispatch) names them.
 
 - Command: `just ci-stress [REPEAT]`, meant for CI.
 - CI job: `stress`, on every push to `main` and every heavy dispatch. A red run is advisory, except
@@ -251,16 +256,16 @@ their tests.
 okfreq counts markers. It never reads a test result. The proof that a marked test passes is the
 green CI job that runs it:
 
-- on a pull request: `static`, `static-windows`, `visual` and `viewer-graph`;
+- on a pull request: `static`, `static-windows`, `visual`, `visual-2` and `viewer-graph`;
 - on a heavy run: `integration`, `acceptance` and `stress`. A version change is tagged as a release
   only when `checks` and these jobs are green
   ([CI guidelines](../.agents/guidelines/ci.guidelines.md), rule 14).
 
 A green job does not prove that every marked test ran:
 
-- `static` and `static-windows` have no Chromium, so they skip the unit tests that need it. `visual`
-  and `viewer-graph` run only the Chromium tests of the simulated bench. A marker on another
-  Chromium test counts, but no CI job runs that test.
+- `static` and `static-windows` have no Chromium, so they skip the unit tests that need it. `visual`,
+  `visual-2` and `viewer-graph` run only the Chromium tests of the simulated bench. A marker on
+  another Chromium test counts, but no CI job runs that test.
 - The `visual` job runs on Linux. There the table width checks only report their differences from
   the Windows reference; they assert the widths on Windows.
 
@@ -268,8 +273,8 @@ These jobs run no test level:
 
 - `release-check`: on a push to `main`, detects a version change;
 - `report`: merges the reports of the stages into the review index;
-- `checks`: the required status, which sums `static`, `static-windows`, `visual`, `viewer-graph`
-  and `report`;
+- `checks`: the required status, which sums `static`, `static-windows`, `visual`, `visual-2`,
+  `viewer-graph` and `report`;
 - `gallery`: builds the gallery and the site on a heavy dispatch;
 - `tag-release`: tags the release of a version change;
 - `release`: starts the release workflow for that tag;
