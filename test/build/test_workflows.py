@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import re
@@ -288,7 +289,9 @@ def test_preflight_skips_only_the_stages_that_need_linux_or_macos_on_windows() -
     static = recipe.index("just ci-static")
     skip = recipe.index('"{{ os() }}" == "windows"')
     assert static < skip < recipe.index("just ci-visual")
-    assert 'exit "$failures"' in recipe[skip:recipe.index("just ci-visual")]
+    skipped = recipe[skip:recipe.index("just ci-visual")]
+    assert 'exit "$failures"' in skipped
+    assert "visual, viewer-graph, integration, acceptance, report and gallery stages skipped on Windows" in skipped
 
 
 def test_ci_visual_runs_the_table_breakout_width_tests_with_chromium_required() -> None:
@@ -340,7 +343,9 @@ def _locked_screen_run(tmp_path: Path, *arguments: str) -> "subprocess.Completed
     )
 
 
-@pytest.mark.parametrize("arguments", [["ci-integration"], ["ci-stress", "1"]])
+# The ci-acceptance case: a locked screen stops the target with exit code 3 before it runs anything.
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S7
+@pytest.mark.parametrize("arguments", [["ci-integration"], ["ci-stress", "1"], ["ci-acceptance", "trust-security"]])
 def test_ci_integration_and_stress_stop_on_a_locked_screen(
     tmp_path: Path, arguments: list[str]
 ) -> None:
@@ -401,20 +406,77 @@ def test_the_long_paths_step_does_nothing_outside_a_git_work_tree(tmp_path: Path
     assert not (tmp_path / ".git").exists()
 
 
-def test_preflight_skips_report_and_gallery_when_the_screen_is_locked() -> None:
+@pytest.mark.parametrize(
+    ("integration", "acceptance", "locked", "failures"),
+    [
+        (3, 3, "integration and acceptance", 2),
+        (3, 0, "integration", 1),
+        (0, 3, "acceptance", 1),
+        (1, 3, "acceptance", 2),
+        (0, 0, "", 0),
+        # A red stage still has reports: report and gallery run.
+        (1, 1, "", 2),
+    ],
+)
+def test_preflight_skips_report_and_gallery_when_the_screen_is_locked(
+    integration: int, acceptance: int, locked: str, failures: int
+) -> None:
+    import subprocess
+
     justfile = (ROOT / "justfile").read_text()
     recipe = justfile.split("\npreflight: ")[1].split("\n\n")[0]
-    assert recipe.index("just ci-visual") < recipe.index("just ci-integration")
+    order = ["just ci-visual", "just ci-integration", "just ci-acceptance", "just ci-report", "just ci-gallery"]
+    assert [recipe.index(call) for call in order] == sorted(recipe.index(call) for call in order)
     assert "_require-unlocked-screen preflight" in recipe
     assert recipe.index("_require-unlocked-screen") < recipe.index("just ci-visual")
-    locked = recipe[recipe.index('"$integration" -eq 3'):]
-    skipped = locked.split("else")[0]
-    assert "ci-report: skipped, integration did not run (screen locked)" in skipped
-    assert "ci-gallery: skipped, integration did not run (screen locked)" in skipped
-    assert "failures=$((failures + 1))" in skipped
-    assert "just ci-report" not in skipped
-    assert "just ci-gallery" not in skipped
-    assert "just ci-report" in locked.split("else")[1]
+    # The real-window part of the recipe, with `just` replaced by a function giving each stage's exit code.
+    part = recipe[recipe.index('locked=""'):recipe.index('if [[ "$failures" -ne 0 ]]')]
+    stub = ('just() { case "$1" in ci-integration) return ' + str(integration) + ";; ci-acceptance) return "
+            + str(acceptance) + ';; *) echo "ran $1";; esac; }\nfailures=0\n')
+    result = subprocess.run([_bash(), "-c", f'{stub}{part}\necho "failures=$failures"'],
+                            capture_output=True, text=True, check=True)
+    assert f"failures={failures}" in result.stdout.splitlines()
+    ran = [line for line in result.stdout.splitlines() if line.startswith("ran ")]
+    if locked:
+        assert ran == []
+        for stage in ("ci-report", "ci-gallery"):
+            assert f"{stage}: skipped, {locked} did not run (screen locked)" in result.stderr
+    else:
+        assert ran == ["ran ci-report", "ran ci-gallery"]
+        assert "skipped" not in result.stderr
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S7
+@pytest.mark.parametrize(("group", "status", "passed"), [("trust-security", 0, True), ("", 0, True), ("two words", 1, False)])
+def test_ci_acceptance_runs_the_group_it_is_given_as_one_argument(
+    tmp_path: Path, group: str, status: int, passed: bool
+) -> None:
+    import shutil
+    import subprocess
+
+    (tmp_path / "scripts").mkdir()
+    shutil.copy(ROOT / "scripts/e2e-campaign.mjs", tmp_path / "scripts")
+    (tmp_path / "fake-npm.sh").write_text(f"printf '<%s>' \"$@\"; echo; exit {status}\n", newline="\n")
+    result = subprocess.run(
+        ["just", "--justfile", str(ROOT / "justfile"), "--working-directory", str(tmp_path), "ci-acceptance", group],
+        env={**os.environ, "STUDIO_NPM": "bash fake-npm.sh", "STUDIO_SCREEN_LOCKED": ""},
+        capture_output=True,
+        text=True,
+    )
+    chosen = f"<--><--group><{group}>" if group else ""
+    assert f"<run><test:acceptance>{chosen}\n" in result.stdout, result.stderr
+    if passed:
+        assert result.returncode == 0 and "ci-acceptance: passed" in result.stdout
+    else:
+        assert result.returncode == 1 and "ci-acceptance: FAILED" in result.stderr
+
+
+def test_the_acceptance_script_and_the_report_target_read_the_acceptance_stage() -> None:
+    scripts = json.loads((ROOT / "package.json").read_text())["scripts"]
+    assert scripts["test:acceptance"].endswith("node out/test/integration/run-tests.js --acceptance-only")
+    recipe = (ROOT / "justfile").read_text().split("\nci-report ")[1].split("\n\n")[0]
+    selection = recipe.index("node scripts/select-acceptance-attempts.mjs || failed=1")
+    assert selection < recipe.index("node scripts/e2e-campaign.mjs report")
 
 
 def test_release_dispatch_can_publish_placeholder_notes(tmp_path: Path) -> None:
@@ -603,7 +665,7 @@ def test_pages_fallback_clears_leftover_reports_before_the_suite() -> None:
 
 
 # A version change on main runs the heavy jobs in its own push run, and tag-release tags it only
-# when both heavy jobs succeeded; Pages then reuses that run's reports.
+# when every heavy job succeeded; Pages then reuses that run's reports.
 def _expression(text: str) -> str:
     """A GitHub expression (`${{ }}` optional) as Python over a ``ctx`` lookup."""
     body = re.sub(r"^\$\{\{\s*|\s*\}\}$", "", str(text).strip())
@@ -656,7 +718,7 @@ def test_release_check_detects_a_version_change_on_a_push_to_main() -> None:
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
-@pytest.mark.parametrize("name", ["integration", "stress"])
+@pytest.mark.parametrize("name", ["integration", "acceptance", "stress"])
 def test_heavy_jobs_run_on_every_push_to_main_and_on_a_heavy_dispatch(name: str) -> None:
     job = _ci_jobs()[name]
     assert "release-check" in _needs(job)
@@ -703,11 +765,48 @@ def test_every_xvfb_screen_is_wider_than_the_emulated_viewports() -> None:
     import re
 
     calls = re.findall(r"xvfb-run [^\n]*", CI.read_text())
-    assert len(calls) == 3
+    assert len(calls) == 4
     for call in calls:
         match = re.search(r'-s "-screen 0 (\d+)x(\d+)x\d+"', call)
         assert match is not None, call
         assert int(match.group(1)) >= 2600 and int(match.group(2)) >= 1440, call
+
+
+def _steps_before_the_window(job: dict) -> list[dict]:
+    steps = job["steps"]
+    return steps[:next(i for i, s in enumerate(steps) if "xvfb-run" in str(s.get("run", "")))]
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S7
+def test_the_acceptance_job_runs_one_window_job_per_group_within_its_own_budget() -> None:
+    jobs = _ci_jobs()
+    job, integration = jobs["acceptance"], jobs["integration"]
+    assert job["if"] == integration["if"] and _needs(job) == _needs(integration) == ["release-check"]
+    assert job["runs-on"] == "ubuntu-latest" and job["permissions"] == {"contents": "read"}
+    assert job["strategy"]["fail-fast"] is False
+    assert "continue-on-error" not in job
+    # The same checkout and set-up as the integration job.
+    assert _steps_before_the_window(job) == _steps_before_the_window(integration)
+    test = next(s for s in job["steps"] if "ci-acceptance" in str(s.get("run", "")))
+    assert test["run"] == f'xvfb-run --auto-servernum -s "-screen 0 {XVFB_SCREEN}" just ci-acceptance "${{{{ matrix.group }}}}"'
+    assert test["env"] == {"STUDIO_VIEWPORT_GUARD": "strict"}
+    assert 0 < test["timeout-minutes"] < job["timeout-minutes"] <= 30 and test["timeout-minutes"] <= 20
+    after = job["steps"][job["steps"].index(test) + 1:]
+    assert after[0]["run"] == "just ci-hang-dump" and after[0]["if"] == "always()"
+    upload = after[1]
+    assert UPLOAD in upload["uses"] and upload["if"] == "always()"
+    assert upload["with"]["name"] == "e2e-acceptance-${{ matrix.group }}" + ATTEMPT_SUFFIX
+    assert upload["with"]["path"] == "out/reports/"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S7
+def test_the_acceptance_matrix_lists_the_groups_with_an_acceptance_file_in_group_order() -> None:
+    declared = (ROOT / "test/shared/e2eGroups.ts").read_text().split("export const GROUPS = [", 1)[1].split("] as const")[0]
+    groups = re.findall(r'\{ id: "([a-z0-9-]+)"', declared)
+    assert len(groups) == 16
+    files = [path.name.split(".", 1)[0] for path in (ROOT / "test/integration/acceptance").glob("*.acceptance.ts")]
+    assert files and set(files) <= set(groups)
+    assert _ci_jobs()["acceptance"]["strategy"]["matrix"] == {"group": [g for g in groups if g in files]}
 
 
 def test_stress_dispatch_inputs_reach_the_stress_recipe_through_env() -> None:
@@ -749,6 +848,7 @@ def test_stress_blocks_only_a_version_change() -> None:
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
 def test_report_merges_the_real_window_stage_of_every_push_to_main() -> None:
     job = _ci_jobs()["report"]
+    assert {"visual", "integration", "acceptance"} <= set(_needs(job))
     step = next(s for s in job["steps"] if "just ci-report" in str(s.get("run", "")))
     mode = re.search(r"\$\{\{(.*)\}\}", step["run"]).group(1)
     assert _run_if(mode, _context("push", bump="true")) == "all"
@@ -767,21 +867,23 @@ def _tag_steps() -> tuple[dict, dict]:
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S10
 def test_tag_release_needs_the_heavy_jobs_and_runs_on_every_push_to_main() -> None:
     job = _ci_jobs()["tag-release"]
-    assert {"checks", "release-check", "integration", "stress"} <= set(_needs(job))
+    assert {"checks", "release-check", "integration", "acceptance", "stress"} <= set(_needs(job))
     assert "needs.release-check.result == 'success'" in str(job["if"])
-    green = {"checks": "success", "integration": "success", "stress": "success"}
+    green = {"checks": "success", "integration": "success", "acceptance": "success", "stress": "success"}
     assert _run_if(job["if"], _context("push", bump="true", **green))
     # Without a version change the heavy jobs are skipped and the job still runs (no tag).
-    assert _run_if(job["if"], _context("push", bump="false", checks="success", integration="skipped", stress="skipped"))
+    skipped = {"integration": "skipped", "acceptance": "skipped", "stress": "skipped"}
+    assert _run_if(job["if"], _context("push", bump="false", checks="success", **skipped))
     # ... but red checks skip it, as before this change.
-    assert not _run_if(job["if"], _context("push", bump="false", checks="failure", integration="skipped", stress="skipped"))
+    assert not _run_if(job["if"], _context("push", bump="false", checks="failure", **skipped))
     # On a version change a red heavy job or red checks do not skip the job: its first step
-    # explains why nothing is tagged. An integration failure fails report, hence checks.
-    assert _run_if(job["if"], _context("push", bump="true", checks="success", integration="success", stress="failure"))
-    assert _run_if(job["if"], _context("push", bump="true", checks="failure", integration="failure", stress="success"))
-    assert _run_if(job["if"], _context("push", bump="true", checks="failure", integration="success", stress="success"))
+    # explains why nothing is tagged. An integration or acceptance failure fails report, hence checks.
+    for results in ({**green, "stress": "failure"}, {**green, "checks": "failure", "integration": "failure"},
+                    {**green, "checks": "failure", "acceptance": "failure"}, {**green, "checks": "failure"}):
+        assert _run_if(job["if"], _context("push", bump="true", **results)), results
     # A failed release-check, another event or a cancelled run skips it.
     failed_check = {**_context("push", bump="", **green), "needs.release-check.result": "failure"}
     assert not _run_if(job["if"], failed_check)
@@ -792,28 +894,34 @@ def test_tag_release_needs_the_heavy_jobs_and_runs_on_every_push_to_main() -> No
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S10
 @pytest.mark.parametrize(
-    ("bump", "checks", "integration", "stress", "tags"),
+    ("bump", "checks", "integration", "acceptance", "stress", "tags"),
     [
-        ("true", "success", "success", "success", True),
+        ("true", "success", "success", "success", "success", True),
         # Realistic: an integration failure (or hang) fails report, then checks.
-        ("true", "failure", "failure", "success", False),
-        ("true", "failure", "failure", "failure", False),
-        ("true", "failure", "cancelled", "success", False),
-        ("true", "success", "success", "failure", False),
-        ("true", "success", "success", "cancelled", False),
+        ("true", "failure", "failure", "success", "success", False),
+        ("true", "failure", "failure", "success", "failure", False),
+        ("true", "failure", "cancelled", "success", "success", False),
+        # Likewise one red acceptance shard.
+        ("true", "failure", "success", "failure", "success", False),
+        ("true", "failure", "success", "cancelled", "success", False),
+        ("true", "success", "success", "failure", "success", False),
+        ("true", "success", "success", "skipped", "success", False),
+        ("true", "success", "success", "success", "failure", False),
+        ("true", "success", "success", "success", "cancelled", False),
         # A static or visual failure alone on a version change.
-        ("true", "failure", "success", "success", False),
-        ("true", "success", "skipped", "skipped", False),
-        ("false", "success", "skipped", "skipped", True),
+        ("true", "failure", "success", "success", "success", False),
+        ("true", "success", "skipped", "skipped", "skipped", False),
+        ("false", "success", "skipped", "skipped", "skipped", True),
     ],
 )
 def test_tag_step_requires_checks_and_both_heavy_jobs_on_a_version_change(
-    bump: str, checks: str, integration: str, stress: str, tags: bool
+    bump: str, checks: str, integration: str, acceptance: str, stress: str, tags: bool
 ) -> None:
     job = _ci_jobs()["tag-release"]
     refuse, tag = _tag_steps()
-    values = _context("push", bump=bump, checks=checks, integration=integration, stress=stress)
+    values = _context("push", bump=bump, checks=checks, integration=integration, acceptance=acceptance, stress=stress)
     assert _run_if(job["if"], values)
     assert bool(_run_if(tag["if"], values)) is tags
     assert bool(_run_if(refuse["if"], values)) is not tags
@@ -821,18 +929,19 @@ def test_tag_step_requires_checks_and_both_heavy_jobs_on_a_version_change(
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S10
 def test_every_untagged_version_change_explains_why() -> None:
     """Truth table over every result: on a version change that reaches tag-release, exactly one of
-    the two steps runs, and the tag step runs only when checks and both heavy jobs succeeded."""
+    the two steps runs, and the tag step runs only when checks and every heavy job succeeded."""
     import itertools
 
     job = _ci_jobs()["tag-release"]
     refuse, tag = _tag_steps()
     results = ["success", "failure", "cancelled", "skipped"]
-    for checks, integration, stress in itertools.product(results, repeat=3):
+    for checks, integration, acceptance, stress in itertools.product(results, repeat=4):
         for bump in ("true", "false"):
-            values = _context("push", bump=bump, checks=checks, integration=integration, stress=stress)
-            green = checks == "success" and (bump == "false" or integration == stress == "success")
+            values = _context("push", bump=bump, checks=checks, integration=integration, acceptance=acceptance, stress=stress)
+            green = checks == "success" and (bump == "false" or integration == acceptance == stress == "success")
             if bump == "false" and checks != "success":
                 assert not _run_if(job["if"], values), values
                 continue
@@ -843,6 +952,7 @@ def test_every_untagged_version_change_explains_why() -> None:
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S10
 def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) -> None:
     import os
     import subprocess
@@ -851,6 +961,7 @@ def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) 
     assert refuse["env"] == {
         "CHECKS": "${{ needs.checks.result }}",
         "INTEGRATION": "${{ needs.integration.result }}",
+        "ACCEPTANCE": "${{ needs.acceptance.result }}",
         "STRESS": "${{ needs.stress.result }}",
         "RUN_ID": "${{ github.run_id }}",
     }
@@ -858,7 +969,7 @@ def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) 
     result = subprocess.run(
         [_bash(), "-e", "-c", refuse["run"]],
         env={**os.environ, "GITHUB_STEP_SUMMARY": str(summary), "CHECKS": "failure", "INTEGRATION": "failure",
-             "STRESS": "skipped", "RUN_ID": "4242"},
+             "ACCEPTANCE": "cancelled", "STRESS": "skipped", "RUN_ID": "4242"},
         capture_output=True,
         text=True,
     )
@@ -866,19 +977,24 @@ def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) 
     text = summary.read_text()
     assert "Release not tagged" in text and "tagging was skipped" in text
     assert "- checks: failure" in text and "- integration: failure" in text and "- stress: skipped" in text
+    assert "- acceptance: cancelled" in text
     # The recovery path: re-run the failed jobs of this same run.
     assert "`gh run rerun 4242 --failed`" in text and "Re-run failed" in text
-    assert "checks: failure, integration: failure, stress: skipped" in result.stdout
+    assert "checks: failure, integration: failure, acceptance: cancelled, stress: skipped" in result.stdout
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S10
 def test_pages_reuses_the_reports_of_the_release_run_when_its_heavy_jobs_are_green() -> None:
     job = _ci_jobs()["pages"]
-    assert {"tag-release", "integration", "stress"} <= set(_needs(job))
+    assert {"tag-release", "integration", "acceptance", "stress"} <= set(_needs(job))
     flag = job["with"]["reports_from_caller"]
-    assert _run_if(flag, {"needs.integration.result": "success", "needs.stress.result": "success"})
-    assert not _run_if(flag, {"needs.integration.result": "success", "needs.stress.result": "skipped"})
+    green = {f"needs.{name}.result": "success" for name in ("integration", "acceptance", "stress")}
+    assert _run_if(flag, green)
+    for name in ("integration", "acceptance", "stress"):
+        for result in ("failure", "skipped"):
+            assert not _run_if(flag, {**green, f"needs.{name}.result": result}), (name, result)
     call = _pages()[True]["workflow_call"]["inputs"]["reports_from_caller"]
     assert call["type"] == "boolean" and call["default"] is False
     find = _pages_step("Find the end-to-end reports")
@@ -918,6 +1034,10 @@ def _downloads(steps: list[dict]) -> list[dict]:
     return [s for s in steps if DOWNLOAD in str(s.get("uses", ""))]
 
 
+def _is_matrix(job: dict) -> bool:
+    return "matrix" in job.get("strategy", {})
+
+
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_every_ci_artifact_name_carries_the_attempt() -> None:
     names = [name for names in _uploads(_ci_jobs()).values() for name in names]
@@ -929,7 +1049,7 @@ def test_every_ci_artifact_name_carries_the_attempt() -> None:
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 @pytest.mark.parametrize(("job", "base"), [("visual", "e2e-visual"), ("integration", "e2e-integration"),
-                                           ("report", "studio-reports")])
+                                           ("acceptance", "e2e-acceptance"), ("report", "studio-reports")])
 def test_a_consumed_artifact_is_announced_by_its_job(job: str, base: str) -> None:
     import importlib.util
 
@@ -938,11 +1058,19 @@ def test_a_consumed_artifact_is_announced_by_its_job(job: str, base: str) -> Non
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     assert base in module.REQUIRED_ARTIFACTS  # the Pages selection reads the same names
+    announced = _ci_jobs()[job]["outputs"]["artifact"]
+    if _is_matrix(_ci_jobs()[job]):
+        # One output for every shard: a pattern that covers each shard's upload name.
+        upload = f"{base}-${{{{ matrix.group }}}}{ATTEMPT_SUFFIX}"
+        assert _uploads(_ci_jobs())[job] == [upload]
+        assert announced == f"{base}-*-attempt-*" and fnmatch.fnmatchcase(upload, announced)
+        return
     assert _uploads(_ci_jobs())[job] == [base + ATTEMPT_SUFFIX]
-    assert _ci_jobs()[job]["outputs"]["artifact"] == base + ATTEMPT_SUFFIX
+    assert announced == base + ATTEMPT_SUFFIX
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S8
 def test_every_ci_download_names_the_artifact_of_the_job_it_needs() -> None:
     jobs = _ci_jobs()
     uploads = _uploads(jobs)
@@ -955,17 +1083,33 @@ def test_every_ci_download_names_the_artifact_of_the_job_it_needs() -> None:
             assert match, f"{name}: downloads {wanted!r}, not a producing job's artifact output"
             producer = match.group(1)
             assert producer in _needs(job), f"{name}: reads the artifact of {producer} without needing it"
-            assert jobs[producer]["outputs"]["artifact"] in uploads[producer]
+            announced = jobs[producer]["outputs"]["artifact"]
+            if _is_matrix(jobs[producer]):
+                # The shards' artifacts keep their own folders: "Re-run failed jobs" leaves
+                # attempt 1 of one group beside attempt 2 of another.
+                assert all(fnmatch.fnmatchcase(upload, announced) for upload in uploads[producer]), announced
+                assert "pattern" in step["with"] and "merge-multiple" not in step["with"]
+            else:
+                assert announced in uploads[producer]
             assert "run-id" not in step["with"], f"{name}: downloads from another run"
-    assert seen >= 3  # report (visual, integration) and gallery
+    assert seen >= 4  # report (visual, integration, acceptance) and gallery
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S8
 def test_report_merges_each_stage_from_the_attempt_that_produced_it() -> None:
     job = _ci_jobs()["report"]
     steps = _downloads(job["steps"])
     patterns = [s["with"]["pattern"] for s in steps]
-    assert patterns == ["${{ needs.visual.outputs.artifact }}", "${{ needs.integration.outputs.artifact }}"]
+    assert patterns == [f"${{{{ needs.{stage}.outputs.artifact }}}}" for stage in ("visual", "integration", "acceptance")]
+    *steps, shards = steps
+    patterns = patterns[:-1]
+    # The acceptance shards are not merged: ci-report keeps the newest attempt of each group.
+    assert shards["with"] == {"pattern": "${{ needs.acceptance.outputs.artifact }}", "path": "out/ci-artifacts/acceptance/"}
+    assert _run_if(shards["if"], {"needs.acceptance.outputs.artifact": "e2e-acceptance-*-attempt-*"})
+    assert not _run_if(shards["if"], {"needs.acceptance.outputs.artifact": ""})
+    runs = [str(s.get("run", "")) for s in job["steps"]]
+    assert job["steps"].index(shards) < next(i for i, run in enumerate(runs) if "just ci-report" in run)
     for step in steps:
         # pattern (not name): a missing artifact (skipped or timed-out job) downloads nothing and
         # ci-report says which stage is missing; merge-multiple writes into out/reports/ directly.

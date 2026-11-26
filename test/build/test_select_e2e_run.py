@@ -15,11 +15,21 @@ select = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(select)
 
 SHA = "a" * 40
-GOOD_JOBS = [{"name": "static", "conclusion": "success"}, {"name": "integration", "conclusion": "success"}]
+SHARD = "acceptance (trust-security)"
+# A green heavy run: both single heavy jobs and one shard per group of the acceptance matrix.
+GOOD_JOBS = [{"name": name, "conclusion": "success"} for name in ("static", "integration", "stress", SHARD)]
 # Every artifact name carries the attempt that uploaded it (ci.yml): a re-run attempt uploads new
-# artifacts next to the old ones instead of under the same name.
-ALL = [{"name": f"{n}-attempt-1"} for n in select.REQUIRED_ARTIFACTS]
+# artifacts next to the old ones instead of under the same name. The acceptance stage has one
+# artifact per group.
+ACCEPTANCE = "e2e-acceptance-trust-security"
+ALL = [{"name": f"{ACCEPTANCE if n == select.ACCEPTANCE_ARTIFACT else n}-attempt-1"} for n in select.REQUIRED_ARTIFACTS]
 REPORTS_1 = "studio-reports-attempt-1"
+
+
+def concluded(job: str, conclusion: str | None) -> list[dict]:
+    """GOOD_JOBS with one job's conclusion changed; None leaves the job out."""
+    others = [entry for entry in GOOD_JOBS if entry["name"] != job]
+    return others if conclusion is None else [*others, {"name": job, "conclusion": conclusion}]
 
 
 def run(rid: int, created: str, **over: object) -> dict:
@@ -126,9 +136,6 @@ def test_main_automatic_selection_falls_back_on_malformed_json(monkeypatch, caps
 
 
 # A push run of main is the release run of a version change: its heavy jobs ran in it.
-HEAVY_JOBS = [*GOOD_JOBS, {"name": "stress", "conclusion": "success"}]
-
-
 def push(rid: int, created: str, **over: object) -> dict:
     return run(rid, created, **{"event": "push", "head_branch": "main", **over})
 
@@ -136,28 +143,76 @@ def push(rid: int, created: str, **over: object) -> dict:
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
 def test_release_push_run_with_green_heavy_jobs_is_used() -> None:
-    assert pick([push(1, "1")], jobs=HEAVY_JOBS) == 1
-    assert check(push(1, "1"), jobs=HEAVY_JOBS) is None
+    assert pick([push(1, "1")]) == 1
+    assert check(push(1, "1")) is None
     # The newest of a manual heavy run and the release push wins.
-    assert pick([run(1, "1"), push(2, "2")], jobs=HEAVY_JOBS) == 2
+    assert pick([run(1, "1"), push(2, "2")]) == 2
 
 
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
-# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S2
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S6
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S11
+@pytest.mark.parametrize("event", [run, push], ids=["dispatch", "push"])
 @pytest.mark.parametrize(
-    "jobs",
+    ("jobs", "named"),
     [
-        GOOD_JOBS,  # stress absent
-        [*GOOD_JOBS, {"name": "stress", "conclusion": "skipped"}],
-        [*GOOD_JOBS, {"name": "stress", "conclusion": "failure"}],
-        [{"name": "integration", "conclusion": "skipped"}, {"name": "stress", "conclusion": "skipped"}],
-        [{"name": "integration", "conclusion": "failure"}, {"name": "stress", "conclusion": "success"}],
+        (concluded("stress", None), "stress"),
+        (concluded("stress", "skipped"), "stress"),
+        (concluded("stress", "failure"), "stress"),
+        (concluded("integration", "failure"), "integration"),
+        # A push without a version change: a skipped matrix is one job without a group.
+        ([{"name": name, "conclusion": "skipped"} for name in ("integration", "stress", "acceptance")], "no 'acceptance (<group>)' job"),
+        (concluded(SHARD, None), "no 'acceptance (<group>)' job"),
+        (concluded(SHARD, "failure"), SHARD),
+        ([*GOOD_JOBS, {"name": "acceptance (gfm)", "conclusion": "skipped"}], "acceptance (gfm)"),
+        ([*GOOD_JOBS, {"name": "acceptance (gfm)", "conclusion": "cancelled"}], "acceptance (gfm)"),
     ],
 )
-def test_push_run_without_both_green_heavy_jobs_is_rejected(jobs: list[dict]) -> None:
-    assert pick([push(1, "1")], jobs=jobs) is None
-    problem = check(push(1, "1"), jobs=jobs) or ""
+def test_a_run_without_every_green_heavy_job_is_rejected(event, jobs: list[dict], named: str) -> None:
+    assert pick([event(1, "1")], jobs=jobs) is None
+    problem = check(event(1, "1"), jobs=jobs) or ""
     assert "integration" in problem and "stress" in problem
+    assert named in problem.split("not green: ")[1]
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S11
+def test_a_run_with_every_acceptance_shard_green_is_used() -> None:
+    shards = [*GOOD_JOBS, {"name": "acceptance (gfm)", "conclusion": "success"}]
+    artifacts = [*ALL, {"name": "e2e-acceptance-gfm-attempt-1"}]
+    for event in (run, push):
+        assert pick([event(1, "1")], jobs=shards, artifacts=artifacts) == 1
+        assert check(event(1, "1"), jobs=shards, artifacts=artifacts) is None
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S11
+def test_a_green_acceptance_shard_without_its_artifact_is_rejected() -> None:
+    # Two green shards, one artifact: a shard that uploaded nothing is not covered by another's.
+    shards = [*GOOD_JOBS, {"name": "acceptance (gfm)", "conclusion": "success"}]
+    for event in (run, push):
+        assert pick([event(1, "1")], jobs=shards) is None
+        problem = check(event(1, "1"), jobs=shards) or ""
+        assert "no e2e-acceptance-gfm-attempt-<n>" in problem and ACCEPTANCE not in problem
+    # An older run that holds every shard's artifact is used instead.
+    complete = [*ALL, {"name": "e2e-acceptance-gfm-attempt-1"}]
+    found = select.select_run([run(1, "1"), run(2, "2")], SHA, lambda _: shards, lambda rid: complete if rid == 1 else ALL)
+    assert found == (1, REPORTS_1)
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076#S11
+def test_the_acceptance_artifacts_are_part_of_the_reports() -> None:
+    without = [a for a in ALL if not a["name"].startswith(ACCEPTANCE)]
+    assert pick([run(1, "1")], artifacts=without) is None
+    assert "e2e-acceptance-<group>-attempt-<n>" in (check(run(1, "1"), artifacts=without) or "")
+    # One expired shard artifact is enough to refuse the run.
+    expired = [*ALL, {"name": "e2e-acceptance-gfm-attempt-1", "expired": True}]
+    assert pick([run(1, "1")], artifacts=expired) is None
+    assert "e2e-acceptance-gfm-attempt-1 expired" in (check(run(1, "1"), artifacts=expired) or "")
+    # A shard re-ran after the last merged report: that report does not hold it.
+    stale = [*ALL, {"name": f"{ACCEPTANCE}-attempt-2"}]
+    assert pick([run(1, "1")], artifacts=stale) is None
+    assert f"older than {ACCEPTANCE}-attempt-2" in (check(run(1, "1"), artifacts=stale) or "")
+    # With the report of that attempt, the other groups keep their attempt-1 artifacts.
+    rerun = [*stale, {"name": "e2e-acceptance-gfm-attempt-1"}, {"name": "studio-reports-attempt-2"}]
+    assert check(run(1, "1"), artifacts=rerun) is None
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1
@@ -166,10 +221,10 @@ def test_push_run_of_another_commit_branch_or_state_is_rejected() -> None:
     for bad in (push(1, "1", head_sha="b" * 40), push(1, "1", head_branch="feature"),
                 push(1, "1", head_branch=None), push(1, "1", conclusion="failure"),
                 push(1, "1", status="in_progress", conclusion=None)):
-        assert pick([bad], jobs=HEAVY_JOBS) is None
-        assert check(bad, jobs=HEAVY_JOBS)
-    assert "branch" in (check(push(1, "1", head_branch="feature"), jobs=HEAVY_JOBS) or "")
-    assert "artifacts" in (check(push(1, "1"), jobs=HEAVY_JOBS, artifacts=ALL[:2]) or "")
+        assert pick([bad]) is None
+        assert check(bad)
+    assert "branch" in (check(push(1, "1", head_branch="feature")) or "")
+    assert "artifacts" in (check(push(1, "1"), artifacts=ALL[:2]) or "")
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S4
@@ -180,7 +235,7 @@ def test_main_automatic_selection_queries_dispatch_and_push_runs(monkeypatch, ca
         if key == "workflow_runs":
             queried.append(path)
             return [push(5, "5")] if "event=push" in path else []
-        return HEAVY_JOBS if key == "jobs" else ALL
+        return GOOD_JOBS if key == "jobs" else ALL
 
     monkeypatch.setattr(select, "gh_api", api)
     assert select.main(["--repo", "o/r", "--sha", SHA]) == 0
@@ -194,7 +249,7 @@ def named(*names: str, expired: tuple[str, ...] = ()) -> list[dict]:
     return [{"name": name, "expired": name in expired} for name in names]
 
 
-ATTEMPT_1 = ("e2e-visual-attempt-1", "e2e-integration-attempt-1", "studio-reports-attempt-1")
+ATTEMPT_1 = ("e2e-visual-attempt-1", "e2e-integration-attempt-1", f"{ACCEPTANCE}-attempt-1", "studio-reports-attempt-1")
 
 
 def chosen(artifacts: list[dict], jobs=GOOD_JOBS) -> tuple[int, str] | None:
@@ -243,8 +298,8 @@ def test_a_report_older_than_a_stage_artifact_is_rejected() -> None:
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S3
 def test_artifacts_without_an_attempt_suffix_are_not_used() -> None:
     # Before the attempt suffix, a name could hold any attempt: such a run falls back to the suite.
-    assert chosen(named("e2e-visual", "e2e-integration", "studio-reports")) is None
-    assert chosen(named("studio-reports-attempt-0", "e2e-visual-attempt-1", "e2e-integration-attempt-1")) is None
+    assert chosen(named("e2e-visual", "e2e-integration", ACCEPTANCE, "studio-reports")) is None
+    assert chosen(named("studio-reports-attempt-0", "e2e-visual-attempt-1", "e2e-integration-attempt-1", f"{ACCEPTANCE}-attempt-1")) is None
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S1

@@ -267,17 +267,18 @@ The full integration and screenshot campaigns require a local VS Code installati
 Playwright browser runtime. They can be run with `just integration`, `just visual`, and `just e2e`.
 Generated reports are stored under `out/reports/`; the README-derived Pages tree is stored under
 `out/site/`. `just preflight` runs every stage and returns a failure if any stage fails.
-On macOS a locked screen stops `ci-integration` at once (exit code 3) and `preflight` skips report
-and gallery.
+On macOS a locked screen stops `ci-integration` and `ci-acceptance` at once (exit code 3) and
+`preflight` skips report and gallery.
 
 On macOS the real VS Code window tests use `/Applications/Visual Studio Code.app` when it exists
 (CI downloads the current stable build); set `STUDIO_VSCODE_EXECUTABLE` to the `Contents/MacOS/Code`
 binary of another build to run them there. They need an unlocked session: each test window must
 become the active window once, or VS Code sees no focused editor and undo, cursor commands and
 typed keys reach nothing. macOS keeps a newly launched app in the background while you work in
-another app, so each test window (the trusted, untrusted and scroll-sync suites and the reload
-campaign) is first brought to the front, and the run waits until VS Code reports the window
-focused; on a locked screen it fails at once with the window state instead of timing out later.
+another app, so each test window (the trusted, untrusted and scroll-sync suites, the reload
+campaign and the acceptance windows that take real input) is first brought to the front, and the
+run waits until VS Code reports the window focused; on a locked screen it fails at once with the
+window state instead of timing out later.
 Losing the focus afterwards, for example by switching to another app, does not affect the run.
 Bringing a window to the front goes through System Events, so the first run asks once per app
 (each VS Code build, and the terminal or editor that runs `npm`) to allow it under System Settings >
@@ -286,9 +287,12 @@ permission.
 
 CI runs the same stages as parallel jobs, each calling one target after `just dev-ci`:
 `just ci-static` (`check-no-merge-commits` against the target branch, justfile format, `check`, `audit`, `sphinx-check`), `just ci-visual`,
-`just ci-viewer-graph`, `just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
-review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage manifest is missing or
-failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
+`just ci-viewer-graph`, `just ci-integration`, `just ci-acceptance <group>` (the `acceptance` job,
+one shard per e2e group that has an acceptance file), then `just ci-report` (merges the visual,
+integration and acceptance outputs into the review index, `out/reports/e2e/e2e-manifest.json` and
+`out/reports/acceptance/acceptance-manifest.json`; it fails when a stage manifest, or the manifest
+of an acceptance group, is missing or failed) and `just ci-gallery` (gallery and site from the
+existing outputs, no E2E re-run).
 On a pull request, CI runs only the simulated tests, which make up the required `checks` job:
 `ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual`
 (Playwright/Chromium against a mock host, then the table breakout width tests, run with
@@ -301,15 +305,23 @@ Chromium, in pinned fonts, that no text or pill of any use case map overlaps ano
 at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`; the same target runs the
 gallery link tests in Chromium) and
 `just ci-report visual`, which reports the real VS Code
-stage as skipped. The real VS Code window jobs (`ci-integration` and the
-`stress` repetitions) are heavy, so they run on every push to `main` and never on a pull request.
-On a branch, start them with
+stages as skipped. The real VS Code window jobs (`ci-integration`, the `ci-acceptance` shards and
+the `stress` repetitions) are heavy, so they run on every push to `main` and never on a pull
+request. On a branch, start them with
 `gh workflow run ci.yml --ref <branch> -f heavy=true` (the gallery and site artifact,
 `studio-site-attempt-<n>`, are built too when `integration` and `report` succeed; `-f gallery=false`
-skips them, for example in a stress loop), or with "Run workflow" in the Actions tab. Run them, or `npm run test:integration`
-locally, before merging a change to the extension host, the webview or the real-window tests.
+skips them, for example in a stress loop), or with "Run workflow" in the Actions tab. Run them, or
+`npm run test:integration` and `npm run test:acceptance` locally, before merging a change to the
+extension host, the webview or the real-window tests.
 On a push to `main` that changes the package version (a release), the `release-check` job detects
-the change, and the release is tagged only when both heavy jobs succeed (see "Releases" below).
+the change, and the release is tagged only when the three heavy jobs (`integration`, every
+`acceptance` shard and `stress`) succeed (see "Releases" below).
+The acceptance tests (`test/integration/acceptance/`) walk main paths of the use cases in real
+VS Code, one window per file: trusted, Restricted Mode, or one whose extension under test is the
+built VSIX. `npm run test:acceptance` runs them all (`-- --group <id>` for one e2e group of
+`test/shared/e2eGroups.ts`), and each group writes
+`out/reports/acceptance/<group>/acceptance-manifest.json`. `just ci-acceptance [GROUP]` starts the
+stage over: it first removes the earlier acceptance manifests, those of the other groups too.
 A flake that only shows in the real window can be hunted with the `toc-loop` job, a repro tool that
 never gates a merge and never runs on its own:
 `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` repeats the `toc`
@@ -318,9 +330,9 @@ step timeout 35). `toc_delay_ms` (0 to 2000) injects a random pause around the e
 after a host theme change. Failed rounds are counted, not fatal, and the job is red if any failed;
 `out/reports/e2e/toc-loop-summary.json` is rewritten after each round.
 `just preflight` calls these targets in sequence. Each stage records its own start time and they share
-a run id, so `just ci-visual`, `just ci-viewer-graph`, `just ci-integration` and `just ci-report` also work one by one; `just
-clean` starts a fresh campaign. `just dev-ci` is for CI machines only: `npm ci` replaces
-`node_modules`.
+a run id, so `just ci-visual`, `just ci-viewer-graph`, `just ci-integration`, `just ci-acceptance`
+and `just ci-report` also work one by one; `just clean` starts a fresh campaign. `just dev-ci` is
+for CI machines only: `npm ci` replaces `node_modules`.
 
 The focused site and gallery commands are:
 
@@ -377,7 +389,9 @@ report artifacts into the published `reports/` tree without relativizing externa
 
 The E2E review index is only passed when the visual and integration artifacts share the current
 campaign UUID, start time, and command. A failed `review:begin` stops `test:e2e`; stale visual
-manifests cannot certify a later run.
+manifests cannot certify a later run. `just ci-report` holds the manifest of each acceptance group
+to the campaign of the visual stage too: both started less than two hours apart, or in the same CI
+run.
 
 ### Mutation testing of src/core
 
@@ -536,8 +550,8 @@ in `test/integration/trusted-suite.ts` and its name in `test/build/trustedParts.
 A hung real-window run fails fast and leaves a dump (CI rule 11). Each step of the trusted window
 runs under `step()` (`test/integration/stepWatchdog.ts`), with a budget per step, `STEP start` and
 `STEP done` lines in the log, and `bounded()` around single VS Code calls that must return. The scroll,
-Restricted Mode and standalone windows run as one step each, and the reload campaign has its own
-3-minute deadline. Every
+Restricted Mode and standalone windows run as one step each, each acceptance file runs its paths
+under `step()` in a window of its own, and the reload campaign has its own 3-minute deadline. Every
 suite writes a heartbeat file (`out/reports/e2e/heartbeat-<instance>-<suite>.json`) every 5
 seconds; `run-tests` stops a launch whose heartbeat is silent for 90 seconds (frozen extension host
 or renderer) or that runs past its deadline (15 minutes, `STUDIO_LAUNCH_TIMEOUT_MS`; a stress run
@@ -547,8 +561,9 @@ computes its own, 2 minutes plus 6 s per scenario run (rounds times scenarios) a
 a trusted part is stopped by `LAUNCH TIMEOUT` or `LAUNCH HANG`, that line names the launch and the
 folder is `<time>-trusted-part-<n>-<step>/`):
 `ps` output, the tails of the VS Code logs, the window state and tabs, the heartbeat and screenshots
-(through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step stops
-at 20 minutes (the `toc-loop` step at 35) and `just ci-hang-dump` adds the processes and logs left behind (`post-step/`).
+(through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step and the
+test step of each acceptance shard stop at 20 minutes (the `toc-loop` step at 35) and
+`just ci-hang-dump` adds the processes and logs left behind (`post-step/`).
 
 Run folders of the real-window suites pile up under `out/reports/e2e/screenshots/`.
 `npm run review:finish` keeps the latest 5 per kind (`STUDIO_E2E_KEEP_RUNS` changes it). Run
@@ -608,14 +623,15 @@ gives the order of a release. Make the version commit (step 3) only after a gree
 top branch of the stack when the version PR tops it (see "The version PR on top of a stack" in the
 release guideline).
 
-1. Merge everything the release needs into `main`. The push runs the heavy jobs (`integration` and
-	`stress`) on `main` HEAD: wait for both to be green on that exact commit, reading the result of
-	each job, because a red `stress` does not turn this run red:
+1. Merge everything the release needs into `main`. The push runs the heavy jobs (`integration`,
+	`acceptance` and `stress`) on `main` HEAD: wait for all of them, every `acceptance` shard
+	included, to be green on that exact commit, reading the result of each job, because a red
+	`stress` does not turn this run red:
 
 	```bash
 	gh run list --workflow ci.yml --branch main --limit 3
 	gh run watch <run-id>
-	gh run view <run-id> --json jobs --jq '.jobs[] | select(.name == "integration" or .name == "stress") | "\(.name) \(.conclusion)"'
+	gh run view <run-id> --json jobs --jq '.jobs[] | select(.name == "integration" or .name == "stress" or (.name | startswith("acceptance ("))) | "\(.name) \(.conclusion)"'
 	```
 
 	A red job: fix, merge, run again. A flake: `gh run rerun <run-id> --failed` once, then treat it
@@ -689,20 +705,21 @@ release guideline).
 
 	If `just preflight` stops at `ci-integration` because the screen is locked, do not wait:
 	dispatch `gh workflow run ci.yml --ref <branch> -f heavy=true` at once on the release branch
-	and go on; its `integration` job is the real-window proof.
+	and go on; its `integration` job and `acceptance` shards are the real-window proof.
 
 	Keep release images and their Git LFS
 	objects committed and pushed, since Marketplace image URLs use the release tag.
 
-5. The push of the version commit to `main` runs the heavy jobs (`integration` and
-	`stress`) in its own CI run: `release-check` sees that the pushed version changed
+5. The push of the version commit to `main` runs the heavy jobs (`integration`,
+	`acceptance` and `stress`) in its own CI run: `release-check` sees that the pushed version changed
 	(`scripts/version.py --bump-since`). After successful main-branch CI, the tagging job
 	checks whether the pushed version changed and whether `vX.Y.Z` exists remotely. It
 	verifies matching lockfile versions and an increasing version, then tags the exact
-	tested commit, but only when `checks` and both heavy jobs of that run succeeded.
+	tested commit, but only when `checks` and the three heavy jobs of that run succeeded.
 	Otherwise it creates no tag, writes "Release not tagged" with the result of `checks`,
-	`integration` and `stress` to the job summary, and fails (an integration failure also
-	fails `report` and `checks`; the summary is written all the same). Only that push can
+	`integration`, `acceptance` and `stress` to the job summary, and fails (an integration or
+	acceptance failure also fails `report` and `checks`; the summary is written all the same).
+	Only that push can
 	tag the version: see "Recovering from a red heavy job" below. Ordinary pushes (no version
 	change) leave the tags unchanged. It never commits files back to
 	`main`.
@@ -725,8 +742,8 @@ release guideline).
 
 ### Recovering from a red heavy job
 
-A flake that fails `integration` or `stress` on the push of a version change is recovered in
-the same CI run, with no new commit and no manual tag:
+A flake that fails `integration`, an `acceptance` shard or `stress` on the push of a version change
+is recovered in the same CI run, with no new commit and no manual tag:
 
 1. Open the run: Actions, workflow **CI**, the run of the version commit on `main`. Its
 	`tag-release` summary says "Release not tagged" and lists each result.
@@ -738,16 +755,19 @@ the same CI run, with no new commit and no manual tag:
 	```
 
 3. GitHub re-runs the failed jobs and the jobs that depend on them, including skipped ones:
-	the heavy job, then `report` and `checks` after an integration failure, `tag-release`,
-	then `release` (which dispatches Release VSIX, a separate run) and `pages`. Jobs that passed keep their results and outputs, so `release-check`
+	the heavy job (of the `acceptance` matrix, the failed shards only), then `report` and `checks`
+	after an integration or acceptance failure, `tag-release`, then `release` (which dispatches
+	Release VSIX, a separate run) and `pages`. Jobs that passed keep their results and outputs, so `release-check`
 	still reports the version change. The re-run uses the same commit and push event, and
 	`tag-release` tags that commit when everything is green.
 4. Each attempt uploads its own artifacts: every artifact name of the CI workflow ends with
 	`-attempt-<n>` (for example `studio-reports-attempt-2`), and each consumer downloads the name
 	that the producing job reports. `report` therefore merges the attempt-1 visual stage with the
 	re-run integration stage, and Pages uses the merged reports of the newest attempt that ran
-	`report`. A download by a fixed name would return the attempt-1 artifact. The visual and
-	integration stages of one CI run form one campaign however far apart they started, so a
+	`report`. A download by a fixed name would return the attempt-1 artifact. Each acceptance
+	shard uploads `e2e-acceptance-<group>-attempt-<n>`, and `report` keeps the newest attempt of
+	each group (`scripts/select-acceptance-attempts.mjs`). The visual, integration and acceptance
+	stages of one CI run form one campaign however far apart they started, so a
 	re-run hours or days later still passes `report`. To fetch the reports of a run by hand, use
 	`just site-from-run <run-id>`, which picks the newest attempt.
 5. Once the tag exists, only re-run the failed jobs. Re-running `tag-release` then finds the

@@ -88,10 +88,11 @@ jobs:
             exit 1
           fi
       # Reuse of CI reports. On the automatic release path, ci.yml calls this workflow from the push
-      # run of the version change, after its heavy jobs (integration and stress) succeeded: the
-      # caller says so with reports_from_caller, and the reports are taken from that same run (it
-      # is still in progress, so the selection below could not find it). Otherwise the selection
-      # looks for the newest green heavy run of the commit: a manual heavy run or that release push.
+      # run of the version change, after its heavy jobs (integration, acceptance and stress)
+      # succeeded: the caller says so with reports_from_caller, and the reports are taken from that
+      # same run (it is still in progress, so the selection below could not find it). Otherwise the
+      # selection looks for the newest green heavy run of the commit: a manual heavy run or that
+      # release push.
       # An explicit run_id goes through the same checks and fails closed on any mismatch; the
       # automatic selection falls back to the suite on any API or download problem.
       # Artifact names end with the attempt that uploaded them ("Re-run failed jobs" keeps the run
@@ -127,8 +128,8 @@ jobs:
             echo "$selection" >> "$GITHUB_OUTPUT"
           fi
           echo "Reports from: ${selection:-none (the suite runs below)}"
-      # The merged reports artifact holds both stage artifacts (e2e-visual, e2e-integration): it
-      # alone is enough.
+      # The merged reports artifact holds the three stages (e2e-visual, e2e-integration and the
+      # e2e-acceptance shards): it alone is enough.
       - name: Fetch the end-to-end reports of the calling run
         id: download-caller
         if: steps.reports.outputs.from_caller == 'true'

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       heavy:
-        description: Also run the real VS Code jobs (integration and stress, about 10 and 16 minutes)
+        description: Also run the real VS Code jobs (integration, acceptance in one shard per group, and stress, about 10, 15 and 16 minutes)
         type: boolean
         default: false
       toc_loop:
@@ -41,8 +41,8 @@ on:
 
 env:
   STUDIO_NPM: npm --registry=https://registry.npmjs.org/
-  # One end-to-end campaign id per workflow run, shared by the visual and integration jobs;
-  # each job records its own real start time. The attempt number is left out on purpose: re-running
+  # One end-to-end campaign id per workflow run, shared by the visual, integration and acceptance
+  # jobs; each job records its own real start time. The attempt number is left out on purpose: re-running
   # only the failed jobs must keep the same id, or the report job would see two campaigns.
   # Artifact names are the opposite: each ends with the attempt that uploaded it, because after
   # "Re-run failed jobs" a download by a fixed name returned the attempt-1 artifact. A job whose
@@ -306,7 +306,61 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
-  # Heavy (with integration): repeats the flake-prone and the new real-window scenarios (11
+  # Heavy, like integration: the StRS use case paths accepted in real VS Code windows
+  # (test/integration/acceptance/), one shard per e2e group that has an acceptance file. A red or
+  # missing shard fails `report`, then `checks`. One job has one output for all its shards, so
+  # `artifact` is a pattern; "Re-run failed jobs" re-runs the failed shards only, and `report`
+  # keeps the newest attempt of each group.
+  acceptance:
+    needs: release-check
+    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.result == 'success') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every group with an acceptance file, in the order of test/shared/e2eGroups.ts.
+        group: [trust-security]
+    outputs:
+      artifact: e2e-acceptance-*-attempt-*
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
+        with:
+          just-version: 1.58.0
+      - run: just dev-ci
+      # Below the job's 30 minutes, with the screen of the integration job (CR 326).
+      - run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-acceptance "${{ matrix.group }}"
+        timeout-minutes: 20
+        env:
+          STUDIO_VIEWPORT_GUARD: strict
+      - name: Collect hang diagnostics
+        if: always()
+        run: just ci-hang-dump
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: e2e-acceptance-${{ matrix.group }}-attempt-${{ github.run_attempt }}
+          path: out/reports/
+          if-no-files-found: warn
+
+  # Heavy (with integration and acceptance): repeats the flake-prone and the new real-window scenarios (11
   # rounds, in the trusted window then in the Restricted Mode window); a race that a single run
   # passes by luck fails here. Its reports are not part of the e2e campaign.
   # Advisory: a red stress run flags a flake to fix (CI rule 12) but does not block merges. On a
@@ -430,7 +484,7 @@ jobs:
           if-no-files-found: warn
 
   report:
-    needs: [release-check, visual, integration]
+    needs: [release-check, visual, integration, acceptance]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
@@ -476,7 +530,15 @@ jobs:
           pattern: ${{ needs.integration.outputs.artifact }}
           path: out/reports/
           merge-multiple: true
-      # Without the heavy jobs the real VS Code stage is reported as skipped (visual only).
+      # One folder per shard artifact, never merged: ci-report keeps the newest attempt of each
+      # group (scripts/select-acceptance-attempts.mjs).
+      - name: Download the acceptance stage reports
+        if: needs.acceptance.outputs.artifact != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: ${{ needs.acceptance.outputs.artifact }}
+          path: out/ci-artifacts/acceptance/
+      # Without the heavy jobs the real VS Code stages are reported as skipped (visual only).
       - run: just ci-report ${{ ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.result == 'success') && 'all' || 'visual' }}
       - name: Publish merged reports
         if: always()
@@ -541,8 +603,8 @@ jobs:
 
   # Stable aggregate name for branch protection: it depends on every required check job, the
   # simulated ones. The real VS Code jobs are not among them, but on a push to main `report` merges
-  # the integration stage, and on a version change tag-release requires both heavy jobs (CI rules
-  # 13 and 14).
+  # the integration and acceptance stages, and on a version change tag-release requires every heavy
+  # job (CI rules 13 and 14).
   checks:
     needs: [static, static-windows, visual, viewer-graph, report]
     if: ${{ !cancelled() }}
@@ -561,12 +623,12 @@ jobs:
           done
 
   tag-release:
-    needs: [checks, release-check, integration, stress]
+    needs: [checks, release-check, integration, acceptance, stress]
     # `checks` runs even though the heavy jobs above it are skipped; a plain `if` carries an
     # implicit success() that is false when any ancestor was skipped, so ask for the result.
-    # Without a version change, red checks skip this job. On a version change the job also runs when checks failed (an integration failure
-    # fails report, then checks), so that every untagged version change says why in its summary;
-    # the tag step requires checks and both heavy jobs to be green.
+    # Without a version change, red checks skip this job. On a version change the job also runs when checks failed (an integration
+    # or acceptance failure fails report, then checks), so that every untagged version change says
+    # why in its summary; the tag step requires checks and every heavy job to be green.
     if: ${{ !cancelled() && needs.release-check.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.checks.result == 'success' || needs.release-check.outputs.bump == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -581,10 +643,11 @@ jobs:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
       - name: Refuse to tag a version change without a green heavy run
-        if: needs.release-check.outputs.bump == 'true' && !(needs.checks.result == 'success' && needs.integration.result == 'success' && needs.stress.result == 'success')
+        if: needs.release-check.outputs.bump == 'true' && !(needs.checks.result == 'success' && needs.integration.result == 'success' && needs.acceptance.result == 'success' && needs.stress.result == 'success')
         env:
           CHECKS: ${{ needs.checks.result }}
           INTEGRATION: ${{ needs.integration.result }}
+          ACCEPTANCE: ${{ needs.acceptance.result }}
           STRESS: ${{ needs.stress.result }}
           RUN_ID: ${{ github.run_id }}
         run: |
@@ -596,6 +659,7 @@ jobs:
             echo
             echo "- checks: $CHECKS"
             echo "- integration: $INTEGRATION"
+            echo "- acceptance: $ACCEPTANCE"
             echo "- stress: $STRESS"
             echo
             echo "Only this push can tag this version (a later push without a version change does"
@@ -604,11 +668,11 @@ jobs:
             echo "when they pass, and Pages uses the reports of the newest attempt. If the failure is"
             echo "a real bug, fix it and release a new version."
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "::error::Tagging skipped: checks or heavy run not green (checks: $CHECKS, integration: $INTEGRATION, stress: $STRESS)"
+          echo "::error::Tagging skipped: checks or heavy run not green (checks: $CHECKS, integration: $INTEGRATION, acceptance: $ACCEPTANCE, stress: $STRESS)"
           exit 1
       - name: Tag a committed version bump
         id: tag
-        if: needs.checks.result == 'success' && (needs.release-check.outputs.bump != 'true' || (needs.integration.result == 'success' && needs.stress.result == 'success'))
+        if: needs.checks.result == 'success' && (needs.release-check.outputs.bump != 'true' || (needs.integration.result == 'success' && needs.acceptance.result == 'success' && needs.stress.result == 'success'))
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: uv run --group release python scripts/version.py --tag-before "$BEFORE_SHA"
@@ -642,9 +706,9 @@ jobs:
 
   # Tags pushed with GITHUB_TOKEN do not trigger tag workflows, so deploy Pages from here.
   pages:
-    # integration and stress: to tell Pages that this run holds green heavy reports to reuse;
-    # report: the name of its merged reports artifact (newest attempt that ran report).
-    needs: [tag-release, integration, stress, report]
+    # integration, acceptance and stress: to tell Pages that this run holds green heavy reports to
+    # reuse; report: the name of its merged reports artifact (newest attempt that ran report).
+    needs: [tag-release, integration, acceptance, stress, report]
     # Same reason as tag-release: do not inherit success() from the skipped heavy ancestors.
     if: ${{ !cancelled() && needs.tag-release.result == 'success' && needs.tag-release.outputs.tag != '' }}
     permissions:
@@ -656,5 +720,5 @@ jobs:
     with:
       tag: ${{ needs.tag-release.outputs.tag }}
       # A tag means a version change whose heavy jobs were green (tag-release); checked again here.
-      reports_from_caller: ${{ needs.integration.result == 'success' && needs.stress.result == 'success' }}
+      reports_from_caller: ${{ needs.integration.result == 'success' && needs.acceptance.result == 'success' && needs.stress.result == 'success' }}
       reports_artifact: ${{ needs.report.outputs.artifact }}

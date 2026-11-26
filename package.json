@@ -467,6 +467,7 @@
     "test:contracts": "node scripts/node-test.mjs contract \"out/test/core/render/*.contract.js\"",
     "test:security": "node scripts/node-test.mjs security \"out/test/security/*.test.js\"",
     "test:integration": "npm run compile && npm run bundle && node out/test/integration/run-tests.js",
+    "test:acceptance": "npm run compile && npm run bundle && node out/test/integration/run-tests.js --acceptance-only",
     "review:begin": "npm run compile && node out/test/integration/review-index.js --begin",
     "review:finish": "node out/test/integration/review-index.js",
     "review:gallery": "npm run compile && node out/test/site/poGalleryCli.js",

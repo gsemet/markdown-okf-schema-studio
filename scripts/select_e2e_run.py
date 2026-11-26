@@ -1,12 +1,14 @@
 """Pick the CI run whose end-to-end reports the Pages site is built from.
 
-The run must be the newest heavy run of the exact commit that finished green, whose ``integration``
-job succeeded and that still holds the three report artifacts. A heavy run is either a manual one
-(workflow ``ci.yml``, event ``workflow_dispatch``) or the release push: the ``push`` run on ``main``
-of a version change, where CI runs the heavy jobs itself; such a run qualifies only when both heavy
-jobs, ``integration`` and ``stress``, succeeded (not skipped). Prints ``run_id=<id>`` and
-``artifact=<name>`` (the merged reports artifact to download, in the ``GITHUB_OUTPUT`` format), or
-nothing when no run qualifies (the caller then runs the suite itself).
+The run must be the newest heavy run of the exact commit that finished green, whose heavy jobs all
+succeeded (not skipped) and that still holds the report artifacts: ``e2e-visual``,
+``e2e-integration``, ``e2e-acceptance-<group>`` for every acceptance shard and ``studio-reports``.
+The heavy jobs are ``integration``, ``stress`` and every shard of the acceptance matrix (a job named
+``acceptance (<group>)``, at least one). A heavy run is either a manual one (workflow ``ci.yml``,
+event ``workflow_dispatch``) or the release push: the ``push`` run on ``main`` of a version change,
+where CI runs the heavy jobs itself. Prints ``run_id=<id>`` and ``artifact=<name>`` (the merged
+reports artifact to download, in the ``GITHUB_OUTPUT`` format), or nothing when no run qualifies
+(the caller then runs the suite itself).
 
 Attempts: every artifact name of ci.yml ends with ``-attempt-<n>``, the attempt that uploaded it.
 "Re-run failed jobs" keeps the run id and uploads the re-run jobs' artifacts again under the new
@@ -39,13 +41,16 @@ PUSH_EVENT = "push"
 PUSH_BRANCH = "main"
 EVENTS = (EVENT, PUSH_EVENT)
 REPORTS_ARTIFACT = "studio-reports"
-STAGE_ARTIFACTS = ("e2e-visual", "e2e-integration")
+# One artifact per acceptance shard, e2e-acceptance-<group>.
+ACCEPTANCE_ARTIFACT = "e2e-acceptance"
+STAGE_ARTIFACTS = ("e2e-visual", "e2e-integration", ACCEPTANCE_ARTIFACT)
 REQUIRED_ARTIFACTS = (*STAGE_ARTIFACTS, REPORTS_ARTIFACT)
 ATTEMPT_NAME = re.compile(r"^(?P<base>.+)-attempt-(?P<attempt>[1-9][0-9]*)$")
-REQUIRED_JOB = "integration"
-# A push run of main is a heavy run only when both heavy jobs succeeded; without a version change
-# they are skipped and the run holds no real-window reports.
-PUSH_REQUIRED_JOBS = (REQUIRED_JOB, "stress")
+# A run is a heavy run only when every heavy job succeeded; a push without a version change skips
+# them and holds no real-window reports.
+REQUIRED_JOBS = ("integration", "stress")
+# The acceptance matrix names its jobs "acceptance (<group>)"; a skipped matrix keeps the bare name.
+ACCEPTANCE_JOB_PREFIX = "acceptance ("
 
 
 def event_problem(run: dict[str, Any]) -> str | None:
@@ -70,12 +75,23 @@ def is_candidate(run: dict[str, Any], sha: str) -> bool:
     )
 
 
-def required_jobs(run: dict[str, Any]) -> tuple[str, ...]:
-    return PUSH_REQUIRED_JOBS if run.get("event") == PUSH_EVENT else (REQUIRED_JOB,)
+def acceptance_shards(jobs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The jobs of the acceptance matrix, one per group."""
+    return [job for job in jobs if str(job.get("name", "")).startswith(ACCEPTANCE_JOB_PREFIX)]
 
 
-def jobs_succeeded(jobs: list[dict[str, Any]], names: tuple[str, ...]) -> bool:
-    return all(any(j.get("name") == name and j.get("conclusion") == "success" for j in jobs) for name in names)
+def jobs_problem(jobs: list[dict[str, Any]]) -> str | None:
+    """Why the jobs of a run do not make a green heavy run, or None."""
+    green = {job.get("name") for job in jobs if job.get("conclusion") == "success"}
+    failed = [name for name in REQUIRED_JOBS if name not in green]
+    shards = acceptance_shards(jobs)
+    if not shards:
+        failed.append(f"no '{ACCEPTANCE_JOB_PREFIX}<group>)' job")
+    failed.extend(str(job["name"]) for job in shards if job.get("conclusion") != "success")
+    if not failed:
+        return None
+    needed = ", ".join(map(repr, REQUIRED_JOBS))
+    return f"jobs {needed} and every '{ACCEPTANCE_JOB_PREFIX}<group>)' job must succeed; not green: {', '.join(failed)}"
 
 
 class Selection(NamedTuple):
@@ -96,19 +112,47 @@ def newest_attempts(artifacts: list[dict[str, Any]]) -> dict[str, tuple[int, dic
     return newest
 
 
+def required_artifact_name(base: str) -> str:
+    return f"{base}-<group>" if base == ACCEPTANCE_ARTIFACT else base
+
+
+def newest_of(newest: dict[str, tuple[int, dict[str, Any]]], base: str) -> list[tuple[int, dict[str, Any]]]:
+    """The newest attempt of each artifact of one required name (one per group for acceptance)."""
+    if base == ACCEPTANCE_ARTIFACT:
+        return [found for name, found in sorted(newest.items()) if name.startswith(f"{base}-")]
+    return [newest[base]] if base in newest else []
+
+
 def reports_artifact(artifacts: list[dict[str, Any]]) -> tuple[str | None, str | None]:
     """(problem, None), or (None, name of the reports artifact of the newest attempt)."""
     newest = newest_attempts(artifacts)
     for base in REQUIRED_ARTIFACTS:
-        if base not in newest:
-            return f"missing artifacts: no {base}-attempt-<n> (need {', '.join(REQUIRED_ARTIFACTS)})", None
-        if newest[base][1].get("expired"):
-            return f"missing or expired artifacts: {newest[base][1]['name']} expired", None
+        found = newest_of(newest, base)
+        if not found:
+            needed = ", ".join(map(required_artifact_name, REQUIRED_ARTIFACTS))
+            return f"missing artifacts: no {required_artifact_name(base)}-attempt-<n> (need {needed})", None
+        expired = [str(artifact["name"]) for _, artifact in found if artifact.get("expired")]
+        if expired:
+            return f"missing or expired artifacts: {', '.join(expired)} expired", None
     attempt, reports = newest[REPORTS_ARTIFACT]
     for base in STAGE_ARTIFACTS:
-        if newest[base][0] > attempt:
-            return f"artifact {reports['name']} is older than {newest[base][1]['name']}", None
+        for stage_attempt, stage in newest_of(newest, base):
+            if stage_attempt > attempt:
+                return f"artifact {reports['name']} is older than {stage['name']}", None
     return None, str(reports["name"])
+
+
+def run_reports(jobs: list[dict[str, Any]], artifacts: list[dict[str, Any]]) -> tuple[str | None, str | None]:
+    """reports_artifact of a run whose every acceptance shard also has the artifact of its group."""
+    problem, reports = reports_artifact(artifacts)
+    if problem:
+        return problem, None
+    uploaded = newest_attempts(artifacts)
+    groups = [str(job["name"])[len(ACCEPTANCE_JOB_PREFIX):].removesuffix(")") for job in acceptance_shards(jobs)]
+    missing = [f"{ACCEPTANCE_ARTIFACT}-{group}" for group in groups if f"{ACCEPTANCE_ARTIFACT}-{group}" not in uploaded]
+    if missing:
+        return f"missing artifacts: no {', '.join(f'{base}-attempt-<n>' for base in missing)}", None
+    return None, reports
 
 
 def validate_run(
@@ -128,10 +172,11 @@ def validate_run(
     if run.get("status") != "completed" or run.get("conclusion") != "success":
         return f"run did not finish green (status={run.get('status')!r}, conclusion={run.get('conclusion')!r})", None
     run_id = int(run["id"])
-    names = required_jobs(run)
-    if not jobs_succeeded(jobs_of(run_id), names):
-        return f"job {' and '.join(map(repr, names))} did not succeed", None
-    return reports_artifact(artifacts_of(run_id))
+    jobs = jobs_of(run_id)
+    problem = jobs_problem(jobs)
+    if problem:
+        return problem, None
+    return run_reports(jobs, artifacts_of(run_id))
 
 
 def select_run(
@@ -145,9 +190,10 @@ def select_run(
         if not is_candidate(run, sha):
             continue
         run_id = int(run["id"])
-        if not jobs_succeeded(jobs_of(run_id), required_jobs(run)):
+        jobs = jobs_of(run_id)
+        if jobs_problem(jobs):
             continue
-        problem, artifact = reports_artifact(artifacts_of(run_id))
+        problem, artifact = run_reports(jobs, artifacts_of(run_id))
         if problem is None and artifact:
             return Selection(run_id, artifact)
     return None

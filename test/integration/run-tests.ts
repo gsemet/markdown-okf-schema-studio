@@ -1,14 +1,17 @@
-import { execFileSync, spawn, type ChildProcess } from "node:child_process";
+import { execFileSync, type ChildProcess } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { downloadAndUnzipVSCode, runTests } from "@vscode/test-electron";
+import { runAcceptance } from "./acceptanceRunner";
 import { runReloadCampaign } from "./reload-suite";
+import { runSpawnedWindow } from "./spawnedWindow";
 import { testProfileLaunchArgs, writeTestProfileSettings } from "../shared/testProfile";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag, shortTemporaryRoot } from "../shared/runIsolation";
 import { heartbeatFileFor, launchDeadlineMs, RELOAD_LAUNCH_DEADLINE_MS, stressDeadlineLine } from "../shared/hangWatchdog";
 import { resetHeartbeat, watchLaunch } from "../shared/launchWatchdog";
+import { parseRunnerArgs, type IntegrationScope, type RunnerArgs } from "../shared/runnerArgs";
 import { trustedLaunches, type TrustedLaunch } from "../shared/trustedParts";
 
 const extensionRoot = path.resolve(__dirname, "../../..");
@@ -34,58 +37,19 @@ async function codeExecutablePath(): Promise<string> {
 }
 
 /**
- * The Restricted Mode window is spawned directly (runTests would trust the workspace). It gets its
- * own loopback CDP port like the browser suites, for its real-window capture (CR 043), and a user
- * setting that keeps the startup trust prompt away: the workspace stays untrusted (the suite checks
- * it), the modal dialog would only cover the window in the capture.
+ * The Restricted Mode window is spawned directly (runTests would trust the workspace), for its
+ * real-window capture (CR 043) too; the workspace stays untrusted (the suite checks it).
  */
 async function runUntrustedScenario(suiteName: string): Promise<void> {
-  const executable = await codeExecutablePath();
-  const directories = createRunDirectories(instanceId);
-  const { userDataDirectory, extensionsDirectory } = directories;
-  const debugPort = await freePort();
-  const heartbeatFile = heartbeatFileFor(instanceId, suiteName);
-  resetHeartbeat(heartbeatFile);
-  writeTestProfileSettings(userDataDirectory); // focus thieves off, trust prompt off (testProfile.ts)
-  const args = [
-    "--no-sandbox",
-    "--disable-gpu-sandbox",
-    "--disable-updates",
-    "--skip-welcome",
-    "--skip-release-notes",
-    ...testProfileLaunchArgs(),
-    `--user-data-dir=${userDataDirectory}`,
-    `--extensions-dir=${extensionsDirectory}`,
-    `--extensionTestsPath=${path.join(__dirname, suiteName)}`,
-    `--extensionDevelopmentPath=${extensionRoot}`,
-    `--remote-debugging-port=${debugPort}`,
-    "--remote-debugging-address=127.0.0.1",
-    workspaceRoot,
-  ];
-  try {
-    let child: ReturnType<typeof spawn> | undefined;
-    // Hang watchdog (test/shared/launchWatchdog.ts): a frozen host or a launch past its deadline is
-    // dumped and killed while the user-data directory still exists.
-    const exitCode = await watchLaunch({
-      name: suiteName, heartbeatFile, userDataDirectory, cdpPort: debugPort, rootPid: () => child?.pid,
-    }, new Promise<number>((resolve, reject) => {
-      child = spawn(executable, args, {
-        env: {
-          ...process.env, STUDIO_E2E_INSTANCE: instanceId, STUDIO_CDP_PORT: String(debugPort),
-          STUDIO_HEARTBEAT_FILE: heartbeatFile, STUDIO_USER_DATA_DIR: userDataDirectory,
-        },
-        stdio: "inherit",
-      });
-      child.once("error", reject);
-      child.once("exit", (code: number | null) => resolve(code ?? 1));
-    }));
-    if (exitCode !== 0) {
-      throw new Error(`Untrusted extension host exited with code ${exitCode}.`);
-    }
-  } finally {
-    resetHeartbeat(heartbeatFile); // a dump already holds a copy
-    directories.dispose();
-  }
+  await runSpawnedWindow({
+    executable: await codeExecutablePath(),
+    name: suiteName,
+    label: "Untrusted extension host",
+    instanceId,
+    testsPath: path.join(__dirname, suiteName),
+    developmentPath: extensionRoot,
+    workspace: workspaceRoot,
+  });
 }
 
 /** `trusted` tells which launch of the trusted window this is; the other suites have one launch each. */
@@ -242,28 +206,28 @@ async function runTrustedLaunches(): Promise<void> {
   for (const launch of trustedLaunches(process.env)) await runScenario(launch.suiteFile, false, launch);
 }
 
-async function main(): Promise<void> {
+async function main(suites: IntegrationScope): Promise<void> {
   launchDeadlineMs(); // an invalid STUDIO_LAUNCH_TIMEOUT_MS or stress plan fails here, before any VS Code starts
   const deadlineLine = stressDeadlineLine();
-  if (deadlineLine !== undefined && !process.argv.includes("--reload-only")) console.log(deadlineLine);
-  if (process.argv.includes("--reload-only")) {
+  if (deadlineLine !== undefined && suites !== "reload") console.log(deadlineLine);
+  if (suites === "reload") {
     await runWatchedReloadCampaign();
     return;
   }
-  if (process.argv.includes("--trusted-only")) {
+  if (suites === "trusted") {
     await runTrustedLaunches();
     return;
   }
-  if (process.argv.includes("--reverse-migration-only")) {
+  if (suites === "reverse-migration") {
     await runReverseMigrationScenario();
     return;
   }
-  if (process.argv.includes("--untrusted-only")) {
+  if (suites === "untrusted") {
     await runScenario("untrusted-suite.js", true);
     return;
   }
   await runScenario("scroll-sync-suite.js", false);
-  if (process.argv.includes("--scroll-only")) return;
+  if (suites === "scroll") return;
   await runScenario("untrusted-suite.js", true);
   await runTrustedLaunches();
   await runScenario("standalone-suite.js", false);
@@ -271,23 +235,42 @@ async function main(): Promise<void> {
   await runWatchedReloadCampaign();
 }
 
-fs.mkdirSync(artifactRoot, { recursive: true });
-fs.mkdirSync(E2E_SCREENSHOT_ROOT, { recursive: true });
-const integrationManifest = {
-  status: "running", command: process.argv.join(" "), campaignCommand, runId: campaignRunId, instanceId,
-  campaignStartedAt, startedAt: new Date().toISOString(),
-  revision: execFileSync("git", ["rev-parse", "HEAD"], { cwd: extensionRoot, encoding: "utf8" }).trim(),
-  dirty: execFileSync("git", ["status", "--porcelain"], { cwd: extensionRoot, encoding: "utf8" }).trim().length > 0,
-  scope: process.argv.includes("--reload-only") ? "reload" : process.argv.includes("--trusted-only") ? "trusted"
-    : process.argv.includes("--untrusted-only") ? "untrusted" : process.argv.includes("--reverse-migration-only") ? "reverse-migration" : process.argv.includes("--scroll-only") ? "scroll" : "all",
-};
-fs.writeFileSync(path.join(artifactRoot, "integration-manifest.json"), JSON.stringify(integrationManifest, null, 2));
-void main().then(() => {
-  integrationManifest.status = "passed";
-}).catch((error: unknown) => {
-  integrationManifest.status = "failed";
-  console.error(error);
-  process.exitCode = 1;
-}).finally(() => {
-  fs.writeFileSync(path.join(artifactRoot, "integration-manifest.json"), JSON.stringify({ ...integrationManifest, completedAt: new Date().toISOString() }, null, 2));
-});
+/** The integration suites, recorded in `out/reports/e2e/integration-manifest.json`. */
+function runIntegration(args: Extract<RunnerArgs, { mode: "integration" }>): void {
+  fs.mkdirSync(artifactRoot, { recursive: true });
+  fs.mkdirSync(E2E_SCREENSHOT_ROOT, { recursive: true });
+  const integrationManifest = {
+    status: "running", command: process.argv.join(" "), campaignCommand, runId: campaignRunId, instanceId,
+    campaignStartedAt, startedAt: new Date().toISOString(),
+    revision: execFileSync("git", ["rev-parse", "HEAD"], { cwd: extensionRoot, encoding: "utf8" }).trim(),
+    dirty: execFileSync("git", ["status", "--porcelain"], { cwd: extensionRoot, encoding: "utf8" }).trim().length > 0,
+    scope: args.scope,
+  };
+  fs.writeFileSync(path.join(artifactRoot, "integration-manifest.json"), JSON.stringify(integrationManifest, null, 2));
+  void main(args.suites).then(() => {
+    integrationManifest.status = "passed";
+  }).catch((error: unknown) => {
+    integrationManifest.status = "failed";
+    console.error(error);
+    process.exitCode = 1;
+  }).finally(() => {
+    fs.writeFileSync(path.join(artifactRoot, "integration-manifest.json"), JSON.stringify({ ...integrationManifest, completedAt: new Date().toISOString() }, null, 2));
+  });
+}
+
+/** The StRS acceptance files only; their manifests are per group (`acceptanceRunner.ts`). */
+async function mainAcceptance(args: Extract<RunnerArgs, { mode: "acceptance" }>): Promise<void> {
+  launchDeadlineMs(); // an invalid STUDIO_LAUNCH_TIMEOUT_MS fails here, before any VS Code starts
+  await runAcceptance({ group: args.group, extensionRoot, instanceId, executable: codeExecutablePath });
+}
+
+// Parsed first: a refused argument fails before any manifest is written and any VS Code starts.
+const runnerArgs = parseRunnerArgs(process.argv.slice(2));
+if (runnerArgs.mode === "integration") {
+  runIntegration(runnerArgs);
+} else {
+  void mainAcceptance(runnerArgs).catch((error: unknown) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

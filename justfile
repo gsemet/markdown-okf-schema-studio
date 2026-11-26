@@ -212,7 +212,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py test/build/test_no_merge_commits.py test/build/test_changelog_refs.py
+    uv run --group docs --group release --group requirements pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_guideline_isolation.py test/build/test_workflows.py test/build/test_plugin_manifests.py test/build/test_table_bar_flow.py test/build/test_check_main_paths.py test/build/test_no_merge_commits.py test/build/test_changelog_refs.py test/build/test_unpack_vsix.py
 
 # Check that the current version has valid release notes under docs/releases-notes/.
 release-notes-check:
@@ -358,7 +358,24 @@ ci-integration: (_require-unlocked-screen "ci-integration")
         exit 1
     fi
 
-# CI job "integration", after its test step whatever its outcome (a hang cancels that step at its
+# CI job "acceptance", one shard per e2e group: the StRS use case paths accepted in real VS Code
+# windows (test/integration/acceptance/), reports under out/reports/acceptance/. GROUP is an e2e
+# group id (test/shared/e2eGroups.ts); every group with an acceptance file when empty.
+ci-acceptance GROUP="": (_require-unlocked-screen "ci-acceptance")
+    #!/usr/bin/env bash
+    set -uo pipefail
+    group={{ quote(GROUP) }}
+    eval "$(node scripts/e2e-campaign.mjs begin acceptance)"
+    run=({{ npm }} run test:acceptance)
+    [[ -z "$group" ]] || run+=(-- --group "$group")
+    if "${run[@]}"; then
+        echo "ci-acceptance: passed"
+    else
+        echo "ci-acceptance: FAILED" >&2
+        exit 1
+    fi
+
+# CI jobs "integration" and "acceptance", after their test step whatever its outcome (a hang cancels that step at its
 # timeout): append the process list and the tails of the VS Code logs left in the temporary
 # user-data directories to out/reports/e2e/hang-dumps/post-step/. Diagnostics only: never fails.
 ci-hang-dump:
@@ -427,9 +444,10 @@ ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0" $STUDIO_TOC_LOOP_S
         exit 1
     fi
 
-# CI job "report": merge the visual and integration outputs into the review index and e2e manifest.
-# STAGES=visual: the real VS Code stage did not run (the pull request path of CI); it is reported as
-# skipped and only the visual stage counts.
+# CI job "report": merge the visual, integration and acceptance outputs into the review index and
+# e2e manifest; of each acceptance group, the newest downloaded attempt counts.
+# STAGES=visual: the real VS Code stages did not run (the pull request path of CI); they are
+# reported as skipped and only the visual stage counts.
 ci-report STAGES="all":
     #!/usr/bin/env bash
     set -uo pipefail
@@ -441,6 +459,7 @@ ci-report STAGES="all":
     failed=0
     {{ npm }} run compile || failed=1
     {{ npm }} run review:finish -- $only || failed=1
+    node scripts/select-acceptance-attempts.mjs || failed=1
     node scripts/e2e-campaign.mjs report $only || failed=1
     if [[ "$failed" -eq 0 ]]; then
         echo "ci-report: passed"
@@ -468,22 +487,28 @@ preflight: clean format
     failures=0
     just ci-static || failures=$((failures + 1))
     if [[ "{{ os() }}" == "windows" ]]; then
-        echo "preflight: visual, viewer-graph, integration, report and gallery stages skipped on Windows; CI runs them"
+        echo "preflight: visual, viewer-graph, integration, acceptance, report and gallery stages skipped on Windows; CI runs them"
         exit "$failures"
     fi
     if ! just _require-unlocked-screen preflight >/dev/null 2>&1; then
-        echo "preflight: the screen is locked; ci-integration will stop unless it is unlocked before then" >&2
+        echo "preflight: the screen is locked; ci-integration and ci-acceptance will stop unless it is unlocked before then" >&2
     fi
     just ci-visual || failures=$((failures + 1))
     just ci-viewer-graph || failures=$((failures + 1))
+    # Exit code 3: the screen is locked and the stage did not run; the report would then be empty.
+    locked=""
     just ci-integration
     integration=$?
-    if [[ "$integration" -eq 3 ]]; then
-        failures=$((failures + 1))
-        echo "ci-report: skipped, integration did not run (screen locked)" >&2
-        echo "ci-gallery: skipped, integration did not run (screen locked)" >&2
+    [[ "$integration" -eq 0 ]] || failures=$((failures + 1))
+    [[ "$integration" -ne 3 ]] || locked="integration"
+    just ci-acceptance
+    acceptance=$?
+    [[ "$acceptance" -eq 0 ]] || failures=$((failures + 1))
+    [[ "$acceptance" -ne 3 ]] || locked="${locked:+$locked and }acceptance"
+    if [[ -n "$locked" ]]; then
+        echo "ci-report: skipped, $locked did not run (screen locked)" >&2
+        echo "ci-gallery: skipped, $locked did not run (screen locked)" >&2
     else
-        [[ "$integration" -eq 0 ]] || failures=$((failures + 1))
         just ci-report || failures=$((failures + 1))
         just ci-gallery || failures=$((failures + 1))
     fi

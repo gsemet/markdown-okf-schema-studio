@@ -1,35 +1,55 @@
-// Gives each standalone CI stage (ci-visual, ci-integration) its own campaign identity and merges
-// their manifests (ci-report).
+// Gives each standalone CI stage (ci-visual, ci-integration, ci-acceptance) its own campaign
+// identity and merges their manifests (ci-report).
 //
 //   eval "$(node scripts/e2e-campaign.mjs begin visual)"   exports STUDIO_E2E_* for the stage and
 //                                                          writes out/reports/e2e/campaign-visual.json
-//   node scripts/e2e-campaign.mjs report                   writes e2e-manifest.json and tests-e2e.xml
+//   node scripts/e2e-campaign.mjs report                   writes e2e-manifest.json, tests-e2e.xml and
+//                                                          out/reports/acceptance/acceptance-manifest.json
 //   node scripts/e2e-campaign.mjs report --visual-only     the same for the visual stage alone: the
-//                                                          real VS Code stage (integration) did not
-//                                                          run, which the manifest records as skipped
+//                                                          real VS Code stages (integration,
+//                                                          acceptance) did not run, which the
+//                                                          manifest records as skipped
 //
-// Both stages share a run id, never a start time: each records its real start, and the report
+// The stages share a run id, never a start time: each records its real start, and the report
 // validates every stage against its own identity. A stage always records a fresh start time and
-// deletes its previous manifest, so old evidence is never validated. The run id is, in order of
+// deletes its previous manifests, so old evidence is never validated. The run id is, in order of
 // precedence: STUDIO_E2E_RUN_ID (the CI workflow sets it once per run), the stage's own campaign
-// file or the other stage's, each only when it started less than two hours ago, then a new random
-// id. `ci-report` fails when the two stages started further apart than that, except when both
-// stages carry the same run id pinned by STUDIO_E2E_RUN_ID (recorded as `pinnedRunId`): the CI
-// workflow pins its run id, which "Re-run failed jobs" keeps, so integration re-run hours after
-// visual is still the same campaign. `just clean` resets all.
+// file or another stage's, each only when it started less than two hours ago, then a new random
+// id. `ci-report` fails when the visual and integration stages started further apart than that,
+// except when both carry the same run id pinned by STUDIO_E2E_RUN_ID (recorded as `pinnedRunId`):
+// the CI workflow pins its run id, which "Re-run failed jobs" keeps, so integration re-run hours
+// after visual is still the same campaign. `just clean` resets all.
+//
+// The acceptance stage runs one shard per e2e group. Each group manifest carries its own campaign
+// identity, which the report reads from there only (a CI report job has no campaign-acceptance.json);
+// the same two rules apply to it, against the visual campaign.
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { writeJUnit } from "./run-e2e.mjs";
 
 const reportRoot = path.join(process.cwd(), "out", "reports", "e2e");
-const stageNames = ["visual", "integration"];
+const acceptanceRoot = path.join(process.cwd(), "out", "reports", "acceptance");
+const acceptanceSources = path.join(process.cwd(), "test", "integration", "acceptance");
+const stageNames = ["visual", "integration", "acceptance"];
+// The stages whose campaign file `report` reads.
+const reportedCampaigns = ["visual", "integration"];
 const maxCampaignAgeMs = 2 * 60 * 60 * 1000;
-const stageManifest = {
-  visual: path.join(reportRoot, "screenshots", "run-manifest.json"),
-  integration: path.join(reportRoot, "integration-manifest.json"),
-};
+const groupManifest = (group) => path.join(acceptanceRoot, group, "acceptance-manifest.json");
+const mergedAcceptance = path.join(acceptanceRoot, "acceptance-manifest.json");
 const campaignPath = (stage) => path.join(reportRoot, `campaign-${stage}.json`);
+
+function groupFolders() {
+  if (!existsSync(acceptanceRoot)) return [];
+  return readdirSync(acceptanceRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+}
+
+/** The evidence a new start of the stage invalidates. */
+function stageManifests(stage) {
+  if (stage === "visual") return [path.join(reportRoot, "screenshots", "run-manifest.json")];
+  if (stage === "integration") return [path.join(reportRoot, "integration-manifest.json")];
+  return [mergedAcceptance, ...groupFolders().map(groupManifest)];
+}
 
 function readJson(file) {
   try {
@@ -51,11 +71,14 @@ function recent(campaign, now) {
 }
 
 function begin(stage) {
-  if (!stageNames.includes(stage)) throw new Error(`unknown stage "${stage}"; expected ${stageNames.join(" or ")}`);
-  const sibling = stageNames.find((name) => name !== stage);
+  if (!stageNames.includes(stage)) {
+    throw new Error(`unknown stage "${stage}"; expected ${stageNames.slice(0, -1).join(", ")} or ${stageNames.at(-1)}`);
+  }
   const now = Date.now();
   const own = recent(validCampaign(readJson(campaignPath(stage))), now);
-  const other = recent(validCampaign(readJson(campaignPath(sibling))), now);
+  const other = stageNames.filter((name) => name !== stage)
+    .map((name) => recent(validCampaign(readJson(campaignPath(name))), now))
+    .find(Boolean);
   const pinned = Boolean(process.env.STUDIO_E2E_RUN_ID);
   const runId = process.env.STUDIO_E2E_RUN_ID || own?.runId || other?.runId || randomUUID();
   const campaign = {
@@ -65,7 +88,7 @@ function begin(stage) {
     ...(pinned ? { pinnedRunId: true } : {}),
   };
   // A new start invalidates this stage's previous evidence and the merged outputs built from it.
-  for (const stale of [stageManifest[stage], path.join(reportRoot, "review.json"), path.join(reportRoot, "e2e-manifest.json")]) {
+  for (const stale of [...stageManifests(stage), path.join(reportRoot, "review.json"), path.join(reportRoot, "e2e-manifest.json")]) {
     rmSync(stale, { force: true });
   }
   mkdirSync(reportRoot, { recursive: true });
@@ -100,10 +123,54 @@ function stageFrom(name, command, manifest, missing, campaign) {
   };
 }
 
+/** The groups that must report: those with an acceptance file in this checkout, the CI matrix. */
+function expectedGroups() {
+  if (!existsSync(acceptanceSources)) return [];
+  const files = readdirSync(acceptanceSources).filter((name) => name.endsWith(".acceptance.ts"));
+  return [...new Set(files.map((name) => name.split(".")[0]))].sort();
+}
+
+/** What is wrong with the manifest of one group, or undefined. */
+function groupProblem(manifest, visualCampaign, integrationCampaign) {
+  if (!manifest) return "its manifest is missing (ci-acceptance did not run for it or its reports were not downloaded)";
+  if (manifest.status !== "passed") {
+    const failed = (manifest.launches ?? []).filter((launch) => launch.status !== "passed").map((launch) => launch.file);
+    return `its manifest status is ${manifest.status}${failed.length > 0 ? ` (${failed.join(", ")})` : ""}`;
+  }
+  const samePinnedRun = [visualCampaign, integrationCampaign, manifest]
+    .every((identity) => identity.pinnedRunId === true && identity.runId === visualCampaign.runId);
+  const gap = Math.abs(Date.parse(manifest.campaignStartedAt) - Date.parse(visualCampaign.startedAt));
+  if (samePinnedRun || gap < maxCampaignAgeMs) return undefined;
+  return `it belongs to another campaign (run id ${manifest.runId}, started ${manifest.campaignStartedAt}); rerun the stages after \`just clean\``;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-CORE-076
+/** The acceptance stage of the report, and the merged manifest of its groups. */
+function acceptanceStage(visualCampaign, integrationCampaign, campaign) {
+  const groups = expectedGroups().map((group) => {
+    const manifest = readJson(groupManifest(group));
+    const problem = groupProblem(manifest, visualCampaign, integrationCampaign);
+    return { ...manifest, scope: group, status: problem ? "failed" : "passed", ...(problem ? { error: problem } : {}) };
+  });
+  const error = groups.length === 0
+    ? "no acceptance file under test/integration/acceptance/"
+    : groups.filter((group) => group.error).map((group) => `${group.scope}: ${group.error}`).join("; ");
+  const status = error ? "failed" : "passed";
+  const startedAt = groups.map((group) => group.startedAt).filter(Boolean).sort()[0] ?? campaign.startedAt;
+  const completedAt = groups.map((group) => group.completedAt).filter(Boolean).sort().at(-1) ?? new Date().toISOString();
+  mkdirSync(acceptanceRoot, { recursive: true });
+  writeFileSync(mergedAcceptance, `${JSON.stringify({ status, runId: campaign.runId, startedAt, completedAt, groups }, null, 2)}\n`);
+  return {
+    name: "acceptance", command: "just ci-acceptance", status, exitCode: error ? 1 : 0,
+    startedAt, completedAt, error: error || undefined,
+  };
+}
+
 /**
  * The pull request path of CI runs only the simulated stages (static, visual); the real VS Code
- * stage is a manual job. `--visual-only` reports that path: only the visual stage and the review
- * index are required, and the integration stage is listed as skipped, never as passed.
+ * stages are manual jobs. `--visual-only` reports that path: only the visual stage and the review
+ * index are required, and the integration and acceptance stages are listed as skipped, never as
+ * passed.
  */
 function reportVisualOnly() {
   const visualCampaign = validCampaign(readJson(campaignPath("visual")));
@@ -121,7 +188,8 @@ function reportVisualOnly() {
   for (const stage of stages) {
     console.log(`${stage.status === "passed" ? "ok    " : "FAILED"} ${stage.name}${stage.error ? `: ${stage.error}` : ""}`);
   }
-  console.log("skipped integration: the real VS Code stage did not run (manual heavy CI job)");
+  const skipped = ["integration", "acceptance"];
+  for (const name of skipped) console.log(`skipped ${name}: the real VS Code stage did not run (manual heavy CI job)`);
   const status = stages.every((stage) => stage.status === "passed") ? "passed" : "failed";
   writeFileSync(path.join(reportRoot, "e2e-manifest.json"), JSON.stringify({
     status,
@@ -130,7 +198,7 @@ function reportVisualOnly() {
     startedAt: visualCampaign.startedAt,
     completedAt: new Date().toISOString(),
     stages,
-    skipped: ["integration"],
+    skipped,
   }, null, 2) + "\n");
   writeJUnit(stages);
   if (status !== "passed") process.exitCode = 1;
@@ -143,7 +211,7 @@ function report() {
   }
   const visualCampaign = validCampaign(readJson(campaignPath("visual")));
   const integrationCampaign = validCampaign(readJson(campaignPath("integration")));
-  const missing = stageNames.filter((name) => !validCampaign(readJson(campaignPath(name))));
+  const missing = reportedCampaigns.filter((name) => !validCampaign(readJson(campaignPath(name))));
   if (missing.length > 0) {
     console.error(`ci-report: no campaign identity for ${missing.join(" and ")}; run ci-${missing.join(" and ci-")} first`);
     process.exitCode = 1;
@@ -168,6 +236,7 @@ function report() {
   const stages = [
     stageFrom("visual", "just ci-visual", visual, "visual manifest is missing (ci-visual did not run or its reports were not downloaded)", visualCampaign),
     stageFrom("integration", "just ci-integration", integration, "integration manifest is missing (ci-integration did not run or its reports were not downloaded)", integrationCampaign),
+    acceptanceStage(visualCampaign, integrationCampaign, campaign),
     stageFrom("review-index", "npm run review:finish", review, "review.json is missing (review:finish did not run)", campaign),
   ];
   for (const stage of stages) {
@@ -190,6 +259,6 @@ const mode = process.argv[2];
 if (mode === "begin") begin(process.argv[3]);
 else if (mode === "report") report();
 else {
-  console.error("usage: e2e-campaign.mjs begin <visual|integration>|report [--visual-only]");
+  console.error("usage: e2e-campaign.mjs begin <visual|integration|acceptance>|report [--visual-only]");
   process.exitCode = 2;
 }
