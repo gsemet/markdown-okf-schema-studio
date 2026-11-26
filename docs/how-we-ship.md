@@ -48,8 +48,9 @@ merge.
   the [requirements report](https://gsemet.github.io/markdown-okf-schema-studio/requirements/) is generated from them.
 - **Screenshots or it did not happen.** A visible change shows before and after, in light and dark
   when themes matter. No screenshot, not mergeable.
-- **The heavy CI is the gate.** The real VS Code jobs (integration, stress) run on every push to
-  `main` and on demand on a branch. A release starts only from a green heavy run on `main`.
+- **The heavy CI is the gate.** The real VS Code jobs (integration, acceptance, stress) run on
+  every push to `main` and on demand on a branch. A release starts only from a green heavy run on
+  `main`.
 - **One commit per pull request.** Branches are rebased and amended; history stays linear.
 - **Small fixes fix themselves.** When CI fails for a clear, small reason, the agent fixes it,
   reruns the failing tests locally, amends and pushes, and reports in one line.

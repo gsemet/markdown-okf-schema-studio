@@ -31,9 +31,31 @@ function makeRoots(): { output: string; outside: string } {
   return { output, outside };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S2
+test("a reference that is not a safe relative path is refused with the code of the failed check", async () => {
+  const { output } = makeRoots();
+  const policy = new ResourcePolicy(createNodeFileSystem(), [{ label: "output", directory: output }]);
+  const table: Array<[string, readonly string[]]> = [
+    ["blocked-resource-scheme", [
+      "data:text/plain,secret", "javascript:alert(1)", "vscode://file/secret", "file:///tmp/secret",
+      "/etc/hosts", "//host/share",
+    ]],
+    // A malformed escape, a backslash, a NUL character, and "%2e" nested one level deeper than the
+    // four decodings reach.
+    ["invalid-resource-path", ["%E0%A4%A", "sub\\image.png", "%00", "image%252525252epng"]],
+  ];
+
+  for (const [code, requests] of table) {
+    for (const request of requests) {
+      assert.deepEqual(await policy.resolveResourceDetailed(request, output), { refusal: code }, request);
+      assert.ok(policy.diagnostics.some((entry) => entry.code === code && entry.value === request), request);
+    }
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S5
 test("canonicalizes local resources and rejects hostile paths", needsSymlinks, async () => {
   const { output, outside } = makeRoots();
   fs.symlinkSync(path.join(outside, "secret.txt"), path.join(output, "escape.txt"));

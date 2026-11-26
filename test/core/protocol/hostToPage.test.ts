@@ -61,8 +61,6 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
 const message = (type: string, identity: Partial<PageIdentity> | Record<string, unknown>): Record<string, unknown> =>
   ({ type, ...identity, ...WELL_FORMED[type as HostToPageType] });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S5
 test("every host message type has a rule, and a well-formed message for the page passes it", () => {
   assert.deepEqual(Object.keys(filter.rules).sort(), Object.keys(WELL_FORMED).sort());
   for (const type of Object.keys(WELL_FORMED)) {
@@ -70,6 +68,7 @@ test("every host message type has a rule, and a well-formed message for the page
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S5
 test("each rule matches the identity it names, and only that", () => {
   const otherDocument = { ...page, documentId: "file:///other.md" };
   const otherRevision = { ...page, revision: 8 };
@@ -156,6 +155,7 @@ test("previewLineMarkerClear is accepted with the render envelope only", () => {
   assert.equal(filter.accepts({ type: "previewLineMarkerClear", ...page, requestId: 99 }, page), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
 test("values that are not host messages are refused", () => {
   for (const value of [null, undefined, 0, "sourceScroll", [], { type: 3 }, { type: "unknownType", ...page }]) {
     assert.equal(filter.accepts(value, page), false, JSON.stringify(value));
@@ -192,7 +192,6 @@ test("the save command names the render and carries nothing else", () => {
   assert.equal(filter.rules.previewSaveCommand.addressing, "render");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S6
 test("previewEditSource and previewFrontmatterResult refuse a payload of the wrong shape", () => {
   const refused: Array<[HostToPageType, Record<string, unknown>]> = [
     ["previewEditSource", { editId: undefined }],

@@ -13,7 +13,7 @@ import { deferred, fixture, MARKDOWN, settle } from "./blockFixture";
 /** The save of the second paragraph (source line 5) with the edited text. */
 const SECOND = { editId: "e1", line: 5, endLine: 5, originalText: "Second paragraph.\n" };
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a restricted-reads preview opens, saves and cancels a block like a writable one", async () => {
   const restricted = fixture({ restrictedReads: true });
   await restricted.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
@@ -433,8 +433,7 @@ test("the last block of a CRLF document without a final line break takes CR LF",
 
 const READ_ONLY = "This file is read-only in VS Code.";
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S3
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S6
 test("a move, a cut and a paste on a file VS Code holds read-only answer the read-only reason, trusted or not", async () => {
   for (const restrictedReads of [false, true]) {
@@ -452,6 +451,7 @@ test("a move, a cut and a paste on a file VS Code holds read-only answer the rea
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S6
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058#S8
 test("a block save on a file VS Code holds read-only is told, and the images pasted meanwhile are removed", async () => {

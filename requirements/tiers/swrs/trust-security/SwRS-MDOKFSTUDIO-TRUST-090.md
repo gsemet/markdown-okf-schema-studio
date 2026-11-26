@@ -58,11 +58,9 @@ implemented_in_files:
 - src/session/features/plantUml.ts
 - src/session/features/sourceEdits.ts
 tested_in_files:
-- test/core/protocol/pageToHost.test.ts
 - test/integration/commentWrite.test.ts
 - test/integration/imagePaste.test.ts
 - test/integration/imagePicker.test.ts
-- test/integration/inlineThread.test.ts
 - test/page/modules/commentCompose.test.ts
 - test/page/modules/commentThreads.test.ts
 - test/page/modules/editPalette.test.ts
@@ -71,6 +69,8 @@ tested_in_files:
 - test/page/modules/plantumlFileRequests.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
+- test/session/paletteReq.requirements.test.ts
+- test/session/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-DIAG-047
@@ -190,11 +190,13 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - Method: test/core/protocol/pageToHost.test.ts (edit id of 1 to 100 characters on the list, pick, paste, thread and include requests)
 - Method: test/page/modules/plantumlFileRequests.test.ts (include request and answer, refusal, stale and repeated answers, timeout reason)
 - Method: test/page/modules/editPalette.test.ts (late list answer after the popover closed is ignored; an empty list or a host error is said in the popover)
-- Method: test/page/runtimePaletteActions.test.ts (an image paste reply for another edit is ignored; a refusal shows its reason)
+- Method: test/page/runtimePaletteActions.test.ts (an image paste reply for another edit is ignored; a refusal shows its reason; an out-of-date list answer is shown in the popover at once; closing the editor forgets a pending list request and leaves a PlantUML include request pending)
 - Method: test/page/modules/paletteReq.requirements.test.ts (a rich text conversion answered after the editor closed inserts nothing; an open editor gets the Markdown)
+- Method: test/session/paletteReq.requirements.test.ts (list, document pick, rich text and image paste answers carry the result type and the identity of the request, with the payload or the reason)
+- Method: test/session/trustReq.requirements.test.ts (a list, picker, paste or thread request of an older render is answered with ok false, the out-of-date reason and the identity of the request)
 - Method: test/session/diagReq.plantuml.requirements.test.ts (an include request is answered once with the edit id, a file or a refusal)
-- Method: test/integration/mystPickers.test.ts, test/integration/imagePicker.test.ts, test/integration/imagePaste.test.ts (host answers with the request identity, labels, keys and refusal reasons of the pickers and the paste)
-- Method: test/integration/inlineThread.test.ts (thread reply and delete results with the edit id, only for the success and the lines refusals)
+- Method: test/integration/imagePicker.test.ts, test/integration/imagePaste.test.ts (host answers and refusal reasons of the image picker and the paste)
+- Method: test/integration/inlineThread.test.ts (thread reply and delete requests change the document or leave it unchanged; the result messages are not read)
 - Method: test/integration/commentWrite.test.ts (previewCommentResult of reply to an unknown thread, delete of an unknown thread, create with an old version)
 - Method: test/core/protocol/hostToPage.test.ts (sample previewThreadReplyResult)
 - Method: test/page/modules/commentCompose.test.ts and test/page/modules/commentThreads.test.ts (the comment save, the thread reply and the resolve each start a 15 second answer timer, with fake timers)

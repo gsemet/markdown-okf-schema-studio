@@ -7,9 +7,9 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { PageToHostMessage } from "../../src/core/protocol/pageToHost";
+import type { PageToHostMessage, PageToHostType } from "../../src/core/protocol/pageToHost";
 import { RenderingController } from "../../src/session/features/rendering";
-import { PageMessageDispatcher } from "../../src/session/pageMessages";
+import { PAGE_MESSAGE_GATES, PageMessageDispatcher, type PageMessageGate } from "../../src/session/pageMessages";
 import { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
 import { createMemoryLogger } from "../../src/host-memory/memoryLogger";
@@ -77,6 +77,112 @@ const blockMove = (identity: { documentId?: string; revision: number; requestId:
   ...identity,
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S2
+test("a value that is not a registered message reaches no handler and nothing is sent to the page", () => {
+  const { dispatcher, session, handled, errors } = harness();
+  const posted: unknown[] = [];
+  (session as unknown as { postToPage: unknown }).postToPage = (message: unknown) => {
+    posted.push(message);
+    return Promise.resolve(true);
+  };
+  const current = blockMove({ revision: 4, requestId: 9 });
+  const values: unknown[] = [
+    null,
+    "previewBlockMove",
+    [],
+    [current],
+    { ...current, type: "previewNothing" },
+    ...["__proto__", "constructor", "toString"].map((type) => ({ ...current, type })),
+  ];
+  for (const value of values) {
+    assert.equal(dispatcher.handle(session, value), undefined, JSON.stringify(value));
+  }
+  assert.deepEqual([handled, errors, posted], [[], [], []]);
+  // The same envelope with its registered type does reach the handler.
+  dispatcher.handle(session, current);
+  assert.deepEqual(handled, ["previewBlockMove"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S2
+test("each page message type has one gate, which decides on the identifiers it compares", () => {
+  const types: Record<PageMessageGate, readonly PageToHostType[]> = {
+    render: [
+      "previewHistoryGo", "previewViewPreferenceChanged", "previewPaletteModeChanged", "previewLabelRename",
+      "previewThreadReply", "previewThreadDelete", "previewBlockMove", "previewBlocksCopy", "previewBlocksCut",
+      "previewBlocksPaste", "previewListTargets", "previewListCitations", "previewPickDocument",
+      "previewPickImage", "previewPasteImage", "previewPasteHtml",
+    ],
+    comment: ["previewCommentCreate", "previewCommentReply", "previewCommentResolve", "previewCommentDelete"],
+    document: ["previewCopyText", "previewPlantUmlInclude", "previewShowProblems", "previewWarningBannerClosed"],
+    "own-id": ["previewEditClosed", "previewEditFlushed"],
+    "page-state": [
+      "previewReady", "previewScroll", "previewReveal", "previewState", "previewLink", "previewLinkDiscover",
+      "previewThemeModeChanged", "previewRefresh", "previewAnchorModeChanged", "previewEditModeChanged",
+      "previewEditOpen", "previewEditSave", "previewEditCancel", "previewFrontmatterSave", "previewCheckboxToggle",
+    ],
+  };
+  for (const [gate, listed] of Object.entries(types)) {
+    for (const type of listed) assert.equal(PAGE_MESSAGE_GATES[type], gate, type);
+  }
+
+  const current = { documentId: DOCUMENT, revision: 4, requestId: 9 };
+  const olderRevision = { ...current, revision: 3 };
+  const olderRequest = { ...current, requestId: 8 };
+  const otherDocument = { ...current, documentId: "file:///other.md" };
+  type Identity = typeof current;
+  // One message of each gate, with the identities its gate lets through and those it drops.
+  const cases: Array<{ message: Record<string, unknown>; passes: Identity[]; dropped: Identity[]; needsStage: boolean }> = [
+    {
+      message: { type: "previewHistoryGo", direction: "back" },
+      passes: [current], dropped: [olderRevision, olderRequest, otherDocument], needsStage: true,
+    },
+    {
+      message: { type: "previewCommentDelete", threadId: "t_00000001" },
+      passes: [current, olderRevision], dropped: [olderRequest, otherDocument], needsStage: true,
+    },
+    {
+      message: { type: "previewShowProblems" },
+      passes: [current, olderRevision, olderRequest], dropped: [otherDocument], needsStage: false,
+    },
+    {
+      message: { type: "previewEditFlushed", flushId: "flush-1", flushed: true },
+      passes: [current, olderRevision, olderRequest, otherDocument], dropped: [], needsStage: false,
+    },
+    {
+      message: { type: "previewScroll", sourceLine: 5 },
+      passes: [current], dropped: [olderRevision, olderRequest, otherDocument], needsStage: true,
+    },
+  ];
+  const run = (message: Record<string, unknown>, options: { stage?: boolean; disposed?: boolean } = {}) => {
+    const t = harness({ stage: options.stage });
+    const posted: unknown[] = [];
+    (t.session as unknown as { postToPage: unknown }).postToPage = (answer: unknown) => {
+      posted.push(answer);
+      return Promise.resolve(true);
+    };
+    t.state.disposed = options.disposed === true;
+    t.dispatcher.handle(t.session, message);
+    return { handled: t.handled, answers: [...t.errors, ...posted] };
+  };
+  for (const { message, passes, dropped, needsStage } of cases) {
+    const type = String(message.type);
+    for (const identity of passes) {
+      assert.deepEqual(run({ ...message, ...identity }).handled, [type], `${type} ${JSON.stringify(identity)}`);
+    }
+    for (const identity of dropped) {
+      assert.deepEqual(run({ ...message, ...identity }), { handled: [], answers: [] }, `${type} ${JSON.stringify(identity)}`);
+    }
+    assert.deepEqual(run({ ...message, ...current }, { disposed: true }), { handled: [], answers: [] }, `${type} disposed`);
+    if (needsStage) {
+      assert.deepEqual(run({ ...message, ...current }, { stage: false }), { handled: [], answers: [] }, `${type} no stage`);
+    }
+  }
+  // A request of the render gate that waits for an answer gets one instead of a silent drop.
+  const request = run({ type: "previewListTargets", editId: "e", ...olderRevision });
+  assert.deepEqual(request.handled, []);
+  assert.equal(request.answers.length, 1);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
 test("a render-gated page message must name the render the host holds", () => {
@@ -130,6 +236,8 @@ test("a label rename from an older render is answered with the stale-line refusa
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-081#S6
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S4
 test("a document-gated page message must name the shown document", () => {
   const { dispatcher, session, handled, state } = harness();
   const banner = { type: "previewWarningBannerClosed", key: "ab-0123abcd", revision: 1, requestId: 1 };
@@ -150,6 +258,8 @@ test("a document-gated page message must name the shown document", () => {
   assert.equal(handled.length, accepted);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S4
 test("an own-identifier page message is matched by its own identifier", () => {
   const { dispatcher, session, handled, state } = harness();
   // The identifiers of the render are not those the host holds: the stage moved on.
@@ -164,6 +274,8 @@ test("an own-identifier page message is matched by its own identifier", () => {
   assert.deepEqual(handled, ["previewEditFlushed", "previewEditClosed"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 test("a page-state message must name the render the host holds, except the save of the open editor", () => {
   const { dispatcher, session, handled, errors } = harness({ activeEdit: { editId: "edit-1", revision: 3 } });
   const identity = { documentId: DOCUMENT, revision: 4, requestId: 9 };
@@ -235,6 +347,8 @@ test("the pending page that clears the content and the missing-source page allow
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S10
 test("every request of the render gate from an older render is answered with the out-of-date reason", () => {
   const { dispatcher, session, handled, errors } = harness();
   const posted: Array<Record<string, unknown>> = [];

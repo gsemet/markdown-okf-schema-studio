@@ -24,8 +24,6 @@ afterEach(() => {
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S6
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S5
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S6
 test("rewrites local resources and removes active HTML content", async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -143,8 +141,6 @@ const bareContext = {
   resolveNavigation: () => ({ kind: "blocked" as const }),
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S2
 test("removes tens of thousands of siblings in linear time", () => {
   const count = 50_000;
   const html = `<html><body><main>${"<foo>x</foo>".repeat(count)}<p>kept</p></main></body></html>`;
@@ -237,8 +233,6 @@ test("CR038: a column width in percent becomes a stylesheet rule; other widths a
   assert.doesNotMatch(result.html, /400px|calc|data-myst-table-style|style="/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S2
 test("rewrites sanitized table styles into a nonce-bearing stylesheet", () => {
   const result = rewriteSphinxHtml(
     '<html><head></head><body><table><tr>'
@@ -544,7 +538,6 @@ test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => 
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-dir"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S3
 test("a blocked link has no href and names the reason in its title", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -563,8 +556,6 @@ test("a blocked link has no href and names the reason in its title", () => {
   assert.match(result.html, /title="The navigation scheme is not allowed in the preview\."/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S4
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the SVG presentation attributes pass the final sanitizer only with a local value", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -585,7 +576,6 @@ test("the SVG presentation attributes pass the final sanitizer only with a local
   assert.match(result.html, /font-style="italic"/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the SVG value check never touches aria attributes nor an HTML element", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);

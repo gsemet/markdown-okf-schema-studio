@@ -206,7 +206,7 @@ test("a comment for a document that is not a file is refused with 'save the docu
   assert.equal(s.posted.at(-1)!.ok, true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S6
 test("saving writes the moved lines to the comments file when the only preview has restricted reads", async () => {
   const s = setup();
   s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 1)]));
@@ -338,7 +338,7 @@ test("a save that cannot write the moved lines warns once for each reason", asyn
   assert.deepEqual(s.writes, []);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a comment from a standalone file or in Restricted Mode is written next to the document", async () => {
   const s = setup();
   const router = new Map<string, (message: any, preview: any) => Promise<void>>();
@@ -354,7 +354,7 @@ test("a comment from a standalone file or in Restricted Mode is written next to 
   assert.ok(s.writes.every((written) => written === SIDECAR));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a reply, a resolve and a delete are written next to the document in Restricted Mode", async () => {
   const s = setup();
   const router = new Map<string, (message: any, preview: any) => Promise<void>>();

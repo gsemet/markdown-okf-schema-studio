@@ -77,7 +77,7 @@ const request = (extra: Record<string, unknown> = {}) => ({
   documentId: "file:///w/a.md", revision: 3, requestId: 1, editId: "e1", line: 3, endLine: 6, ...extra,
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a reply or a delete from a restricted-reads preview is applied like any other", async () => {
   const restricted = setup({ restrictedReads: true });
   const afterReply = setup({ restrictedReads: true });
@@ -152,6 +152,7 @@ test("a document that changes while the author is resolved gets the changed-mean
   assert.equal(quick.results[0]!.ok, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("a reply, a delete and a find replace on a file VS Code holds read-only answer the read-only reason", async () => {
   for (const restrictedReads of [false, true]) {
     const readOnly = setup({ readOnly: true, restrictedReads });

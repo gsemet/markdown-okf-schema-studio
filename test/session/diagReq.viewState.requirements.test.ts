@@ -65,6 +65,7 @@ function readOnlyHarness() {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S6
 test("a preview with restricted reads stores a zoom change, and a message of an older render is dropped", () => {
   const { choices, send } = readOnlyHarness();
 

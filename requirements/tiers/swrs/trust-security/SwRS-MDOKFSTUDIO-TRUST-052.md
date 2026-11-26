@@ -39,7 +39,8 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
-- test/core/protocol/pageToHost.test.ts
+- test/session/renderReq.codeCopy.requirements.test.ts
+- test/session/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-CORE-066
@@ -119,6 +120,9 @@ When the host receives a value from the page, it SHALL hand it to a handler only
 
 - Method: test/core/protocol/pageToHost.test.ts (nominal; refusal; identity fields and size bound: accepts a valid registered message, rejects non-objects, unregistered and prototype-key types, rejects missing or non-integer ids and oversize documentId, the shipped registry rejects an unregistered type)
 - Method: test/core/protocol/pageStateMessages.test.ts (identity fields, shared optional fields, owned fields, block edit lines: non-objects and inherited keys are not page messages; a page-state message keeps accepting a document id longer than the registered bound; the page-state validators accept exactly what the frozen validator accepted, a differential corpus of more than 100 000 messages, every single-field variant and every pair, against the frozen earlier validator)
+- Method: test/core/protocol/pageStateMessages.test.ts (the identity fields of an envelope are of their kind and the document id is bounded; the shared optional fields of a page-state message are of their kind and within their bounds; a field is accepted only on the message type that owns it; a block edit or checkbox request names its editor and its lines) checks the rows of those four scenarios on the shipped registry.
+- Method: test/session/trustReq.requirements.test.ts (a value that is not a registered message reaches no handler and nothing is sent to the page) gives null, a string, arrays, an unregistered type and the prototype keys to PageMessageDispatcher.handle in src/session/pageMessages.ts.
+- Method: test/session/renderReq.codeCopy.requirements.test.ts (a copy request only needs the document) dispatches a previewCopyText with a valid envelope and reads the clipboard write and the answer.
 - Criteria: isPageToHostMessage returns false for every inherited key of the table. Revisions are opaque to the page: only equality with the revision the host holds is ever tested. The page-state family keeps the unbounded identifier for compatibility; every other type is bounded. Source lines are safe integers of at least 1; the pin pair is complete or absent; no other type carries flush, final or blockEditOpen. Only validated messages reach handlers.
 
 <!-- okf:links:start -->

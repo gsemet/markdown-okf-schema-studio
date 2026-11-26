@@ -833,7 +833,6 @@ test("T30: Enter in the filter picks the first match; Escape closes", () => {
   assert.equal(popover(h.root), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S2
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S9
 test("T30: an empty list or a host error is said in the popover; a late answer after closing is ignored", () => {
   const empty = openHost({ requestList: (_kind, done) => done({ items: [] }) });

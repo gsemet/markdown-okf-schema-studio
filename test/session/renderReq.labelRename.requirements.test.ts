@@ -45,8 +45,7 @@ function setup(options: { restrictedReads: boolean; blockEditOpen: boolean; read
   return { applied, posted, run: () => router.dispatch(rename, preview) };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a rename in a standalone file or in Restricted Mode is not refused for the missing trust", async () => {
   const t = setup({ restrictedReads: true, blockEditOpen: false });
   await (t.run() as { result?: unknown }).result;
@@ -64,6 +63,7 @@ test("a rename while a block edit is open changes nothing and answers Save or ca
   assert.deepEqual(t.applied, [], "the document is unchanged");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("a rename on a file VS Code holds read-only answers the read-only reason", async () => {
   for (const restrictedReads of [false, true]) {
     const t = setup({ restrictedReads, blockEditOpen: false, readOnly: true });

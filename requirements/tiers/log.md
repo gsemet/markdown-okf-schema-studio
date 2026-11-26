@@ -2,6 +2,12 @@
 
 ## 2026-11-26
 
+### Scenario coverage of the trust and security behaviours (CR-505, round 3)
+
+- Changed (`proposed`, markers and tests): every scenario of the live, non-exempt SwRS of trust-security has at least one `@tests_req ...#S<n>` marker; the 18 scenarios that had none are covered by new unit tests or by existing tests that walk them. No scenario is pruned, no scenario text or normative text changes, no approved requirement is touched, and no file under `src/` changes.
+- Changed (markers, no requirement text): each `#S<n>` marker of these SwRS was read again against its test. A marker stays where the test sets up the scenario, or a row of its table, and observes the outcome; the others are moved to the scenario the test walks or removed.
+- Changed (verification notes): SwRS-MDOKFSTUDIO-TRUST-001, 005, 007, 012, 022, 025, 036, 042, 052, 059, 065, 074, 090 and 092 name the tests as marked now. `requirements/guidelines/project.guidelines.md` ("Benches") says where the acceptance walks sit and that the StRS coverage mode is not switched.
+
 ### StRS acceptance tests of trust and security, and the acceptance job (CR-505, first round)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-CORE-076 covers the new CI job `acceptance` (one shard per e2e group with a file under `test/integration/acceptance/`): normative text and S1 to S6 name it beside `integration` and `stress` (S6: a dispatch run now needs `stress` too, as a push run does), and the new scenarios S7 (the shards and the refusals of the launcher and of the VSIX unpacking), S8 (their artifacts), S9 (the newest attempt and the acceptance stage of the report), S10 (tagging needs the job) and S11 (a later Pages deploy needs every shard). Reason: CR-505. No approved requirement is touched; StRS-MDOKFSTUDIO-CORE-007 names no job and does not change.

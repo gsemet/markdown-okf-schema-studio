@@ -17,19 +17,39 @@ function contributedSettings(categories: ConfigurationCategory[]): Record<string
   return Object.assign({}, ...categories.map((category) => category.properties)) as Record<string, Record<string, unknown>>;
 }
 
+/** The icon contract: the manifest names images/logo.png, and that file is a 256 by 256 PNG. */
+function assertIconContract(manifest: { icon: string }, icon: Buffer): void {
+  assert.equal(manifest.icon, "images/logo.png");
+  assert.deepEqual(icon.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  assert.equal(icon.readUInt32BE(16), 256);
+  assert.equal(icon.readUInt32BE(20), 256);
+}
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-074#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-074#S2
 test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as { icon: string };
-  assert.equal(manifest.icon, "images/logo.png");
-  const icon = fs.readFileSync(path.join(extensionRoot, manifest.icon));
-  assert.deepEqual(icon.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
-  assert.equal(icon.readUInt32BE(16), 256);
-  assert.equal(icon.readUInt32BE(20), 256);
+  assertIconContract(manifest, fs.readFileSync(path.join(extensionRoot, manifest.icon)));
   assert.equal(
     fs.readFileSync(path.join(extensionRoot, "sphinx/_static/favicon.svg"), "utf8"),
     fs.readFileSync(path.join(extensionRoot, "images/logo.svg"), "utf8"),
   );
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-074#S3
+test("the icon contract fails for another icon file and for a file that is not a 256 pixel PNG", () => {
+  const icon = fs.readFileSync(path.join(extensionRoot, "images/logo.png"));
+  const manifest = { icon: "images/logo.png" };
+  assert.doesNotThrow(() => assertIconContract(manifest, icon));
+  assert.throws(() => assertIconContract({ icon: "images/other.png" }, icon), assert.AssertionError);
+  const narrow = Buffer.from(icon);
+  narrow.writeUInt32BE(128, 16);
+  const short = Buffer.from(icon);
+  short.writeUInt32BE(128, 20);
+  const notPng = fs.readFileSync(path.join(extensionRoot, "images/logo.svg"));
+  for (const broken of [narrow, short, notPng]) {
+    assert.throws(() => assertIconContract(manifest, broken), assert.AssertionError);
+  }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S8
@@ -385,14 +405,29 @@ test("CR 144: Cmd/Ctrl+F runs the find command on the focused preview only", () 
   assert.match(bindings[0].when, /!editorTextFocus/u, "the text editor keeps its own find");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-092#S3
-test("CR 135: the VSIX leaves out source maps, internal docs, agent files and the Python project file", () => {
-  const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8")
-    .split(/\r?\n/u).map((line) => line.trim());
+/** The contract of .vscodeignore: the leftovers are excluded; out/bundle and the docs folder are not. */
+function assertIgnoreContract(ignore: readonly string[]): void {
   for (const pattern of ["**/*.map", ".claude/**", "pyproject.toml", "docs/*.md"]) {
     assert.ok(ignore.includes(pattern), `.vscodeignore must exclude ${pattern}`);
   }
   assert.ok(!ignore.some((line) => /^docs\/(\*\*)?$/u.test(line)), "docs/user pages linked from the README must ship");
+  assert.ok(!ignore.some((line) => /^out(\/bundle)?(\/(\*\*)?)?$/u.test(line)), "out/bundle must ship");
+}
+
+const ignoreLines = (): string[] => fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8")
+  .split(/\r?\n/u).map((line) => line.trim());
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-092#S3
+test("CR 135: the VSIX leaves out source maps, internal docs, agent files and the Python project file", () => {
+  assertIgnoreContract(ignoreLines());
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-092#S4
+test("the .vscodeignore contract fails when out is excluded or source maps are kept", () => {
+  const ignore = ignoreLines();
+  assert.throws(() => assertIgnoreContract([...ignore, "out/**"]), /out\/bundle must ship/u);
+  assert.throws(() => assertIgnoreContract(ignore.filter((line) => line !== "**/*.map")),
+    /must exclude \*\*\/\*\.map/u);
 });
 
 test("the Marketplace listing declares its categories and keywords", () => {

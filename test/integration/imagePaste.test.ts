@@ -23,12 +23,9 @@ async function waitFor(description: string, predicate: () => boolean, timeoutMs 
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S1
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-196#S5
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S5
 /** Pasting an image: written next to the document, numbered names, refusals. Files are removed. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);

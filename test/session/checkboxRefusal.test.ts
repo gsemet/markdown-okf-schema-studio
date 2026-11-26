@@ -72,7 +72,7 @@ test("a malformed checkbox toggle is answered, so the box never stays busy", () 
   assert.equal(answers.length, 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a checkbox toggle of a standalone file or in Restricted Mode reaches the handler", () => {
   const standalone = harness({ restrictedReads: true });
   standalone.dispatcher.handle(standalone.session, toggle());
@@ -83,4 +83,21 @@ test("a checkbox toggle of a standalone file or in Restricted Mode reaches the h
   untrusted.dispatcher.handle(untrusted.session, toggle());
   assert.deepEqual(untrusted.answers, []);
   assert.deepEqual(untrusted.handled, ["previewCheckboxToggle"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
+test("the dispatcher stops no edit or viewing request of a preview with restricted reads", () => {
+  const { dispatcher, session, handled } = harness({ restrictedReads: true });
+  const identity = { documentId: DOCUMENT, revision: 4, requestId: 9 };
+  const requests = [
+    { type: "previewEditOpen", editId: "e1", line: 3, endLine: 4 },
+    // The theme message comes right after the edit request: it stays accepted.
+    { type: "previewThemeModeChanged", previewThemeMode: "white" },
+    { type: "previewViewPreferenceChanged", preference: "toc", value: true },
+    { type: "previewHistoryGo", direction: "back" },
+    { type: "previewLink", request: "sibling.md" },
+    { type: "previewLinkDiscover", requests: ["sibling.md"] },
+  ];
+  for (const request of requests) dispatcher.handle(session, { ...identity, ...request });
+  assert.deepEqual(handled, requests.map((request) => request.type));
 });

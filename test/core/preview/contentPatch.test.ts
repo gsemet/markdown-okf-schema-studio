@@ -259,7 +259,6 @@ test("T34: a ready report with the identifiers of the last assignment is a webvi
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S4
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S5
 test("T34: the record of a patched page carries the nonce of the loaded page and keeps its shell", async () => {
   const loaded = await page("# Loaded\n\nText.\n", { requestId: 1, version: 1 });
   const next = await page("# Next\n\nOther text.\n", { requestId: 2, version: 2 });

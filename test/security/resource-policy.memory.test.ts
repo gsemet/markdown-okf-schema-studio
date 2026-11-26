@@ -31,7 +31,6 @@ test("a link to a file outside the root is refused with symlink-escape, a link i
   assert.equal(await policy.resolveResource("image.png", root), path.join(root, "image.png"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S3
 test("a file below a linked folder that leads outside the root is refused", async () => {
   const policy = new ResourcePolicy(fixture(), [{ label: "output", directory: root }]);
   assert.equal(await policy.resolveResource("outside-folder/secret.png", root), undefined);

@@ -83,7 +83,6 @@ async function withFixture(
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-174#S5
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S5
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S8
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S2
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S4
 /** Copy, cut and paste of blocks as Markdown, and every unsafe request refused. */
@@ -159,7 +158,6 @@ export async function runUndo(): Promise<void> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
 /** A preview in Restricted Mode copies, pastes and cuts blocks like a trusted one; each edit is undone here. */
 export async function runUntrusted(
   preview: { documentUri: string; documentVersion?: number; requestId?: number },

@@ -486,8 +486,6 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S1
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S3
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S3
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054#S3
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S1
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-134#S2

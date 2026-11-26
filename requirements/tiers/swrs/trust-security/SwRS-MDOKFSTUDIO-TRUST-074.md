@@ -61,6 +61,7 @@ The package SHALL declare images/logo.png, a PNG of 256 by 256 pixels, as its ex
 ### Verification notes
 
 - Method: Unit test test/security/package-contract.test.ts (extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo) covers the icon key and the icon file. The same test also compares the favicon file of the Sphinx fixtures with images/logo.svg; that is not product behaviour and is not specified.
+- Method: Unit test test/security/package-contract.test.ts (the icon contract fails for another icon file and for a file that is not a 256 pixel PNG) gives the check of the first test another icon key, a width of 128, a height of 128 and a file that is not a PNG, and expects it to fail.
 - Criteria: The icon key equals images/logo.png and the width and height fields of the PNG header are both 256.
 
 <!-- okf:links:start -->

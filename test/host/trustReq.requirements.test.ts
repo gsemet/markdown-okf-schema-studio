@@ -16,7 +16,6 @@ function statusAreaOf(assignments: readonly string[]): string {
   return match[0];
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S6
 test("the status area lists render diagnostics and nothing the sanitizer or the policy removed", async (t) => {
   const markdown = [

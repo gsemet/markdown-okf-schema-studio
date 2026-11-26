@@ -22,8 +22,8 @@ import { createMemoryLogger } from "../../src/host-memory/memoryLogger";
 
 const DOCUMENT = "file:///notes/doc.md";
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S4
 test("an include request is handled for the current document even one render behind, and dropped otherwise", () => {
   const handled: string[] = [];
   const session = {
@@ -62,7 +62,6 @@ test("an include request is handled for the current document even one render beh
   assert.deepEqual(handled, ["previewPlantUmlInclude"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 test("an include request is answered once with the request's edit id: the file, or a refusal", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-include-"));

@@ -41,8 +41,7 @@ function page() {
   return { ask, posted, requests, expireTimers };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S3
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
 test("a file request of the PlantUML bundle becomes a registered host message and the answer comes back", () => {
   const { ask, posted, requests } = page();
   const { detail, answers } = ask({ path: "styles/common.puml", from: null });

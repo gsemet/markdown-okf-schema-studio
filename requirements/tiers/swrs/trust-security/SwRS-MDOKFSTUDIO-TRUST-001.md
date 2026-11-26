@@ -52,19 +52,19 @@ implemented_in_files:
 - src/session/sessionDocuments.ts
 - src/session/sessionFactory.ts
 tested_in_files:
-- test/core/preview/previewStyles.test.ts
 - test/host/fmtableReq.requirements.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/commentWrite.test.ts
 - test/integration/standalone-suite.ts
 - test/integration/untrusted-suite.ts
-- test/page/modules/commentThreads.test.ts
 - test/security/trustReq.requirements.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/dropFiles.requirements.test.ts
+- test/session/paletteReq.requirements.test.ts
 - test/session/readOnlyFirstLoad.test.ts
 - test/session/readOnlyImagesSession.test.ts
-- test/visual/capture_layout_checks.py
+- test/session/renderReq.labelRename.requirements.test.ts
+- test/session/reviewReqThreads.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -161,7 +161,9 @@ A preview whose folder is removed gets restricted reads on the same panel: see S
 - Method: Unit test "the first load of a page with restricted reads has edit cells in the properties table and an enabled Edit button" in test/session/readOnlyFirstLoad.test.ts (properties table and Edit button rows of the page built by the host).
 - Method: Unit test of the toolbar markup in test/core/preview/previewStyles.test.ts (16 buttons, no aria-disabled) and `T38: toggling edit mode posts previewEditModeChanged` in test/page/runtimePageControls.test.ts (a click toggles the edit mode).
 - Method: Unit tests of the host handlers in test/session/blockReq.requirements.test.ts, test/session/checkboxRefusal.test.ts, test/session/reviewReqComments.requirements.test.ts and test/host/fmtableReq.requirements.test.ts show that a preview with restricted reads, an untrusted workspace and a standalone file included, is not refused for trust (see SwRS-MDOKFSTUDIO-TRUST-005).
-- Method: Integration suites test/integration/untrusted-suite.ts (the command preview and the Open With editor of an untrusted workspace report restrictedReads true, carry an enabled Edit button, store the palette mode, move a block, copy and paste blocks, write a comment and a pasted image; the real-window scenario trust-security/r01-untrusted-read-only shows the side preview with the enabled Edit button and the edit mode on) and test/integration/standalone-suite.ts (a file outside the workspace reports restrictedReads true, a document of the workspace false, and a frontmatter save is applied). They run in the real-window jobs only: they were compiled but not run on the author's machine.
+- Method: Unit test "Restricted Mode: the page boots with the Comment button and the reply box on" in test/session/readOnlyImagesSession.test.ts (Comment button row: the boot context carries commentsEnabled true).
+- Method: Unit test "the citation list needs a trusted workspace folder: refused with its reason in a restricted-reads preview, no file read" in test/session/paletteReq.requirements.test.ts (citation list row of the What stays off because it needs trust scenario).
+- Method: Integration suites test/integration/untrusted-suite.ts (the command preview and the Open With editor of an untrusted workspace report restrictedReads true, carry an enabled Edit button, store the palette mode, move a block, copy and paste blocks, write a comment and a pasted image; the real-window scenario trust-security/r01-untrusted-read-only shows the side preview with the enabled Edit button and the edit mode on), test/integration/commentWrite.test.ts (runUntrusted: a preview in Restricted Mode offers the Comment button and writes the comments file) and test/integration/standalone-suite.ts (a file outside the workspace reports restrictedReads true, a document of the workspace false, and a frontmatter save is applied). They run in the real-window jobs only: they were compiled but not run on the author's machine.
 - Method: Visual scenarios trust-security/v01-restricted-page-dark-900 and trust-security/v02-restricted-page-light-460 in test/visual/scenarioDefinitions2.ts (RESTRICTED_PAGE_ASSERTIONS: the Edit button is enabled, the frontmatter cells are editable) and trust-security/v03-restricted-opens-block-editor-light-900 (RESTRICTED_EDITS_ASSERTIONS: edit mode on and the block editor opens after a click on a paragraph). They build the page in test/visual/renderFixtures.ts with the restrictedReads option.
 - Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description (editing stays on, no "read-only") and the five restricted settings in package.json (and that the list is the registry's). A packaged VSIX is not run in a Restricted Mode window.
 - Method: Unit tests of the write paths with a document that VS Code holds read-only: test/session/blockReq.requirements.test.ts (block save, move, cut, paste and the pasted image removed), test/session/dropFiles.requirements.test.ts, test/session/reviewReqThreads.requirements.test.ts, test/session/renderReq.labelRename.requirements.test.ts and test/host/fmtableReq.requirements.test.ts (metadata save); each answers the READ_ONLY_FILE reason, with restricted reads too.

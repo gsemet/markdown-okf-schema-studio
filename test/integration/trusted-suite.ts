@@ -66,7 +66,6 @@ import { ensureTestWindowFocused } from "./windowFocus";
 import { step, withSuiteWatchdog } from "./stepWatchdog";
 import { TRUSTED_PART_STEPS, trustedLaunch, trustedPartFromEnvironment, type TrustedPart, type TrustedStepName } from "../shared/trustedParts";
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S1
 export async function run(): Promise<void> {
   const launch = trustedLaunch(trustedPartFromEnvironment(process.env));
   // Printed from the part the host received: the log of a green run names each trusted launch.
@@ -129,9 +128,6 @@ async function runPreviewSmoke(): Promise<void> {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-011#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S4
 /**
  * A reader opens a document with hostile HTML (an inline script, `on*` attributes, an iframe, an
  * object and a `javascript:` link) in the unsaved buffer of preview.md: the page shows the document,

@@ -40,11 +40,7 @@ implemented_in_files:
 - src/session/webview.ts
 tested_in_files:
 - test/security/readOnlyRoot.requirements.test.ts
-- test/session/baselineDiff.test.ts
 - test/session/readOnlyImages.test.ts
-- test/session/readOnlyImagesSession.test.ts
-- test/session/readOnlyLocalRoots.test.ts
-- test/visual/readOnlyImagesScenarios.ts
 default_owner_email: gaetan@xeberon.net
 ---
 

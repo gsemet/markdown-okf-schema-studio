@@ -37,15 +37,15 @@ const readThreads = (file: string): any[] => JSON.parse(fs.readFileSync(file, "u
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S3
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-012#S4
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-054#S3
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S7
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S2
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-004#S4
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S4
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-065#S6
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S6
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-074#S11
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S4
 /**
  * T43: creating a thread and replying write the sidecar next to the document through the host
  * queue. Two creates sent together both land; the author comes from the setting; an invalid
@@ -221,10 +221,8 @@ export async function run(): Promise<void> {
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S5
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S2
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
 /** T43: a preview in Restricted Mode offers comments and writes the sidecar next to the document. */
 export async function runUntrusted(preview: PreviewForTests, document: vscode.TextDocument): Promise<void> {
   assert.match(preview.html, /"commentsEnabled":true/u, "Restricted Mode offers the Comment button");
