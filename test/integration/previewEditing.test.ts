@@ -984,7 +984,7 @@ export async function run(): Promise<void> {
     revision: process.env.STUDIO_AUDIT_REVISION ?? "unprovided (working tree)",
     command: process.env.STUDIO_AUDIT_COMMAND ?? "node out/test/integration/run-tests.js --trusted-only",
     startedAt: new Date().toISOString(), result: "running",
-    suiteResult: "Parent must record trusted-suite exit after serializer and workspace disposal; this test cannot certify later operations.",
+    suiteResult: "Parent must record the exit of trusted-suite.js part 2/2, the launch of this test; serializer and workspace disposal run in part 1/2, which this does not certify.",
     reload: "Separate real-window campaign: see RELOAD-LATEST.md. Refresh captures here only prove toolbar refresh.",
     tooltip: "Custom accessible link tooltips have dedicated hover captures; native browser popups are not captured.",
   };
@@ -1309,6 +1309,6 @@ export async function run(): Promise<void> {
     );
   }
   evidence.assertComplete();
-  manifest.result = "previewEditing passed including cleanup; trusted-suite result still requires parent exit";
+  manifest.result = "previewEditing passed including cleanup; the result of trusted-suite.js part 2/2 still requires parent exit";
   evidence.writeManifest(manifest);
 }

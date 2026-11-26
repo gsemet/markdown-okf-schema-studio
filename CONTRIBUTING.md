@@ -524,6 +524,15 @@ user-data directory, extensions directory, CDP port and evidence folders; the ma
 `instanceId`. The LATEST pointers and `integration-manifest.json` are shared files, so the last run
 to finish wins them; use the run folder named in the console for a specific run.
 
+The trusted window runs as two launches, each with its own launch deadline. Part 1 runs `setup`,
+`preview-smoke`, the steps from `project-features` to `find-in-preview`, then those from `edit-keys`
+to `workspace-disposal`. Part 2 runs `setup`, `preview-smoke`, `real-input` and `preview-editing`.
+The two lists are in `test/shared/trustedParts.ts`; a new step goes into one of them, gets its runner
+in `test/integration/trusted-suite.ts` and its name in `test/build/trustedParts.test.ts`.
+`run-tests` (full run and `--trusted-only`) launches part 1, then part 2, and passes
+`STUDIO_TRUSTED_PART`; a `STUDIO_REAL_INPUT_SCENARIO` run stays one launch. Each launch prints
+`TRUSTED LAUNCH: <name>` (for example `trusted-suite.js part 2/2`).
+
 A hung real-window run fails fast and leaves a dump (CI rule 11). Each step of the trusted window
 runs under `step()` (`test/integration/stepWatchdog.ts`), with a budget per step, `STEP start` and
 `STEP done` lines in the log, and `bounded()` around single VS Code calls that must return. The scroll,
@@ -534,7 +543,9 @@ seconds; `run-tests` stops a launch whose heartbeat is silent for 90 seconds (fr
 or renderer) or that runs past its deadline (15 minutes, `STUDIO_LAUNCH_TIMEOUT_MS`; a stress run
 computes its own, 2 minutes plus 6 s per scenario run (rounds times scenarios) and at most 24 minutes, and
 `just ci-toc-loop` sets 30), kills its VS Code processes and names the last step. Thresholds live in
-`test/shared/hangWatchdog.ts`. Each timeout writes `out/reports/e2e/hang-dumps/<time>-<step>/`:
+`test/shared/hangWatchdog.ts`. Each timeout writes `out/reports/e2e/hang-dumps/<time>-<step>/` (when
+a trusted part is stopped by `LAUNCH TIMEOUT` or `LAUNCH HANG`, that line names the launch and the
+folder is `<time>-trusted-part-<n>-<step>/`):
 `ps` output, the tails of the VS Code logs, the window state and tabs, the heartbeat and screenshots
 (through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step stops
 at 20 minutes (the `toc-loop` step at 35) and `just ci-hang-dump` adds the processes and logs left behind (`post-step/`).

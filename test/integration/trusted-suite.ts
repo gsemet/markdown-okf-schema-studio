@@ -64,10 +64,14 @@ import { attribute, findElements, parseHtml } from "../core/render/dom";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
 import { step, withSuiteWatchdog } from "./stepWatchdog";
+import { TRUSTED_PART_STEPS, trustedLaunch, trustedPartFromEnvironment, type TrustedPart, type TrustedStepName } from "../shared/trustedParts";
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S1
 export async function run(): Promise<void> {
-  await withSuiteWatchdog("trusted-suite", runTrustedSuite);
+  const launch = trustedLaunch(trustedPartFromEnvironment(process.env));
+  // Printed from the part the host received: the log of a green run names each trusted launch.
+  console.log(`TRUSTED LAUNCH: ${launch.name}`);
+  await withSuiteWatchdog(launch.suite, () => runTrustedSuite(launch.part));
 }
 
 /** The shared preview.md checks: trusted command, page security, styles, dirty buffer, no build. */
@@ -215,128 +219,110 @@ async function runRealInputScenario(): Promise<void> {
   else await runRealInput();
 }
 
+async function runSetup(): Promise<void> {
+  await pinStoredWorkspaceChoices();
+  // CDP input and the undo steps need a window macOS has activated (windowFocus.ts).
+  await ensureTestWindowFocused();
+}
+
+/** What each step of the trusted window runs. trustedParts.ts says which part runs it, and in which order. */
+const STEP_RUNNERS: Readonly<Record<TrustedStepName, () => Promise<unknown>>> = {
+  "setup": runSetup,
+  "preview-smoke": runPreviewSmoke,
+  "project-features": runProjectFeatures,
+  "hostile-html": runHostilePreview,
+  "stock-coexistence": runStockCoexistence,
+  "open-at-line": runOpenAtLine,
+  "open-at-line-probe": runOpenAtLineProbe,
+  "open-at-line-studio": runOpenAtLineStudio,
+  "checkbox-toggle": runCheckboxToggle,
+  "radio-choice": runRadioChoice,
+  "table-empty-column": runTableEmptyColumn,
+  "edit-toolbar-cover": runEditToolbarCover,
+  "tall-block-scroll": runTallBlockScroll,
+  "block-actions": runBlockActions,
+  "find-in-preview": runFindInPreview,
+  "real-input": runRealInputScenario,
+  "preview-editing": runPreviewEditing,
+  "edit-keys": runEditKeys,
+  "save-key": runSaveKey,
+  "grid-card-editor-blur": runGridCardEditorBlur,
+  "paste-url": runPasteUrl,
+  "drop-files": runDropFiles,
+  "window-switch-keys": runWindowSwitchKeys,
+  "preview-history": runPreviewHistory,
+  "export-html": runExportHtml,
+  "palette-mode": runPaletteMode,
+  "label-rename": runLabelRename,
+  "inline-thread": runInlineThread,
+  "block-move": runBlockMove,
+  "block-clipboard": runBlockClipboard,
+  "empty-blocks": runEmptyBlocks,
+  "blank-lines": runBlankLines,
+  "myst-pickers": runMystPickers,
+  "image-picker": runImagePicker,
+  "image-paste": runImagePaste,
+  "incoming-changes": runIncomingChanges,
+  "update-glow": runUpdateGlow,
+  "review-comments": runReviewComments,
+  "comment-write": runCommentWrite,
+  "comment-contrast": runCommentContrast,
+  "comment-title": runCommentTitle,
+  "readme-html": runReadmeHtml,
+  "toc": runToc,
+  "myst-blocks": runMystBlocks,
+  "comment-anchors": runCommentAnchors,
+  "generic-markdown": runGenericMarkdown,
+  "dirty-snapshots": runDirtySnapshots,
+  "source-mapping": runSourceMapping,
+  "diff-preview": runDiffPreview,
+  "diff-preview-scroll": runDiffPreviewScroll,
+  "side-preview-jump": runSidePreviewJump,
+  "lifecycle": runLifecycle,
+  "myst-diagnostics": runMystDiagnostics,
+  "serializer": runSerializer,
+  "workspace-disposal": runWorkspaceDisposal,
+};
+
+/** The line these steps add to the log in front of their error. */
+const FAILURE_LINES: Partial<Record<TrustedStepName, string>> = {
+  "checkbox-toggle": "Checkbox toggle integration failed:",
+  "real-input": "Real-input integration failed:",
+  "preview-editing": "Preview editing integration failed:",
+};
+
+async function runNamedStep(name: TrustedStepName): Promise<void> {
+  try {
+    await step(name, STEP_RUNNERS[name]);
+  } catch (error) {
+    const failureLine = FAILURE_LINES[name];
+    if (failureLine !== undefined) console.error(failureLine, error);
+    throw error;
+  }
+}
+
+/** The steps of the one launch a STUDIO_REAL_INPUT_SCENARIO run makes. */
+function scenarioSteps(scenario: string | undefined): readonly TrustedStepName[] {
+  // These scenarios need no fixture document: they run without the shared preview.md checks.
+  if (scenario === "drop-files" || scenario === "paste-url" || scenario === "block-actions") return ["setup", scenario];
+  const opening = ["setup", "preview-smoke"] as const;
+  if (scenario === "window-switch-keys") return [...opening, "window-switch-keys"];
+  if (scenario === "empty-column") return [...opening, "table-empty-column"];
+  if (scenario === "toolbar-cover") return [...opening, "edit-toolbar-cover", "tall-block-scroll"];
+  if (scenario === "find-in-preview") return [...opening, "find-in-preview"];
+  if (scenario === "tall-block-scroll") return [...opening, "tall-block-scroll"];
+  return [...opening, "real-input"];
+}
+
 /**
+ * Runs one part of the trusted window, or without a part the scenario of STUDIO_REAL_INPUT_SCENARIO.
  * Every step runs under the hang watchdog (stepWatchdog.ts): a budget per step, `STEP start/done`
  * lines in the log, and a dump that names the step and its last progress marker on a timeout.
  */
-async function runTrustedSuite(): Promise<void> {
+async function runTrustedSuite(part: TrustedPart | undefined): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
-  await step("setup", async () => {
-    await pinStoredWorkspaceChoices();
-    // CDP input and the undo steps need a window macOS has activated (windowFocus.ts).
-    await ensureTestWindowFocused();
-  });
-  // The block actions scenario needs no fixture document: it runs before the shared preview.md checks.
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "drop-files") {
-    await step("drop-files", runDropFiles);
-    return;
-  }
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "paste-url") {
-    await step("paste-url", runPasteUrl);
-    return;
-  }
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "block-actions") {
-    await step("block-actions", runBlockActions);
-    return;
-  }
-  await step("preview-smoke", runPreviewSmoke);
-
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "window-switch-keys") {
-    await step("window-switch-keys", runWindowSwitchKeys);
-    return;
-  }
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "empty-column") {
-    await step("table-empty-column", runTableEmptyColumn);
-    return;
-  }
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "toolbar-cover") {
-    await step("edit-toolbar-cover", runEditToolbarCover);
-    await step("tall-block-scroll", runTallBlockScroll);
-    return;
-  }
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "find-in-preview") {
-    await step("find-in-preview", runFindInPreview);
-    return;
-  }
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "tall-block-scroll") {
-    await step("tall-block-scroll", runTallBlockScroll);
-    return;
-  }
-  const onlyRealInput = process.env.STUDIO_REAL_INPUT_SCENARIO !== undefined;
-  if (!onlyRealInput) {
-    await step("project-features", runProjectFeatures);
-    await step("hostile-html", runHostilePreview);
-    await step("stock-coexistence", runStockCoexistence);
-    await step("open-at-line", runOpenAtLine);
-    await step("open-at-line-probe", runOpenAtLineProbe);
-    await step("open-at-line-studio", runOpenAtLineStudio);
-  }
-  try {
-    if (!onlyRealInput) await step("checkbox-toggle", runCheckboxToggle);
-  } catch (error) {
-    console.error("Checkbox toggle integration failed:", error);
-    throw error;
-  }
-  if (!onlyRealInput) await step("radio-choice", runRadioChoice);
-  if (!onlyRealInput) {
-    await step("table-empty-column", runTableEmptyColumn);
-    await step("edit-toolbar-cover", runEditToolbarCover);
-    await step("tall-block-scroll", runTallBlockScroll);
-    await step("block-actions", runBlockActions);
-    await step("find-in-preview", runFindInPreview);
-  }
-  try {
-    await step("real-input", runRealInputScenario);
-  } catch (error) {
-    console.error("Real-input integration failed:", error);
-    throw error;
-  }
-  if (onlyRealInput) return;
-  try {
-    await step("preview-editing", runPreviewEditing);
-  } catch (error) {
-    console.error("Preview editing integration failed:", error);
-    throw error;
-  }
-  const remainingSteps: ReadonlyArray<readonly [string, () => Promise<void>]> = [
-    ["edit-keys", runEditKeys],
-    ["save-key", runSaveKey],
-    ["grid-card-editor-blur", runGridCardEditorBlur],
-    ["paste-url", runPasteUrl],
-    ["drop-files", runDropFiles],
-    ["window-switch-keys", runWindowSwitchKeys],
-    ["preview-history", runPreviewHistory],
-    ["export-html", runExportHtml],
-    ["palette-mode", runPaletteMode],
-    ["label-rename", runLabelRename],
-    ["inline-thread", runInlineThread],
-    ["block-move", runBlockMove],
-    ["block-clipboard", runBlockClipboard],
-    ["empty-blocks", runEmptyBlocks],
-    ["blank-lines", runBlankLines],
-    ["myst-pickers", runMystPickers],
-    ["image-picker", runImagePicker],
-    ["image-paste", runImagePaste],
-    ["incoming-changes", runIncomingChanges],
-    ["update-glow", runUpdateGlow],
-    ["review-comments", runReviewComments],
-    ["comment-write", runCommentWrite],
-    ["comment-contrast", runCommentContrast],
-    ["comment-title", runCommentTitle],
-    ["readme-html", runReadmeHtml],
-    ["toc", runToc],
-    ["myst-blocks", runMystBlocks],
-    ["comment-anchors", runCommentAnchors],
-    ["generic-markdown", runGenericMarkdown],
-    ["dirty-snapshots", runDirtySnapshots],
-    ["source-mapping", runSourceMapping],
-    ["diff-preview", runDiffPreview],
-    ["diff-preview-scroll", runDiffPreviewScroll],
-    ["side-preview-jump", runSidePreviewJump],
-    ["lifecycle", runLifecycle],
-    ["myst-diagnostics", runMystDiagnostics],
-    ["serializer", runSerializer],
-    ["workspace-disposal", runWorkspaceDisposal],
-  ];
-  for (const [name, runRemaining] of remainingSteps) await step(name, runRemaining);
+  const steps: readonly TrustedStepName[] = part === undefined
+    ? scenarioSteps(process.env.STUDIO_REAL_INPUT_SCENARIO)
+    : TRUSTED_PART_STEPS[part];
+  for (const name of steps) await runNamedStep(name);
 }

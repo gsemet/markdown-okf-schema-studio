@@ -22,6 +22,8 @@ import {
 export interface LaunchWatchdogOptions {
   /** Names the launch in errors and in the dump folder (for example the suite file). */
   readonly name: string;
+  /** Put in front of the step in the dump folder name, to tell launches of one suite apart. */
+  readonly dumpLabel?: string;
   /** Heartbeat file the extension host writes; undefined = deadline only (no host suite). */
   readonly heartbeatFile?: string;
   /** The launch's user-data directory: its logs go in the dump, its processes are matched by it. */
@@ -112,7 +114,8 @@ export async function watchLaunch<T>(options: LaunchWatchdogOptions, launch: Pro
       try {
         dump = await writeHangDump({
           root: options.dumpRoot ?? HANG_DUMP_ROOT,
-          step: lastHeartbeat?.step ?? options.name,
+          // The label goes first: the folder name is cut, and the same step runs in several launches.
+          step: [options.dumpLabel, lastHeartbeat?.step ?? options.name].filter(Boolean).join("-"),
           reason,
           userDataDirectory: options.userDataDirectory,
           heartbeatFile: options.heartbeatFile,

@@ -9,6 +9,7 @@ import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag, shortTemporaryRoot } from "../shared/runIsolation";
 import { heartbeatFileFor, launchDeadlineMs, RELOAD_LAUNCH_DEADLINE_MS, stressDeadlineLine } from "../shared/hangWatchdog";
 import { resetHeartbeat, watchLaunch } from "../shared/launchWatchdog";
+import { trustedLaunches, type TrustedLaunch } from "../shared/trustedParts";
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 const workspaceRoot = extensionRoot;
@@ -87,7 +88,8 @@ async function runUntrustedScenario(suiteName: string): Promise<void> {
   }
 }
 
-async function runScenario(suiteName: string, untrusted: boolean): Promise<void> {
+/** `trusted` tells which launch of the trusted window this is; the other suites have one launch each. */
+async function runScenario(suiteName: string, untrusted: boolean, trusted?: TrustedLaunch): Promise<void> {
   if (untrusted) {
     await runUntrustedScenario(suiteName);
     return;
@@ -114,7 +116,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
   const browserSuite = suiteName === "scroll-sync-suite.js" || suiteName === "trusted-suite.js";
   // Resolved (downloaded) before the launch, so the launch deadline does not count the download.
   const executable = await codeExecutablePath();
-  const heartbeatFile = heartbeatFileFor(instanceId, suiteName);
+  const heartbeatFile = heartbeatFileFor(instanceId, trusted?.suite ?? suiteName);
   resetHeartbeat(heartbeatFile);
   const debugPort = browserSuite ? await freePort() : undefined;
   const launchArgs = ["--user-data-dir", userDataDirectory, "--extensions-dir", extensionsDirectory, workspaceFile];
@@ -132,7 +134,9 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
     try {
     // Hang watchdog (test/shared/launchWatchdog.ts): runTests owns the VS Code process, which is
     // found through its user-data directory when it has to be dumped and killed.
-    await watchLaunch({ name: suiteName, heartbeatFile, userDataDirectory, cdpPort: debugPort }, runTests({
+    await watchLaunch({
+      name: trusted?.name ?? suiteName, dumpLabel: trusted?.dumpLabel, heartbeatFile, userDataDirectory, cdpPort: debugPort,
+    }, runTests({
       vscodeExecutablePath: executable,
       extensionDevelopmentPath: extensionRoot,
       extensionTestsPath: path.join(__dirname, suiteName),
@@ -143,6 +147,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
         STUDIO_USER_DATA_DIR: userDataDirectory,
         STUDIO_AUDIT_REVISION: revision,
         STUDIO_AUDIT_COMMAND: process.env.STUDIO_E2E_COMMAND ?? process.argv.join(" "),
+        ...(trusted?.part ? { STUDIO_TRUSTED_PART: trusted.part } : {}),
         ...(campaignRunId ? { STUDIO_E2E_RUN_ID: campaignRunId } : {}),
         ...(campaignStartedAt ? { STUDIO_E2E_STARTED_AT: campaignStartedAt } : {}),
         ...(campaignCommand ? { STUDIO_E2E_COMMAND: campaignCommand } : {}),
@@ -151,7 +156,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
     }));
     passed = true;
     } finally {
-      if (suiteName === "trusted-suite.js") {
+      if (trusted?.runsPreviewEditing) { // the launch that wrote the frontmatter evidence
         for (const entry of fs.readdirSync(E2E_SCREENSHOT_ROOT, { withFileTypes: true })) {
           if (!entry.isDirectory() || !entry.name.startsWith("frontmatter-e2e-")) continue;
           const manifestPath = path.join(E2E_SCREENSHOT_ROOT, entry.name, "manifest.json");
@@ -232,6 +237,11 @@ async function runWatchedReloadCampaign(): Promise<void> {
   }));
 }
 
+/** The trusted window: two launches, each with its own deadline, or the one launch of a scenario (trustedParts.ts). */
+async function runTrustedLaunches(): Promise<void> {
+  for (const launch of trustedLaunches(process.env)) await runScenario(launch.suiteFile, false, launch);
+}
+
 async function main(): Promise<void> {
   launchDeadlineMs(); // an invalid STUDIO_LAUNCH_TIMEOUT_MS or stress plan fails here, before any VS Code starts
   const deadlineLine = stressDeadlineLine();
@@ -241,7 +251,7 @@ async function main(): Promise<void> {
     return;
   }
   if (process.argv.includes("--trusted-only")) {
-    await runScenario("trusted-suite.js", false);
+    await runTrustedLaunches();
     return;
   }
   if (process.argv.includes("--reverse-migration-only")) {
@@ -255,7 +265,7 @@ async function main(): Promise<void> {
   await runScenario("scroll-sync-suite.js", false);
   if (process.argv.includes("--scroll-only")) return;
   await runScenario("untrusted-suite.js", true);
-  await runScenario("trusted-suite.js", false);
+  await runTrustedLaunches();
   await runScenario("standalone-suite.js", false);
   await runReverseMigrationScenario();
   await runWatchedReloadCampaign();
