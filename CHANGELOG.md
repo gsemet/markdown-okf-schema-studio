@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A frontmatter field with a schema error now shows its name in red on a light red background and a wavy red
+  underline under its value; a field with a warning shows the same in the warning colour, and a whole-table
+  warning row (such as "Schema could not be parsed") now shows in the warning colour too (CR-513 field-error)
 - Charts in the preview are live: hovering a Vega-Lite mark shows its values in a themed box (`"tooltip": null`
   on a mark turns it off; a Vega chart shows only the tooltips it defines), and the HTML export keeps the drawn
   chart as a static inline SVG (CR-503 vega-charts-live-view, PR #523)

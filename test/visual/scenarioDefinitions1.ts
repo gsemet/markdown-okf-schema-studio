@@ -61,6 +61,7 @@ import { LABEL_RENAME_SCENARIOS } from "./labelRenameScenarios";
 import { MATH_SCENARIOS } from "./mathScenarios";
 import { TABLE_ROW_COLOUR_SCENARIOS } from "./tableRowColourScenarios";
 import { TABLE_TAB_HINT_SCENARIOS } from "./tableTabHintScenarios";
+import { FRONTMATTER_ISSUE_ROW_SCENARIOS } from "./frontmatterIssueRowScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   {
@@ -484,6 +485,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   ...CHANGE_BAR_TOOLTIP_SCENARIOS,
   ...CHANGE_BAR_CARD_SCENARIOS,
   ...FRONTMATTER_COLLAPSE_SCENARIOS,
+  ...FRONTMATTER_ISSUE_ROW_SCENARIOS,
   ...TOOLBAR_FLOAT_SCENARIOS,
   ...EXPORT_HTML_SCENARIOS,
   ...EXPORT_EDITED_CELL_SCENARIOS,

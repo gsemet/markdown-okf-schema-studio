@@ -42,11 +42,14 @@ derived_by: []
 implemented_in_files:
 - src/core/frontmatter/frontmatterParse.ts
 - src/core/frontmatter/okfFrontmatter.ts
+- src/core/preview/styles/propertiesStyles.markers.ts
 tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/schemaRegistry.test.ts
+- test/core/preview/fieldIssueStyles.test.ts
 - test/integration/previewEditingSchemaSteps.ts
+- test/visual/frontmatterIssueRowScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -93,7 +96,7 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 
 | Input | Outcome |
 | --- | --- |
-| a Note.schema.json5 file that is not valid JSON after comments are stripped | the table is generic and one warning row starts with "Schema could not be parsed: {error}", with a warning badge |
+| a Note.schema.json5 file that is not valid JSON after comments are stripped | the table is generic and one warning row starts with "Schema could not be parsed: {error}"; it is shown in the warning colour on a light background of that colour, spans every column and wraps its text, and the badge counts one warning |
 | a Note.schema.json5 file with a trailing comma after the last property | the schema cannot be parsed and the warning row "Schema could not be parsed: {error}" is shown |
 
 ### Scenario S6 (refusal): YAML syntax error
@@ -139,6 +142,8 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 - Method: test/core/frontmatter/diagReq.frontmatter.requirements.test.ts, test `an empty or comment-only YAML schema is reported as empty: generic table, one info note, no throw` (empty YAML schema).
 - Method: test/core/frontmatter/schemaRegistry.test.ts (schema that cannot be compiled: the same error is reported at every analysis).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario in dark and light, 900 px and 460 px (schema that cannot be compiled, compile failure in a narrow preview).
+- Method: test/core/preview/fieldIssueStyles.test.ts, test `a warning row about the whole document takes the warning colour and wraps its message` (how the warning row is shown: schema that cannot be parsed).
+- Method: test/visual/frontmatterIssueRowScenarios.ts, visual scenarios `v34-schema-warning-row-light-900` and `v35-schema-warning-row-dark-900` (how the warning row is shown: schema that cannot be parsed).
 - Criteria: Only comment stripping is supported: trailing commas, unquoted keys and single-quote conversions are not. Only a node made of a single `$ref` key is inlined; a missing target leaves a reference to the schema root. The summary is 0 errors, 1 warning, 0 infos for a JSON or JSON5 failure, and the fields are listed in source order without documentation. The standard JSON-pointer scenario has no test (probed against the resolver).
 
 <!-- okf:links:start -->

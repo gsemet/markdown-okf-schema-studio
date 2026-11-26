@@ -2,6 +2,12 @@
 
 ## 2026-11-26
 
+### Frontmatter: rows with an error or a warning are coloured (CR-513)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-FMSCHEMA-084 (an error or warning field row shows its name in the severity colour on a light background of that colour and a wavy underline in that colour under its value; info field rows keep the plain look; a value cell being edited has no underline), SwRS-MDOKFSTUDIO-FMSCHEMA-023 (the "Schema could not be parsed" warning row is shown in the warning colour on a light background, across the table, with its text wrapped)
+- Reason: a field with a validation error was only signalled by the badge of the table title: no rule styled the field rows or the whole-document warning row
+- Tests: test/core/preview/fieldIssueStyles.test.ts, test/visual/frontmatterIssueRowScenarios.ts (v32 to v35)
+
 ### Auto width: only top-level blocks widen (CR-511)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-LAYOUT-023: the normative text states that only a top-level block, or an image alone in a top-level paragraph, widens in Auto, and a nested block keeps its Margin layout (new scenario S9; the list-item row moves from S8 to S9; the Known issue on nested blocks is removed). A Known issue is added on the image alone in a top-level paragraph: a linked one is not widened, and a paragraph holding no text and several images, at least one of them not wrapped in a link or another element, is measured and marked as a whole, once, from its first image's sizes.

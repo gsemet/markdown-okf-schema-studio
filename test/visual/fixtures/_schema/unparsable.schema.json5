@@ -1,0 +1,9 @@
+// Visual fixture: the comma after the last property makes this schema unreadable on purpose, so the
+// frontmatter table shows its whole-document warning row.
+{
+  "type": "object",
+  "properties": {
+    "type": { "const": "unparsable" },
+    "title": { "type": "string" },
+  }
+}
