@@ -48,11 +48,10 @@ export const STEP_BUDGET_DEFAULT_MS = 3 * 60_000;
 /**
  * Steps that take minutes when healthy. Heavy CI integration job (main b71f, 2026-10-28): the
  * real-input step took about 100 s for 37 of its 85 captures, so about 5 minutes in full. The
- * trusted window is two launches (trustedParts.ts). Their steps, summed from CI runs that still ran
- * them as one launch (so not measured as two launches, and without a second window start): part 1
- * about 393 s (run 45713440510: setup to find-in-preview 277 s, edit-keys to workspace-disposal
- * 116 s), part 2 about 439 s (run 45713440510: real-input 405 s, preview-editing 32 s; run
- * 45476952370 has about the same real-input time).
+ * trusted window is two launches (trustedParts.ts). Measured on heavy CI run 45729384181 (job
+ * integration, one run): part 1 428 s (from the start of `setup` to the end of
+ * `workspace-disposal`), part 2 502.5 s (from the start of its `setup` to the end of
+ * `preview-editing`; of which `real-input` 462 s and `preview-editing` 39 s).
  */
 export const STEP_BUDGETS_MS: Readonly<Record<string, number>> = {
   "real-input": 10 * 60_000,

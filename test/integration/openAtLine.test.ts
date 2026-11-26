@@ -115,7 +115,7 @@ export async function run(): Promise<void> {
       await waitFor("no text tab left", () => textTabs().length === 0);
       await vscode.commands.executeCommand("vscode.open", target, { selection: new vscode.Range(41, 0, 41, 0) });
       await settle(3000);
-      // Webview frames only (shared/webviewFrames.ts): a count on a frame with no document does not return.
+      // Webview frames only (shared/webviewFrames.ts): a count on a frame with an empty URL once did not return in time.
       const frames = (await Promise.all(webviewFrames(page.frames()).map((candidate) => candidate.locator(".sphinx-preview-line-marker").count().catch(() => 0))))
         .reduce((total, count) => total + count, 0);
       console.log(`[open-at-line] jump with the side preview open, file not open as text: studio=${studioTabs().length} text=${textTabs().length} marks=${frames} markedLine=${getActivePreviewForTests()?.markedLine?.line}`);

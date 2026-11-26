@@ -1,7 +1,8 @@
 /**
- * Which frames of the workbench page can be the Studio frame, told from `url()` alone. A frame that
- * never committed a document has an empty URL, and a Playwright call that needs its execution context
- * does not return. So a frame is picked by its URL before any other call on it.
+ * Which frames of the workbench page can be the Studio frame, told from `url()` alone. In heavy CI
+ * run 45706313890, attempt 2, a locator count on a frame with an empty URL did not return within its
+ * 10 s bound. Such a frame has no webview address, so a frame is picked by its URL before any other
+ * call on it.
  *
  * No vscode, no playwright: unit-testable with fake frames.
  */
