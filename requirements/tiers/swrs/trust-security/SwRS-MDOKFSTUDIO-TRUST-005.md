@@ -56,10 +56,11 @@ implemented_in_files:
 - src/session/pageMessages.ts
 tested_in_files:
 - test/host/fmtableReq.requirements.test.ts
+- test/host/lifeReq.requirements.test.ts
 - test/integration/blockClipboard.test.ts
 - test/integration/blockMove.test.ts
 - test/integration/commentWrite.test.ts
-- test/integration/imagePaste.test.ts
+- test/integration/standalone-suite.ts
 - test/integration/untrusted-suite.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/checkboxRefusal.test.ts
@@ -162,7 +163,9 @@ A preview has restricted reads because the workspace is untrusted or the file is
 
 - Method: test/session/blockReq.requirements.test.ts, unit tests `a restricted-reads preview opens, saves and cancels a block like a writable one`, `a restricted-reads preview and a writable one both post a flush request before a switch`, `an open, save or cancel from an older page of a preview is answered with an error` and the edit mode test (block edit, flush and edit mode rows). Before the change these were refusals with the read-only reason.
 - Method: test/session/checkboxRefusal.test.ts and test/session/radioChoice.test.ts (a checkbox toggle and a radio choice of a standalone file or in Restricted Mode reach the handler through PageMessageDispatcher; the malformed rows).
+- Method: Unit test `the dispatcher stops no edit or viewing request of a preview with restricted reads` in test/session/checkboxRefusal.test.ts (The dispatcher stops no request for trust scenario).
 - Method: test/host/fmtableReq.requirements.test.ts, unit test a frontmatter save in an untrusted workspace is applied like in a trusted one (frontmatter row).
+- Method: test/host/lifeReq.requirements.test.ts, unit test `a preview with restricted reads that switches document asks its page to save first` (the document switch row of the host-side writes).
 - Method: test/session/renderReq.labelRename.requirements.test.ts (a rename in a standalone file or in Restricted Mode is applied; rename row), test/session/reviewReqThreads.requirements.test.ts (reply, delete and find and replace of a preview with restricted reads are applied; thread and find rows), test/session/dropFiles.requirements.test.ts (a drop is written; no Markdown file is read under restricted reads; a standalone document links any file; a read-only file is refused).
 - Method: test/session/reviewReqComments.requirements.test.ts (a comment of a standalone file or in Restricted Mode is written next to the document, and the moved lines are written when the document is saved; comment and host-side rows).
 - Method: test/session/paletteReq.requirements.test.ts (the document picker opens; the image picker of a standalone file accepts an image of the document folder and refuses one elsewhere; an image paste is saved next to a standalone file and in Restricted Mode; the citation list is refused with its reason and no file is read).

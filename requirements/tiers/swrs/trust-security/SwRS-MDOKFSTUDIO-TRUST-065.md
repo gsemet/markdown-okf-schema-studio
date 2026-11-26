@@ -49,10 +49,8 @@ implemented_in_files:
 - src/session/sessionDocuments.ts
 tested_in_files:
 - test/host/fmtableReq.requirements.test.ts
-- test/integration/blockClipboard.test.ts
 - test/integration/blockMove.test.ts
 - test/integration/commentWrite.test.ts
-- test/integration/labelRename.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
 - test/session/paletteReq.requirements.test.ts
@@ -164,18 +162,18 @@ A message that passes its gate but writes for a document newer than the render i
 
 ### Verification notes
 
-- Method: test/session/trustReq.requirements.test.ts (render gate current, older and foreign identity, disposed and stage-less preview; comment gate; document gate; own-id gate; page-state gate with previewScroll and the open editor save; stale save answered with an error). It runs PageMessageDispatcher.handle in src/session/pageMessages.ts with the real matchesCurrent of the preview manager. The other render-gated types share the same gate.
+- Method: test/session/trustReq.requirements.test.ts (every listed type has its gate, and one message of each gate is passed or dropped by the identifiers that gate compares; render gate current, older and foreign identity, disposed and stage-less preview; document gate; own-id gate; page-state gate with previewScroll and the open editor save; stale save and stale render-gated requests answered). It runs PageMessageDispatcher.handle in src/session/pageMessages.ts with the real matchesCurrent of the preview manager.
 - Method: test/integration/commentWrite.test.ts (comment gate: a previewCommentCreate with an old documentVersion is written and answered ok; the same message with a wrong document id is dropped and writes nothing).
-- Method: test/integration/blockMove.test.ts and test/integration/blockClipboard.test.ts (stale version: document and clipboard unchanged, current render plans the move or copy). The message text has no assertion.
+- Method: test/integration/blockMove.test.ts (a previewBlockMove of the current render is applied).
 - Method: test/session/blockReq.requirements.test.ts (a save or cancel from an older page of a preview, one with restricted reads included, is answered with an error).
 - Method: test/session/renderReq.codeCopy.requirements.test.ts (stale copy request copied and answered, another document dropped).
 - Method: test/session/diagReq.plantuml.requirements.test.ts (include request handled for the current document even one render behind, dropped otherwise).
 - Method: test/host/fmtableReq.requirements.test.ts (frontmatter save from an older render answered with the reopen hint; another document gets no answer).
-- Method: test/integration/labelRename.test.ts (rename out-of-date answer) and test/session/trustReq.requirements.test.ts (stale revision answered with the stale-line refusal).
+- Method: test/session/trustReq.requirements.test.ts (a label rename of a stale revision is answered with the stale-line refusal).
 - Method: test/session/paletteReq.requirements.test.ts (label, citation, image picker and document picker requests answered with the out-of-date reason; current requests answered, and answered while a block editor is open on the render after its autosave moved the document, but not when no editor is open or it is open on another render; no file read and no dialog opened for a refused request).
 - Method: test/session/reviewReqThreads.requirements.test.ts (thread request that names another revision gets the out-of-date answer).
 - Method: test/session/toolbarReq.requirements.test.ts (link request of a stale page or a disposed preview is ignored).
-- Criteria: the reason texts equal those of the tables (the move and clipboard messages have no assertion on the text). currentPreviewDocument returns nothing when the revision differs, the stage differs, or the document is not a .md file (eligibility needs a file path ending in .md in any case). The ready reports and the stale-save cases beyond the open-editor save are covered by the tests of SwRS-MDOKFSTUDIO-LIFE-071.
+- Criteria: the reason texts equal those of the tables. currentPreviewDocument returns nothing when the revision differs, the stage differs, or the document is not a .md file (eligibility needs a file path ending in .md in any case). The ready reports and the stale-save cases beyond the open-editor save are covered by the tests of SwRS-MDOKFSTUDIO-LIFE-071.
 
 <!-- okf:links:start -->
 ### Links

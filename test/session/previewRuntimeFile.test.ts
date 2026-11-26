@@ -61,7 +61,6 @@ function text(element: HtmlElement): string {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S5
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S3
 test("PERF-11: a rendered page loads the runtime as a bundle file and carries its context as inert JSON", async () => {
   const { html, context } = await page("# Title\n\nSome text.\n", 7);
   const all = scripts(html);
@@ -83,8 +82,6 @@ test("PERF-11: a rendered page loads the runtime as a bundle file and carries it
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S5
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002#S6
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S3
 test("PERF-11: the static stylesheet is a bundle file; the page keeps only the per-render rule inline", async () => {
   const { html } = await page("Text.\n", 3, 720);
   const styles = findElements(parseHtml(html), (element) => element.tagName === "style");

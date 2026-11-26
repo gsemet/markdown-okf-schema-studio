@@ -366,7 +366,7 @@ test("previews of one root share one file watcher, which closing the last previe
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S7
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-026#S8
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("a document outside the workspace folder gets a new session on the same panel", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n");
@@ -481,6 +481,23 @@ test("granting trust flushes the open page editor before the preview is replaced
   assert.deepEqual(flushes, [true], "the page editor is flushed once, while the old session is alive");
   assert.equal(studio.manager.active!.restrictedReads, false);
   assert.equal(studio.manager.active!.panel, restricted.panel);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S6
+test("a preview with restricted reads that switches document asks its page to save first", async (t) => {
+  const studio = start(t, { trusted: false });
+  const first = writeFile("# First\n");
+  const second = writeFile("# Second\n");
+  const { panel } = await studio.openSide(first);
+  await studio.ready(panel);
+  const restricted = studio.manager.active!;
+  assert.equal(restricted.restrictedReads, true);
+  const flushes = watchFlush(restricted);
+  await fake.controls.showDocument(second);
+  fake.controls.events.changeActiveEditor.fire(fake.vscode.window.activeTextEditor);
+  await studio.until(() => restricted.documentUri === Uri.file(second).toString(), "the switch of the restricted preview");
+  assert.deepEqual(flushes, [true], "one flush request is posted before the switch, as for any preview");
+  assert.equal(restricted.restrictedReads, true);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-143#S5
@@ -1049,6 +1066,44 @@ test("with incrementalUpdates off a render assigns the page document instead of 
   assert.equal(patches(), 1, "with the setting off no patch is posted");
   assert.ok(panel.htmlAssignments.length > assignments, "the page document is assigned again");
   assert.match(lastRendered(panel), /After\./u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022#S5
+test("a patched page that is loaded as a new document gets a nonce that no earlier document had", async (t) => {
+  const studio = start(t);
+  const { document, panel } = await studio.openSide(writeFile("# Nonce\n\nBefore.\n"));
+  await studio.advance(100);
+  await studio.ready(panel);
+  const session = studio.manager.active!;
+  const nonceOf = (html: string): string => /'nonce-([^']+)'/u.exec(html)![1]!;
+  const patches = (): number => panel.posted.filter((message) => message.type === "previewContentPatch").length;
+  const first = nonceOf(lastRendered(panel));
+
+  // The page does not acknowledge the patch in time: the host loads its record as a new document.
+  fake.controls.changeDocument(document, "# Nonce\n\nMiddle.\n");
+  await studio.advance(300);
+  assert.equal(patches(), 1);
+  assert.equal(nonceOf(session.webview.html), first, "the record keeps the nonce of the loaded page");
+  let assignments = panel.htmlAssignments.length;
+  await studio.advance(2_500);
+  assert.equal(panel.htmlAssignments.length, assignments + 1, "the record is loaded");
+  assert.match(lastRendered(panel), /Middle\./u);
+  const second = nonceOf(lastRendered(panel));
+  assert.notEqual(second, first);
+  assert.equal(lastRendered(panel).includes(first), false);
+
+  // VS Code creates the webview again after a patch: it reports the document it was last given.
+  await studio.ready(panel);
+  const loaded = identityOfDocument(lastRendered(panel))!;
+  fake.controls.changeDocument(document, "# Nonce\n\nAfter.\n");
+  await studio.advance(300);
+  assert.equal(patches(), 2);
+  assignments = panel.htmlAssignments.length;
+  await studio.ready(panel, loaded);
+  assert.equal(panel.htmlAssignments.length, assignments + 1, "the record is loaded again");
+  assert.match(lastRendered(panel), /After\./u);
+  const third = nonceOf(lastRendered(panel));
+  assert.equal(new Set([first, second, third]).size, 3);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-127#S2

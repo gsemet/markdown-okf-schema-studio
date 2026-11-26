@@ -38,7 +38,13 @@ function ignored(): any {
   });
 }
 
-async function show(): Promise<{ html: string; roots: readonly string[]; toolbar: unknown }> {
+async function show(options: { renderedHtml?: string } = {}): Promise<{
+  html: string;
+  roots: readonly string[];
+  toolbar: unknown;
+  /** The diagnostics on the record of the page. */
+  diagnostics: ReadonlyArray<{ code?: string; message?: string; value?: string }>;
+}> {
   const ws = path.join(sandbox, "ws");
   const guide = path.join(ws, "docs", "guide");
   const text = "![x](../../images/x.png)\n";
@@ -56,6 +62,9 @@ async function show(): Promise<{ html: string; roots: readonly string[]; toolbar
     isWorkspaceTrusted: () => false,
     allowUntrusted: true,
     plantUmlEngine: "builtin",
+    ...(options.renderedHtml === undefined ? {} : {
+      renderSource: async () => ({ html: options.renderedHtml!, diagnostics: [], dependencies: [], renderMs: 0 }),
+    }),
   });
   const identity = result.stage.activeDocumentIdentity;
   let roots: readonly string[] = [];
@@ -94,10 +103,21 @@ async function show(): Promise<{ html: string; roots: readonly string[]; toolbar
   await controller.updatePreview(preview, result);
   const html: string = preview.webview.html;
   preview.stage?.dispose();
-  return { html, roots, toolbar };
+  return { html, roots, toolbar, diagnostics: preview.webview.diagnostics };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S5
+test("the record of the page holds the removal of an iframe and of an image that leaves the roots", async () => {
+  // The page HTML is given as rendered: the MyST pass drops raw HTML of this kind before it.
+  const renderedHtml = '<iframe src="https://example.test/"></iframe><p><img src="../../../../outside.png" alt="x"></p>';
+  const { diagnostics } = await show({ renderedHtml });
+  const iframe = diagnostics.find((entry) => entry.code === "blocked-active-element");
+  assert.equal(iframe?.message, "Removed <iframe> from preview output.", JSON.stringify(diagnostics));
+  const image = diagnostics.find((entry) => entry.code === "blocked-resource");
+  assert.equal(image?.message, "Removed a resource outside staged output.", JSON.stringify(diagnostics));
+  assert.equal(image?.value, "../../../../outside.png");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("Restricted Mode: an image of the workspace folder outside the document folder is shown and its folder is a webview root", async () => {
   const { html, roots } = await show();
@@ -105,7 +125,7 @@ test("Restricted Mode: an image of the workspace folder outside the document fol
   assert.deepEqual(roots, [path.join(sandbox, "ws", "docs", "guide"), path.join(sandbox, "ws")]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S2
 test("Restricted Mode: the page boots with the Comment button and the reply box on", async () => {
   const { toolbar } = await show();
   assert.equal((toolbar as { commentsEnabled?: boolean }).commentsEnabled, true);

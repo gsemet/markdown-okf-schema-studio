@@ -8,12 +8,8 @@ import { test } from "node:test";
 import { previewLocalResourceRoots } from "../../src/session/features/rendering";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
 test("a restricted-reads preview has its document folder and a non-broad workspace folder as local resource roots", async () => {
   const sandbox = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "readonly-roots-")));
   const saved = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };

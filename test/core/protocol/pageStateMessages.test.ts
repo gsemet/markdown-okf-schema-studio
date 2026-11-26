@@ -257,14 +257,93 @@ test("a page-state message keeps accepting a document id longer than the registe
   assert.equal(isPageToHostMessage({ ...long, type: "previewCopyText", editId: "e", text: "code", userGesture: true }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S4
 test("non-objects and inherited keys are not page messages", () => {
   for (const value of [null, undefined, 0, "previewReady", []]) {
     assert.equal(isPageToHostMessage(value), false, String(value));
   }
   for (const type of ["__proto__", "constructor", "toString", "hasOwnProperty"]) {
     assert.equal(isPageToHostMessage({ type, ...envelope }), false, type);
+  }
+});
+
+/** The verdict of the registry on `base` with each change applied on its own. */
+function verdicts(base: Record<string, unknown>, changes: ReadonlyArray<Record<string, unknown>>): boolean[] {
+  return changes.map((change) => isPageToHostMessage({ ...base, ...change }));
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S3
+test("the identity fields of an envelope are of their kind and the document id is bounded", () => {
+  const copy = { type: "previewCopyText", ...envelope, editId: "e", text: "code", userGesture: true };
+  assert.equal(isPageToHostMessage({ ...copy, documentId: "x".repeat(4096) }), true);
+  assert.equal(isPageToHostMessage({ ...copy, documentId: "x".repeat(4097) }), false);
+  const scroll = { type: "previewScroll", ...envelope, line: 2 };
+  assert.equal(isPageToHostMessage({ ...scroll, documentId: "x".repeat(5000) }), true, "a page-state message");
+  for (const base of [copy, scroll]) {
+    assert.deepEqual(verdicts(base, [{ documentId: undefined }, { documentId: 3 }]), [false, false]);
+    assert.deepEqual(verdicts(base, [
+      { revision: 7, requestId: 3 },
+      { revision: 1.5 },
+      { requestId: "3" },
+      { revision: Number.MAX_SAFE_INTEGER + 1 },
+    ]), [true, false, false, false]);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S4
+test("the shared optional fields of a page-state message are of their kind and within their bounds", () => {
+  const scroll = { type: "previewScroll", ...envelope, line: 2, anchorLine: 3.5, scrollTop: 120, request: "other.md" };
+  assert.equal(isPageToHostMessage(scroll), true);
+  const refused = [
+    { line: 0 }, { endLine: 0 }, { sourceLine: 0 }, { selectionLine: 0 }, { line: 1.5 },
+    { anchorLine: 0.5 }, { scrollTop: -1 }, { editMode: "yes" }, { anchorToEditor: "yes" },
+    { previewThemeMode: "neon" }, { request: 4 },
+  ];
+  for (const change of refused) {
+    assert.equal(isPageToHostMessage({ ...scroll, ...change }), false, JSON.stringify(change));
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S5
+test("a field is accepted only on the message type that owns it", () => {
+  const frontmatter = { type: "previewFrontmatterSave", ...envelope, editId: "f1", fieldName: "title", fieldValue: "x" };
+  const save = { type: "previewEditSave", ...envelope, editId: "e1", line: 3, endLine: 5, originalText: "a", editedText: "b" };
+  const cancel = { type: "previewEditCancel", ...envelope, editId: "e1", line: 3, endLine: 5 };
+  const ready = { type: "previewReady", ...envelope };
+  const scroll = { type: "previewScroll", ...envelope, line: 2 };
+  const pin = { pinLine: 3, pinViewportTop: 120 };
+  for (const accepted of [
+    { ...frontmatter, ...pin }, { ...save, final: true, ...pin }, { ...ready, blockEditOpen: true },
+    { ...save, final: false },
+  ]) {
+    assert.equal(isPageToHostMessage(accepted), true, JSON.stringify(accepted));
+  }
+  for (const refused of [
+    { ...cancel, ...pin },
+    { ...frontmatter, pinLine: 3, pinViewportTop: 100_001 },
+    { ...frontmatter, pinLine: 3 },
+    { ...frontmatter, pinViewportTop: 120 },
+    { ...frontmatter, pinLine: 0, pinViewportTop: 120 },
+    { ...ready, blockEditOpen: "yes" },
+    { ...save, final: "true" },
+    { ...scroll, blockEditOpen: true },
+    { ...cancel, flush: true },
+  ]) {
+    assert.equal(isPageToHostMessage(refused), false, JSON.stringify(refused));
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S6
+test("a block edit or checkbox request names its editor and its lines", () => {
+  const lines = { ...envelope, editId: "e1", line: 3, endLine: 5 };
+  for (const base of [
+    { type: "previewEditOpen", ...lines },
+    { type: "previewEditSave", ...lines, originalText: "a", editedText: "b" },
+    { type: "previewEditCancel", ...lines },
+    // A checkbox toggle is on one line and names its column and state (SwRS-MDOKFSTUDIO-GFM-021).
+    { type: "previewCheckboxToggle", ...lines, line: 5, column: 2, checked: true },
+  ]) {
+    assert.equal(isPageToHostMessage(base), true, base.type);
+    assert.deepEqual(verdicts(base, [{ endLine: 2 }, { editId: undefined }, { editId: "" }]), [false, false, false], base.type);
   }
 });
 

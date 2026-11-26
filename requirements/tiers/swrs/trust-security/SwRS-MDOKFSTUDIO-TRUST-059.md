@@ -114,7 +114,8 @@ When the page receives a window message event, it SHALL hand its value to the ho
 
 ### Verification notes
 
-- Method: test/core/protocol/hostToPage.test.ts (every host message type has a rule, and a well-formed message for the page passes it; values that are not host messages are refused; each rule matches the identity it names, and only that: all scenarios and the addressing table).
+- Method: test/core/protocol/hostToPage.test.ts (values that are not host messages are refused; each rule matches the identity it names, and only that: the refused values and the addressing table; every host message type has a rule, and a well-formed message for the page passes it).
+- Method: test/core/protocol/hostToPage.holes.test.ts (the bounds of a content patch: content and text caps, the six statuses, the diagnostics and the next render).
 - Method: test/page/hostMessages.test.ts (a window message event reaches the listener only from the parent frame, a same-origin host frame, the page itself or an event without a sender; a host message addressed to the page reaches its handler, any other goes to unhandled; the page is read at each message, so a moved render identity applies at once: nominal and render scenarios).
 - Method: test/page/runtimeBlockMoves.test.ts (`T36: a refused move says why next to the bar; a result of another context is ignored`: previewBlockMoveResult row of the render addressing).
 - Method: test/core/protocol/hostToPage.test.ts (the payload checks refuse what the page used to refuse: the out of bounds patch, the markup, the targets, the identifiers).

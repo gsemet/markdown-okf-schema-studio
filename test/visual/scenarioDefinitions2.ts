@@ -989,7 +989,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the preview opens in the cream theme and the floating toolbar shows only its first row, without any click.",
   })),
   ...([["dark", WIDE, "900", 1], ["light", NARROW, "460", 2]] as const).map(([theme, viewport, width, number]) => ({
-    // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
+    // @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S2
     id: `trust-security/v0${number}-restricted-page-${theme}-${width}`,
     fixture: "08-okf-schema",
     theme,

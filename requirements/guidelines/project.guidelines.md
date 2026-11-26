@@ -190,8 +190,11 @@ this project: okfreq counts markers by their verb and knows no bench.
 - `just check-markers` holds these placement rules. Its list of exceptions is
   `ACCEPTANCE_OUTSIDE_VSCODE` in `scripts/check-marker-companions.mjs`; it and this section change
   together.
-- The acceptance layout (the files and the CI job of the acceptance walks) is added by the
-  acceptance CR.
+- The acceptance walks in real VS Code sit in
+  `test/integration/acceptance/<group>[.<kind>].acceptance.ts`, `<group>` being an e2e group. The CI
+  job `acceptance` runs one shard (`just ci-acceptance <group>`) for each group that has such a
+  file; at present that is `trust-security` only. The StRS coverage mode of
+  `requirements/config.yml` is still `linked-swrs-and-validation-test`.
 
 ## During a change
 

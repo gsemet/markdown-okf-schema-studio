@@ -32,7 +32,6 @@ async function openPreview(document: vscode.TextDocument): Promise<NonNullable<R
   return preview;
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S5
 // @tests_req SwRS-MDOKFSTUDIO-MYST-045#S3
 // @tests_req SwRS-MDOKFSTUDIO-MYST-045#S7
 /** Renaming a label from its anchor icon: one edit of the label line, one undo, stale lines refused. */

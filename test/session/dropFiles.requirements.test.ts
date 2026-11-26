@@ -127,8 +127,7 @@ test("a restricted-reads preview takes a drop, and a line past the end of the do
   assert.equal(stale.document.getText(), MARKDOWN);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a dropped Markdown file is not read under restricted reads: its link has no title", async () => {
   const restricted = fixture({ restrictedReads: true });
   await restricted.send(["file:///w/notes/The%20Guide.md"]);
@@ -138,6 +137,7 @@ test("a dropped Markdown file is not read under restricted reads: its link has n
   assert.equal(restricted.document.getText().includes("Getting"), false, "the heading is not read");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S1
 test("a drop on a file VS Code holds read-only answers the read-only reason", async () => {
   for (const restrictedReads of [false, true]) {
     const drop = fixture({ readOnly: true, restrictedReads });
@@ -149,6 +149,7 @@ test("a drop on a file VS Code holds read-only answers the read-only reason", as
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
 test("a drop on a standalone file links any file relative to the document, reading none", async () => {
   const drop = fixture({ standalone: true, restrictedReads: true });
   await drop.send(["file:///lone/img/logo.png", "file:///w/notes/The%20Guide.md"]);

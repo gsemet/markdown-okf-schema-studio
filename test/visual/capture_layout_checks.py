@@ -263,7 +263,6 @@ def check_heading_fold(page: Page, toolbar, page_name: str, failures: list[Failu
 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S1
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001#S5
-# @tests_req SwRS-MDOKFSTUDIO-TRUST-001#S4
 def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failure]) -> None:
     page_name = scenario["page"]
     toolbar = page.locator('[data-sphinx-preview-toolbar][role="toolbar"]')

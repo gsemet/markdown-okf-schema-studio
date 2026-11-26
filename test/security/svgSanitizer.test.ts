@@ -163,7 +163,6 @@ test("a value is an allow-list: no other function than colours, var, url(#id) an
   assert.ok(removed.includes("fill") && removed.includes("stroke") && removed.includes("style: font-family"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the value check of the final sanitizer accepts a presentation value and refuses a remote one", () => {
   assert.equal(isSafeSvgPresentationValue("url(#a)"), true);
   assert.equal(isSafeSvgPresentationValue("var(--text, rgb(1,2,3))"), true);

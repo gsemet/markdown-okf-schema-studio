@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { PLANTUML_FILE_REQUEST_EVENT } from "../../src/page/modules/plantumlFileRequests";
 import { createRuntimeHarness, RuntimeElement, type RuntimeHarness } from "./runtimeHarness";
 import {
   allDescendants,
@@ -103,6 +104,7 @@ test("T31: Image keeps the editor open while the file dialog has the focus, then
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
 test("T31: a stale image answer, a refusal and a cancel insert nothing", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -115,10 +117,59 @@ test("T31: a stale image answer, a refusal and a cancel insert nothing", () => {
   assert.equal(textarea.value, "See ", "an answer for another edit id is ignored");
   harness.dispatchMessage({ type: "previewPickImageResult", editId: request.editId, ok: false, reason: "Outside the workspace." });
   assert.equal(textarea.value, "See ");
+  const status = harness.createdElements.find((element) => element.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.equal(status?.textContent, "Outside the workspace.", "the page shows the reason of the refusal");
   paletteButton(harness, "image").dispatch("click", paletteClick);
   const second = harness.messages.at(-1)!;
   harness.dispatchMessage({ type: "previewPickImageResult", editId: second.editId, ok: true, cancelled: true });
   assert.equal(textarea.value, "See ");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S10
+test("an out-of-date answer to a list request is shown in the popover at once, without the timeout", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
+  openBlockEditorWithSource(harness);
+  paletteButton(harness, "ref").dispatch("click", paletteClick);
+  const request = harness.messages.at(-1)!;
+  assert.equal(request.type, "previewListTargets");
+  const note = (): RuntimeElement | undefined => harness.createdElements.find((element) =>
+    element.className === "sphinx-preview-edit-choice-note" && !element.removed);
+  assert.equal(note()?.textContent, "Loading...");
+  const reason = "The preview is out of date. Try again once it has refreshed.";
+  harness.dispatchMessage({ type: "previewListTargetsResult", editId: request.editId, ok: false, reason });
+  assert.equal(note()?.textContent, reason);
+  harness.advanceTimers(6000);
+  assert.equal(note()?.textContent, reason, "the timeout of the answered request changes nothing");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S8
+test("closing the editor forgets a pending list request, and a PlantUML include request is still answered", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
+  const answers: unknown[] = [];
+  harness.dispatchDocument(PLANTUML_FILE_REQUEST_EVENT, {
+    detail: { request: { path: "common.puml", from: null }, accepted: false, respond: (answer: unknown) => answers.push(answer) },
+  });
+  const include = harness.messages.at(-1)!;
+  assert.equal(include.type, "previewPlantUmlInclude");
+  const textarea = openBlockEditorWithSource(harness);
+  paletteButton(harness, "ref").dispatch("click", paletteClick);
+  const list = harness.messages.at(-1)!;
+  assert.equal(list.type, "previewListTargets");
+  const frame = textarea.parentElement!;
+  const key = { key: "Escape", preventDefault: () => undefined, stopPropagation: () => undefined };
+  textarea.dispatch("keydown", key);
+  textarea.dispatch("keydown", key);
+  assert.equal(frame.removed, true, "the editor is torn down");
+  const before = harness.messages.length;
+  harness.advanceTimers(6000);
+  harness.dispatchMessage({ type: "previewListTargetsResult", editId: list.editId, ok: true, items: [{ value: "x", label: "x" }] });
+  assert.equal(harness.createdElements.some((element) => element.getAttribute("data-edit-option") === "x"), false);
+  assert.equal(harness.createdElements.some((element) =>
+    String(element.textContent).includes("The editor did not answer")), false, "no failure is shown");
+  assert.equal(harness.messages.length, before, "nothing more is sent");
+  harness.dispatchMessage({ type: "previewPlantUmlIncludeResult", editId: include.editId, ok: true, id: "/docs/common.puml", text: "A -> B" });
+  // The answers come from the page's realm: compare their JSON.
+  assert.equal(JSON.stringify(answers), JSON.stringify([{ ok: true, id: "/docs/common.puml", text: "A -> B" }]));
 });
 
 test("T31: Done saves while the file dialog is still open, so the editor is never stuck", () => {
@@ -745,7 +796,6 @@ test("T38: an image over 10 MB is refused in the editor without a message to the
   assert.match(String(status?.textContent), /larger than 10 MB/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S9
 test("T38: a reply for another edit is ignored and a refusal shows its reason", () => {
   const harness = createRuntimeHarness();

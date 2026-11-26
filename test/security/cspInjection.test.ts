@@ -5,8 +5,6 @@ import { parse } from "parse5";
 
 import { injectContentSecurityPolicy } from "../../src/core/security/html-sanitizer";
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S5
 test("the policy is spliced into the head and the rest of the page is left as written", () => {
   const html = injectContentSecurityPolicy(
     "<!DOCTYPE html><html><head><title>t</title></head><body><p hidden>a --> b</p></body></html>",
@@ -31,14 +29,12 @@ test("a weaker policy meta in the head is dropped, in any case and quoting", () 
   assert.match(html, /<head><meta http-equiv="Content-Security-Policy" content="default-src 'none'"><meta charset="UTF-8"><\/head>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S4
 test("a document without a head element still gets the policy", () => {
   const html = injectContentSecurityPolicy("<p>ok</p>", "default-src 'none'");
 
   assert.match(html, /<head><meta http-equiv="Content-Security-Policy" content="default-src 'none'">(?:<\/meta>)?<\/head>/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S4
 test("a head-like text in an attribute of the root element does not swallow the policy", () => {
   const html = injectContentSecurityPolicy(
     "<!DOCTYPE html><html aria-label=\"<head>\"><head><title>t</title></head><body><p>x</p></body></html>",

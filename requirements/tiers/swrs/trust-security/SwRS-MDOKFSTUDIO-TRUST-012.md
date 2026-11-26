@@ -39,12 +39,10 @@ implemented_in_files:
 - src/core/security/html-sanitizer.ts
 - src/session/webview.ts
 tested_in_files:
-- test/integration/trusted-suite.ts
 - test/security/cspInjection.test.ts
 - test/security/html-policy.test.ts
 - test/security/trustReq.pageBuild.requirements.test.ts
 - test/security/trustReq.requirements.test.ts
-- test/session/previewRuntimeFile.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -97,11 +95,11 @@ When the extension builds the policy of a page, it SHALL set its default source 
 - SwRS-MDOKFSTUDIO-TRUST-022: the nonce of the page
 
 ### Verification notes
-- Method: test/security/html-policy.test.ts (generates a restrictive nonce-bearing CSP; adds the CSP as a head meta without retaining a weaker policy) checks the starting directive, the script, image and no-wildcard rows and the replacement of the policy of the head.
+- Method: test/security/html-policy.test.ts (generates a restrictive nonce-bearing CSP; adds the CSP as a head meta without retaining a weaker policy) checks default-src 'none', the script, image and no-wildcard rows and the replacement of the policy of the head.
 - Method: test/security/cspInjection.test.ts (the policy is spliced into the head and the rest of the page is left as written; a weaker policy meta in the head is dropped, in any case and quoting, while the one in the body stays; a document without a head element still gets the policy) checks the scenario The policy of the document is replaced (head meta replaced, body meta kept); a head-like text in an attribute of the root element falls back to the tree. The splice is a string operation on the head of the page the sanitizer wrote, with the tree only for a document without a head.
 - Method: test/session/previewRuntimeFile.test.ts (PERF-11: the static stylesheet is a bundle file; the page keeps only the per-render rule inline) checks the policy read back from the rendered page: the style-src nonce and the absence of unsafe-inline.
 - Method: test/integration/trusted-suite.ts (the page carries a Content-Security-Policy without unsafe-inline or a wildcard default) checks the rendered page; only the script-src, img-src, no-wildcard and no-unsafe parts are asserted.
-- Method: test/security/trustReq.requirements.test.ts (fonts and media load only from the webview source; the page may open no connection, frame, object or worker; the page may not change its base address or submit a form; a status page carries the policy and its own nonce and no script) checks the font-src, media-src, connect-src, frame-src, object-src, worker-src, base-uri and form-action rows one by one and the Status page scenario, built with buildStatusWebviewHtml in src/session/webview.ts. The browser effects of the table (a blocked script, style attribute, remote image, remote font, fetch call, base element) are deduced from the policy, not run in a browser.
+- Method: test/security/trustReq.requirements.test.ts (a built policy starts from none and every other directive names a kind of source; fonts and media load only from the webview source; the page may open no connection, frame, object or worker; the page may not change its base address or submit a form; a status page carries the policy and its own nonce and no script) checks the Rendered page starts from none scenario on a built policy, the font-src, media-src, connect-src, frame-src, object-src, worker-src, base-uri and form-action rows one by one and the Status page scenario for the pending, error and missing-source pages built in src/session/webview.ts. The browser effects of the table (a blocked script, style attribute, remote image, remote font, fetch call, base element) are deduced from the policy, not run in a browser.
 - Method: test/security/trustReq.pageBuild.requirements.test.ts (a policy meta element in the body is kept as an inert element; only the policy of the head applies) checks the page built by buildPreviewWebviewHtml: the head holds one policy meta, the meta of the body stays without its http-equiv attribute, so it sets no policy.
 - Criteria: The first directive of the policy is default-src 'none'. script-src and style-src each have exactly two sources. img-src is the webview source followed by data:. font-src and media-src each hold the webview source and nothing else. connect-src, frame-src, object-src, worker-src, base-uri and form-action are each 'none'. No source of any directive is a bare *, and the keywords unsafe-inline and unsafe-eval do not appear. Exactly one Content-Security-Policy meta element remains in the head and no earlier policy text survives. The status markup contains a Content-Security-Policy meta and no script element. The base-uri and form-action rows are the second wall for the base element, which the sanitizer leaves in place (SwRS-MDOKFSTUDIO-TRUST-036), and for a form that would escape the sanitizer.
 

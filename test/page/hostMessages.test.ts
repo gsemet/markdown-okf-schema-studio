@@ -14,7 +14,8 @@ function pushTransport(): { transport: HostTransport; send(data: unknown): void 
   };
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S4
 test("a host message addressed to the page reaches its handler; any other goes to unhandled", () => {
   const messages = createPageHostMessages();
   const { transport, send } = pushTransport();
@@ -31,6 +32,7 @@ test("a host message addressed to the page reaches its handler; any other goes t
   assert.deepEqual(unhandled, [stale, "not a message"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S4
 test("the page is read at each message, so a moved render identity applies at once", () => {
   const messages = createPageHostMessages();
   const { transport, send } = pushTransport();
@@ -63,7 +65,6 @@ test("the VS Code transport passes the webview API through and unwraps window me
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
 test("a window message event reaches the page only from the host frames, the page itself or an event without a sender", () => {
   const parent = {};
   const other = {};

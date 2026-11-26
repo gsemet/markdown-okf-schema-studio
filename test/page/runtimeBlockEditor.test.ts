@@ -748,8 +748,7 @@ test("STAB-03: a watch for an editor that is already closed is answered at once"
     [["previewEditClosed", "gone"]]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S2
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S3
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059#S6
 test("STAB-03: a watch sent while the host already follows another document is still answered", () => {
   // The host switched to the next document while this page still shows the previous one: the
   // watch carries the new document id, and the page must answer it by editor id, or the host

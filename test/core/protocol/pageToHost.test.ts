@@ -26,7 +26,6 @@ test("rejects missing or non-integer ids and oversize documentId", () => {
   assert.equal(check({ ...valid, requestId: 2 ** 53 }), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-052#S2
 test("rejects non-objects, unregistered and prototype-key types", () => {
   assert.equal(check(null), false);
   assert.equal(check("sample"), false);
@@ -161,8 +160,6 @@ test("previewLabelRename validates the line and both label names", () => {
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S7
 test("T30: the list and pick messages carry an edit id and no other payload", () => {
   for (const type of ["previewListTargets", "previewListCitations", "previewPickDocument", "previewPickImage"]) {
     const base = { type, documentId: "doc", revision: 1, requestId: 1, editId: "host-1" };
@@ -474,6 +471,11 @@ test("CR 050: the warning banner messages are registered with a bounded key", ()
   for (const key of [undefined, 2, "", "2-0A1B2C3D", "2-0a1b2c3", "x".repeat(40), "2-0a1b2c3d\n"]) {
     assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewWarningBannerClosed", key }), false, String(key));
   }
+  const accepts = (key: string) => isRegisteredPreviewMessage({ ...envelope, type: "previewWarningBannerClosed", key });
+  assert.equal(accepts("abc12-0123abcd"), true);
+  assert.equal(accepts("abc120123abcd"), false, "a key without the hyphen");
+  assert.equal(accepts(`${"a".repeat(23)}-0123abcd`), true, "32 characters");
+  assert.equal(accepts(`${"a".repeat(24)}-0123abcd`), false, "33 characters");
   assert.equal(isRegisteredPreviewMessage({ type: "previewShowProblems" }), false, "the envelope is required");
 });
 

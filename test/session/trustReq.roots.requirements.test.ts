@@ -1,9 +1,10 @@
 /**
  * Requirement tests of the resource roots of a preview for rows no other test checked: the root
- * that the manager gives a session in Restricted Mode, for a document in a subfolder and in the
- * second folder of a multi-root window (`createSession` in src/session/sessionFactory.ts), and the
- * bundle folder that a rendered page adds to the roots of its panel (`updatePreview` in
- * src/session/features/rendering.ts, run on a stub manager as in readOnlyImagesSession.test.ts).
+ * that the manager gives a session in Restricted Mode, for a document in a subfolder, in the
+ * second folder of a multi-root window and outside every workspace folder (`createSession` in
+ * src/session/sessionFactory.ts), and the roots of the panel once the session's own render queue
+ * has shown the page (`updatePreview` in src/session/features/rendering.ts), bundle folder
+ * included.
  * Each test asserts the behaviour of the current code.
  */
 import * as assert from "node:assert/strict";
@@ -13,23 +14,29 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import type { HostServices } from "../../src/host-api/index";
+import type { HostDocument } from "../../src/host-api/documentStore";
 import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
-import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
-import { previewLocalResourceRoots, RenderingController } from "../../src/session/features/rendering";
+import { previewLocalResourceRoots } from "../../src/session/features/rendering";
 import { PreviewManager } from "../../src/session/previewManager";
+import type { PreviewSession } from "../../src/session/previewSession";
 import { fakeAssetResolver } from "../shared/fakeAssets";
+import { recordingLogger } from "./memoryPorts";
 import { nodeHostPorts } from "./nodeHostPorts";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const noEvent = (): { dispose(): void } => ({ dispose: () => undefined });
 
-/** Two workspace folders, each with a document in a subfolder, and a manager of the given trust. */
+/**
+ * Two workspace folders, each with a document in a subfolder, a document with an image beside it
+ * outside both, and a manager of the given trust.
+ */
 function fixture(trusted: boolean) {
   const sandbox = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "trust-roots-")));
   const first = path.join(sandbox, "first");
   const second = path.join(sandbox, "second");
+  const outside = path.join(sandbox, "outside");
   const store = createMemoryDocumentStore();
   const documents = [first, second].map((folder, index) => {
     fs.mkdirSync(path.join(folder, "notes"), { recursive: true });
@@ -37,11 +44,21 @@ function fixture(trusted: boolean) {
     fs.writeFileSync(file, "# Title\n");
     return store.add(`file:///ws${index}/notes/page.md`, "# Title\n", file);
   });
+  fs.mkdirSync(outside);
+  fs.writeFileSync(path.join(outside, "page.md"), "![x](beside.png)\n");
+  fs.writeFileSync(path.join(outside, "beside.png"), "png");
+  const outsideDocument = store.add("file:///outside/page.md", "![x](beside.png)\n", path.join(outside, "page.md"));
+  const errors: string[] = [];
   const host = {
     ...nodeHostPorts,
-    files: {},
+    files: createNodeFileSystem(),
+    schemaFiles: nodeSchemaFiles,
     documents: store,
     settings: { section: () => ({ get: <T>(_key: string, fallback: T): T => fallback }) },
+    capabilities: { processes: false, editorPairing: false },
+    theme: { kind: "light" },
+    diagnostics: { create: () => ({ set: () => undefined, delete: () => undefined, dispose: () => undefined }) },
+    logger: recordingLogger(errors),
     workspace: { trusted, folders: () => [{ path: first }, { path: second }] },
     watcher: {
       watch: () => ({ onDidChange: noEvent, onDidCreate: noEvent, onDidDelete: noEvent, dispose: () => undefined }),
@@ -51,30 +68,56 @@ function fixture(trusted: boolean) {
   const groups: PanelGroups = { lockNewPanelGroup: () => Promise.resolve(false), release: () => undefined };
   const manager = new PreviewManager(host, groups);
   const roots: string[][] = [];
+  const bundleRoot = path.join(sandbox, "extension", "out", "bundle");
   const panel = {
     visible: true,
     active: false,
     html: "",
     title: "",
     cspSource: "csp",
-    bundleRoot: path.join(sandbox, "extension", "out", "bundle"),
+    assets: fakeAssetResolver({ cspSource: "vscode-webview://csp", url: (file) => `webview://${file}` }),
+    bundleRoot,
     column: 1,
     setResourceRoots: (value: string[]) => { roots.push([...value]); },
+    postMessage: () => Promise.resolve(true),
     onDidReceiveMessage: noEvent,
     onDidChangeLayout: noEvent,
     onDidDispose: noEvent,
     onDidChangeViewState: noEvent,
     dispose: () => undefined,
   };
+  /** Renders the document through the session's own queue and waits until the page is shown. */
+  const show = async (session: PreviewSession, document: HostDocument): Promise<void> => {
+    await manager.requestDocument(session, document);
+    await manager.rendering.pendingShow(session);
+    assert.deepEqual(errors, []);
+    assert.equal(session.status, "success", session.webview.html);
+  };
   const cleanup = (): void => {
     manager.disposeAll(false);
     fs.rmSync(sandbox, { recursive: true, force: true });
   };
-  return { manager, first, second, documents, panel, roots, cleanup };
+  return { manager, first, second, outside, documents, outsideDocument, panel, bundleRoot, roots, show, cleanup };
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
+test("a preview of a file outside every workspace folder has its folder as resource root and loads the image beside it", async () => {
+  // A trusted window, so only the place of the file restricts the reads.
+  const f = fixture(true);
+  try {
+    const session = f.manager.createSession(f.panel as never, f.outsideDocument, undefined);
+    assert.equal(session.restrictedReads, true);
+    assert.equal(session.workspaceRoot, f.outside);
+    await f.show(session, f.outsideDocument);
+    assert.deepEqual(f.roots[f.roots.length - 1], [f.outside, f.bundleRoot]);
+    const address = `src="webview://${path.join(f.outside, "beside.png")}"`;
+    assert.ok(session.webview.html.includes(address), session.webview.html);
+  } finally {
+    f.cleanup();
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S2
 test("in Restricted Mode the resource root of a document in a subfolder is that subfolder", async () => {
   const f = fixture(false);
   try {
@@ -91,7 +134,7 @@ test("in Restricted Mode the resource root of a document in a subfolder is that 
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S3
 test("in a trusted window the resource root is the folder that holds the document, the second one in a multi-root window", async () => {
   const f = fixture(true);
   try {
@@ -108,58 +151,35 @@ test("in a trusted window the resource root is the folder that holds the documen
   }
 });
 
-/** A value that answers every property and call with itself: the collaborators the test ignores. */
-function ignored(): any {
-  const target = function ignoredTarget() { return undefined; };
-  return new Proxy(target, {
-    get: (t, key) => (key === Symbol.toPrimitive ? () => "" : key === "then" ? undefined
-      : Object.prototype.hasOwnProperty.call(t, key) ? (t as any)[key] : ignored()),
-    apply: () => ignored(),
-  });
-}
-
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S5
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S7
-test("a rendered page sets the resource root and the bundle folder as the roots of its panel", async () => {
-  const sandbox = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "trust-roots-bundle-")));
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007#S4
+test("a shown page may load from its resource root and the bundle folder, and a restricted-reads workspace document also from its workspace folder", async () => {
+  const full = fixture(true);
   try {
-    const folder = path.join(sandbox, "ws");
-    const bundleRoot = path.join(sandbox, "extension", "out", "bundle");
-    fs.mkdirSync(path.join(folder, "notes"), { recursive: true });
-    const text = "# Title\n";
-    const result = await renderPreviewDocument({
-      files: createNodeFileSystem(),
-      document: { uri: { scheme: "file", fsPath: path.join(folder, "notes", "page.md") }, languageId: "markdown", version: 1, getText: () => text },
-      workspaceRoot: folder, requestId: 1, isWorkspaceTrusted: () => true, plantUmlEngine: "builtin",
-    });
-    const identity = result.stage.activeDocumentIdentity;
-    let roots: readonly string[] = [];
-    const manager: any = ignored();
-    manager.has = () => true;
-    manager.host = { schemaFiles: nodeSchemaFiles, files: createNodeFileSystem(), documents: { idOf: () => undefined } };
-    manager.scroll = { initialAnchorLine: () => undefined, takePendingPin: () => undefined, visibleEditorFor: () => undefined };
-    manager.choices = { editMode: false, initialPaletteMode: () => "auto", refreshThreadAuthor: () => undefined };
-    manager.previewTitle = () => "page";
-    const preview: any = {
-      disposed: false, documentUri: identity, restrictedReads: false, workspaceRoot: folder,
-      workspaceFolder: { path: folder }, state: undefined,
-      configuration: { incrementalUpdates: false, maxContentWidth: undefined },
-      frontmatterConfiguration: {}, frontmatter: { result: undefined }, sessionRoots: [folder],
-      page: { resourceRoots: [] }, probe: { renderedStages: 0 }, overlay: {}, webview: { html: "", nonce: "" },
-      panel: {
-        assets: fakeAssetResolver({ cspSource: "vscode-webview://csp", url: (file) => `webview://${file}` }),
-        bundleRoot,
-        setResourceRoots: (next: readonly string[]) => { roots = next; },
-      },
-    };
-    const controller: any = new RenderingController(manager);
-    controller.runtimeContext = () => ({ documentId: identity, revision: 1, requestId: 1, activeSourceFile: result.stage.activeDocumentPath });
-    controller.assignWebviewHtml = () => undefined;
-    controller.clearPendingOverlay = () => undefined;
-    await controller.updatePreview(preview, result);
-    preview.stage?.dispose();
-    assert.deepEqual(roots, [folder, bundleRoot], "the resource root, then the bundle folder, and nothing else");
+    const document = full.documents[0];
+    const session = full.manager.createSession(full.panel as never, document, { path: full.first } as never);
+    await full.show(session, document);
+    assert.deepEqual(full.roots[full.roots.length - 1], [full.first, full.bundleRoot], "full reads");
   } finally {
-    fs.rmSync(sandbox, { recursive: true, force: true });
+    full.cleanup();
+  }
+  const outside = fixture(true);
+  try {
+    const session = outside.manager.createSession(outside.panel as never, outside.outsideDocument, undefined);
+    await outside.show(session, outside.outsideDocument);
+    assert.deepEqual(outside.roots[outside.roots.length - 1], [outside.outside, outside.bundleRoot],
+      "restricted reads of a file outside the workspace");
+  } finally {
+    outside.cleanup();
+  }
+  const restricted = fixture(false);
+  try {
+    const document = restricted.documents[0];
+    const session = restricted.manager.createSession(restricted.panel as never, document, { path: restricted.first } as never);
+    await restricted.show(session, document);
+    assert.deepEqual(restricted.roots[restricted.roots.length - 1],
+      [path.join(restricted.first, "notes"), restricted.first, restricted.bundleRoot],
+      "restricted reads of a workspace document");
+  } finally {
+    restricted.cleanup();
   }
 });

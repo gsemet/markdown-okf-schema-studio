@@ -58,6 +58,21 @@ test("an embed, an object and a form are removed with their content and each rec
   ]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S4
+test("the lookup ignores the query and fragment of a reference and the webview address ends with them", async () => {
+  const directory = folder();
+  fs.writeFileSync(path.join(directory, "image.png"), "png");
+  const built = await build(
+    '<img src="image.png?v=1#preview" alt="query"><img src="image.png#a?b" alt="hash">',
+    directory,
+  );
+  const sourceOf = (alt: string): string =>
+    /src="([^"]*)"/u.exec(new RegExp(`<img[^>]*alt="${alt}"[^>]*>`, "u").exec(built.html)?.[0] ?? "")?.[1] ?? "";
+  assert.match(sourceOf("query"), /^webview:\/[^?#]*image\.png\?v=1#preview$/u);
+  assert.match(sourceOf("hash"), /^webview:\/[^?#]*image\.png#a\?b$/u);
+  assert.equal(codes(built.diagnostics, "missing-resource"), 0);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S7
 test("a srcset whose candidates are all refused is removed and records blocked-srcset", async () => {
   const directory = folder();

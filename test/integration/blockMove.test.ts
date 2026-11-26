@@ -35,7 +35,6 @@ async function openPreview(document: vscode.TextDocument): Promise<NonNullable<R
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S5
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-065#S3
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S1
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S5
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127#S2
@@ -222,7 +221,6 @@ export async function runUndo(): Promise<void> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S1
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S3
 /** A preview in Restricted Mode moves a block like a trusted one: one swap, undone here. */
 export async function runUntrusted(preview: { documentUri: string; documentVersion?: number; requestId?: number }, document: vscode.TextDocument): Promise<void> {
   const before = document.getText();

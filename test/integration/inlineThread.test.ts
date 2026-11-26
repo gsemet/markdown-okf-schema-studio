@@ -97,8 +97,6 @@ async function withThreadPreview(
   }
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S4
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S6
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S1
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-186#S5
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-192#S3

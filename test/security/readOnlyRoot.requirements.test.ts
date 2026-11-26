@@ -14,6 +14,8 @@ import { needsSymlinks } from "../shared/symlinks";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
 
 const SECRET = "PRIVATE-KEY-MATERIAL";
+/** What the restricted-root diagnostic says about the folder of the document. */
+const NAMES_HOME_FOLDER = /is in your home folder\b/u;
 const savedHome = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };
 let sandbox = "";
 let home = "";
@@ -43,7 +45,6 @@ afterEach(() => {
   fs.rmSync(sandbox, { recursive: true, force: true });
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("the home folder, its ancestors and file-system roots are broad roots", async () => {
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), home), true);
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), sandbox), true);
@@ -51,12 +52,12 @@ test("the home folder, its ancestors and file-system roots are broad roots", asy
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), path.join(home, "project")), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("a restricted-reads policy in the home folder reads nothing", async () => {
   const policy = createPreviewResourcePolicy(createNodeFileSystem(), home, home, true);
   const read = await readBoundedText(policy, "part.md", home);
   assert.deepEqual(read, { ok: false, refusal: "restricted-root" });
-  assert.ok(policy.diagnostics.some((entry) => entry.code === "restricted-root"));
+  assert.match(policy.diagnostics.find((entry) => entry.code === "restricted-root")?.message ?? "", NAMES_HOME_FOLDER);
   assert.equal((await readBoundedText(policy, ".ssh/id_rsa", home)).ok, false);
 });
 
@@ -100,12 +101,12 @@ async function render(text: string, documentDirectory: string, restrictedReads: 
   });
 }
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("an include of a document in the home folder is refused with a diagnostic", async () => {
   const result = await render("```{include} .ssh/id_rsa\n```\n\n```{include} part.md\n```\n", home, true);
   assert.equal(result.html.includes(SECRET), false);
   assert.equal(result.html.includes("Included part"), false);
-  assert.ok(result.diagnostics.some((entry) => entry.code === "restricted-root"));
+  assert.match(result.diagnostics.find((entry) => entry.code === "restricted-root")?.message ?? "", NAMES_HOME_FOLDER);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S1
@@ -118,7 +119,6 @@ test("a restricted-reads preview includes a plain file but not a dot-directory f
   assert.ok(result.diagnostics.some((entry) => entry.code === "hidden-path"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S5
 test("a trusted workspace still includes from a dot-directory", async () => {
   const project = path.join(home, "project");
@@ -126,7 +126,6 @@ test("a trusted workspace still includes from a dot-directory", async () => {
   assert.ok(result.html.includes(SECRET));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S3
 test("a standalone file (no workspace root) includes a plain sibling, refuses dot-directories and non-image files outside its folder", async () => {
   const project = path.join(home, "project");
@@ -145,13 +144,11 @@ test("a standalone file (no workspace root) includes a plain sibling, refuses do
   assert.equal(await standalone.resolveResource("../image.png", sub, { image: true }), undefined);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("the home folder is found with another letter case on case-insensitive systems", async () => {
   const insensitive = process.platform === "win32" || process.platform === "darwin";
   assert.equal(await isBroadRestrictedRoot(createNodeFileSystem(), home.toUpperCase()), insensitive);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S4
 test("on Windows USERPROFILE wins over HOME, elsewhere HOME wins", async () => {
   const other = path.join(sandbox, "other");
   fs.mkdirSync(other);

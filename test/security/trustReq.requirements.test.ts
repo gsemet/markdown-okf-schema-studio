@@ -46,6 +46,25 @@ const CSP_SOURCE = "vscode-webview://csp";
 // ---------------------------------------------------------------------------------------------
 // The policy of a page
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S1
+test("a built policy starts from none and every other directive names a kind of source", () => {
+  const [first, ...others] = createContentSecurityPolicy(CSP_SOURCE, "abc").split("; ");
+  assert.equal(first, "default-src 'none'");
+  assert.deepEqual(others.map((entry) => entry.split(" ")[0]).sort(), [
+    "base-uri", "connect-src", "font-src", "form-action", "frame-src", "img-src", "media-src",
+    "object-src", "script-src", "style-src", "worker-src",
+  ]);
+  for (const entry of others) {
+    // Closed again, or opened to the webview source and at most the page nonce or data URIs.
+    const sources = entry.split(" ").slice(1);
+    assert.ok(
+      sources.join(" ") === "'none'"
+        || (sources[0] === CSP_SOURCE && sources.slice(1).every((source) => source === "'nonce-abc'" || source === "data:")),
+      entry,
+    );
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S2
 test("fonts and media load only from the webview source", () => {
   const policy = createContentSecurityPolicy(CSP_SOURCE, "abc");
@@ -81,22 +100,20 @@ test("each nonce is 18 random bytes as 24 base64url characters, fresh for every 
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012#S5
 test("a status page carries the policy and its own nonce and no script", () => {
-  const pending = buildStatusWebviewHtml("pending", CSP_SOURCE, "Rendering.");
-  assert.match(pending, /<meta http-equiv="Content-Security-Policy" content="[^"]*default-src 'none'/u);
-  const nonce = /script-src [^;]*'nonce-([^']+)'/u.exec(pending)![1]!;
-  assert.match(pending, new RegExp(`<style nonce="${nonce}"`, "u"));
-  assert.doesNotMatch(pending, /<script/iu);
-
-  const error = buildErrorWebviewHtml("The render failed.", CSP_SOURCE);
-  const errorNonce = /script-src [^;]*'nonce-([^']+)'/u.exec(error)![1]!;
-  assert.match(error, /<meta http-equiv="Content-Security-Policy"/u);
-  assert.doesNotMatch(error, /<script/iu);
-  assert.notEqual(errorNonce, nonce);
-
-  const missing = buildStatusWebviewHtml("missing-source", CSP_SOURCE);
-  assert.match(missing, /<meta http-equiv="Content-Security-Policy"/u);
-  assert.doesNotMatch(missing, /<script/iu);
+  const nonces = [
+    buildStatusWebviewHtml("pending", CSP_SOURCE, "Rendering."),
+    buildErrorWebviewHtml("The render failed.", CSP_SOURCE),
+    buildStatusWebviewHtml("missing-source", CSP_SOURCE),
+  ].map((html) => {
+    assert.match(html, /<meta http-equiv="Content-Security-Policy" content="[^"]*default-src 'none'/u);
+    const nonce = /script-src [^;]*'nonce-([^']+)'/u.exec(html)![1]!;
+    assert.match(html, new RegExp(`<style nonce="${nonce}"`, "u"));
+    assert.doesNotMatch(html, /<script/iu);
+    return nonce;
+  });
+  assert.equal(new Set(nonces).size, 3, "each page has a nonce of its own");
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -122,6 +139,7 @@ test("a resource must be an existing regular file", async () => {
   assert.equal(policy.diagnostics.filter((entry) => entry.code === "missing-resource").length, 3);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025#S5
 test("a resource root that does not exist is dropped with the diagnostic missing-root", async () => {
   const present = makeDirectory();
   fs.writeFileSync(path.join(present, "image.png"), "image");
@@ -254,6 +272,50 @@ test("the sanitizer removes style elements and records blocked-inline-style", ()
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-inline-style"));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S3
+test("an automatic refresh is removed in any letter case and the viewport meta stays", () => {
+  const run = (meta: string) => rewriteSphinxHtml(`<html><head>${meta}</head><body><p>Text</p></body></html>`, {
+    outputRoot: "/workspace",
+    policy: new ResourcePolicy(createNodeFileSystem(), []),
+    nonce: "unit-nonce",
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+
+  const spaced = run('<meta http-equiv=" Refresh " content="0;url=https://example.test/">');
+  assert.doesNotMatch(spaced.html, /http-equiv|example\.test/iu);
+  assert.ok(spaced.diagnostics.some((entry) => entry.code === "blocked-refresh"));
+  assert.doesNotMatch(run('<meta http-equiv="rEFRESH" content="1">').html, /http-equiv/iu);
+  const viewport = run('<meta name="viewport" content="width=device-width">');
+  assert.match(viewport.html, /<meta name="viewport" content="width=device-width">/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S4
+test("event, srcdoc and style attributes are removed and each removal is recorded", () => {
+  const result = rewriteSphinxHtml(
+    '<html><body onload="run()"><img src="a.png" alt="a" onclick="run()"><p style="color: red">Text</p>'
+    + '<div srcdoc="inner">d</div></body></html>',
+    {
+      outputRoot: "/workspace",
+      policy: new ResourcePolicy(createNodeFileSystem(), []),
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+  assert.doesNotMatch(result.html, /onload|onclick|srcdoc|style=/iu);
+  assert.match(result.html, /<p[^>]*>Text<\/p>/u);
+  assert.equal(result.diagnostics.filter((entry) => entry.code === "blocked-event-attribute").length, 4);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S5
+test("an image without an alternative text gets an empty one, an existing one is kept", () => {
+  const html = sanitize('<html><body><img title="bare"><img alt="image" title="named"></body></html>');
+  assert.match(/<img[^>]*title="bare"[^>]*>/u.exec(html)?.[0] ?? "", /\salt=""/u);
+  assert.match(/<img[^>]*title="named"[^>]*>/u.exec(html)?.[0] ?? "", /\salt="image"/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the sanitizer keeps only listed elements and attributes", () => {
   const html = sanitize(
     '<html><head><base href="https://example.test/"><link rel="icon" href="x.ico"></head><body>'
@@ -266,6 +328,7 @@ test("the sanitizer keeps only listed elements and attributes", () => {
   assert.match(html, /<p[^>]*aria-label="a"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036#S6
 test("the sanitizer reports a removed element and a removed attribute", () => {
   const result = rewriteSphinxHtml(
     '<html><head><base href="https://example.test/"></head><body><p data-example="1">Text</p></body></html>',
@@ -281,7 +344,6 @@ test("the sanitizer reports a removed element and a removed attribute", () => {
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-attribute"));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-042#S4
 test("an ignored linked stylesheet is reported and its link element is removed", () => {
   const ignored: string[] = [];
   const result = rewriteSphinxHtml(

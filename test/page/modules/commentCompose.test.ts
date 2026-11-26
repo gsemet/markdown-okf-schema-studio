@@ -313,7 +313,6 @@ test("T43 r2: results of other kinds, or without a pending save, are ignored", (
   assert.ok(box());
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S3
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090#S7
 test("a comment save waits 15 seconds for the host's answer", () => {
   const { click, save, delays, posted } = openAndType();

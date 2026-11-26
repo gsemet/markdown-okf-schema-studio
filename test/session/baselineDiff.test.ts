@@ -58,7 +58,6 @@ test("CR147: raw scripts of the HEAD text never reach the page", async () => {
   assert.ok(html === undefined || !/<script/iu.test(html));
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-TRUST-002#S2
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-091#S1
 test("CR251: in Restricted Mode the HEAD text shows an image of the workspace folder outside the document folder", async () => {
   const sandbox = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "baseline-readonly-")));
