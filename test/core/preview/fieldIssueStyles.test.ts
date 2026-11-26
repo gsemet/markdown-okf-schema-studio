@@ -82,6 +82,7 @@ test("a field row with a warning has the same marks in the warning colour", () =
 });
 
 // A text decoration of the cell is drawn on everything inside it, the open editor and its menu too.
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S8
 test("a value cell that is being edited drops the issue underline", () => {
   const editing = "tr[data-okf-field] > td[data-okf-editing=\"true\"]";
   assert.deepEqual(valuesOf(editing, "text-decoration"), ["none"]);
@@ -90,6 +91,21 @@ test("a value cell that is being edited drops the issue underline", () => {
     rules().findIndex((rule) => rule.selectors.some((selector) => selector.endsWith(subject)));
   assert.ok(position(editing) > position("tr[data-okf-field] > td.okf-error"), "after the error underline");
   assert.ok(position(editing) > position("tr[data-okf-field] > td.okf-warning"), "after the warning underline");
+});
+
+// The severity background is set under an id, so it outranks the hover rule of the edit cells.
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084#S9
+test("in edit mode the name cell of an error or warning row highlights under the pointer", () => {
+  const editMode = "html[data-sphinx-preview-edit-mode=\"on\"]";
+  const otherCells = valuesOf(`${editMode} [data-okf-edit-cell]:hover`, "background");
+  assert.equal(otherCells.length, 1, "the edit cells have one hover background");
+  for (const severity of ["okf-error", "okf-warning"]) {
+    // Everything the severity rule selects by, plus the edit mode, the edit cell and the pointer.
+    const hover = `${editMode} #sphinx-myst-preview-content [data-okf-properties] `
+      + `tr[data-okf-field].${severity} > th[data-okf-edit-cell]:hover`;
+    assert.deepEqual(valuesOf(hover, "background"), otherCells, `${severity} highlights like the other edit cells`);
+    assert.deepEqual(valuesOf(hover, "color"), [], `${severity} keeps the severity colour of its text`);
+  }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023#S5

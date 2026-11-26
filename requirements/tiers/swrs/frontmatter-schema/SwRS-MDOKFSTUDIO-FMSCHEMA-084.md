@@ -32,6 +32,10 @@ scenarios:
   title: Strict setting
 - id: S7
   title: Cases without an issue
+- id: S8
+  title: No underline during an edit
+- id: S9
+  title: Marked name cell in edit mode
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,7 +50,6 @@ tested_in_files:
 - test/core/frontmatter/propertiesTable.test.ts
 - test/core/frontmatter/schemaValidator.holes.test.ts
 - test/core/preview/fieldIssueStyles.test.ts
-- test/visual/frontmatterIssueRowScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -115,6 +118,18 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 | a schema root that allows additional properties, or one that does not state it | the properties section has no data-okf-additional-properties attribute |
 | strictAdditionalProperties unset (default false, boolean) | titel is listed without any warning |
 
+### Scenario S8 (boundary): No underline during an edit
+
+- GIVEN a field row whose value carries an error or a warning
+- WHEN that value is being edited
+- THEN its cell has no underline, so neither the editor nor its field menu is underlined
+
+### Scenario S9 (nominal): Marked name cell in edit mode
+
+- GIVEN edit mode on and a field row with an error or a warning whose name can be edited
+- WHEN the pointer is over its name cell
+- THEN the cell takes the hover background of the other editable cells and the name keeps the colour of its severity
+
 ### Known issues
 
 - Known issue: messages are not translated and unknown schema keywords are ignored without notice.
@@ -131,9 +146,10 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 - Method: test/integration/previewEditing.test.ts (closed schema).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario (strict setting).
 - Method: test/core/preview/fieldIssueStyles.test.ts, tests `a field row with an error has a red name cell and a red wavy underline under its value` and `a field row with a warning has the same marks in the warning colour` (how the rows are marked: violations mark their field rows; strict setting).
-- Method: test/core/preview/fieldIssueStyles.test.ts, test `a value cell that is being edited drops the issue underline` (Criteria, no underline during an edit).
-- Method: test/visual/frontmatterIssueRowScenarios.ts, visual scenarios `v32-field-issue-rows-light-900` and `v33-field-issue-rows-dark-900` (how the rows are marked: violations mark their field rows; strict setting).
-- Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently. The validator collects all errors, so each violation gets its own row or underline. An error or warning field row is marked like the whole-document error row: its name cell takes the severity colour on a light background of that colour and its value a wavy underline in that colour; the value text keeps its colour, and an info-severity field row keeps the plain look. While a value is being edited its cell has no underline, so the editor and its field menu are not underlined. The empty required row has value null and is flagged required. The whole-document row is an info-style row with the error severity and spans every visible column. The strict setting has no effect on the closed-schema error; one row is reported per undeclared key, including type when the schema does not declare it. The strict warning applies only when a schema matched, is independent of the schema's own additionalProperties, and a generic table never warns. The whole-document scenario (minProperties) has no test (probed against the analysis).
+- Method: test/core/preview/fieldIssueStyles.test.ts, test `a value cell that is being edited drops the issue underline` (no underline during an edit).
+- Method: test/core/preview/fieldIssueStyles.test.ts, test `in edit mode the name cell of an error or warning row highlights under the pointer` (marked name cell in edit mode).
+- Method: test/visual/scenarioDefinitions2.ts, visual scenarios `v32-field-issue-rows-light-900` and `v33-field-issue-rows-dark-900` (how the rows are marked: violations mark their field rows; strict setting).
+- Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently. The validator collects all errors, so each violation gets its own row or underline. An error or warning field row is marked like the whole-document error row: its name cell takes the severity colour on a light background of that colour and its value a wavy underline in that colour; the value text keeps its colour, and an info-severity field row keeps the plain look. While a value is being edited its cell has no underline, so the editor and its field menu are not underlined. In edit mode, while the pointer is over the name cell of an error or warning row whose name can be edited, the hover background of the other editable cells replaces the severity background and the name keeps its severity colour. The empty required row has value null and is flagged required. The whole-document row is an info-style row with the error severity and spans every visible column. The strict setting has no effect on the closed-schema error; one row is reported per undeclared key, including type when the schema does not declare it. The strict warning applies only when a schema matched, is independent of the schema's own additionalProperties, and a generic table never warns. The whole-document scenario (minProperties) has no test (probed against the analysis).
 
 <!-- okf:links:start -->
 ### Links
