@@ -85,7 +85,8 @@ function unclosedSpan(node: MystNode, context: UnclosedFenceContext): { start: n
   return undefined;
 }
 
-function closes(line: string, fence: string): boolean {
+/** True when `line`, after its quote markers and indentation, closes a fence opened with `fence`. */
+export function closes(line: string, fence: string): boolean {
   const trimmed = line.replace(/^[\s>]+/u, "").trimEnd();
   return trimmed.length >= fence.length && [...trimmed].every((char) => char === fence[0]);
 }
