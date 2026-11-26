@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { COMMAND_ID, getActivePreviewForTests } from "./extensionApi";
 import { FILLER, pageMarks, settle, studioTabs, tabs, textTabs, withAssociation } from "./openAtLineHelpers";
 import { connectWorkbench, createFixture, findCurrentFrame, waitFor } from "./realInput/harness";
+import { webviewFrames } from "../shared/webviewFrames";
 
 const OPEN_AS_TEXT = "markdown-okf-schema-studio.openAsText";
 
@@ -114,7 +115,8 @@ export async function run(): Promise<void> {
       await waitFor("no text tab left", () => textTabs().length === 0);
       await vscode.commands.executeCommand("vscode.open", target, { selection: new vscode.Range(41, 0, 41, 0) });
       await settle(3000);
-      const frames = (await Promise.all(page.frames().map((candidate) => candidate.locator(".sphinx-preview-line-marker").count().catch(() => 0))))
+      // Webview frames only (shared/webviewFrames.ts): a count on a frame with no document does not return.
+      const frames = (await Promise.all(webviewFrames(page.frames()).map((candidate) => candidate.locator(".sphinx-preview-line-marker").count().catch(() => 0))))
         .reduce((total, count) => total + count, 0);
       console.log(`[open-at-line] jump with the side preview open, file not open as text: studio=${studioTabs().length} text=${textTabs().length} marks=${frames} markedLine=${getActivePreviewForTests()?.markedLine?.line}`);
       assert.equal(studioTabs().length, 1, "a Studio tab opens");
