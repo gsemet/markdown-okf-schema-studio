@@ -192,8 +192,11 @@ well the SwRS tests catch a broken implementation. See [CONTRIBUTING](../CONTRIB
 ### Repro tools and probes
 
 The `toc-loop` job (`just ci-toc-loop`) repeats real-window steps to reproduce a flake. It runs only
-on a manual dispatch that asks for it, and never gates a merge. The probes of `test/probe` measure
-performance and frames and take chart screenshots. Neither has a marker of its own.
+on a manual dispatch that asks for it, and never gates a merge. The `perf-547` job
+(`just ci-perf-547`) measures comments on a large generated document in a real window (issue 547).
+It sets no limit and fails only when the measure cannot be taken. It runs only on a manual dispatch
+with `perf_547=true`, and never gates a merge. The probes of `test/probe` measure performance and
+frames and take chart screenshots. None of these jobs and probes has a marker of its own.
 
 The folders `test/shared` and `test/fixtures` hold shared code and data only.
 
