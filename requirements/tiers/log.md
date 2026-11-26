@@ -2,6 +2,10 @@
 
 ## 2026-11-26
 
+### Scenario markers of the clip pages tests (CR-504, after the restack)
+
+- Changed (markers, no test and no requirement text changed): the nine `@tests_req SwRS-MDOKFSTUDIO-CORE-095` markers without a fragment in `test/site/siteClips.test.ts` (shipped documentation pages that play a feature clip as video, added by the changes below this one) name scenario S1. Reason: CR-504, a marker on a requirement that declares `scenarios:` needs a fragment.
+
 ### Scenarios and markers of the requirements main added (CR-504, after the rebase)
 
 - Changed (scenario headings and `scenarios:`, all `proposed`, no scenario text or normative text changed): the scenario blocks that main added without an id are numbered and moved after the last numbered one: SwRS-MDOKFSTUDIO-DIAG-121 S4, SwRS-MDOKFSTUDIO-DIAG-123 S4 to S6, SwRS-MDOKFSTUDIO-LAYOUT-023 S8. SwRS-MDOKFSTUDIO-CORE-096, added by main, declares S1 to S5 in heading order.
