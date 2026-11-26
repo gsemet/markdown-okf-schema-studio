@@ -561,9 +561,12 @@ computes its own, 2 minutes plus 6 s per scenario run (rounds times scenarios) a
 a trusted part is stopped by `LAUNCH TIMEOUT` or `LAUNCH HANG`, that line names the launch and the
 folder is `<time>-trusted-part-<n>-<step>/`):
 `ps` output, the tails of the VS Code logs, the window state and tabs, the heartbeat and screenshots
-(through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step and the
-test step of each acceptance shard stop at 20 minutes (the `toc-loop` step at 35) and
-`just ci-hang-dump` adds the processes and logs left behind (`post-step/`).
+(through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step stops
+at 20 minutes, the test step of each acceptance shard at 3 (the `toc-loop` step at 35), and
+`just ci-hang-dump` adds the processes and logs left behind (`post-step/`). The acceptance step ends
+before the step budget and the launch deadline can expire: a hang there that neither the heartbeat nor
+`bounded()` catches in time leaves `post-step/` and no watchdog dump, with a `STEP start` line only if
+it is inside a `step()` call.
 
 Run folders of the real-window suites pile up under `out/reports/e2e/screenshots/`.
 `npm run review:finish` keeps the latest 5 per kind (`STUDIO_E2E_KEEP_RUNS` changes it). Run

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       heavy:
-        description: Also run the real VS Code jobs (integration, acceptance in one shard per group, and stress, about 10, 15 and 16 minutes)
+        description: Also run the real VS Code jobs (integration, acceptance in one shard per group, and stress, about 10, 2 and 16 minutes)
         type: boolean
         default: false
       toc_loop:
@@ -317,7 +317,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 30
+    # About twice the slowest shard's measured healthy duration (run 45766254331, trust-security:
+    # job 115 s, test step 77 s); never above 30 for the job and 20 for the test step.
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -344,9 +346,9 @@ jobs:
         with:
           just-version: 1.58.0
       - run: just dev-ci
-      # Below the job's 30 minutes, with the screen of the integration job (CR 326).
+      # Below the job's 5 minutes, with the screen of the integration job (CR 326).
       - run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-acceptance "${{ matrix.group }}"
-        timeout-minutes: 20
+        timeout-minutes: 3
         env:
           STUDIO_VIEWPORT_GUARD: strict
       - name: Collect hang diagnostics

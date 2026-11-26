@@ -38,11 +38,13 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     internal ids in the text (see
     [pull-request.guidelines.md](pull-request.guidelines.md)).
 11. **Every job has a `timeout-minutes`** (about twice its healthy duration: 30 for the VS Code
-    integration, acceptance and stress jobs, 15 for the others, 10 for the report job). A hung job must fail fast and name
+    integration and stress jobs, 5 for each `acceptance` shard, 15 for the others, 10 for the report
+    job; the `acceptance` job and step timeouts come from the slowest shard's measured healthy
+    duration and are never above 30 and 20). A hung job must fail fast and name
     where it stopped, never run to the platform default of six hours. Never raise a timeout to
     make a slow or flaky run pass: find what waits.
     - **A hang names its step and leaves a dump.** The step that runs the tests has its own
-      `timeout-minutes` below the job's (20 for `integration` and for each `acceptance` shard), so a
+      `timeout-minutes` below the job's (20 for `integration`, 3 for each `acceptance` shard), so a
       hang cancels that step and the `if: always()` steps still collect diagnostics
       (`just ci-hang-dump`) and upload the reports. These two jobs are the ones with a third target,
       and it only collects files.
