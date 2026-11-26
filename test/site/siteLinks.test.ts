@@ -18,7 +18,7 @@ test("site branding resolves from root and nested pages", () => {
 
 test("the site header links How we ship then How we test from root and nested pages", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
-  for(const [currentPage, folder] of [["index.html", "docs/"], ["docs/guide.html", ""], ["reports/e2e/index.html", "../../docs/"]]) {
+  for (const [currentPage, folder] of [["index.html", "docs/"], ["docs/guide.html", ""], ["reports/e2e/index.html", "../../docs/"]]) {
     const document = pageDocument("Studio", currentPage, "<h1>Studio</h1>");
     const pair = `<a href="${folder}how-we-ship.html">How we ship</a><a href="${folder}how-we-test.html">How we test</a>`;
     assert.ok(document.includes(pair), `${currentPage} holds ${pair}`);
