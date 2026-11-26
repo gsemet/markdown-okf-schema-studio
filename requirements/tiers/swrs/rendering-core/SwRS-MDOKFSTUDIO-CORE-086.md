@@ -6,9 +6,9 @@ title: The published site has one cream look on every page and picture
 description: When a maintainer builds the Pages site, every page and every
   social picture SHALL use the cream palette of the extension, every page SHALL
   carry the one site header (the logo and the links Home, Contributing, How we
-  ship, Gallery and Requirements, plus the breadcrumb on the requirements
-  pages), and no page SHALL have a dark palette, a prefers-color-scheme dark
-  rule or a theme switch.
+  ship, How we test, Gallery and Requirements, plus the breadcrumb on the
+  requirements pages), and no page SHALL have a dark palette, a
+  prefers-color-scheme dark rule or a theme switch.
 project: markdown-okf-schema-studio
 scope: rendering-core
 req_lifecycle: proposed
@@ -42,19 +42,19 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a maintainer builds the Pages site, every page and every social picture SHALL use the cream palette of the extension, every page SHALL carry the one site header (the logo and the links Home, Contributing, How we ship, Gallery and Requirements, plus the breadcrumb on the requirements pages), and no page SHALL have a dark palette, a prefers-color-scheme dark rule or a theme switch.
+When a maintainer builds the Pages site, every page and every social picture SHALL use the cream palette of the extension, every page SHALL carry the one site header (the logo and the links Home, Contributing, How we ship, How we test, Gallery and Requirements, plus the breadcrumb on the requirements pages), and no page SHALL have a dark palette, a prefers-color-scheme dark rule or a theme switch.
 
 ### Scenario S1 (nominal): A main page
 
-- GIVEN a page of the site written from Markdown (home, Contributing, How we ship), the Gallery or the Reports index
+- GIVEN a page of the site written from Markdown (home, Contributing, How we ship, How we test), the Gallery or the Reports index
 - WHEN the page is written
-- THEN it takes the cream tokens (background #f5f1e8, text #2b2a27, link #a14e32, border #d6cdbd), carries the site header with the logo and the five links Home, Contributing, How we ship, Gallery and Requirements in that order, and has no dark palette, no prefers-color-scheme dark rule and no theme attribute
+- THEN it takes the cream tokens (background #f5f1e8, text #2b2a27, link #a14e32, border #d6cdbd), carries the site header with the logo and the six links Home, Contributing, How we ship, How we test, Gallery and Requirements in that order, and has no dark palette, no prefers-color-scheme dark rule and no theme attribute
 
 ### Scenario S2 (nominal): A requirements page
 
 - GIVEN a page of the requirements viewer
 - WHEN the page is written
-- THEN its stylesheet starts with the same cream tokens as the main pages, its header holds the same logo and five links followed by the breadcrumb, the History checkbox and the Search button, and it has no Theme button, no theme script and no stored theme choice
+- THEN its stylesheet starts with the same cream tokens as the main pages, its header holds the same logo and six links followed by the breadcrumb, the History checkbox and the Search button, and it has no Theme button, no theme script and no stored theme choice
 
 ### Scenario S3 (nominal): A social card
 

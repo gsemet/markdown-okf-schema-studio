@@ -16,10 +16,12 @@ test("site branding resolves from root and nested pages", () => {
   }
 });
 
-test("the site header links the How we ship page from root and nested pages", () => {
-  for (const [currentPage, target] of [["index.html", "docs/how-we-ship.html"], ["docs/guide.html", "how-we-ship.html"], ["reports/e2e/index.html", "../../docs/how-we-ship.html"]]) {
+test("the site header links How we ship then How we test from root and nested pages", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
+  for(const [currentPage, folder] of [["index.html", "docs/"], ["docs/guide.html", ""], ["reports/e2e/index.html", "../../docs/"]]) {
     const document = pageDocument("Studio", currentPage, "<h1>Studio</h1>");
-    assert.ok(document.includes(`<a href="${target}">How we ship</a>`));
+    const pair = `<a href="${folder}how-we-ship.html">How we ship</a><a href="${folder}how-we-test.html">How we test</a>`;
+    assert.ok(document.includes(pair), `${currentPage} holds ${pair}`);
   }
 });
 
@@ -29,9 +31,9 @@ test("a viewer page brands and links the site relative to its own folder", () =>
   const html = viewerDocument({ dir: "requirements/area/StRS-X-001", level: "use-case", title: "T", shareTitle: "T", description: "d", body: "", crumbs: [] }, { sha: "abc", generatedAt: "" });
   assert.ok(html.includes('src="../../../images/logo.svg" alt="" width="44" height="44"'));
   assert.ok(html.includes('class="site-brand" href="../../../index.html"'));
-  for (const [text, target] of [["Home", "../../../index.html"], ["Contributing", "../../../contributing.html"], ["How we ship", "../../../docs/how-we-ship.html"], ["Gallery", "../../../gallery.html"], ["Requirements", "../../"]]) {
-    assert.ok(html.includes(`<a href="${target}">${text}</a>`), text);
-  }
+  const links = [["Home", "../../../index.html"], ["Contributing", "../../../contributing.html"], ["How we ship", "../../../docs/how-we-ship.html"], ["How we test", "../../../docs/how-we-test.html"], ["Gallery", "../../../gallery.html"], ["Requirements", "../../"]];
+  const nav = links.map(([text, target]) => `<a href="${target}">${text}</a>`).join("");
+  assert.ok(html.includes(`<nav class="site" aria-label="Site">${nav}</nav>`), "the six links, in order");
 });
 
 test("rewrites rendered Markdown documents and preserves fragments", () => {

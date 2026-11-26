@@ -164,6 +164,8 @@ export const SIMPLE_CARDS: Record<string, SimpleCardEntry> = {
     "Contributing: Markdown OKF-Schema Studio", "How to set up, build, test and change Markdown OKF-Schema Studio."),
   "docs/how-we-ship.md": simpleEntry("docs/how-we-ship.html", "how-we-ship", "How we ship", "One owner, a team of AI agents", "The workflow, followed through one real release",
     "How we ship: Markdown OKF-Schema Studio", "How one owner and a team of AI agents in Claude Code ship Markdown OKF-Schema Studio, followed through one real release."),
+  "docs/how-we-test.md": simpleEntry("docs/how-we-test.html", "how-we-test", "How we test", "From a use case to its proof", "Every test level and the requirement it proves",
+    "How we test: Markdown OKF-Schema Studio", "How Markdown OKF-Schema Studio is tested, from unit tests to acceptance tests in a real VS Code window, and how each test is tied to a requirement."),
 };
 
 function simpleCardFor(relativeSource: string): SimpleCardEntry | undefined {

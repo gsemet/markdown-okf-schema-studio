@@ -195,6 +195,8 @@ this project: okfreq counts markers by their verb and knows no bench.
   job `acceptance` runs one shard (`just ci-acceptance <group>`) for each group that has such a
   file; at present that is `trust-security` only. The StRS coverage mode of
   `requirements/config.yml` is still `linked-swrs-and-validation-test`.
+- For the full picture of the test levels and what each one proves, see
+  [How we test](../../docs/how-we-test.md).
 
 ## During a change
 
@@ -215,6 +217,10 @@ Before the PR is opened, the agent that opens it (for a stack, per branch) runs 
 runs it (`okfreq validate --check-links --project-root .` and coverage with CI's okfreq version);
 a gap is fixed before the PR opens. The PR body's Tests section lists the requirement IDs added or
 changed with their source and test files.
+
+- A change to a marker verb, to the bench convention, to the commands of `just requirements-lint`
+  or to `strs_test_coverage_mode` updates `docs/how-we-test.md` in the same change, its section
+  "What is not enforced yet" included.
 
 ### Marker placement
 

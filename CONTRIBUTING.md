@@ -252,6 +252,8 @@ and the code that needs the page or a host in its own layer.
 
 ## Checks
 
+[How we test](docs/how-we-test.md) explains each test level and the requirement it proves.
+
 Run the package-local checks before opening a pull request:
 
 ```bash

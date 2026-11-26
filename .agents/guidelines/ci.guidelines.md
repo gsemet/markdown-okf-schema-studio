@@ -129,6 +129,13 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     job of `ci.yml`, never through `workflow_call` (a called workflow's token names the caller, so
     the Open VSX trusted publisher does not match). A change to that wiring is proven by the next
     version push, not only by a manual dispatch.
+16. **A change to the test levels updates How we test.** A change that adds, removes or renames a
+    CI job, a test folder, an e2e group or a group of the `acceptance` matrix, or changes when a
+    level runs, updates `docs/how-we-test.md` (its table, its sections and its diagram) in the same
+    pull request. `test/site/howWeTest.test.ts` catches only part of this: it fails when a CI job, a
+    test folder or an e2e group of the repository is not named on the page, and when the page's
+    acceptance groups differ from the `acceptance` matrix. It does not see a removed job, folder or
+    e2e group that the page still names, a change of when a level runs, or what the diagram draws.
 
 ## Recovering from a red heavy job on a release push
 
