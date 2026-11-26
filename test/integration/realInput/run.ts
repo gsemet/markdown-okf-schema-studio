@@ -35,6 +35,7 @@ import { scenarioToc } from "../tocWindow";
 import { scenarioReadmeHtml } from "../readmeHtmlWindow";
 import { scenarioMystBlocks } from "../mystBlocksWindow";
 import { scenarioPerformanceProbe } from "../performanceProbe";
+import { scenarioPerf547 } from "../perf547";
 import * as fs from "node:fs";
 import { E2E_REPORT_ROOT } from "../../reportPaths";
 import {
@@ -220,12 +221,13 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     // A single scenario: the registry completeness check is skipped. The stress rounds keep their own
-    // evidence, and the performance probe measures and reports (it is not part of the integration job).
+    // evidence; the performance probe and perf-547 measure and report (not part of the integration job).
     const single: Record<string, () => Promise<void>> = {
       toolbar: () => scenarioToolbarState(page, evidence),
       stress: () => runStress(page),
       "toc-loop": () => runTocLoop(page),
       probe: () => scenarioPerformanceProbe(page),
+      "perf-547": () => scenarioPerf547(browser, page),
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
       "list-item-moves": () => scenarioListItemMoves(page),

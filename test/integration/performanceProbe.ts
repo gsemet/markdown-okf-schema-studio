@@ -52,7 +52,7 @@ function contentPatchCount(): number {
 }
 
 /** Waits until the host has no deferred page work and has rendered nothing new for 800 ms. */
-async function settle(): Promise<void> {
+export async function settle(): Promise<void> {
   let last = "";
   let since = Date.now();
   await waitFor("the preview to settle", () => {

@@ -443,16 +443,24 @@ def _locked_screen_run(tmp_path: Path, *arguments: str) -> "subprocess.Completed
 
 # The ci-acceptance case: a locked screen stops the target with exit code 3 before it runs anything.
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S7
-@pytest.mark.parametrize("arguments", [["ci-integration"], ["ci-stress", "1"], ["ci-acceptance", "trust-security"]])
+@pytest.mark.parametrize(
+    ("arguments", "dispatch"),
+    [
+        (["ci-integration"], "heavy=true"),
+        (["ci-stress", "1"], "heavy=true"),
+        (["ci-acceptance", "trust-security"], "heavy=true"),
+        (["ci-perf-547"], "perf_547=true"),
+    ],
+)
 def test_ci_integration_and_stress_stop_on_a_locked_screen(
-    tmp_path: Path, arguments: list[str]
+    tmp_path: Path, arguments: list[str], dispatch: str
 ) -> None:
     result = _locked_screen_run(tmp_path, *arguments)
     assert result.returncode == 3
     assert "screen locked" in result.stderr
     assert f"{arguments[0]}: screen locked" in result.stderr
     assert "gh workflow run ci.yml --ref" in result.stderr
-    assert "-f heavy=true" in result.stderr
+    assert f"-f {dispatch}" in result.stderr
     assert "Unlock the screen" in result.stderr
     assert "caffeinate" in result.stderr
     assert not (tmp_path / "out").exists()
@@ -863,7 +871,7 @@ def test_every_xvfb_screen_is_wider_than_the_emulated_viewports() -> None:
     import re
 
     calls = re.findall(r"xvfb-run [^\n]*", CI.read_text())
-    assert len(calls) == 4
+    assert len(calls) == 5
     for call in calls:
         match = re.search(r'-s "-screen 0 (\d+)x(\d+)x\d+"', call)
         assert match is not None, call
@@ -1336,3 +1344,43 @@ def test_toc_loop_inputs_reach_the_recipe_and_leave_the_deadline_computed() -> N
     recipe = (ROOT / "justfile").read_text().split("\nci-toc-loop ", 1)[1].split("\n\n", 1)[0]
     assert "STUDIO_LAUNCH_TIMEOUT_MS" not in recipe
     assert "STUDIO_TOC_AFTER_README_HTML" not in recipe
+
+
+def test_the_perf_547_job_runs_only_on_demand_and_uploads_its_report_whatever_happens() -> None:
+    import yaml
+
+    perf_input = yaml.safe_load(CI.read_text())[True]["workflow_dispatch"]["inputs"]["perf_547"]
+    assert perf_input["type"] == "boolean"
+    assert perf_input["default"] is False
+    jobs = _ci_jobs()
+    job = jobs["perf-547"]
+
+    def runs(event: str, asked: object) -> bool:
+        values = _context(event)
+        values["inputs.perf_547"] = asked
+        return bool(_run_if(job["if"], values))
+
+    assert runs("workflow_dispatch", True)
+    assert not runs("workflow_dispatch", False)
+    # A pull request or a push has no inputs: the expression reads them as empty.
+    assert not runs("pull_request", "")
+    assert not runs("push", "")
+    assert job["permissions"] == {"contents": "read"}
+    # A measure, not a gate: no job waits for it.
+    assert not any("perf-547" in _needs(other) for other in jobs.values())
+    measure = next(s for s in job["steps"] if "ci-perf-547" in s.get("run", ""))
+    assert measure["run"] == f'xvfb-run --auto-servernum -s "-screen 0 {XVFB_SCREEN}" just ci-perf-547'
+    assert measure["env"] == {"STUDIO_VIEWPORT_GUARD": "strict"}
+    # Above the 10-minute budget of the real-input step, below the job's own limit.
+    assert 10 < measure["timeout-minutes"] < job["timeout-minutes"] <= 20
+    after = job["steps"][job["steps"].index(measure) + 1:]
+    assert after[0]["run"] == "just ci-hang-dump" and after[0]["if"] == "always()"
+    assert UPLOAD in after[1]["uses"] and after[1]["if"] == "always()"
+    assert after[1]["with"]["name"] == "perf-547" + ATTEMPT_SUFFIX
+    assert after[1]["with"]["path"] == "out/reports/"
+    recipe = (ROOT / "justfile").read_text().split("\nci-perf-547:", 1)[1].split("\n\n", 1)[0]
+    assert "export STUDIO_REAL_INPUT_SCENARIO=perf-547" in recipe
+    assert "run test:integration -- --trusted-only" in recipe
+    assert "STUDIO_LAUNCH_TIMEOUT_MS" not in recipe
+    # The name the recipe exports is a scenario of the real-window runner.
+    assert '"perf-547": () => scenarioPerf547(' in (ROOT / "test/integration/realInput/run.ts").read_text()

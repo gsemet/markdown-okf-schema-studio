@@ -228,8 +228,9 @@ sphinx-check:
     uv run --no-sync --group docs pytest sphinx/tests/test_sphinx_preview_mapping.py --junitxml=out/reports/contract/tests-sphinx.xml
 
 # Private: stop with exit code 3 when the screen is locked (the real VS Code window cannot become active).
-# STUDIO_SCREEN_LOCKED=1 forces it on every OS (tests); the real probe runs on macOS only.
-_require-unlocked-screen STAGE="ci-integration":
+# STUDIO_SCREEN_LOCKED=1 forces it on every OS (tests); the real probe runs on macOS only. DISPATCH is
+# the workflow_dispatch input that runs the stage in CI.
+_require-unlocked-screen STAGE="ci-integration" DISPATCH="heavy=true":
     #!/usr/bin/env bash
     set -uo pipefail
     locked=0
@@ -242,7 +243,7 @@ _require-unlocked-screen STAGE="ci-integration":
         {
             echo "{{ STAGE }}: screen locked, the VS Code window cannot become active; the real VS Code tests did not run."
             echo "Unlock the screen and run it again, or prove the branch in CI at once:"
-            echo "  gh workflow run ci.yml --ref <branch> -f heavy=true"
+            echo "  gh workflow run ci.yml --ref <branch> -f {{ DISPATCH }}"
             echo "To keep the screen from locking during an unattended run, see \"App-window tests\" in"
             echo ".agents/guidelines/local-worktree.guidelines.md (caffeinate)."
         } >&2
@@ -462,6 +463,22 @@ ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0" $STUDIO_TOC_LOOP_S
         echo "ci-toc-loop: finished ($STUDIO_TOC_LOOP rounds of ${STUDIO_TOC_LOOP_STEPS:-the default steps}, control $STUDIO_TOC_LOOP_CONTROL, delay up to $STUDIO_TOGGLE_DELAY_MS ms)"
     else
         echo "ci-toc-loop: FAILED" >&2
+        exit 1
+    fi
+
+# CI job "perf-547" (workflow_dispatch input perf_547), and the local command of the same measure:
+# one trusted window opens a generated large document, drags over its text and across its table cells
+# with the mouse, and creates comments (test/integration/perf547.ts). Reports every sample and the
+# median per interaction in out/reports/probe/perf-547.json. It sets no limit: it fails only when
+# the measure cannot be taken. It opens a VS Code window, so it is not part of `check` or `preflight`.
+ci-perf-547: (_require-unlocked-screen "ci-perf-547" "perf_547=true")
+    #!/usr/bin/env bash
+    set -uo pipefail
+    export STUDIO_REAL_INPUT_SCENARIO=perf-547
+    if {{ npm }} run test:integration -- --trusted-only; then
+        echo "ci-perf-547: passed (out/reports/probe/perf-547.json)"
+    else
+        echo "ci-perf-547: FAILED" >&2
         exit 1
     fi
 

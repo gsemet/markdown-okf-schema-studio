@@ -436,6 +436,20 @@ needs to run:
 STUDIO_REAL_INPUT_SCENARIO=probe npm run test:integration -- --trusted-only
 ```
 
+A second real-window measure covers comments on a large document (issue 547): a generated review
+document with 22 tables, 11 images and 9 comment threads (`test/probe/perf547Document.ts`). It drags
+over running text and across table cells with the mouse, creates comments from the Comment button,
+and writes `out/reports/probe/perf-547.json`: every sample and the median of `selectionRelease` and
+`commentCreate`, the number of elements a comment creation restyles, and the longest main-thread
+task of each drag and release. It sets no limit and fails only when the measure cannot be taken.
+
+```bash
+just ci-perf-547
+```
+
+On CI it runs on demand only, three times on one commit when two states are compared:
+`gh workflow run ci.yml --ref <branch> -f perf_547=true`.
+
 ## Scope
 
 Keep the extension standalone. Runtime code and tests must not resolve files from a parent
@@ -570,7 +584,8 @@ a trusted part is stopped by `LAUNCH TIMEOUT` or `LAUNCH HANG`, that line names 
 folder is `<time>-trusted-part-<n>-<step>/`):
 `ps` output, the tails of the VS Code logs, the window state and tabs, the heartbeat and screenshots
 (through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step stops
-at 20 minutes, the test step of each acceptance shard at 3 (the `toc-loop` step at 35), and
+at 20 minutes, the test step of each acceptance shard at 3 (the `toc-loop` step at 35, the
+`perf-547` step at 13), and
 `just ci-hang-dump` adds the processes and logs left behind (`post-step/`). The acceptance step ends
 before the step budget and the launch deadline can expire: a hang there that neither the heartbeat nor
 `bounded()` catches in time leaves `post-step/` and no watchdog dump, with a `STEP start` line only if
