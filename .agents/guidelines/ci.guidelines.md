@@ -111,6 +111,12 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     rounds of three steps), inside the 35-minute step of the 45-minute job; the launcher prints it.
     The job does not gate merges and is not part of `checks`; failed rounds are counted and the job
     is red if any failed.
+    A third on-demand job, `perf-547`, measures comments on a large generated document in a real
+    window (issue 547): `gh workflow run ci.yml --ref <branch> -f perf_547=true`. It uploads
+    `out/reports/probe/perf-547.json` in the artifact `perf-547-attempt-<n>` and sets no limit: it is
+    red only when the measure cannot be taken. It does not gate merges and is not part of `checks`.
+    Its job has 20 minutes and its measure step 13, above the 10-minute budget of the `real-input`
+    step.
 14. **A release is tagged only after a green heavy run of its commit.** On a push to `main` that
     changes the package version, the `release-check` job detects the change
     (`scripts/version.py --bump-since`, the same test `tag-release` uses) and `stress` blocks
