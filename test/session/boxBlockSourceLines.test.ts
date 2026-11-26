@@ -606,6 +606,327 @@ test("a version admonition body whose source lines cannot be found opens the who
   assert.deepEqual(opened.range, [1, 6]);
 });
 
+/** A formula of a list item that the parser gives no lines: the item, and the formula's lines in it. */
+const FORMULAS_WITHOUT_LINES = [
+  ["after the text of a tight item", [2, 4], ["- Text", "  $$", "  y = 2", "  $$"]],
+  ["after the text of a loose item", [2, 4], ["- Text", "  $$", "  y = 2", "  $$", "", "- next"]],
+  ["after a quote", [4, 6], ["- Text", "", "  > quoted", "  $$", "  y = 2", "  $$"]],
+  ["after a code block and text", [6, 8],
+    ["- Text", "  ```py", "  x", "  ```", "  tail", "  $$", "  y = 2", "  $$"]],
+  ["written on one line", [2, 2], ["- Text", "  $$ y = 2 $$", "", "- next"]],
+  ["with a label", [2, 4], ["- Text", "  $$", "  y = 2", "  $$ (label)", "", "- next"]],
+  ["between two texts", [2, 4], ["- Text", "  $$", "  y = 2", "  $$", "  after"]],
+  ["of a nested item", [3, 5], ["- Text", "  - sub", "    $$", "    y = 2", "    $$"]],
+] as const;
+
+for (const [name, [from, to], body] of FORMULAS_WITHOUT_LINES) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`in an admonition or an alert, a formula ${name} opens only lines that hold all of it`, async () => {
+    for (const source of [
+      text(":::{note}", ...body, ":::", "", "After."),
+      text("> [!NOTE]", ...body.map((line) => (line ? `> ${line}` : ">")), "", "After."),
+    ]) {
+      const formula: Range = [from + 1, to + 1];
+      const loaded = await load(source);
+      const rendered = loaded.page.document.querySelectorAll(".math-display");
+      assert.equal(rendered.length, 1, source);
+      for (const exact of [false, true]) {
+        const { range } = await loaded.open(rendered[0]!, exact);
+        assert.ok(range[0] <= formula[0] && range[1] >= formula[1], `${range.join("-")}: ${source}`);
+      }
+      for (const block of loaded.page.document.querySelectorAll(MAPPINGS_SELECTOR)) {
+        const [line, endLine] = loaded.rangeOf(block);
+        const apart = endLine < formula[0] || line > formula[1];
+        const whole = line <= formula[0] && endLine >= formula[1];
+        assert.ok(apart || whole, `<${block.tagName} ${line}-${endLine}> cuts the formula: ${source}`);
+      }
+    }
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+test("in an admonition, a paragraph of an item keeps its lines above a closing HTML tag", async () => {
+  for (const gap of [[""], []]) {
+    const source = text(
+      ":::{note}", "- Step one", "  <details>", "  <summary>More</summary>", "", "  Inside.", ...gap,
+      "  </details>", "  <div>", "  Last.", "  </div>", ":::",
+    );
+    const loaded = await load(source);
+    const paragraph = loaded.page.elementWithText("Inside.");
+    const opened = await loaded.open(paragraph, true);
+    const lines: Range = [6, 6 + gap.length];
+    assert.deepEqual(opened.range, lines, source);
+    assert.equal(opened.originalText, linesOf(source, lines));
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+test("a formula directly in the body of a box, with text after it, opens its own line", async () => {
+  for (const [opening, line] of [[[":::{note}"], 4], [[":::{div}", ":class: callout-tip", ""], 6]] as const) {
+    const source = text(...opening, "Before.", "", "***", "$$ y = 2 $$ after", ":::");
+    const loaded = await load(source);
+    const rendered = loaded.page.document.querySelectorAll(".math-display");
+    for (const exact of [false, true]) {
+      assert.deepEqual((await loaded.open(rendered[0]!, exact)).range, [line + 1, line + 1], source);
+    }
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+test("a formula with text after it, first in a paragraph of two lines, opens no part of the paragraph", async () => {
+  const body = ["$$ y = 2 $$ after", "more words"];
+  for (const [source, from] of [
+    [text(":::{note}", "Before.", "", "***", ...body, ":::"), 5],
+    [text("::::{note}", "- Item", "", "  :::{tip}", ...body.map((line) => `  ${line}`), "  :::", "::::"), 5],
+  ] as const) {
+    const loaded = await load(source);
+    const rendered = loaded.page.document.querySelectorAll(".math-display");
+    for (const exact of [false, true]) {
+      const { range } = await loaded.open(rendered[0]!, exact);
+      assert.ok(range[0] <= from && range[1] >= from + 1, `${range.join("-")}: ${source}`);
+    }
+  }
+});
+
+/**
+ * Boxes written with a `---` block of options and a later `---` line in the body, where the renderer
+ * maps the body one line down, with the lines of the innermost box that holds them.
+ */
+const SHIFTED_BODIES = [
+  ["a note", text(":::{note}", "---", "class: x", "---", "Alpha", "", "---", ":::"), [1, 8]],
+  ["a dropdown", text(":::{dropdown} T", "---", "open:", "---", "Alpha", "", "---", ":::"), [1, 8]],
+  ["a callout, the line inside code",
+    text(":::{div}", "---", "class: callout-tip", "---", "Alpha", "", "```", "---", "```", ":::"), [1, 10]],
+  ["a quoted note", text("> :::{note}", "> ---", "> class: x", "> ---", "> Alpha", ">", "> ---", "> :::"), [1, 8]],
+  ["a nested tip", text("::::{note}", ":::{tip}", "---", "class: x", "---", "Alpha", "", "---", ":::", "::::"), [2, 9]],
+] as const;
+
+for (const [name, source, box] of SHIFTED_BODIES) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`a body mapped one line down opens its whole box: ${name}`, async () => {
+    const loaded = await load(source);
+    const paragraph = loaded.page.elementWithText("Alpha");
+    for (const exact of [false, true]) {
+      assert.deepEqual((await loaded.open(paragraph, exact)).range, box);
+    }
+  });
+}
+
+/** Inline HTML under another block of a definition, with the line it is written on. */
+const WRAPPED_HTML = [
+  ["after a rule", 6, ["  : ***", "    <span>kept</span> words"]],
+  ["after a code block", 8, ["  : ~~~", "    x", "    ~~~", "    <span>kept</span> words"]],
+  ["after another tag", 7, ["  : ***", "    <b>bold</b>", "    <span>kept</span>"]],
+] as const;
+
+for (const [name, line, definition] of WRAPPED_HTML) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`in an admonition, inline HTML of a definition ${name} opens only lines that hold it`, async () => {
+    const source = text(":::{note}", "- Text", "", "  Term", ...definition, "- next", ":::");
+    const loaded = await load(source);
+    const span = loaded.page.document.querySelectorAll("span")
+      .find((element) => element.textContent.trim() === "kept")!;
+    for (const target of [span, span.parentElement!]) {
+      const { range } = await loaded.open(target, true);
+      assert.ok(range[0] <= line && range[1] >= line, `${range.join("-")}: ${source}`);
+    }
+  });
+}
+
+/**
+ * A `<details>` of a list item whose closing tag has more HTML right under it, so the renderer does
+ * not pair its tags: what stands above it in the box, its summary, and its first and last lines.
+ */
+const UNPAIRED_DETAILS = [
+  ["above a table", "Table", [3, 8], [
+    "<details>", "<summary>Table</summary>", "", "word", "", "</details>",
+    "<table>", "<tr><td>cell</td></tr>", "</table>",
+  ]],
+  ["under another one", "Second", [9, 14], [
+    "<details>", "<summary>First</summary>", "", "one", "", "</details>",
+    "<details>", "<summary>Second</summary>", "", "two", "", "</details>",
+  ]],
+] as const;
+
+for (const [name, summary, [from, to], body] of UNPAIRED_DETAILS) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`in an admonition, a details element ${name} opens only lines that hold all of it`, async () => {
+    const quoted = body.map((line) => (line ? `  > ${line}` : "  >"));
+    const source = text("::::{note}", "- Text", ...quoted, "- next", "::::");
+    const loaded = await load(source);
+    const title = leafReading(loaded.box(), summary);
+    // From the keyboard, which reaches a block inside a list item.
+    const opened = await loaded.open(title, true);
+    assert.ok(opened.range[0] <= from && opened.range[1] >= to, `${opened.range.join("-")}: ${source}`);
+  });
+}
+
+/**
+ * No click or Enter inside a box of `loaded` opens one line of the pair `tags` without the other;
+ * returns the opened ranges.
+ */
+async function assertKeepsTags(loaded: Awaited<ReturnType<typeof load>>, tags: Range, source: string): Promise<void> {
+  const all = (element: MappedElement): MappedElement[] => [element, ...element.children.flatMap(all)];
+  for (const element of all(loaded.box())) {
+    for (const exact of [false, true]) {
+      if (!element.closest(MAPPINGS_SELECTOR)) continue;
+      const { range: [line, endLine] } = await loaded.open(element, exact);
+      const [open, close] = tags.map((tag) => line <= tag && tag <= endLine);
+      assert.equal(open, close, `<${element.tagName}> opens ${line}-${endLine}: ${source}`);
+    }
+  }
+}
+
+/** A one-line block of a list item, above a closing HTML tag. */
+const BLOCKS_ABOVE_TAGS = [
+  ["a heading", "### Head"], ["a thematic break", "***"], ["a quote", "> Head"], ["a formula", "$$ y = 2 $$"],
+] as const;
+
+for (const [name, block] of BLOCKS_ABOVE_TAGS) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`in an admonition, ${name} of an item above a closing HTML tag leaves the tag`, async () => {
+    for (const tag of ["details", "div"]) {
+      for (const gap of [[""], []]) {
+        const source = text(
+          ":::{note}", "- Step", "", `  <${tag}>`, "  <summary>More</summary>", "", `  ${block}`, ...gap,
+          `  </${tag}>`, "", "- next", ":::",
+        );
+        const closing = 9 + gap.length;
+        const loaded = await load(source);
+        await assertKeepsTags(loaded, [4, closing], source);
+        const own = loaded.page.document.querySelectorAll("h3, hr, blockquote, .math-display")[0]!;
+        const { range } = await loaded.open(own, true);
+        assert.deepEqual(range, [7, 7 + gap.length], source);
+      }
+    }
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+test("in an admonition, text right under a closing HTML tag does not open with that tag", async () => {
+  for (const source of [
+    text(":::{note}", "<div>", "", "Inside.", "", "</div>", "Under.", ":::"),
+    text(":::{note}", "- Step", "", "  <div>", "", "  Inside.", "", "  </div>", "  ***", "", "- next", ":::"),
+  ]) {
+    const lines = source.split("\n");
+    const tags: Range = [
+      lines.findIndex((line) => line.includes("<div>")) + 1, lines.findIndex((line) => line.includes("</div>")) + 1,
+    ];
+    await assertKeepsTags(await load(source), tags, source);
+  }
+});
+
+/** Elements whose tag lines the preview does not pair as the source writes them. */
+const MISPAIRED_TAGS: ReadonlyArray<readonly [string, readonly Range[], readonly string[]]> = [
+  ["a closing tag written right above a table", [[2, 7], [8, 10]], [
+    "<details>", "<summary>More</summary>", "", "word", "", "</details>",
+    "<table>", "<tr><td>cell</td></tr>", "</table>",
+  ]],
+  ["a details element inside another one", [[4, 13], [7, 9]], [
+    "Before.", "", "<details>", "<summary>More</summary>", "", "<details><summary>Inner</summary>", "Words",
+    "</details>", "$$", "y = 2", "$$", "</details>",
+  ]],
+  ["an element of a list item closed after a picture that ends the list", [[5, 15]], [
+    "Before.", "", "- Step", "  <details>", "  <summary>More</summary>", "", "  Words", "  and more", "",
+    "  <svg viewBox=\"0 0 1 1\">", "  <title>Mark</title>", "  </svg>", "", "  </details>", "- next",
+  ]],
+];
+
+for (const [name, pairs, body] of MISPAIRED_TAGS) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`in an admonition, with ${name}, nothing opens one tag line without the other`, async () => {
+    const source = text(":::{note}", ...body, ":::");
+    const loaded = await load(source);
+    for (const tags of pairs) await assertKeepsTags(loaded, [...tags], source);
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+test("directly in a box body, a formula in a table row opens the table", async () => {
+  const source = text(":::{note}", "| a | b |", "| --- | --- |", "| 1 | 2 |", "$$ y = 2 $$ more", ":::");
+  const loaded = await load(source);
+  const formula = loaded.page.document.querySelectorAll(".math-display")[0]!;
+  for (const exact of [false, true]) {
+    assert.deepEqual((await loaded.open(formula, exact)).range, [2, 5], source);
+  }
+});
+
+/** Formulas directly in a box body that the parser gives no lines of their own. */
+const BODY_FORMULAS = [
+  ["under text", [3, 5], ["Before.", "$$", "y = 2", "$$"]],
+  ["under text, written on one line", [3, 3], ["Before.", "$$ y = 2 $$"]],
+  ["under two lines of text", [4, 6], ["Before.", "More.", "$$", "y = 2", "$$"]],
+  ["after a block break", [3, 5], ["+++", "$$", "y = 2", "$$"]],
+  ["on two lines under a field list", [3, 4], [":name: value", "$$ y", "= 2 $$"]],
+] as const;
+
+/** The opening lines of a note, an alert and a callout, around `body`. */
+const AROUND_BODY = [
+  (body: readonly string[]) => [":::{note}", ...body, ":::"],
+  (body: readonly string[]) => ["> [!NOTE]", ...body.map((line) => (line ? `> ${line}` : ">"))],
+  (body: readonly string[]) => [":::{div}", ":class: callout-tip", "", ...body, ":::"],
+];
+
+for (const [name, [from, to], body] of BODY_FORMULAS) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+  test(`directly in a box body, a formula ${name} opens only lines that hold all of it`, async () => {
+    for (const [index, around] of AROUND_BODY.entries()) {
+      const source = text(...around(body), "", "After.");
+      const shift = index === 2 ? 2 : 0;
+      const formula: Range = [from + shift, to + shift];
+      const loaded = await load(source);
+      const rendered = loaded.page.document.querySelectorAll(".math-display");
+      assert.equal(rendered.length, 1, source);
+      for (const exact of [false, true]) {
+        const { range } = await loaded.open(rendered[0]!, exact);
+        assert.ok(range[0] <= formula[0] && range[1] >= formula[1], `${range.join("-")}: ${source}`);
+      }
+    }
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S3
+test("directly in a box body, an unpaired details element opens only lines that hold all of it", async () => {
+  const body = [
+    "<details>", "<summary>Table</summary>", "", "word", "", "</details>",
+    "<table>", "<tr><td>cell</td></tr>", "</table>",
+  ];
+  for (const [index, around] of AROUND_BODY.entries()) {
+    const source = text(...around(body), "", "After.");
+    const shift = index === 2 ? 4 : 2;
+    const loaded = await load(source);
+    const summary = leafReading(loaded.page.document.querySelectorAll("details")[0]!, "Table");
+    const { range } = await loaded.open(summary, true);
+    assert.ok(range[0] <= shift && range[1] >= shift + 5, `${range.join("-")}: ${source}`);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+test("a callout opens from its opening fence to its closing fence", async () => {
+  for (const opening of [[":::{div}", ":class: callout-tip", ""], ["::: {.callout-tip}"]]) {
+    const source = text(...opening, "Before.", "", "Last.", ":::", "", "After.");
+    const loaded = await load(source);
+    const whole: Range = [1, opening.length + 4];
+    assert.deepEqual((await loaded.open(loaded.box(), false)).range, whole, source);
+    assert.deepEqual(loaded.rangeOf(loaded.box()), whole, source);
+    const paragraph = loaded.page.elementWithText("Last.");
+    const line = opening.length + 3;
+    assert.deepEqual((await loaded.open(paragraph, true)).range, [line, line], source);
+  }
+});
+
 const HIDDEN_BODY = "A --- line cannot start an admonition or an alert: its content would not show.";
 const TAKEN_AS_TITLE = "A heading cannot start this admonition: it would become its title.";
 
@@ -627,6 +948,34 @@ const REFUSED_FIRST_BLOCKS = [
   ["a bare {admonition}, a heading", text(":::{admonition}", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
   ["a callout with a title, a heading", text("::: {.callout-tip title=\"T\"}", "Before.", "", "# Head", ":::"),
     TAKEN_AS_TITLE],
+  ["a {div} with a :class: option, ---",
+    text(":::{div}", ":class: callout-tip", "", "Before.", "", "---", ":::"), HIDDEN_BODY],
+  ["a {div} with a second :class: option, a heading",
+    text(":::{div}", ":name: n", ":class: x callout-tip", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a {div} with a block of options, a heading",
+    text(":::{div}", "---", "name: n", "class: \"x callout-tip\"", "---", "Before.", "", "# Head", ":::"),
+    TAKEN_AS_TITLE],
+  ["a {div} with a folded class in a block of options, a heading",
+    text(":::{div}", "---", "class: >", "  callout-tip", "---", "", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a quoted {div} with a :class: option, ---",
+    text("> :::{div}", "> :class: callout-tip", ">", "> Before.", ">", "> ---", "> :::"), HIDDEN_BODY],
+  ["a {div} with a class= attribute, a heading",
+    text(":::{div class=\"x callout-tip\"}", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["an attribute-only opening with a :class: option, ---",
+    text(":::{#a}", ":class: callout-tip", "", "Before.", "", "---", ":::"), HIDDEN_BODY],
+  ["a { note } written with spaces, a heading", text(":::{ note }", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a {note .x} with a class, ---", text(":::{note .x}", "Before.", "", "---", ":::"), HIDDEN_BODY],
+  ["a bare { admonition }, a heading", text(":::{ admonition }", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a {VersionAdded} in capitals, ---", text(":::{VersionAdded} 1.0", "", "Before.", "", "---", ":::"), HIDDEN_BODY],
+  ["a {div} whose block of options lists its class, a heading",
+    text(":::{div}", "---", "class: [callout-tip]", "---", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a {div} whose block of options lists its class on a line, a heading",
+    text(":::{div}", "---", "class:", "  - callout-tip", "---", "", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a {div} whose class is written with a YAML escape, a heading",
+    text(":::{div}", "---", "class: \"call\\x6Fut-tip\"", "---", "Before.", "", "# Head", ":::"), TAKEN_AS_TITLE],
+  ["a {div} whose class comes from a YAML alias, a heading",
+    text(":::{div}", "---", "name: &c callout-tip", "class: *c", "---", "Before.", "", "# Head", ":::"),
+    TAKEN_AS_TITLE],
 ] as const;
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S7
@@ -641,6 +990,15 @@ for (const [name, source, reason] of REFUSED_FIRST_BLOCKS) {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S7
+test("the chord is also refused in a {div} whose options name a callout class that it does not get", async () => {
+  const source = text(":::{div}", ":name: callout-ref", "", "Before.", "", "# Head", ":::");
+  const loaded = await load(source);
+  const first = loaded.page.elementWithText("Before.");
+  assert.deepEqual(await loaded.sendChord(first, "down"),
+    { answers: [[false, TAKEN_AS_TITLE]], document: source });
+});
+
 /** Moves that give a rule or a heading a first place that renders it: the lines of the two blocks. */
 const ACCEPTED_FIRST_BLOCKS = [
   ["*** in a note", text(":::{note}", "Before.", "", "***", ":::"), 2, 4],
@@ -653,6 +1011,10 @@ const ACCEPTED_FIRST_BLOCKS = [
   ["--- under a link definition",
     text(":::{note}", "[a]: http://example.com", "", "Before.", "", "---", ":::"), 4, 6],
   ["--- at the top level, under a closed note", text(":::{note}", "In.", ":::", "", "Before.", "", "---"), 5, 7],
+  ["a heading in a {div} that is no callout",
+    text(":::{div}", ":class: wide", "", "Before.", "", "# Head", ":::"), 4, 6],
+  ["a heading in a {div} whose argument names a callout",
+    text(":::{div} callout-tip", "Before.", "", "# Head", ":::"), 2, 4],
 ] as const;
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-124#S7

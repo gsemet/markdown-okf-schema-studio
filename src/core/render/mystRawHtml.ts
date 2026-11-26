@@ -226,13 +226,14 @@ function finishBlockLevel(kids: MystNode[]): MystNode[] {
       const paragraph: MystNode = {
         type: "paragraph",
         ...(first === undefined ? {} : { position: { start: { line: first }, end: { line: last ?? first } } }),
+        data: { htmlWrap: true },
         children: run,
       };
       const only = run.length === 1 && run[0].type === "rawHtmlElement" ? run[0] : undefined;
       const tag = only ? tagOf(only) : "";
       if (only && !UNTITLED_TAGS.has(tag) && first !== undefined) {
         const open = only.data?.openTag as string | undefined;
-        paragraph.data = { hProperties: blockProperties(paragraph, open, first) };
+        paragraph.data = { htmlWrap: true, hProperties: blockProperties(paragraph, open, first) };
       }
       output.push(paragraph);
     }

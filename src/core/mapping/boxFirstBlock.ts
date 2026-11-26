@@ -5,6 +5,8 @@
  * the block move can refuse before it writes.
  */
 
+import { parse } from "yaml";
+
 import { ADMONITION_TITLES } from "../directives/admonition";
 import { VERSION_ADMONITION_TYPES } from "../palette/paletteActions";
 import { isAlertMarkerLine } from "../render/mystGithubAlerts";
@@ -13,9 +15,13 @@ import type { BlockLines } from "./blockMove";
 const HIDDEN_BODY = "A --- line cannot start an admonition or an alert: its content would not show.";
 const TAKEN_AS_TITLE = "A heading cannot start this admonition: it would become its title.";
 
-/** The opening line of a directive: its quote and list markers, its name or classes, its argument. */
+/** The opening line of a directive: its quote and list markers, what its braces hold, its argument. */
 const OPENING = /^((?:[ \t>]|(?:[-*+]|\d{1,9}[.)])[ \t])*)(?::{3,}|`{3,}|~{3,})[ \t]*\{([^}]*)\}(.*)$/u;
-const OPTION = /^:[\w-]+:/u;
+/** The name in the braces: the first word that is no class, id or attribute. Without one, a div. */
+const DIRECTIVE_NAME = /^\s*(?![.#]|[\w-]+=)(\S+)/u;
+/** A `callout-` class written in the braces, as `.callout-…` or in a `class=` attribute. */
+const CALLOUT_CLASS = /(?:^|\s)(?:\.|class=(?:"[^"]*?|'[^']*?)?)callout-/u;
+const OPTION = /^:([^:\s]+?):(.*)$/u;
 const DASHES = /^---+[ \t]*$/u;
 const LINK_DEFINITION = /^\[[^\]]+\]:[ \t]*\S/u;
 const ATX_HEADING = /^#{1,6}(?:[ \t]|$)/u;
@@ -33,13 +39,48 @@ interface Box {
   takesTitle: boolean;
 }
 
-function directiveBox(line: string): Box | undefined {
-  const opening = OPENING.exec(line);
+/** The `class` that a `---` block of options gives, read as the renderer reads it, as a text. */
+function yamlClass(block: string): string {
+  try {
+    const options = parse(block, { merge: true, logLevel: "silent" }) as { class?: unknown } | null;
+    return String(options?.class ?? "");
+  } catch {
+    return ""; // Not YAML: the renderer reads the block as the body.
+  }
+}
+
+/**
+ * True when the options of a directive, at the start of its `body`, name `callout-` anywhere: in
+ * the colon lines, or in a `---` block of options (to its end when it is not closed), whatever the
+ * YAML spelling of the class. Wider than the classes the options give, so that no spelling of a
+ * callout escapes.
+ */
+function optionsNameCallout(body: readonly string[]): boolean {
+  if (body[0]?.trimEnd() === "---") {
+    const end = body.findIndex((line, index) => index > 0 && line.trimEnd() === "---");
+    const block = body.slice(1, end === -1 ? body.length : end).join("\n");
+    return block.includes("callout-") || yamlClass(block).includes("callout-");
+  }
+  for (const line of body) {
+    if (!OPTION.test(line)) return false;
+    if (line.includes("callout-")) return true;
+  }
+  return false;
+}
+
+/** The box that the directive opened on line `index` (zero-based) of `texts` builds, if any. */
+function directiveBox(texts: readonly string[], index: number): Box | undefined {
+  const opening = OPENING.exec(texts[index]!);
   if (!opening) return undefined;
-  const [, markers, name, argument] = opening as unknown as [string, string, string, string];
-  const callout = /(?:^|\s)\.callout-/u.test(name);
+  const [, markers, braces, argument] = opening as unknown as [string, string, string, string];
+  const name = DIRECTIVE_NAME.exec(braces)?.[1] ?? "div";
+  // The body lines without what the opening line stands after; their further indentation stays.
+  const body = (): string[] => texts.slice(index + 1)
+    .map((line) => line.slice(Math.min(markers.length, /^[ \t>]*/u.exec(line)![0].length)));
+  const callout = CALLOUT_CLASS.test(braces) || (name === "div" && optionsNameCallout(body()));
   const admonition = name === "admonition" || Object.hasOwn(ADMONITION_TITLES, name);
-  if (!callout && !admonition && name !== "dropdown" && !VERSION_ADMONITION_TYPES.includes(name)) return undefined;
+  const version = VERSION_ADMONITION_TYPES.includes(name.toLowerCase());
+  if (!callout && !admonition && !version && name !== "dropdown") return undefined;
   return {
     container: new RegExp(`^[ \\t]*(?:>[ \\t]*){${markers.split(">").length - 1}}`, "u"),
     column: markers.length,
@@ -71,7 +112,7 @@ function boxStartingAt(texts: readonly string[], line: number, linksToo: boolean
       return { container: /^[ \t]*>[ \t]?/u, column: text.indexOf(">") + 2, takesTitle: false };
     }
     quoted &&= /^[ \t]*>[ \t]*$/u.test(text);
-    const box = directiveBox(text);
+    const box = directiveBox(texts, above);
     if (!box) continue;
     const between = texts.slice(above + 1, line - 1).map((body) => body.replace(box.container, ""));
     return isPreamble(between, linksToo) ? box : undefined;

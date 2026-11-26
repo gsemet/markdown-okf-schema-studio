@@ -52,7 +52,10 @@ environments),
   opening line is no block of its own there: the body of `:::{warning} Text`, or a card title,
   edits its whole directive, and a `{table}` caption the admonition around it. A `{table}`
   directive is the exception: its table is edited on its own rows, without the directive lines, and
-  it does not move (see below).
+  it does not move (see below). Where a block of the body cannot be edited on its own lines (a
+  formula written under text with no blank line, or a block that would take only one of the two
+  tags of an HTML element), the block or the admonition around it is edited. The same holds for the
+  whole body of a directive whose `---` block of options is followed by another `---` line.
   From the keyboard, select the list, press Right to go to its items and
   Right again to go to the blocks of an item, Left to go back up, and Enter to edit the selected
   list, item or block.
@@ -145,7 +148,7 @@ environments),
   a caption; a block next to that table does not move past it either. A move that would put a
   `---` line first in the body, or a heading first in an admonition without a title or in a
   callout, is refused with a reason: the content would not show, or the heading would become the
-  title. Erasing a paragraph or an item of an alert keeps the alert, with an empty `>` line in its
+  title (a `{div}` whose options mention a `callout-` class is refused the same way). Erasing a paragraph or an item of an alert keeps the alert, with an empty `>` line in its
   place. If the erased block holds a lazy continuation line (a line without the `>`), an empty
   line is written instead, and the quoted lines after it are no longer part of the alert.
 
