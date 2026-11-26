@@ -31,9 +31,25 @@ function mapped(harness: RuntimeHarness, line: number, endLine: number, top: num
   return element;
 }
 
+/** The two admonitions of the preview: a MyST directive and a rewritten GitHub alert. */
+const ADMONITION_KINDS = [
+  ["a MyST admonition", {}],
+  ["a GitHub alert", { "data-okf-github-alert": "true" }],
+] as const;
+
+/** The rendered element of an admonition: an `aside` of class `admonition`. */
+function mappedAdmonition(
+  harness: RuntimeHarness, line: number, endLine: number, extra: Readonly<Record<string, string>> = {},
+): RuntimeElement {
+  const admonition = mapped(harness, line, endLine, line * 10, "aside");
+  admonition.setAttribute("class", "admonition note");
+  Object.entries(extra).forEach(([name, value]) => admonition.setAttribute(name, value));
+  return admonition;
+}
+
 // The default page has blocks at lines 1, 50 and 100. This one adds a 2 x 3 table at line 60 and
 // an admonition at line 70 that holds two paragraphs (lines 71 and 73).
-function page(): Page {
+function page(kind: Readonly<Record<string, string>> = {}): Page {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const table = mapped(harness, 60, 63, 600, "table");
   const rows = [0, 1].map((rowIndex) => {
@@ -50,7 +66,7 @@ function page(): Page {
   }));
   rows.forEach((row, index) => { row.cells = cells[index]; });
   table.rows = rows;
-  const admonition = mapped(harness, 70, 75, 700);
+  const admonition = mappedAdmonition(harness, 70, 75, kind);
   const inner = [mapped(harness, 71, 71, 710, "p"), mapped(harness, 73, 73, 730, "p")];
   inner.forEach((element) => admonition.appendChild(element));
   return { harness, table, cells, admonition, inner };
@@ -201,15 +217,115 @@ test("CR 157: Up and Down walk the inner blocks of a container and stop at its e
   assert.deepEqual(selectedLines(harness), [73], "Down at the last inner block stays inside");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S5
 test("CR 157: Enter on an inner block opens that block's editor", () => {
-  const { harness } = page();
+  for (const [kind, attributes] of ADMONITION_KINDS) {
+    const { harness } = page(attributes);
+    selectBlock(harness, 70);
+    press(harness, "ArrowRight");
+    const before = harness.messages.length;
+    press(harness, "Enter");
+    assert.deepEqual(opened(harness, before), [[71, 71]], kind);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S5
+test("Enter on an admonition selected as a whole opens the whole admonition, also after coming back to it", () => {
+  for (const [kind, attributes] of ADMONITION_KINDS) {
+    const { harness } = page(attributes);
+    selectBlock(harness, 70);
+    press(harness, "ArrowRight");
+    press(harness, "ArrowLeft");
+    const before = harness.messages.length;
+    press(harness, "Enter");
+    assert.deepEqual(opened(harness, before), [[70, 75]], kind);
+  }
+});
+
+// An admonition at lines 70 to 80: a paragraph (71) and a list (73 to 78) of three items, the
+// second (74 to 77) with a nested sub-list (75 to 77) of two items.
+function admonitionListPage(kind: Readonly<Record<string, string>> = {}) {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const admonition = mappedAdmonition(harness, 70, 80, kind);
+  const block = (parent: RuntimeElement, line: number, endLine: number, tag: string): RuntimeElement => {
+    const element = mapped(harness, line, endLine, line * 10, tag);
+    element.siblingsFromParent = true;
+    parent.appendChild(element);
+    return element;
+  };
+  const paragraph = block(admonition, 71, 71, "p");
+  const list = block(admonition, 73, 78, "ul");
+  const first = block(list, 73, 73, "li");
+  const second = block(list, 74, 77, "li");
+  const last = block(list, 78, 78, "li");
+  block(first, 73, 73, "p");
+  block(second, 74, 74, "p");
+  const sublist = block(second, 75, 77, "ul");
+  const nested = [block(sublist, 75, 75, "li"), block(sublist, 76, 77, "li")];
+  return { harness, admonition, paragraph, list, first, second, last, nested };
+}
+
+/** Selects the admonition of `admonitionListPage` and presses `keys` one after the other. */
+function walkFromAdmonition(harness: RuntimeHarness, keys: readonly string[]): void {
   selectBlock(harness, 70);
-  press(harness, "ArrowRight");
-  const before = harness.messages.length;
-  press(harness, "Enter");
-  const opened = harness.messages.slice(before).filter((message) => message.type === "previewEditOpen");
-  assert.equal(opened.length, 1);
-  assert.equal(opened[0].line, 71);
+  keys.forEach((name) => press(harness, `Arrow${name}`));
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S5
+test("Right, Down, Right walk into a list item of an admonition and Enter opens that item only", () => {
+  for (const [kind, attributes] of ADMONITION_KINDS) {
+    const { harness, first } = admonitionListPage(attributes);
+    walkFromAdmonition(harness, ["Right", "Down", "Right"]);
+    assert.equal(first.getAttribute(SELECTED), "true", kind);
+    const before = harness.messages.length;
+    press(harness, "Enter");
+    assert.deepEqual(opened(harness, before), [[73, 73]], kind);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S5
+test("the arrows walk on into a nested sub-list of an admonition and Enter opens that sub-item only", () => {
+  for (const [kind, attributes] of ADMONITION_KINDS) {
+    const { harness, nested } = admonitionListPage(attributes);
+    // To the second item, into it (its paragraph), down to the sub-list and into it.
+    walkFromAdmonition(harness, ["Right", "Down", "Right", "Down", "Right", "Down", "Right"]);
+    assert.equal(nested[0].getAttribute(SELECTED), "true", kind);
+    const before = harness.messages.length;
+    press(harness, "Enter");
+    assert.deepEqual(opened(harness, before), [[75, 75]], kind);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S6
+test("Down at the end of the last item and Up at the start of the first, of a list in an admonition, keep the editor", () => {
+  const edges: ReadonlyArray<[string, "ArrowUp" | "ArrowDown", string[]]> = [
+    ["the first item", "ArrowUp", ["Right", "Down", "Right"]],
+    ["the last item", "ArrowDown", ["Right", "Down", "Right", "Down", "Down"]],
+    ["the last item of the nested sub-list", "ArrowDown", ["Right", "Down", "Right", "Down", "Right", "Down", "Right", "Down"]],
+    ["a block of the first item", "ArrowUp", ["Right", "Down", "Right", "Right"]],
+  ];
+  for (const [kind, attributes] of ADMONITION_KINDS) {
+    for (const [name, arrow, keys] of edges) {
+      const { harness } = admonitionListPage(attributes);
+      walkFromAdmonition(harness, keys);
+      assert.deepEqual(arrowAtEdge(harness, arrow), { prevented: false, opened: [] }, `${name} of ${kind}`);
+      assert.deepEqual(harness.messages.filter((message) => message.type === "previewEditSave"), [], `${name} of ${kind}`);
+      assert.equal(harness.createdElements.filter((element) => element.tagName === "TEXTAREA" && !element.removed).length, 1,
+        `the editor of ${name} of ${kind} stays open`);
+    }
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079#S6
+test("Down and Up between the items of a list in an admonition still open the next or previous item", () => {
+  for (const [kind, attributes] of ADMONITION_KINDS) {
+    const down = admonitionListPage(attributes);
+    walkFromAdmonition(down.harness, ["Right", "Down", "Right"]);
+    assert.deepEqual(arrowAtEdge(down.harness, "ArrowDown"), { prevented: true, opened: [[74, 77]] }, kind);
+    const up = admonitionListPage(attributes);
+    walkFromAdmonition(up.harness, ["Right", "Down", "Right", "Down", "Down"]);
+    assert.deepEqual(arrowAtEdge(up.harness, "ArrowUp"), { prevented: true, opened: [[74, 77]] }, kind);
+  }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254#S1

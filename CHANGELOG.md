@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- In edit mode, a click or Enter inside an admonition or a GitHub alert now edits the selected paragraph,
+  list item or directive only (a diagram, a formula or a code block opens whole); the title or the frame, and
+  Enter on the admonition selected as a whole, still open all of it. The move chord moves a block of its body
+  inside it, the arrows keep the caret at the edges of its lists, and erasing a block of an alert keeps the
+  alert (CR-514 enter-admonition)
 - A frontmatter field with a schema error now shows its name in red on a red-tinted background and a wavy red
   underline under its value; a field with a warning shows the same in the warning colour, and a whole-table
   warning row (such as "Schema could not be parsed") now shows in the warning colour too (CR-513 field-error, PR #535)

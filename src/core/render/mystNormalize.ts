@@ -374,7 +374,7 @@ const NODE_RULES: readonly NodeRule[] = [
         class: [...classes].join(" "),
         ...(isDropdown && node.open ? { open: true } : {}),
         // @implements_req SwRS-MDOKFSTUDIO-GFM-009
-        // A rewritten GitHub alert: a click in its body opens the whole alert (see mappedBlocks).
+        // A rewritten GitHub alert: its title or frame opens the whole alert (see mappedBlocks).
         ...(node.data?.githubAlert === true ? { "data-okf-github-alert": "true" } : {}),
         ...sourcePositionProperties(node, line),
       });

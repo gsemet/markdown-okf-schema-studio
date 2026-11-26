@@ -285,9 +285,11 @@ export class RuntimeElement {
         || (selector === "[data-okf-row-handle]" && current.getAttribute("data-okf-row-handle") !== null)
         || (selector === "[data-okf-col-handle]" && current.getAttribute("data-okf-col-handle") !== null)
         || (selector === "[data-okf-list-item-handle]" && current.getAttribute("data-okf-list-item-handle") !== null)
-        // The containers whose box the handles of a list inside them stay out of (features/listItemMove.ts).
-        || (selector === "[data-okf-github-alert], aside.admonition, details.admonition, blockquote"
-          && (current.getAttribute("data-okf-github-alert") !== null || current.tagName === "BLOCKQUOTE"
+        // The alerts and admonitions (features/mappedBlocks.ts); with `blockquote`, the containers
+        // whose box the handles of a list inside them stay out of (features/listItemMove.ts).
+        || (selector.startsWith("[data-okf-github-alert], aside.admonition, details.admonition")
+          && (current.getAttribute("data-okf-github-alert") !== null
+            || (selector.endsWith(", blockquote") && current.tagName === "BLOCKQUOTE")
             || (["ASIDE", "DETAILS"].includes(current.tagName)
               && (current.getAttribute("class") ?? current.className).split(" ").includes("admonition"))))
         || (selector === "ul, ol" && ["UL", "OL"].includes(current.tagName))

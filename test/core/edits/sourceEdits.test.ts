@@ -8,6 +8,7 @@ import {
   LABEL_GONE,
   MOVE_INCLUDED,
   PASTE_NEXT_TO_INCLUDED,
+  planAlertPlaceholder,
   planBlockMoveEdit,
   planBlocksCopyCut,
   planBlocksDelete,
@@ -30,6 +31,60 @@ function applied(text: string, plan: { edit: TextEdit } | { refused: string } | 
 }
 
 const THREAD = ["<!-- THREAD", "Ada (2026-10-16 10:47):", "  hello", "-->"];
+
+// The placeholder of the emptied block on lines `from` to `to` (1-based) of `lines`.
+function placeholderOf(lines: readonly string[], from: number, to: number, eol: string): string | undefined {
+  const text = lines.map((line) => line + eol).join("");
+  const originalText = lines.slice(from - 1, to).map((line) => line + eol).join("");
+  const offset = lines.slice(0, from - 1).reduce((sum, line) => sum + line.length + eol.length, 0);
+  return planAlertPlaceholder(text, offset, originalText, originalText);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S5
+test("an emptied block of a GitHub alert body leaves the alert's prefix alone", () => {
+  const alert = ["# T", "", "> [!NOTE]", "> First.", ">", "> Second,", "> wrapped.", ">", "> - a", "> - b"];
+  const indented = ["- item", "", "   > [!TIP]", "   > First.", "   >", "   > Second."];
+  for (const eol of ["\n", "\r\n", "\r"]) {
+    assert.equal(placeholderOf(alert, 4, 4, eol), `>${eol}`, "a paragraph");
+    assert.equal(placeholderOf(alert, 6, 7, eol), `>${eol}`, "a paragraph of two lines");
+    assert.equal(placeholderOf(alert, 9, 9, eol), `>${eol}`, "a list item");
+    assert.equal(placeholderOf(indented, 6, 6, eol), `   >${eol}`, "an alert indented in a list item");
+  }
+  const autosaved = "> [!NOTE]\n> Fir\n>\n> Second.\n";
+  assert.equal(planAlertPlaceholder(autosaved, 10, "> Fir\n", "> First.\n"), ">\n",
+    "after an autosave wrote another text");
+  assert.equal(planAlertPlaceholder("> [!NOTE]\r\n> Last.", 11, "> Last.", "> Last."), ">\r\n",
+    "a block with no line break of its own takes the document's");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-264#S4
+test("an emptied block outside an alert body keeps the empty placeholder line", () => {
+  assert.equal(placeholderOf(["Text.", "", "> A quote.", ">", "> Second."], 3, 3, "\n"), undefined, "a plain quote");
+  assert.equal(placeholderOf([":::{note}", "First.", "", "Second.", ":::"], 2, 2, "\n"), undefined, "a MyST body");
+  assert.equal(placeholderOf(["# T", "", "Text."], 3, 3, "\n"), undefined, "a top-level block");
+  assert.equal(placeholderOf(["> [!NOTE]", "> A.", "", "Text."], 4, 4, "\n"), undefined, "a block below an alert");
+  assert.equal(placeholderOf(["> [!NOTE]", "> A,", "lazy."], 2, 3, "\n"), undefined, "a block with a lazy line");
+  assert.equal(planAlertPlaceholder("> [!NOTE]\n> A.\n", 12, "A.\n", "A.\n"), undefined, "inside a line");
+  assert.equal(planAlertPlaceholder("> [!NOTE]\n", 40, "> A.\n", "> A.\n"), undefined, "past the end");
+  assert.equal(planAlertPlaceholder("> [!NOTE]\n", 10, "", ""), undefined, "an insertion");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117#S7
+test("a move inside an alert leaves out the quote's empty lines a mapped range ends on", () => {
+  const text = "> [!NOTE]\n>\n> - a\n> - b\n>\n> Last.\n>\n";
+  const moved = "> [!NOTE]\n>\n> Last.\n>\n> - a\n> - b\n>\n";
+  const down = planBlockMoveEdit(text, { line: 3, endLine: 5, neighbourLine: 6, neighbourEndLine: 7, direction: "down" });
+  assert.equal(applied(text, down), moved);
+  assert.equal("line" in down && down.line, 5);
+  const up = planBlockMoveEdit(text, { line: 6, endLine: 7, neighbourLine: 3, neighbourEndLine: 5, direction: "up" });
+  assert.equal(applied(text, up), moved);
+  assert.equal("line" in up && up.line, 3);
+  const include = "> [!NOTE]\n>\n> ```{include} other.md\n> ```\n>\n> Last.\n";
+  assert.deepEqual(
+    planBlockMoveEdit(include, { line: 6, endLine: 6, neighbourLine: 3, neighbourEndLine: 4, direction: "up" }),
+    { refused: MOVE_INCLUDED },
+  );
+});
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-021#S1
 // @tests_req SwRS-MDOKFSTUDIO-GFM-021#S5

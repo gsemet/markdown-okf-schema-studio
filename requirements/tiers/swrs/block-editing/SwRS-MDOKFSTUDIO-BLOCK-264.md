@@ -27,15 +27,19 @@ scenarios:
   title: One edit before an autosave, two after
 - id: S4
   title: Cases that keep the placeholder line
+- id: S5
+  title: An emptied block of an alert body keeps the alert
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/edits/sourceEdits.ts
+- src/core/render/mystGithubAlerts.ts
 - src/page/features/blockEditor.ts
 - src/session/features/blockEdits.ts
 tested_in_files:
 - test/core/edits/blocksDelete.test.ts
+- test/core/edits/sourceEdits.test.ts
 - test/integration/emptyBlocks.test.ts
 - test/page/runtimeBlockDelete.test.ts
 - test/session/emptiedBlockDelete.test.ts
@@ -70,11 +74,18 @@ When the writer erases the whole text of the editor of a top-level body block or
 
 - GIVEN a block inside a list item, an alert, a quote, an admonition or another container, an item left as `- `, an autosave of an empty text, Escape or Cancel, or held lines that no longer match the block
 - WHEN the writer commits it
-- THEN no deletion happens: the placeholder line is written, or the original text is written back
+- THEN no deletion happens: the placeholder line is written, or the original text is written back. The placeholder line is an empty line, except for a block of a GitHub alert body, whose placeholder is the alert's prefix alone; a block of an alert body that has a lazy continuation line (a line without the `>` prefix) also writes an empty line
+
+### Scenario S5 (boundary): An emptied block of an alert body keeps the alert
+
+- GIVEN a GitHub alert whose body holds two paragraphs (also a list, also an alert indented in a list item), and the editor of one paragraph or one item opened alone and erased
+- WHEN the writer commits it (Done, Ctrl or Cmd+Enter, a blur that commits), or an autosave writes the empty text
+- THEN its lines are replaced by one line holding only the alert's prefix without its trailing space (`>`, or the indentation then `>`), with the document's line ending, and the alert renders whole, with the same type and no plain quote after it
 
 ### Verification notes
 
 - Method: test/core/edits/sourceEdits.test.ts (`planEmptiedBlockRemoval`: middle, first and last block, tight and loose list item, range ending on a blank line, CR LF and lone CR).
+- Method: test/core/edits/sourceEdits.test.ts (`an emptied block of a GitHub alert body leaves the alert's prefix alone`: scenario 5, and `an emptied block outside an alert body keeps the empty placeholder line`: scenario 4) and test/session/emptiedBlockDelete.test.ts, in LF, CR LF and lone CR (`an erased paragraph of an alert body leaves the alert's prefix, so the alert stays whole`, `an autosave of the empty text writes the alert's prefix once`, `an erased item of an alert indented in a list item leaves the indented prefix`: scenario 5; `an erased paragraph of a MyST admonition still writes an empty line`: scenario 4; the lazy continuation line is the `a block with a lazy line` assertion of the first of these tests).
 - Method: test/session/ (the final save with `deleteWhenEmpty`, before and after an autosave, and without the field).
 - Method: test/page/runtimeBlockEditor.test.ts (the final save carries `deleteWhenEmpty` for a top-level block and a list item only, never on an autosave).
 - Method: test/integration (a real file in LF and CR LF, undo with and without an autosave).

@@ -48,6 +48,7 @@ tested_in_files:
 - test/core/render/cardsTabs.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/integration/mystBlocksWindow.ts
+- test/session/boxBlockSourceLines.test.ts
 - test/visual/cardsTabsScenarios.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
@@ -113,6 +114,7 @@ When a document holds an admonition directive, the extension SHALL render a pane
 - GIVEN `{versionadded} 2.1` with a body, `{versionchanged}` and `{deprecated}` with versions, and a body with emphasis
 - WHEN the preview renders
 - THEN each panel has the title and accent of the table, with the given version for X, and the Markdown body follows parsed (the emphasis is rendered)
+- AND each block of that body maps the source lines it is written on, after the blank lines and options before the body; a body whose lines cannot be found in the document (an included body, option lines the parser rewrites) maps no block
 
 | Directive | Title | Accent |
 | --- | --- | --- |
@@ -160,6 +162,7 @@ A GitHub alert (`> [!NOTE]`, `> **Note**`) is not an untitled admonition here: i
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (scenarios named kind and kind outside the list: "all named MyST admonitions receive their documented default title"; version admonitions: "Sphinx version admonitions render generated titles and Markdown bodies"; custom title and class: "custom admonition titles preserve inline Markdown and their class"; untitled: "a leading bold paragraph or heading supplies the MyST admonition title"; Quarto callouts: "Quarto callout classes render as semantic MyST admonitions"; simple and icon-less: "dropdown admonitions render as openable details with a summary", which checks the `simple` and `no-icon` classes)
+- Method: test/session/boxBlockSourceLines.test.ts (version admonitions: the lines the body blocks map, after blank lines and an option, and a body whose lines cannot be found).
 - Method: test/core/preview/previewStyles.test.ts (dropdown state: "dropdown admonitions show their open or closed state with a chevron"); test/visual/scenarioAssertions.ts (dropdown state: visual scenarios myst-gallery-full, assertion "the closed dropdown shows a state chevron at the right of its title")
 - Method: test/core/preview/previewStyles.test.ts (accent and badge: "every admonition flavour gets an accent colour"; simple and icon-less: "MyST simple and no-icon admonition modifiers are styled")
 - Method: test/visual/scenarioDefinitions1.ts (accent and badge: visual scenario admonitions-dark-full)

@@ -15,11 +15,15 @@ const OPTIONS = `${PICKER} [role='menuitem']`;
 const IN_VIEWPORT = `(() => { const list = document.querySelector("${PICKER}"); if (!list) return false; const box = list.getBoundingClientRect(); `
   + "return box.top >= 0 && box.left >= 0 && box.bottom <= window.innerHeight && box.right <= window.innerWidth; })()";
 
-// The click lands mid-way along the body line, so ArrowUp puts the caret at the end of the head line
-// (`> [!NOTE]` or `:::{note}`, nine characters) and one ArrowLeft puts it on the last letter of the type.
+// The click on the title opens the whole alert or directive. Control+Home then ArrowDown put the caret at
+// the start of its second line, wherever the click left it; one ArrowLeft goes back to the end of the head
+// line (`> [!NOTE]` or `:::{note}`) and the next one puts it on the last letter of the type. (End goes to
+// the end of the whole text in a block editor.)
 const OPEN_ON_TYPE = (target: string) => [
   { click: target, waitMs: 400 },
-  { press: "ArrowUp" },
+  { press: "Control+Home" },
+  { press: "ArrowDown" },
+  { press: "ArrowLeft" },
   { press: "ArrowLeft", waitMs: 400 },
 ];
 
@@ -59,7 +63,7 @@ export const ADMONITION_TYPE_PICKER_SCENARIOS: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "top" as const },
     editMode: true,
-    pageActions: OPEN_ON_TYPE(`${MAIN} aside.admonition.note > p:last-child`),
+    pageActions: OPEN_ON_TYPE(`${MAIN} aside.admonition.note > .admonition-title`),
     contentAssertions: assertions("> [!NOTE]", ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"]),
     description: `Edit mode, ${variant.name} theme, 900 px: with the caret on the type of the opened note alert, the five GFM types are listed with their icons at the caret.`,
   })),
@@ -71,7 +75,7 @@ export const ADMONITION_TYPE_PICKER_SCENARIOS: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "top" as const },
     editMode: true,
-    pageActions: OPEN_ON_TYPE(`${MAIN} aside.admonition.note > p:last-child`),
+    pageActions: OPEN_ON_TYPE(`${MAIN} aside.admonition.note > .admonition-title`),
     contentAssertions: assertions(":::{note}", undefined),
     description: `Edit mode, ${variant.name} theme, 900 px: with the caret on the type of the opened note directive, the admonition types are listed with their icons at the caret.`,
   })),

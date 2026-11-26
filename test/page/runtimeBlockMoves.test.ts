@@ -385,6 +385,230 @@ test("T37: with nothing to save the chord closes the editor and moves at once", 
   assert.deepEqual(sent, ["previewEditCancel", "previewBlockMove"]);
 });
 
+// The move chord inside an admonition or an alert. The default page has blocks at lines 1, 50 and
+// 100; an admonition from line 60 to 90 stands between the last two. Its body holds a paragraph
+// (61), a list (63 to 66, with a nested sub-list), a code block (68 to 70), a nested admonition
+// (72 to 76), a block quote holding a list (78 to 79), a card holding a list (81 to 82) and a
+// last paragraph (84).
+const ADMONITION_KINDS = ["a MyST admonition", "a GitHub alert"] as const;
+
+function admonitionMovePage(kind: (typeof ADMONITION_KINDS)[number]) {
+  const harness = createRuntimeHarness();
+  const element = (tag: string, parent: RuntimeElement | undefined,
+    attributes: Record<string, string> = {}): RuntimeElement => {
+    const created = new RuntimeElement(attributes, harness.windowState, 600, 20, tag);
+    parent?.appendChild(created);
+    return created;
+  };
+  const mapped = (tag: string, parent: RuntimeElement | undefined, line: number, endLine = line,
+    attributes: Record<string, string> = {}): RuntimeElement => {
+    const created = element(tag, parent, {
+      "data-sphinx-preview-document": "file:///active.md",
+      "data-sphinx-source-end-line": String(endLine),
+      "data-sphinx-source-file": "/workspace/active.md",
+      "data-sphinx-source-line": String(line),
+      ...attributes,
+    });
+    created.siblingsFromParent = true;
+    harness.mappings.push(created);
+    return created;
+  };
+  const alert: Record<string, string> = kind === "a GitHub alert" ? { "data-okf-github-alert": "true" } : {};
+  const admonition = mapped("aside", undefined, 60, 90, { class: "admonition note", ...alert });
+  element("p", admonition, { class: "admonition-title" });
+  const first = mapped("p", admonition, 61);
+  const list = mapped("ul", admonition, 63, 66);
+  const item = mapped("li", list, 63);
+  mapped("p", item, 63);
+  const parentItem = mapped("li", list, 64, 66);
+  mapped("p", parentItem, 64);
+  const subList = mapped("ul", parentItem, 65, 66);
+  mapped("li", subList, 65);
+  const nestedItem = mapped("li", subList, 66);
+  const code = mapped("code", element("pre", admonition), 68, 70);
+  const inner = mapped("aside", admonition, 72, 76, { class: "admonition tip" });
+  element("p", inner, { class: "admonition-title" });
+  const innerFirst = mapped("p", inner, 73);
+  mapped("p", inner, 75);
+  const quotedList = mapped("ul", mapped("blockquote", admonition, 78, 79), 78, 79);
+  const quotedItem = mapped("li", quotedList, 78);
+  mapped("li", quotedList, 79);
+  const cardList = mapped("ul", element("div", admonition, { class: "sd-card" }), 81, 82);
+  const cardItem = mapped("li", cardList, 81);
+  mapped("li", cardList, 82);
+  const last = mapped("p", admonition, 84);
+  harness.editModeButton.dispatch("click");
+
+  const editors = () => harness.createdElements.filter((created) => created.tagName === "TEXTAREA");
+  // Answers the last edit request, so its text box opens.
+  const answer = (originalText: string, identifiers: Record<string, unknown> = MOVE_IDENTIFIERS): RuntimeElement => {
+    const request = harness.messages.filter((message) => message.type === "previewEditOpen").at(-1);
+    harness.dispatchMessage({ type: "previewEditSource", ...identifiers, editId: request?.editId, originalText });
+    return editors().at(-1)!;
+  };
+  const open = (target: RuntimeElement): RuntimeElement => {
+    harness.dispatchDocument("click", { target, preventDefault: () => undefined });
+    return answer("Source of the block\n");
+  };
+  const chord = (textarea: RuntimeElement, key: "ArrowUp" | "ArrowDown"): boolean => {
+    let prevented = false;
+    textarea.dispatch("keydown", altKey(key, { ctrlKey: true, preventDefault: () => { prevented = true; } }));
+    return prevented;
+  };
+  // The lines of `block`, and of the blocks inside it, as the render after a move maps them.
+  const shift = (block: RuntimeElement, delta: number): void => {
+    for (const moved of harness.mappings.filter((candidate) => candidate === block || block.contains(candidate))) {
+      for (const name of ["data-sphinx-source-line", "data-sphinx-source-end-line"]) {
+        moved.setAttribute(name, String(Number(moved.getAttribute(name)) + delta));
+      }
+    }
+  };
+  return {
+    harness, admonition, first, list, item, parentItem, subList, nestedItem, code, inner, innerFirst,
+    quotedItem, cardItem, last, answer, open, chord, shift,
+  };
+}
+
+const movedLines = (message: Record<string, unknown>) =>
+  [message.line, message.endLine, message.neighbourLine, message.neighbourEndLine, message.direction];
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S8
+test("the chord in the editor of a block of an admonition moves it among the blocks of that admonition", () => {
+  type Page = ReturnType<typeof admonitionMovePage>;
+  const cases: ReadonlyArray<readonly [string, (page: Page) => RuntimeElement, "ArrowUp" | "ArrowDown", unknown[]]> = [
+    ["an item moves its list down", (page) => page.item, "ArrowDown", [63, 66, 68, 70, "down"]],
+    ["an item moves its list up", (page) => page.item, "ArrowUp", [63, 66, 61, 61, "up"]],
+    ["a nested item moves the outermost list", (page) => page.nestedItem, "ArrowDown", [63, 66, 68, 70, "down"]],
+    ["the list", (page) => page.list, "ArrowUp", [63, 66, 61, 61, "up"]],
+    ["a paragraph", (page) => page.first, "ArrowDown", [61, 61, 63, 66, "down"]],
+    ["a code block, up", (page) => page.code, "ArrowUp", [68, 70, 63, 66, "up"]],
+    ["a code block, past a nested admonition", (page) => page.code, "ArrowDown", [68, 70, 72, 76, "down"]],
+    ["a block of a nested admonition", (page) => page.innerFirst, "ArrowDown", [73, 73, 75, 75, "down"]],
+    ["a nested admonition, up", (page) => page.inner, "ArrowUp", [72, 76, 68, 70, "up"]],
+    ["a nested admonition, down", (page) => page.inner, "ArrowDown", [72, 76, 78, 79, "down"]],
+  ];
+  for (const kind of ADMONITION_KINDS) {
+    for (const [name, target, key, expected] of cases) {
+      const page = admonitionMovePage(kind);
+      const textarea = page.open(target(page));
+      const before = page.harness.messages.length;
+      assert.equal(page.chord(textarea, key), true, `${kind}, ${name}: the chord is consumed`);
+      assert.deepEqual(moveMessages(page.harness, before).map(movedLines), [expected], `${kind}, ${name}`);
+    }
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S8
+test("the chord stops at the edge of an admonition body and leaves a block that is not a direct one", () => {
+  type Page = ReturnType<typeof admonitionMovePage>;
+  const cases: ReadonlyArray<readonly [string, (page: Page) => RuntimeElement, "ArrowUp" | "ArrowDown"]> = [
+    ["the first block, up", (page) => page.first, "ArrowUp"],
+    ["the last block, down", (page) => page.last, "ArrowDown"],
+    ["the first block of a nested admonition, up", (page) => page.innerFirst, "ArrowUp"],
+    ["a list inside a list item", (page) => page.subList, "ArrowDown"],
+    ["an item of a list inside a block quote", (page) => page.quotedItem, "ArrowDown"],
+    ["an item of a list inside a card", (page) => page.cardItem, "ArrowUp"],
+  ];
+  for (const kind of ADMONITION_KINDS) {
+    for (const [name, target, key] of cases) {
+      const page = admonitionMovePage(kind);
+      const textarea = page.open(target(page));
+      textarea.value = "Source of the block, changed\n";
+      textarea.dispatch("input");
+      const before = page.harness.messages.length;
+      assert.equal(page.chord(textarea, key), true, `${kind}, ${name}: the chord is consumed`);
+      assert.deepEqual(page.harness.messages.slice(before), [], `${kind}, ${name}: nothing is saved or moved`);
+      assert.equal(page.harness.documentElement.getAttribute("data-sphinx-preview-block-editing"), "true",
+        `${kind}, ${name}: the editor stays open`);
+    }
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S8
+test("after a move inside an admonition the block's editor reopens, and the chord moves it again to the edge", () => {
+  for (const kind of ADMONITION_KINDS) {
+    const page = admonitionMovePage(kind);
+    const textarea = page.open(page.code);
+    textarea.setSelectionRange(5, 5);
+    const before = page.harness.messages.length;
+    page.chord(textarea, "ArrowUp");
+    page.harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: true, line: 63 });
+    page.shift(page.code, -5);
+    page.shift(page.list, 4);
+    page.harness.dispatchMessage(patchMessage());
+    const reopened = page.answer("Source of the block\n", NEXT_IDENTIFIERS);
+    assert.notEqual(reopened, textarea, `${kind}: a new editor`);
+    assert.deepEqual(reopened.selectionRange, [5, 5], `${kind}: the caret is where it was`);
+    page.chord(reopened, "ArrowUp");
+    page.harness.dispatchMessage({ type: "previewBlockMoveResult", ...NEXT_IDENTIFIERS, ok: true, line: 61 });
+    page.shift(page.code, -2);
+    page.shift(page.first, 4);
+    page.harness.dispatchMessage(patchMessage({ revision: 8, requestId: 12, next: { revision: 9, requestId: 13 } }));
+    const atEdge = page.answer("Source of the block\n", { ...NEXT_IDENTIFIERS, revision: 9, requestId: 13 });
+    assert.notEqual(atEdge, reopened, `${kind}: a third editor`);
+    assert.deepEqual(atEdge.selectionRange, [5, 5], `${kind}: the caret is still where it was`);
+    const edge = page.harness.messages.length;
+    assert.equal(page.chord(atEdge, "ArrowUp"), true);
+    assert.deepEqual(page.harness.messages.slice(edge), [], `${kind}: the first block stays`);
+    assert.deepEqual(moveMessages(page.harness, before).map(movedLines),
+      [[68, 70, 63, 66, "up"], [63, 65, 61, 61, "up"]], kind);
+    assert.deepEqual(
+      page.harness.messages.slice(before).filter((message) => message.type === "previewEditOpen")
+        .map((message) => [message.line, message.endLine]),
+      [[63, 65], [61, 63]], `${kind}: the moved block's editor opens at its new lines`);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S8
+test("with unsaved text the chord in an admonition saves, moves the list, then reopens its editor", () => {
+  for (const kind of ADMONITION_KINDS) {
+    const page = admonitionMovePage(kind);
+    const textarea = page.open(page.item);
+    textarea.value = "- Source of the item, changed\n";
+    textarea.dispatch("input");
+    textarea.setSelectionRange(7, 7);
+    const before = page.harness.messages.length;
+    page.chord(textarea, "ArrowUp");
+    const save = page.harness.messages.slice(before).find((message) => message.type === "previewEditSave");
+    assert.deepEqual([save?.final, save?.line, save?.endLine], [true, 63, 63], `${kind}: the item is saved first`);
+    assert.deepEqual(moveMessages(page.harness, before), [], `${kind}: the move waits for the saved render`);
+    page.harness.dispatchMessage(patchMessage());
+    const moves = moveMessages(page.harness, before);
+    assert.deepEqual(moves.map(movedLines), [[63, 66, 61, 61, "up"]], kind);
+    assert.equal(moves[0].revision, 8);
+    page.harness.dispatchMessage({ type: "previewBlockMoveResult", ...NEXT_IDENTIFIERS, ok: true, line: 61 });
+    page.shift(page.list, -2);
+    page.shift(page.first, 5);
+    page.harness.dispatchMessage(patchMessage({ revision: 8, requestId: 12, next: { revision: 9, requestId: 13 } }));
+    const opened = page.harness.messages.slice(before).filter((message) => message.type === "previewEditOpen");
+    assert.deepEqual(opened.map((message) => [message.line, message.endLine]), [[61, 64]],
+      `${kind}: the list's editor opens at its new lines`);
+    const reopened = page.answer("- Source of the item, changed\n", { ...NEXT_IDENTIFIERS, revision: 9, requestId: 13 });
+    assert.notEqual(reopened, textarea);
+    assert.deepEqual(reopened.selectionRange, [7, 7], `${kind}: the caret is where it was`);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109#S8
+test("a refused move inside an admonition says why next to the admonition's insert point", () => {
+  for (const kind of ADMONITION_KINDS) {
+    for (const [name, key] of [["a block of the body", "first"], ["a block of a nested admonition", "innerFirst"]] as const) {
+      const page = admonitionMovePage(kind);
+      page.chord(page.open(page[key]), "ArrowDown");
+      const status = () => insertPointAfterLine(page.harness, 90).childElements.find((element) =>
+        element.className.split(" ").includes("sphinx-preview-move-status"));
+      assert.equal(status(), undefined);
+      page.harness.dispatchMessage({
+        type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "Not here.",
+      });
+      assert.equal(status()?.textContent, "Not here.", `${kind}, ${name}`);
+      assert.equal(status()?.getAttribute("role"), "status");
+      page.harness.flushTimers();
+      assert.equal(status(), undefined, `${kind}, ${name}: the reason disappears`);
+    }
+  }
+});
+
 test("T28: a render that starts in edit mode builds the insertion points at init", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   assert.equal(insertPointsOf(harness).length, 3);

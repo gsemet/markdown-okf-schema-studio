@@ -10,7 +10,9 @@
  */
 
 import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../comments/inlineThread";
-import { opensIncludeDirective, planBlockMove, type BlockLines } from "../mapping/blockMove";
+import {
+  isEmptyQuoteLine, opensIncludeDirective, planBlockMove, quoteContainer, splitLines, type BlockLines,
+} from "../mapping/blockMove";
 import {
   isCommonMarkBlank, planBlankRunPaste, planBlankRunRemoval, planCut, planPaste, spanText,
 } from "../mapping/blockRange";
@@ -18,6 +20,7 @@ import { STALE_REQUEST } from "../protocol/staleRequest";
 import { countRefUses, renameLabelLine } from "../mapping/labelRename";
 import { minimalReplacement } from "../mapping/textDiff";
 import { checkboxToggleEdit } from "../render/checkboxMarkers";
+import { alertBodyPrefix } from "../render/mystGithubAlerts";
 import { type RadioPosition, radioSelectEdits } from "../render/radioMarkers";
 import { sourceLines, type EditRefusal, type SourceLines, type TextEdit } from "./textEdit";
 
@@ -184,13 +187,16 @@ export interface BlockMoveRequest {
 /**
  * The range without the blank lines at its end. The renderer maps a list that is followed by a
  * blank line up to that blank line, so the page sends such a range as it is mapped; the block
- * itself ends on its last non-blank line. A range that is out of bounds is left to the planner.
+ * itself ends on its last non-blank line. In a quote of `quoteDepth` markers, a line holding only
+ * markers, that many or fewer, is blank too. A range that is out of bounds is left to the planner.
  */
-function withoutTrailingBlankLines(text: string, block: BlockLines): BlockLines {
+function withoutTrailingBlankLines(text: string, block: BlockLines, quoteDepth = 0): BlockLines {
   const lines = sourceLines(text);
   let endLine = block.endLine;
   if (!Number.isSafeInteger(endLine) || !Number.isSafeInteger(block.line) || endLine > lines.count) return block;
-  while (endLine > block.line && lines.text(endLine - 1).trim() === "") endLine -= 1;
+  const depths = Array.from({ length: quoteDepth }, (_, index) => index + 1);
+  const isBlank = (line: string): boolean => line.trim() === "" || depths.some((depth) => isEmptyQuoteLine(line, depth));
+  while (endLine > block.line && isBlank(lines.text(endLine - 1))) endLine -= 1;
   return { line: block.line, endLine };
 }
 
@@ -215,15 +221,21 @@ function withoutTrailingCommonMarkBlankLines(text: string, block: BlockLines): B
  * range. Refused: what the block move planner refuses, and a block that opens an `{include}`.
  */
 export function planBlockMoveEdit(text: string, request: BlockMoveRequest): EditRefusal | { edit: TextEdit; line: number } {
-  const moving = withoutTrailingBlankLines(text, { line: request.line, endLine: request.endLine });
-  const neighbour = withoutTrailingBlankLines(text, { line: request.neighbourLine, endLine: request.neighbourEndLine });
   const movesDown = request.direction === "down";
+  const starts = [request.line, request.neighbourLine] as const;
+  const quote = quoteContainer(text, ...(movesDown ? starts : [starts[1], starts[0]] as const));
+  const depth = typeof quote === "object" ? quote.depth : 0;
+  const moving = withoutTrailingBlankLines(text, { line: request.line, endLine: request.endLine }, depth);
+  const neighbour = withoutTrailingBlankLines(text,
+    { line: request.neighbourLine, endLine: request.neighbourEndLine }, depth);
   const first = movesDown ? moving : neighbour;
   const second = movesDown ? neighbour : moving;
   const plan = planBlockMove(text, first, second);
   if ("refused" in plan) return { refused: plan.refused };
   const lines = sourceLines(text);
-  if ([first, second].some((block) => opensIncludeDirective(lines.text(block.line - 1)))) {
+  const opening = (line: number): string =>
+    depth > 0 ? lines.text(line - 1).replace(/^[ \t]*(?:>[ \t]*)+/u, "") : lines.text(line - 1);
+  if ([first, second].some((block) => opensIncludeDirective(opening(block.line)))) {
     return { refused: MOVE_INCLUDED };
   }
   return {
@@ -314,6 +326,32 @@ export function planEmptiedBlockRemoval(
   const kept = plan.edit.end < restoredEnd ? restored.slice(plan.edit.end, restoredEnd) : "";
   const end = Math.max(plan.edit.end, restoredEnd) - restoredEnd + savedEnd;
   return { start, end, text: kept };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-264
+/**
+ * The placeholder of an emptied block of a GitHub alert body: one line holding the alert's prefix
+ * alone (an empty line would cut the alert in two), with the line break of the block, else of the
+ * document. The block starts at `sourceStartOffset` and holds `lastSavedText` now;
+ * `originalText` is what it held when its editor opened. Undefined for any other block: its
+ * emptied text is written as it is.
+ */
+export function planAlertPlaceholder(
+  text: string,
+  sourceStartOffset: number,
+  lastSavedText: string,
+  originalText: string,
+): string | undefined {
+  const savedEnd = sourceStartOffset + lastSavedText.length;
+  if (sourceStartOffset < 0 || savedEnd > text.length || originalText === "") return undefined;
+  const above = text.slice(0, sourceStartOffset);
+  if (above !== "" && !/[\r\n]$/u.test(above)) return undefined;
+  const lines = splitLines(above + originalText + text.slice(savedEnd)).map((line) => line.text);
+  const from = splitLines(above).length;
+  const prefix = alertBodyPrefix(lines, from, from + splitLines(originalText).length - 1);
+  if (prefix === undefined) return undefined;
+  const lineBreak = /(?:\r\n|\n|\r)$/u.exec(originalText) ?? /\r\n|\n|\r/u.exec(text);
+  return prefix + (lineBreak?.[0] ?? "\n");
 }
 
 /**

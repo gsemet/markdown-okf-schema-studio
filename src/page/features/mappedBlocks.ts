@@ -160,24 +160,44 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
     return Number.isSafeInteger(limit) && limit > span.endLine ? { line: span.line, endLine: limit } : span;
   }
 
-  function editingElementFor(target: HTMLElement, options: { exact?: boolean } = {}): ReturnType<MappedBlocks["editingElementFor"]> {
-    // A block in the body of a GitHub alert or of a MyST admonition (a paragraph, a list) edits the
-    // whole alert or directive, like a click on its title; the nearest one wins, and one inside a
-    // list item edits that block, not the list.
-    // A context-tag panel (SwRS-MDOKFSTUDIO-MYST-013) is not an admonition directive: a click in its
-    // body keeps opening the clicked block only.
-    const alertSelector = "[data-okf-github-alert], aside.admonition, details.admonition";
-    let alert = target.closest?.<HTMLElement>(alertSelector) ?? null;
-    while (alert && alert.getAttribute("class")?.split(/\s+/u).includes("myst-context-admonition")) {
-      alert = alert.parentElement?.closest?.<HTMLElement>(alertSelector) ?? null;
+  function hasClass(element: Element, name: string): boolean {
+    return Boolean(element.getAttribute("class")?.split(/\s+/u).includes(name));
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+  // The nearest GitHub alert or admonition around `element`, `element` included. A context-tag
+  // panel (SwRS-MDOKFSTUDIO-MYST-013) is not one.
+  function admonitionAround(element: Element): HTMLElement | undefined {
+    const selector = "[data-okf-github-alert], aside.admonition, details.admonition";
+    let found = element.closest?.<HTMLElement>(selector) ?? null;
+    while (found && hasClass(found, "myst-context-admonition")) {
+      found = found.parentElement?.closest?.<HTMLElement>(selector) ?? null;
     }
-    if (alert) {
-      const sourceRange = sourceRangeForAlert(alert, target);
-      if (sourceRange) return { element: alert, sourceRange };
+    return found ?? undefined;
+  }
+
+  // True when `target` is the title of `admonition` (a direct child of it) or lies inside it.
+  function isInTitle(target: Element, admonition: Element): boolean {
+    for (let node: Element | null = target; node && node !== admonition; node = node.parentElement) {
+      if (node.parentElement === admonition) return hasClass(node, "admonition-title");
+    }
+    return false;
+  }
+
+  function editingElementFor(target: HTMLElement, options: { exact?: boolean } = {}): ReturnType<MappedBlocks["editingElementFor"]> {
+    // A GitHub alert or an admonition edits whole only when it is the target itself (its frame, a
+    // keyboard selection of it) or the target is its title; the nearest one decides. Any other block
+    // of its body edits as a block outside it does, under the list rules below.
+    const admonition = admonitionAround(target);
+    if (admonition && (target === admonition || isInTitle(target, admonition))) {
+      const sourceRange = sourceRangeForAlert(admonition, target);
+      if (sourceRange) return { element: admonition, sourceRange };
     }
     // A click in a list item edits that item; a click on the list itself (outside its items)
     // edits the whole list. From the keyboard (`exact`), a block inside an item edits that block.
-    const list = target.closest?.<HTMLElement>("ul, ol");
+    // A list around the admonition never takes over a block of its body.
+    const found = target.closest?.<HTMLElement>("ul, ol");
+    const list = found && (!admonition || admonition.contains(found)) ? found : undefined;
     if (list) {
       const item = target.closest?.<HTMLElement>("li");
       if (item && item.parentElement === list) {
@@ -216,6 +236,7 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
     isIncludedBlock,
     bodyBlockAtLine,
     propertiesSection,
+    admonitionAround,
     editingElementFor,
     listRange,
     hasRenderedPreview,

@@ -77,7 +77,7 @@ When the writer drags the handle of a list item in edit mode onto another item o
 | Alt+Up on the handle of the first item, or Alt+Down on that of the last | Nothing happens |
 | Alt+Down repeated before the render of the previous move arrived | The repeat is ignored |
 
-The chord on a handle is not also read as the move of the whole list block. In an open list item editor, the Cmd/Ctrl+Alt chord still moves the whole list (SwRS-MDOKFSTUDIO-BLOCK-130).
+The chord on a handle is not also read as the move of the whole list block. In an open list item editor, the Cmd/Ctrl+Alt chord still moves the whole list (SwRS-MDOKFSTUDIO-BLOCK-130); for a list that is a direct block of an admonition or an alert, the list moves among the blocks of that admonition (SwRS-MDOKFSTUDIO-BLOCK-130).
 
 ### Scenario S3 (nominal): The handle beside its item
 
@@ -106,7 +106,7 @@ The chord on a handle is not also read as the move of the whole list block. In a
 | Input | Outcome |
 | --- | --- |
 | A list in a quote, a GitHub alert, a MyST admonition or two nested admonitions | The handles sit left of the outermost box; a move saves only the list's lines, each with its quote prefix kept, blank quote lines included |
-| A click on an item of a list in an alert or an admonition | The whole container opens in its editor, as before (SwRS-MDOKFSTUDIO-BLOCK-014) |
+| A click on an item of a list in an alert or an admonition | The clicked item opens in its editor; a click on the title or the frame of the alert or admonition opens the whole container (SwRS-MDOKFSTUDIO-BLOCK-014) |
 
 ### Scenario S6 (boundary): One edit, one undo
 
@@ -125,8 +125,8 @@ The chord on a handle is not also read as the move of the whole list block. In a
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-BLOCK-014: a click on a list item edits that item; in an alert or an admonition, the whole container.
-- SwRS-MDOKFSTUDIO-BLOCK-130: the move chord of a block editor's text box, which in a list item editor moves the whole list.
+- SwRS-MDOKFSTUDIO-BLOCK-014: a click on a list item edits that item, also in an alert or an admonition, whose title or frame edits the whole container.
+- SwRS-MDOKFSTUDIO-BLOCK-130: the move chord of a block editor's text box, which in a list item editor moves the whole list, inside its admonition when it has one.
 - SwRS-MDOKFSTUDIO-TABLE-002: the row handles of a table, which these handles follow.
 
 ### Verification notes

@@ -422,10 +422,12 @@ export interface MappedBlocks {
   bodyBlockAtLine(line: number): HTMLElement | undefined;
   /** The properties section (frontmatter table), if the page shows one. */
   propertiesSection(): HTMLElement | null | undefined;
+  /** The nearest GitHub alert or admonition around `element`, itself included (no context-tag panel). */
+  admonitionAround(element: Element): HTMLElement | undefined;
   /**
-   * The element an edit of `target` opens on, with its source range: the nearest GitHub alert or
-   * admonition, else the list item that holds `target` (the whole list for the list itself), else
-   * `target`. With `exact` (the keyboard), a block inside a list item opens on its own.
+   * The element an edit of `target` opens on, with its source range: the nearest alert or admonition
+   * for itself or its title, else the list item that holds `target` (the whole list for the list; no
+   * list outside that admonition), else `target`. `exact` (keyboard): a block of an item, alone.
    */
   editingElementFor(
     target: HTMLElement,
@@ -680,7 +682,7 @@ export interface BlockMoves {
   /** True while a keyboard move waits for its result and render. */
   inFlight(): boolean;
   requestBlockMove(block: HTMLElement, direction: "up" | "down", mode: "edit" | "focus", caretOffset?: number): boolean;
-  bodyBlockNeighbour(block: HTMLElement, direction: "up" | "down"): HTMLElement | undefined;
+  moveNeighbour(block: HTMLElement, direction: "up" | "down"): HTMLElement | undefined;
   moveChordDirection(event: KeyboardEvent, inEditor: boolean): "up" | "down" | undefined;
   updateMoveLabels(blocks: HTMLElement[]): void;
   addMoveButtons(point: HTMLElement, move: InsertMove): void;

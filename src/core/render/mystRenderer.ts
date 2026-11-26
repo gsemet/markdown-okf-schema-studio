@@ -31,6 +31,7 @@ import {
   shiftSourcePositions,
   wrapBareBlockImages,
 } from "./mystBlockTransforms";
+import { mapBoxSourceLines } from "./mystBoxLines";
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
 import { addFootnoteLines, footnoteLabelLines } from "./mystFootnotes";
 import { showFrontmatterValues } from "./frontmatterValues";
@@ -480,7 +481,10 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "quote directive lines", run: (state) => mapQuoteDirectives(state.ast) },
   { name: "caption-less references", run: (state) => normalizeCaptionlessReferences(state.ast) },
   { name: "doc and download labels", run: (state) => labelLinkRoles(state.ast) },
-  { name: "version admonitions", run: (state) => expandVersionAdmonitions(state.ast, state.mystParse) },
+  {
+    name: "version admonitions",
+    run: (state) => expandVersionAdmonitions(state.ast, state.mystParse, state.source.split(/\r\n|\r|\n/u)),
+  },
   { name: "dollar placeholders", run: (state) => restoreDollarPlaceholders(state.ast) },
   { name: "dollar amounts", run: (state) => restoreDollarAmounts(state.ast) },
   // Before the toc markers: a heading entry of the table of contents shows the value, not the code.
@@ -522,6 +526,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
     run: (state) => neutralizeDirectiveErrors(state.ast, state.source.split(/\r\n|\r|\n/u)),
   },
   { name: "svg pictures", run: (state) => expandSvgPictures(state.ast, state.diagnostics) },
+  { name: "box source lines", run: (state) => mapBoxSourceLines(state.ast, state.source.split(/\r\n|\r|\n/u)) },
   { name: "normalize nodes", run: (state) => walk(state.ast, state.diagnostics) },
   {
     name: "table alignments",
