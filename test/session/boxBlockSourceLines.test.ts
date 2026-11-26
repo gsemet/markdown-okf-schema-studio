@@ -82,6 +82,15 @@ function deepest(element: MappedElement): MappedElement {
   return element.children.length > 0 ? deepest(element.children[0]!) : element;
 }
 
+/** The childless element under `root` whose trimmed text is `value`. */
+function leafReading(root: MappedElement, value: string): MappedElement {
+  const leaves = (element: MappedElement): MappedElement[] =>
+    element.children.length > 0 ? element.children.flatMap(leaves) : [element];
+  const found = leaves(root).find((element) => element.textContent.trim() === value);
+  assert.ok(found, `an element reads "${value}"`);
+  return found;
+}
+
 /**
  * `source` with the block at `first` and the block at `second`, below it, swapped. As the host
  * does, an empty line (`>` in a quote) separates a moved block from a line of text beside it.
@@ -255,6 +264,55 @@ test("a {list-table} and a {csv-table} of an admonition are opened and moved as 
   await assertWholeMoves(TABLES_IN_A_NOTE, TABLE_RANGES);
 });
 
+const TABLE_DIRECTIVE = ["```{table}", "| a |", "| - |", "| 1 |", "```"] as const;
+
+for (const [name, opening] of [["with a caption", "```{table} Caption"], ["without a caption", "```{table}"]] as const) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S8
+  test(`neither a {table} ${name} of an admonition or an alert nor its neighbour moves past it`, async () => {
+    const body = ["Before.", "", opening, ...TABLE_DIRECTIVE.slice(1), "", "After.", "", "Last."];
+    for (const source of [
+      text("::::{note}", ...body, "::::"),
+      text("> [!NOTE]", ...body.map((line) => (line ? `> ${line}` : ">"))),
+    ]) {
+      const loaded = await load(source);
+      const children = loaded.inner(loaded.box());
+      assert.deepEqual(children.map(loaded.rangeOf), [[2, 2], [5, 7], [10, 10], [12, 12]], source);
+      const [before, table, after, last] = children;
+      for (const [block, direction] of [[table, "up"], [table, "down"], [before, "down"], [after, "up"]] as const) {
+        assert.equal(await loaded.chord(block!, direction), undefined, `${direction} next to the table: ${source}`);
+      }
+      assert.equal(await loaded.chord(after!, "down"), swapped(source, [10, 10], [12, 12]), "away from it, a move");
+      assert.equal(await loaded.chord(last!, "up"), swapped(source, [10, 10], [12, 12]), "away from it, a move");
+    }
+  });
+}
+
+const CARD_WITH_OPTIONS = [
+  "```{card} Card title",
+  ":header: Card header",
+  ":footer: Card footer",
+  "",
+  "Card body.",
+  "```",
+] as const;
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S7
+test("in an admonition or an alert, a card title opens the whole card, its header and footer their lines", async () => {
+  for (const source of [
+    text("::::{note}", ...CARD_WITH_OPTIONS, "::::"),
+    text("> [!NOTE]", ...CARD_WITH_OPTIONS.map((line) => (line ? `> ${line}` : ">"))),
+  ]) {
+    const loaded = await load(source);
+    for (const [value, range] of [
+      ["Card title", [2, 7]], ["Card header", [3, 3]], ["Card footer", [4, 4]],
+    ] as const) {
+      const opened = await loaded.open(leafReading(loaded.page.document, value), false);
+      assert.deepEqual(opened.range, range, `${value}: ${source}`);
+      assert.equal(opened.originalText, linesOf(source, [...range]), `${value} opens the source`);
+    }
+  }
+});
+
 const AMSMATH_IN_A_NOTE = text(
   "::::{note}",
   "Before.",
@@ -368,6 +426,51 @@ for (const [name, opening, closing] of ONE_LINE_BODIES) {
   });
 }
 
+/** Admonitions left open at the end of the file, whose last line closes a directive inside. */
+const UNCLOSED_AROUND_A_DIRECTIVE = [
+  ["a {mermaid} of backticks in a colon admonition", ":::{note}", "```{mermaid}", "graph TD", "```"],
+  ["a {math} shorter than the backtick admonition", "````{note}", "```{math}", "x = 1", "```"],
+] as const;
+
+for (const [name, admonition, ...directive] of UNCLOSED_AROUND_A_DIRECTIVE) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S8
+  test(`in an unclosed admonition, ${name} that ends the file is a block of its own`, async () => {
+    const source = text(admonition, "Before.", "", ...directive);
+    await assertWholeBlocks(source, [[2, 2], [4, 6]]);
+    await assertWholeMoves(source, [[2, 2], [4, 6]]);
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+test("in an unclosed admonition, a shorter or an indented admonition that ends the file keeps its blocks", async () => {
+  for (const source of [
+    text("::::{note}", "Before.", "", ":::{tip}", "Inner.", ":::"),
+    text(":::{note}", "- item", "", "    :::{tip}", "    Inner.", "    :::"),
+  ]) {
+    const loaded = await load(source);
+    const tip = loaded.box(1);
+    assert.deepEqual(loaded.rangeOf(tip), [4, 6], source);
+    assert.deepEqual((await loaded.open(tip, false)).range, [4, 6], source);
+    assert.deepEqual((await loaded.open(loaded.page.elementWithText("Inner."), false)).range, [5, 5], source);
+  }
+});
+
+const CODE_AT_THE_END = [
+  ["a code block", "```python"],
+  ["a {code-block}", "```{code-block} python"],
+] as const;
+
+for (const [name, opening] of CODE_AT_THE_END) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-130#S8
+  test(`${name} that ends an unclosed admonition keeps all its lines`, async () => {
+    const source = text(":::{note}", "Before.", "", opening, "print(1)", "print(2)", "```");
+    await assertWholeBlocks(source, [[2, 2], [4, 7]]);
+    await assertWholeMoves(source, [[2, 2], [4, 7]]);
+  });
+}
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-260#S7
 test("a table caption and a card title written on an opening line are no blocks of their own", async () => {
@@ -384,10 +487,7 @@ test("a table caption and a card title written on an opening line are no blocks 
     "::::::",
   );
   const loaded = await load(source);
-  const leaves = (element: MappedElement): MappedElement[] =>
-    element.children.length > 0 ? element.children.flatMap(leaves) : [element];
-  const byText = (value: string): MappedElement =>
-    leaves(loaded.page.document).find((element) => element.textContent.trim() === value)!;
+  const byText = (value: string): MappedElement => leafReading(loaded.page.document, value);
   assert.deepEqual((await loaded.open(byText("Table caption"), false)).range, [1, 10], "the admonition around it");
   assert.deepEqual((await loaded.open(byText("Card title"), false)).range, [7, 9], "the whole card");
 });

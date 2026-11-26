@@ -13,6 +13,8 @@ Reason: CR-514, the owner's answers of 2026-11-26. All requirements below are `p
 - Fixed (found while capturing the new visual scenarios): an admonition of a directive scrolls its own overflow, so the sticky palette of an editor opened inside it covered the text box; it lets its overflow show while it holds the editor (SwRS-MDOKFSTUDIO-PALETTE-021, new scenario S9).
 - Fixed (second review round): inside an admonition, an alert, a callout or a dropdown no block maps a fence line of a directive around it, and what a directive builds without a position maps that directive's lines, so a click, Enter, an erased editor or the move chord acts on a whole directive and never cuts a fence (SwRS-MDOKFSTUDIO-BLOCK-014 S3, BLOCK-130 S8). Text written on a directive's opening line (a one-line body, a card title, a table caption) is no block of its own there (BLOCK-260, new scenario S7); the body of a version admonition maps the lines it is written on (SwRS-MDOKFSTUDIO-MYST-001 S4). Outside a box nothing changes.
 - Clarified: a block of an alert body with a lazy continuation line writes an empty placeholder line (SwRS-MDOKFSTUDIO-BLOCK-264 S4).
+- Clarified (third review round): the table of a `{table}` directive of a box, with or without a caption, is no direct block, so neither it nor its neighbour moves past it (SwRS-MDOKFSTUDIO-BLOCK-130 S8). The header and footer of a card inside a box are now tested (BLOCK-260 S7).
+- Fixed (third review round): an admonition left open at the end of the file no longer takes the closing fence of a block inside it for its own, so that block stays a block of its own, whole (SwRS-MDOKFSTUDIO-BLOCK-014 S3, BLOCK-130 S8; no normative change).
 
 ### Frontmatter: rows with an error or a warning are coloured (CR-513)
 

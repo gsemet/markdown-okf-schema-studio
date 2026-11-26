@@ -5,6 +5,7 @@
  */
 
 import { type MystNode, sourcePositionProperties } from "./mystNode";
+import { closes } from "./mystUnclosedFences";
 
 /** The nodes whose first and last lines are fences (or tags) around their content. */
 const FENCED_NODES = new Set([
@@ -17,7 +18,8 @@ const DIRECTIVE_NODES = new Set(["mystDirective", "mystGrid", "mystGridItem", "m
 /** What a directive builds without a position of its own, whose source is the whole directive. */
 const WHOLE_DIRECTIVE = new Set(["admonition", "container", "mermaid", "math", "code", "table", "div"]);
 
-const CLOSING_FENCE = /^[ \t]*(?:>[ \t]*)*(?::{3,}|`{3,}|~{3,})[ \t]*$/u;
+/** The fence a line opens, after its quote and list markers. */
+const OPENING_FENCE = /^((?:[ \t>]|(?:[-*+]|\d{1,9}[.)])[ \t])*)(:{3,}|`{3,}|~{3,})/u;
 
 const LINE_ATTRIBUTES = ["data-line", "data-end-line", "data-single-line"];
 
@@ -51,6 +53,18 @@ function isBox(node: MystNode): boolean {
   return node.type === "details";
 }
 
+/**
+ * True when `last` closes the fence that `opening` opens: the same character, at least as long, and
+ * indented less than four columns past it. An unclosed directive may end on the fence of a block
+ * inside it, which is not its own.
+ */
+function closesOpening(opening: string, last: string): boolean {
+  const found = OPENING_FENCE.exec(opening);
+  if (!found) return false;
+  const [, markers, fence] = found as unknown as [string, string, string];
+  return closes(last, fence) && last.indexOf(fence.charAt(0)) - markers.length < 4;
+}
+
 function fenceOf(node: MystNode, sourceLines: readonly string[]): Fence | undefined {
   const start = node.position?.start?.line;
   const end = node.position?.end?.line;
@@ -58,7 +72,8 @@ function fenceOf(node: MystNode, sourceLines: readonly string[]): Fence | undefi
   // A rewritten GitHub alert ends on its last body line: it has no closing fence.
   const alert = node.children?.some((child) => child.data?.githubAlert === true) === true;
   const tags = node.type === "rawDetails" || classNames(node).includes("myst-context-admonition");
-  return { start, end, closed: !alert && (tags || CLOSING_FENCE.test(sourceLines[end - 1] ?? "")) };
+  const fenced = end > start && closesOpening(sourceLines[start - 1] ?? "", sourceLines[end - 1] ?? "");
+  return { start, end, closed: !alert && (tags || fenced) };
 }
 
 /** The lines `node` renders with: those a pass has written, else those of its position. */

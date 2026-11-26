@@ -50,7 +50,9 @@ environments),
   admonition or alert. A directive written in that body (a `{mermaid}` diagram, a `{math}` formula,
   a `{code-block}`) edits and moves as a whole, fence lines included. Text written on a directive's
   opening line is no block of its own there: the body of `:::{warning} Text`, or a card title,
-  edits its whole directive, and a `{table}` caption the admonition around it.
+  edits its whole directive, and a `{table}` caption the admonition around it. A `{table}`
+  directive is the exception: its table is edited on its own rows, without the directive lines, and
+  it does not move (see below).
   From the keyboard, select the list, press Right to go to its items and
   Right again to go to the blocks of an item, Left to go back up, and Enter to edit the selected
   list, item or block.
@@ -137,8 +139,13 @@ environments),
   at the edges of the editor of any other block of its body. In the editor of an item,
   Cmd+Alt+Up/Down (Ctrl+Alt elsewhere) saves the item and moves the whole list, whose editor then
   opens. In the editor of a block of an admonition or an alert (for an item or a list, the whole
-  list), the same keys move that block among the blocks of the admonition, never out of it. Erasing
-  a paragraph or an item of an alert keeps the alert, with an empty `>` line in its place.
+  list), the same keys move that block among the blocks of the admonition, never out of it. Some
+  blocks do not move: one inside a list item, a quote, a card or a grid of the box (an item of a
+  list in such a quote, card or grid too), and the table of a `{table}` directive, with or without
+  a caption; a block next to that table does not move past it either. Erasing a paragraph or an
+  item of an alert keeps the alert, with an empty `>` line in its place. If the erased block holds
+  a lazy continuation line (a line without the `>`), an empty line is written instead, and the
+  quoted lines after it are no longer part of the alert.
 
   ![In edit mode, from the keyboard only: E turns edit mode on, Down selects a note admonition, Enter opens it whole and Escape closes it, Right goes inside it, Down reaches its list, the arrows go down to an item of a nested sub-list, Enter opens that item alone, one word is changed and Ctrl+Enter saves](../demo-video/clips/keyboard-navigation/keyboard-navigation.gif)
 
