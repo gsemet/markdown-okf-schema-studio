@@ -31,7 +31,7 @@ import {
   shiftSourcePositions,
   wrapBareBlockImages,
 } from "./mystBlockTransforms";
-import { mapBoxSourceLines } from "./mystBoxLines";
+import { htmlTagLines, type Lines, mapBoxSourceLines } from "./mystBoxLines";
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
 import { addFootnoteLines, footnoteLabelLines } from "./mystFootnotes";
 import { showFrontmatterValues } from "./frontmatterValues";
@@ -393,6 +393,8 @@ interface RenderState {
   readonly rawSvgToken: string;
   readonly ast: MystNode;
   anchorLabels: ReadonlySet<string>;
+  /** The two tag lines of every HTML element written on several lines (see `mystBoxLines.ts`). */
+  htmlTagLines: readonly Lines[];
   readonly tableAlignments: Array<TableAlignmentSpec | undefined>;
 }
 
@@ -516,6 +518,8 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
       (comment) => sourcePositionProperties(comment, comment.position?.start?.line),
     ),
   },
+  // Before the HTML passes replace the HTML the parser found.
+  { name: "html tag lines", run: (state) => { state.htmlTagLines = htmlTagLines(state.ast); } },
   { name: "raw details and kbd", run: (state) => normalizeRawDetailsAndKbd(state.ast, state.mystParse) },
   { name: "raw html elements", run: (state) => expandRawHtmlElements(state.ast) },
   { name: "context tag containers", run: (state) => normalizeContextTagContainers(state.ast) },
@@ -526,7 +530,10 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
     run: (state) => neutralizeDirectiveErrors(state.ast, state.source.split(/\r\n|\r|\n/u)),
   },
   { name: "svg pictures", run: (state) => expandSvgPictures(state.ast, state.diagnostics) },
-  { name: "box source lines", run: (state) => mapBoxSourceLines(state.ast, state.source.split(/\r\n|\r|\n/u)) },
+  {
+    name: "box source lines",
+    run: (state) => mapBoxSourceLines(state.ast, state.source.split(/\r\n|\r|\n/u), state.htmlTagLines),
+  },
   { name: "normalize nodes", run: (state) => walk(state.ast, state.diagnostics) },
   {
     name: "table alignments",
@@ -587,6 +594,7 @@ export async function renderMyst(
     rawSvgToken: rawSvg.token,
     ast: mystParse(parsedText, MYST_PARSE_OPTIONS),
     anchorLabels: new Set<string>(),
+    htmlTagLines: [],
     tableAlignments: [],
   };
   for (const pass of TREE_PASSES) {
