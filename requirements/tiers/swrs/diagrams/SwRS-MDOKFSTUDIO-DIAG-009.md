@@ -48,7 +48,6 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput/renderPatching.ts
 - test/page/chartCsp.test.ts
-- test/page/modules/chartViewCache.test.ts
 - test/page/modules/diagReq.pageDiagrams.requirements.test.ts
 - test/page/modules/mermaidCache.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts

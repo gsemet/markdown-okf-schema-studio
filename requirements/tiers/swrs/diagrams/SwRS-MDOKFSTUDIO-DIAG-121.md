@@ -22,6 +22,8 @@ scenarios:
   title: A vega fence
 - id: S3
   title: Other fences and an unreadable specification
+- id: S4
+  title: The preview hides the Chart source and the export shows it
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -52,12 +54,6 @@ When a document contains a vega-lite or vega fenced code block, the extension SH
 - WHEN the preview renders in the Strict, GFM, MyST or Full palette mode
 - THEN the block is one figure of the class myst-vega-figure holding a div myst-vega-diagram (aria-label Chart diagram, data-myst-chart-kind vega-lite, the specification as its text) and a collapsed details section titled Chart source with the same text, the figure carries the source line, and the document text is unchanged
 
-### Scenario (nominal): The preview hides the Chart source and the export shows it
-
-- GIVEN a page with a drawn chart and a chart in error, in reading mode and in edit mode
-- WHEN the page is shown, and when the document is exported to HTML
-- THEN in the preview each details myst-vega-source has display none and the find bar does not match its text, and in the exported file each one has display block and stays closed
-
 ### Scenario S2 (nominal): A vega fence
 
 - GIVEN a fenced block whose language is vega
@@ -69,6 +65,12 @@ When a document contains a vega-lite or vega fenced code block, the extension SH
 - GIVEN a mermaid fence, a json fence and a vega-lite fence whose text is not a specification
 - WHEN the preview renders
 - THEN the mermaid fence stays a Mermaid figure, the json fence a code block, and the broken fence is a chart figure like any other (the page shows the error in place of the chart, see SwRS-MDOKFSTUDIO-DIAG-123)
+
+### Scenario S4 (nominal): The preview hides the Chart source and the export shows it
+
+- GIVEN a page with a drawn chart and a chart in error, in reading mode and in edit mode
+- WHEN the page is shown, and when the document is exported to HTML
+- THEN in the preview each details myst-vega-source has display none and the find bar does not match its text, and in the exported file each one has display block and stays closed
 
 ### Known issues
 

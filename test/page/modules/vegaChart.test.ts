@@ -147,7 +147,7 @@ type SizedConfig = {
   mark: Record<string, unknown>;
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("the chart text sizes are ratios of the body font size: the table of values at 14 px", () => {
   const config = chartConfig(AT_14) as SizedConfig;
   assert.deepEqual(config.legend, {
@@ -166,7 +166,7 @@ test("the chart text sizes are ratios of the body font size: the table of values
   assert.equal(config.header.titleFontSize, 13.3);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("the chart text sizes scale with the body font size (18 px)", () => {
   const config = chartConfig(AT_18) as SizedConfig;
   assert.equal(config.legend.labelFontSize, 16.7);
@@ -174,7 +174,7 @@ test("the chart text sizes scale with the body font size (18 px)", () => {
   assert.equal(config.title.fontSize, 20.7);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("the body font size falls back to 13 when it is not a number above 0", () => {
   const fontSizeOf = (computed?: string): number => chartThemeFrom(() => "", "rgb(255, 255, 255)", computed).fontSize;
   assert.equal(fontSizeOf(), 13);
@@ -186,7 +186,7 @@ test("the body font size falls back to 13 when it is not a number above 0", () =
   assert.equal((chartConfig(chartThemeFrom(() => "", "rgb(255, 255, 255)", "abc")) as SizedConfig).legend.labelFontSize, 12.1);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("the subtitle takes the label colour, discrete x labels are horizontal, and there is no mark tooltip", () => {
   const config = chartConfig(AT_14) as SizedConfig;
   assert.equal(config.title.subtitleColor, "#112233");
@@ -212,7 +212,7 @@ const COLOURED = {
   },
 };
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("a Vega-Lite legend is drawn at the page-relative size, and its own config wins", async () => {
   const studio = await drawChart("vega-lite", JSON.stringify(COLOURED), AT_14);
   assert.deepEqual([...new Set(sizesOf(studio, "Legend entry"))], ["13"]);
@@ -220,7 +220,7 @@ test("a Vega-Lite legend is drawn at the page-relative size, and its own config 
   assert.deepEqual([...new Set(sizesOf(own, "Legend entry"))], ["9"]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S6
 test("a Vega legend takes the page-relative size, and a size of its own spec wins", async () => {
   const spec = (legend: Record<string, unknown>) => ({
     width: 120, height: 80,
@@ -234,7 +234,7 @@ test("a Vega legend takes the page-relative size, and a size of its own spec win
 
 type Marked = { mark: Record<string, unknown>; events: Record<string, unknown> };
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("the Vega-Lite config gives every mark a tooltip, the Vega config none, and neither creates input widgets", () => {
   const lite = vegaLiteConfig(AT_14) as Marked;
   const full = vegaConfig(AT_14) as Marked;
@@ -246,7 +246,7 @@ test("the Vega-Lite config gives every mark a tooltip, the Vega config none, and
   assert.equal(full.mark.color, AT_14.accent, "the Vega config keeps its mark colours");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("a Vega-Lite mark shows its encoded fields, and \"tooltip\": null on the mark shows none", async () => {
   const shown = await sceneTooltips("vega-lite", JSON.stringify(BARS), AT_14, "rect");
   assert.deepEqual(shown, [{ category: "A", amount: "28" }, { category: "B", amount: "55" }]);
@@ -254,7 +254,7 @@ test("a Vega-Lite mark shows its encoded fields, and \"tooltip\": null on the ma
   assert.deepEqual(off, [null, null]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("a full Vega mark shows only the tooltip its encode defines", async () => {
   const mark = (type: string, encode: Record<string, unknown>) => ({
     type, from: { data: "t" }, encode: { enter: { x: { scale: "x", field: "k" }, y: { scale: "y", field: "v" }, ...encode } },
@@ -274,7 +274,6 @@ test("a full Vega mark shows only the tooltip its encode defines", async () => {
   assert.deepEqual(await sceneTooltips("vega", JSON.stringify(spec), AT_14, "line"), [null, null], "the line mark defines none and shows none");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
 test("the runtime of a chart is the AST the headless drawing and the live view both run", async () => {
   const runtime = chartRuntime("vega-lite", JSON.stringify(BARS), AT_14);
   assert.ok(Array.isArray(runtime.operators), "a parsed runtime");

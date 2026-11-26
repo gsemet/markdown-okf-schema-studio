@@ -37,7 +37,6 @@ test("the reason is plain text, never HTML", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S1
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S2
 test("the error styles use the theme error colour and keep long reasons inside the column", () => {
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-error\s*\{[^}]*color: var\(--studio-errorForeground, #f14c4c\)/u);
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-error-details pre\s*\{[^}]*(overflow-x: auto|white-space: pre-wrap)/u);
@@ -45,7 +44,7 @@ test("the error styles use the theme error colour and keep long reasons inside t
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-view > svg\s*\{[^}]*max-width: 100%;[^}]*height: auto;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("the hover detail is fixed, lets the pointer through and has a stronger border on both dark pages", () => {
   assert.match(PREVIEW_THEME_CSS, /[/}]\s*\.myst-vega-tooltip\s*\{[^}]*position: fixed;/u);
   assert.match(PREVIEW_THEME_CSS, /[/}]\s*\.myst-vega-tooltip\s*\{[^}]*pointer-events: none;/u);
@@ -55,7 +54,7 @@ test("the hover detail is fixed, lets the pointer through and has a stronger bor
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-tooltip-value\s*\{[^}]*font-weight: bold;/u);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
 test("the preview sheet hides the Chart source section and the export sheet shows it again", () => {
   assert.match(PREVIEW_THEME_CSS, /#sphinx-myst-preview-content details\.myst-vega-source\s*\{[^}]*display: none;/u);
   assert.match(exportSheet(0, "light"), /#sphinx-myst-preview-content details\.myst-vega-source\s*\{\s*display: block;\s*\}/u);

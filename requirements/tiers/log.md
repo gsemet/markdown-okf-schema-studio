@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-11-26
+
+### Scenarios and markers of the requirements main added (CR-504, after the rebase)
+
+- Changed (scenario headings and `scenarios:`, all `proposed`, no scenario text or normative text changed): the scenario blocks that main added without an id are numbered and moved after the last numbered one: SwRS-MDOKFSTUDIO-DIAG-121 S4, SwRS-MDOKFSTUDIO-DIAG-123 S4 to S6, SwRS-MDOKFSTUDIO-LAYOUT-023 S8. SwRS-MDOKFSTUDIO-CORE-096, added by main, declares S1 to S5 in heading order.
+- Changed (markers, no test changed): the `@tests_req` markers of main's tests for SwRS-MDOKFSTUDIO-DIAG-009, DIAG-121, DIAG-123, DIAG-128, LAYOUT-023 and CORE-096 name the scenario the test checks. A test that checks no declared scenario has its marker removed (a rule of the chart view cache, the place of the hover box, a chart input binding, the chart runtime, a Mermaid figure that is not a code block, the markup and the escaping of the gallery page). The DIAG-123 S2 line of the chart error style test is removed: that test checks no redraw on a theme change.
+
 ## 2026-11-25
 
 ### StRS paths and SwRS scenarios on okfreq 0.18 (CR-504, first layer)

@@ -22,7 +22,7 @@ const box = (): FakeElement => doc.body.querySelector(".myst-vega-tooltip")!;
 const rowsOf = (): string[][] => box().querySelectorAll(".myst-vega-tooltip-row")
   .map((row) => [row.querySelector(".myst-vega-tooltip-key")?.textContent ?? "", row.querySelector(".myst-vega-tooltip-value")!.textContent]);
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("an object value gives a key and a value row per field, as text and never as HTML", () => {
   show({ Quarter: "Q1", Revenue: 12, note: "<b>x</b>" });
   assert.deepEqual(rowsOf(), [["Quarter", "Q1"], ["Revenue", "12"], ["note", "<b>x</b>"]]);
@@ -31,7 +31,6 @@ test("an object value gives a key and a value row per field, as text and never a
   assert.equal(box().getAttribute("role"), "tooltip");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
 test("a plain value gives one row with the value only, a nested value is written as JSON text", () => {
   show("Only text");
   assert.deepEqual(rowsOf(), [["", "Only text"]]);
@@ -39,7 +38,7 @@ test("a plain value gives one row with the value only, a nested value is written
   assert.deepEqual(rowsOf(), [["list", "[1,2]"], ["nested", '{"a":1}']]);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("a null or undefined value hides the box", () => {
   show({ a: 1 });
   show(null);
@@ -49,7 +48,6 @@ test("a null or undefined value hides the box", () => {
   assert.equal(box().hasAttribute("hidden"), true);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
 test("the box sits at the pointer, offset 10 px, through the CSSOM only (no style attribute)", () => {
   show({ a: 1 }, 100, 200);
   assert.equal(box().styles.get("left"), "110px");
@@ -57,7 +55,6 @@ test("the box sits at the pointer, offset 10 px, through the CSSOM only (no styl
   assert.equal(box().hasAttribute("style"), false);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
 test("at the right or bottom edge of the viewport the box goes to the other side of the pointer", () => {
   show({ a: 1 }, 790, 590);
   // The fake box is 40 by 20: left of the pointer by the offset and the width, above it by the offset and the height.
@@ -65,7 +62,6 @@ test("at the right or bottom edge of the viewport the box goes to the other side
   assert.equal(box().styles.get("top"), "560px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
 test("one shared element serves every call, a child of body and not of the content", () => {
   show({ a: 1 });
   show({ b: 2 });
@@ -74,7 +70,7 @@ test("one shared element serves every call, a child of body and not of the conte
   assert.equal(doc.content.querySelectorAll(".myst-vega-tooltip").length, 0);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-123
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S4
 test("a scroll (capture, on the window), a content patch and hideChartTooltip hide the box", () => {
   for (const hide of [
     () => (windowListeners.get("window:scroll:true")![0] as () => void)(),

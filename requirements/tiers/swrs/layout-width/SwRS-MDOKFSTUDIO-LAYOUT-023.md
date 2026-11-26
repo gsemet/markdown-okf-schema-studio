@@ -32,6 +32,8 @@ scenarios:
   title: Measured again when the layout changes
 - id: S7
   title: Re-measure keeps the sideways scroll
+- id: S8
+  title: A code block fits its longest line
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -63,16 +65,6 @@ supersedes:
 ### Normative behavior
 
 When the width mode is Auto, the extension SHALL widen a table, figure, image, code block or Mermaid diagram that is wider than the text column to the width it needs (a code block until its longest line fits, its border and a caption bar included, so that it scrolls only beyond the available area), up to the available area, centred on that area, measuring it again whenever the layout may have changed.
-
-### Scenario (nominal): A code block fits its longest line
-| Input | Outcome |
-| --- | --- |
-| Auto, 700 px column, 1000 px pane, a top-level code block with a 1 px border whose `pre` is 698 px inside and 760 px of content | Breakout 62 px (762 − 700): after the pass `scrollWidth` equals `clientWidth`, no scroll bar |
-| The same block captioned (a figure with the `pre` and its caption bar), 800 px of content | The figure breaks out by 102 px and the caption bar has the block's width |
-| A code block whose content overflows by 1 px | Marked wide with a breakout of 1 px (an overflowing code block has no 1 px tolerance) |
-| A code block that fits, with a fractional box width (700.4 px in a 700 px column) | Not marked wide, not shifted |
-| A code block of 1600 px of content | Capped at the available area (breakout 268 px) and scrolls inside it |
-| A code block inside a list item, wider than the item | Not marked; scrolls inside the item (Known issue) |
 
 ### Scenario S1 (nominal): Wide table and oversized block
 - GIVEN Auto mode, a column of 700 px, a pane of 1000 px, a table needing 900 px and a code block needing 1600 px
@@ -118,6 +110,17 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 - WHEN a layout pass measures it again (a cell editor closes, the pane is resized, an image loads)
 - THEN its scrollLeft is kept, clamped to the new maximum scroll (scroll width minus box width)
 - AND when the breakout width changes the table keeps the same pixel offset, clamped, not a proportional one
+
+### Scenario S8 (nominal): A code block fits its longest line
+
+| Input | Outcome |
+| --- | --- |
+| Auto, 700 px column, 1000 px pane, a top-level code block with a 1 px border whose `pre` is 698 px inside and 760 px of content | Breakout 62 px (762 − 700): after the pass `scrollWidth` equals `clientWidth`, no scroll bar |
+| The same block captioned (a figure with the `pre` and its caption bar), 800 px of content | The figure breaks out by 102 px and the caption bar has the block's width |
+| A code block whose content overflows by 1 px | Marked wide with a breakout of 1 px (an overflowing code block has no 1 px tolerance) |
+| A code block that fits, with a fractional box width (700.4 px in a 700 px column) | Not marked wide, not shifted |
+| A code block of 1600 px of content | Capped at the available area (breakout 268 px) and scrolls inside it |
+| A code block inside a list item, wider than the item | Not marked; scrolls inside the item (Known issue) |
 
 ### Several triggers in one frame (verification note)
 

@@ -73,7 +73,7 @@ test("the limit stops the search across blocks", () => {
   assert.equal(findInBlocks(collectTextBlocks(root as never), pattern("a"), 4).length, 4);
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-DIAG-121
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
 test("the Chart source section of a chart is not searched: its text is hidden in the preview", () => {
   const root = el("main", [
     el("p", ["body text"]),
