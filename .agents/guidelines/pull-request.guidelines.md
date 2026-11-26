@@ -96,7 +96,8 @@ linear (constitution, section 4).
   branch" button or a local `git merge origin/main`.
 - If you cannot rebase the branch yourself, ask whoever owns it to rebase it.
 - `ci-static` enforces the rule with `just check-no-merge-commits`. A red check is fixed by the
-  rebase command the check prints.
+  rebase command the check prints. The check ignores the forge's test merge, also the chained one
+  of a native stack, and still reports every merge a branch of the stack carries.
 
 ## GitHub issues
 
