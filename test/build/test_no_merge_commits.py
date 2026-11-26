@@ -141,6 +141,106 @@ def test_test_merge_of_a_branch_that_carries_a_merge_fails(clone: Path) -> None:
     assert "test merge" not in result.stderr
 
 
+def _stack(clone: Path, merged: "str | None" = None) -> None:
+    """Nested stack branches ``s1``..``s3``, each from the one below, ``s1`` from origin/main.
+
+    The branch named ``merged`` also merges a moved origin/main into itself, before the branch above forks.
+    """
+    below = "origin/main"
+    for branch in ("s1", "s2", "s3"):
+        _git(clone, "checkout", "--quiet", "-b", branch, below)
+        _commit(clone, f"{branch} work")
+        if branch == merged:
+            _push_main(clone, "main moved")
+            _git(clone, "checkout", "--quiet", branch)
+            _git(clone, "merge", "--no-ff", "-m", f"Merge branch main into {branch}", "origin/main")
+        below = branch
+
+
+def _forge_merge(clone: Path, branch: str, subject: "str | None" = None) -> str:
+    """Merge ``branch`` into HEAD, by default with the forge's subject; returns the short id of the merge."""
+    first = _git(clone, "rev-parse", "HEAD")
+    second = _git(clone, "rev-parse", branch)
+    _git(clone, "merge", "--no-ff", "-m", subject or f"Merge {second} into {first}", second)
+    return _git(clone, "rev-parse", "--short", "HEAD")
+
+
+def _chained_test_merge(clone: Path, *branches: str) -> "list[str]":
+    """Detach HEAD on origin/main and merge each branch on the merge before it, like a native stack's test merge."""
+    _git(clone, "checkout", "--quiet", "--detach", "origin/main")
+    return [_forge_merge(clone, branch) for branch in branches]
+
+
+def test_chained_test_merge_of_a_linear_stack_passes(clone: Path) -> None:
+    _stack(clone)
+    _chained_test_merge(clone, "s1", "s2", "s3")
+    result = _check(clone, "origin/main")
+    assert result.returncode == 0, result.stderr
+    assert "passed (3 commits since origin/main" in result.stdout
+
+
+def test_chained_test_merge_passes_against_the_lower_branch_base(clone: Path) -> None:
+    _stack(clone)
+    _git(clone, "push", "--quiet", "origin", "s2")
+    _chained_test_merge(clone, "s1", "s2", "s3")
+    result = _check(clone, "origin/s2")
+    assert result.returncode == 0, result.stderr
+    assert "passed (1 commits since origin/s2" in result.stdout
+
+
+def test_chained_test_merge_fails_when_the_top_branch_carries_a_merge(clone: Path) -> None:
+    _stack(clone, merged="s3")
+    inner = _git(clone, "rev-parse", "--short", "s3")
+    chain = _chained_test_merge(clone, "s1", "s2", "s3")
+    result = _check(clone, "origin/main")
+    assert result.returncode == 1
+    assert f"{inner} Merge branch main into s3" in result.stderr
+    assert not [merge for merge in chain if merge in result.stderr]
+
+
+def test_chained_test_merge_fails_when_a_lower_branch_carries_a_merge(clone: Path) -> None:
+    _stack(clone, merged="s1")
+    inner = _git(clone, "rev-parse", "--short", "s1")
+    chain = _chained_test_merge(clone, "s1", "s2", "s3")
+    result = _check(clone, "origin/main")
+    assert result.returncode == 1
+    assert f"{inner} Merge branch main into s1" in result.stderr
+    assert not [merge for merge in chain if merge in result.stderr]
+
+
+def test_chain_with_non_nested_heads_reports_every_merge(clone: Path) -> None:
+    for branch in ("a", "b", "c"):
+        _git(clone, "checkout", "--quiet", "-b", branch, "origin/main")
+        _commit(clone, f"{branch} work")
+    chain = _chained_test_merge(clone, "a", "b", "c")
+    result = _check(clone, "origin/main")
+    assert result.returncode == 1
+    assert [merge for merge in chain if merge in result.stderr] == chain
+
+
+def test_nested_chain_with_another_subject_reports_every_merge(clone: Path) -> None:
+    _stack(clone)
+    _git(clone, "checkout", "--quiet", "--detach", "origin/main")
+    chain = [
+        _forge_merge(clone, "s1", "Merge branch s1"),
+        _forge_merge(clone, "s2"),
+        _forge_merge(clone, "s3"),
+    ]
+    result = _check(clone, "origin/main")
+    assert result.returncode == 1
+    assert [merge for merge in chain if merge in result.stderr] == chain
+
+
+def test_chain_not_rooted_on_the_base_reports_every_merge(clone: Path) -> None:
+    _stack(clone)
+    _git(clone, "checkout", "--quiet", "-b", "feature", "origin/main")
+    _commit(clone, "feature work")
+    chain = [_forge_merge(clone, "s1"), _forge_merge(clone, "s2")]
+    result = _check(clone, "origin/main")
+    assert result.returncode == 1
+    assert [merge for merge in chain if merge in result.stderr] == chain
+
+
 def test_stacked_base_counts_only_the_branch_commits(clone: Path) -> None:
     _git(clone, "checkout", "--quiet", "-b", "lower")
     _commit(clone, "lower one")
