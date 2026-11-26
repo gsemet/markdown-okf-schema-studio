@@ -593,7 +593,7 @@ test("T10b: a code block wider than the available area is capped", () => {
   assert.equal(breakoutOf(block), "268px");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
 test("T10b: a code block inside a list item is not measured", () => {
   const { harness, make, code } = codeColumn();
   const list = make("ol", 700, 700);
@@ -602,6 +602,26 @@ test("T10b: a code block inside a list item is not measured", () => {
   harness.widthButton.dispatch("click");
   for (const element of [list, item, block]) {
     assert.equal(element.getAttribute("data-sphinx-preview-wide"), null, element.tagName);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
+test("T10b: a wide block nested in a container is not measured", () => {
+  const { harness, make, code } = codeColumn();
+  // The harness renders no directive: a `div` stands for an admonition and for a card.
+  const admonition = make("div", 700, 700);
+  const table = make("table", 900, 900, admonition);
+  const quote = make("blockquote", 700, 700);
+  const paragraph = make("p", 660, 900, quote);
+  const image = make("img", 900, 900, paragraph);
+  // The harness elements lack these two image members: with them, a measured image fails the assertions.
+  Object.assign(image, { naturalWidth: 900, hasAttribute: (name: string) => image.getAttribute(name) !== null });
+  const card = make("div", 700, 700);
+  const block = code(660, 900, card);
+  harness.widthButton.dispatch("click");
+  for (const element of [admonition, table, quote, paragraph, image, card, block]) {
+    assert.equal(element.getAttribute("data-sphinx-preview-wide"), null, element.tagName);
+    assert.equal(breakoutOf(element), "", element.tagName);
   }
 });
 
