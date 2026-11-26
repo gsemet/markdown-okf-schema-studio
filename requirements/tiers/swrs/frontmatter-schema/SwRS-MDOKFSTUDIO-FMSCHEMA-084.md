@@ -40,10 +40,13 @@ implemented_in_files:
 - src/core/frontmatter/okfFrontmatter.ts
 - src/core/frontmatter/propertiesTable.ts
 - src/core/frontmatter/schemaValidator.ts
+- src/core/preview/styles/propertiesStyles.markers.ts
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
 - test/core/frontmatter/schemaValidator.holes.test.ts
+- test/core/preview/fieldIssueStyles.test.ts
+- test/visual/frontmatterIssueRowScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -66,7 +69,7 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 
 - GIVEN a schema with a number maximum 5 and a date-time format, and a document with values 9 and x for those fields
 - WHEN the preview is rendered
-- THEN both rows are underlined in red, every violation is reported (not only the first) and their tooltips read must be <= 5 and must match format "date-time"
+- THEN each of the two rows shows its name in the error colour on a light red background and a wavy underline in the error colour under its value, every violation is reported (not only the first) and their tooltips read must be <= 5 and must match format "date-time"
 
 ### Scenario S2 (nominal): 2020-12 keywords and formats
 
@@ -98,7 +101,7 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 
 - GIVEN `markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties` true, a schema declaring type and title, and a document that also sets titel
 - WHEN the preview is rendered
-- THEN the row titel carries the warning "Unknown field; it is not declared in the "{type}" schema." and the badge counts one warning
+- THEN the row titel carries the warning "Unknown field; it is not declared in the "{type}" schema." and is shown with its name in the warning colour on a light background of that colour and a wavy underline in the warning colour under its value, and the badge counts one warning
 
 ### Scenario S7 (boundary): Cases without an issue
 
@@ -127,7 +130,10 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 - Method: test/core/frontmatter/propertiesTable.test.ts, test T25 `the section flags a schema that forbids additional properties` (closed schema, section flag; cases without an issue, flag absent).
 - Method: test/integration/previewEditing.test.ts (closed schema).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario (strict setting).
-- Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently. The validator collects all errors, so each violation gets its own row or underline. The empty required row has value null and is flagged required. The whole-document row is an info-style row with the error severity and spans every visible column. The strict setting has no effect on the closed-schema error; one row is reported per undeclared key, including type when the schema does not declare it. The strict warning applies only when a schema matched, is independent of the schema's own additionalProperties, and a generic table never warns. The whole-document scenario (minProperties) has no test (probed against the analysis).
+- Method: test/core/preview/fieldIssueStyles.test.ts, tests `a field row with an error has a red name cell and a red wavy underline under its value` and `a field row with a warning has the same marks in the warning colour` (how the rows are marked: violations mark their field rows; strict setting).
+- Method: test/core/preview/fieldIssueStyles.test.ts, test `a value cell that is being edited drops the issue underline` (Criteria, no underline during an edit).
+- Method: test/visual/frontmatterIssueRowScenarios.ts, visual scenarios `v32-field-issue-rows-light-900` and `v33-field-issue-rows-dark-900` (how the rows are marked: violations mark their field rows; strict setting).
+- Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently. The validator collects all errors, so each violation gets its own row or underline. An error or warning field row is marked like the whole-document error row: its name cell takes the severity colour on a light background of that colour and its value a wavy underline in that colour; the value text keeps its colour, and an info-severity field row keeps the plain look. While a value is being edited its cell has no underline, so the editor and its field menu are not underlined. The empty required row has value null and is flagged required. The whole-document row is an info-style row with the error severity and spans every visible column. The strict setting has no effect on the closed-schema error; one row is reported per undeclared key, including type when the schema does not declare it. The strict warning applies only when a schema matched, is independent of the schema's own additionalProperties, and a generic table never warns. The whole-document scenario (minProperties) has no test (probed against the analysis).
 
 <!-- okf:links:start -->
 ### Links

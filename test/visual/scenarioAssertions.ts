@@ -278,6 +278,46 @@ export const STRICT_FIELD_ASSERTIONS: ContentAssertion[] = [
   { message: "the undeclared field is listed", selector: "[data-okf-properties]", text: "bonus_field" },
 ];
 
+const ISSUE_TABLE = `${MAIN} [data-okf-properties]`;
+const fieldRow = (field: string): string => `${ISSUE_TABLE} tr[data-okf-field="${field}"]`;
+const RED_HUE = "r > g * 1.25 && r > b * 1.25";
+const WARNING_HUE = "b < r * 0.6 && b < g * 0.6";
+
+/** True in the page when the text colour and the background of an element both pass `hue` and neither is transparent. */
+const textAndBackgroundHue = (selector: string, hue: string): string =>
+  `(() => { const style = getComputedStyle(document.querySelector('${selector}')); return [style.color, style.backgroundColor].every((value) => { const [r, g, b, a = 1] = value.match(/[\\d.]+/g).map(Number); return a !== 0 && ${hue}; }); })()`;
+
+/** CR 513: fixture 98 with the strict setting on, one field with an error and one with a warning. */
+export const FIELD_ISSUE_ROW_ASSERTIONS: ContentAssertion[] = [
+  { message: "the badge counts one error", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-errors", value: "1" } },
+  { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
+  { message: "the value of the error field has a wavy underline", selector: `${fieldRow("status")}.okf-error > td.okf-error`, count: 1,
+    css: { textDecorationLine: "underline", textDecorationStyle: "wavy" } },
+  { message: "the value of the warning field has a wavy underline", selector: `${fieldRow("bonus_field")}.okf-warning > td.okf-warning`, count: 1,
+    css: { textDecorationLine: "underline", textDecorationStyle: "wavy" } },
+  { message: "the name of the error field is red on a light red background", selector: `${fieldRow("status")} > th`, count: 1,
+    expr: textAndBackgroundHue(`${fieldRow("status")} > th`, RED_HUE) },
+  { message: "the name of the warning field takes the warning colour on a light background of it", selector: `${fieldRow("bonus_field")} > th`, count: 1,
+    expr: textAndBackgroundHue(`${fieldRow("bonus_field")} > th`, WARNING_HUE) },
+  { message: "each underline has the colour of the name in its row", selector: `${ISSUE_TABLE} tr[data-okf-field] > td.okf-error, ${ISSUE_TABLE} tr[data-okf-field] > td.okf-warning`, count: 2,
+    expr: `[...document.querySelectorAll('${ISSUE_TABLE} tr[data-okf-field] > td.okf-error, ${ISSUE_TABLE} tr[data-okf-field] > td.okf-warning')].every((cell) => getComputedStyle(cell).textDecorationColor === getComputedStyle(cell.parentElement.querySelector(':scope > th')).color)` },
+  { message: "the name of a valid field has no background", selector: `${fieldRow("title")} > th`, count: 1, css: { backgroundColor: "rgba(0, 0, 0, 0)" } },
+  { message: "the value of a valid field is not underlined", selector: `${fieldRow("title")} > td[data-okf-value-cell]`, count: 1, css: { textDecorationLine: "none" } },
+];
+
+const SCHEMA_WARNING_ROW = `${ISSUE_TABLE} tr.okf-info-row.okf-warning`;
+
+/** CR 513: fixture 99, whose schema cannot be parsed. */
+export const SCHEMA_WARNING_ROW_ASSERTIONS: ContentAssertion[] = [
+  { message: "one warning row says that the schema could not be parsed", selector: SCHEMA_WARNING_ROW, count: 1,
+    expr: `document.querySelector('${SCHEMA_WARNING_ROW}').textContent.replace(/^\\W+/, '').startsWith('Schema could not be parsed:')` },
+  { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
+  { message: "the row takes the warning colour on a light background of it", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
+    expr: textAndBackgroundHue(`${SCHEMA_WARNING_ROW} th`, WARNING_HUE) },
+  { message: "the row spans every column of the table and wraps its message inside it", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
+    expr: `(() => { const cell = document.querySelector('${SCHEMA_WARNING_ROW} th'); const table = cell.closest('table'); const columns = [...table.querySelectorAll('thead th')].filter((header) => getComputedStyle(header).display !== 'none').length; return cell.colSpan === columns && Math.abs(cell.getBoundingClientRect().width - table.getBoundingClientRect().width) <= 2 && cell.scrollWidth <= cell.clientWidth + 1; })()` },
+];
+
 export const PROPERTIES_HIDDEN_ASSERTIONS: ContentAssertion[] = [
   { message: "no properties table", selector: "[data-okf-properties]", count: 0 },
   { message: "the heading still renders", selector: `${MAIN} h1`, text: "Frontmatter Rendering" },
