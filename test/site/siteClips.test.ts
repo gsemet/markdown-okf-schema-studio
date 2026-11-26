@@ -105,7 +105,7 @@ test("the shipped editing page plays the list drag clip as video", async () => {
 });
 
 test("the shipped editing page plays the renderings tour clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/advanced-renderings-tour";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -117,7 +117,7 @@ test("the shipped editing page plays the renderings tour clip as video", async (
 });
 
 test("the shipped editing page plays the radio clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/radio-buttons";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -129,7 +129,7 @@ test("the shipped editing page plays the radio clip as video", async () => {
 });
 
 test("the shipped editing page plays the block editor modes clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/block-editor-modes";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -141,7 +141,7 @@ test("the shipped editing page plays the block editor modes clip as video", asyn
 });
 
 test("the shipped editing page plays the keyboard navigation clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/keyboard-navigation";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -189,7 +189,7 @@ test("the shipped editing page plays the spreadsheet paste clip as video", async
 });
 
 test("the shipped editing page plays the table handles clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/table-anchors";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -201,7 +201,7 @@ test("the shipped editing page plays the table handles clip as video", async () 
 });
 
 test("the shipped editing page plays the figure editor clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/figure-editor";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "editing.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -238,7 +238,7 @@ test("the shipped themes page plays the theme switch clip as video", async () =>
 });
 
 test("the shipped OKF page plays the frontmatter clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/okf-frontmatter";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "okf.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -250,7 +250,7 @@ test("the shipped OKF page plays the frontmatter clip as video", async () => {
 });
 
 test("the shipped wide tables page plays the wide table clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/wide-table-auto-width";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "wide-tables.md"), "utf8");
   const rendered = await renderMyst(source);
@@ -262,7 +262,7 @@ test("the shipped wide tables page plays the wide table clip as video", async ()
 });
 
 test("the shipped OKF page plays the schema bundle frontmatter clip as video", async () => {
-  // @tests_req SwRS-MDOKFSTUDIO-CORE-095
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-095#S1
   const clip = "docs/demo-video/clips/okf-schema-bundle-frontmatter";
   const source = fs.readFileSync(path.join(EXTENSION_ROOT, "docs", "user", "okf.md"), "utf8");
   const rendered = await renderMyst(source);
