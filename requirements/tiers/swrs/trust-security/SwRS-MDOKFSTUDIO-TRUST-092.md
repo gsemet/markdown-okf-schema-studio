@@ -28,6 +28,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/plantumlBundle.markers.ts
 tested_in_files:
+- test/security/builtPackage.test.ts
 - test/security/package-contract.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -65,8 +66,8 @@ The package SHALL keep the folder out/bundle, which holds the built-in engine bu
 
 ### Verification notes
 
-- Method: Unit test test/security/package-contract.test.ts (the VSIX leaves out source maps, internal docs, agent files and the Python project file; the built-in PlantUML engine ships pinned and the JAR is an explicit opt-in setting) covers the .vscodeignore lines and the bundle entry point of esbuild.mjs. The other bundles (preview.js, preview.css, KaTeX, Mermaid) are not asserted.
-- Criteria: .vscodeignore does not exclude out/bundle or out/**, the build script holds the entry point of out/bundle/plantumlPreview.js and the licence copy (no test asserts the licence copy), and the leftovers are excluded.
+- Method: Unit test test/security/package-contract.test.ts (the VSIX leaves out source maps, internal docs, agent files and the Python project file; the built-in PlantUML engine ships pinned and the JAR is an explicit opt-in setting) covers the .vscodeignore lines and the bundle entry point of esbuild.mjs. Test test/security/builtPackage.test.ts runs the bundle step of esbuild.mjs and the file listing of the packaging tool: it checks the files the preview loads (preview.js, preview.css, KaTeX, Mermaid and the engine bundle among them), the content of the engine licence copy, and that the package keeps all of out/bundle but its source maps.
+- Criteria: .vscodeignore does not exclude out/bundle or out/**, the build script holds the entry point of out/bundle/plantumlPreview.js and writes that file and the licence copy, and the leftovers are excluded.
 
 <!-- okf:links:start -->
 ### Links

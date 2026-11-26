@@ -85,10 +85,11 @@ this repository.
   the static stage only: CI runs the others)
 - Release notes of the current version, in `docs/releases-notes/`: `just release-notes-check`
 - CI jobs (in parallel in `.github/workflows/ci.yml`, in sequence in `just preflight`):
-  `just ci-static` (on Linux and Windows), `just ci-visual`, `just ci-viewer-graph`, `just ci-integration`, then
-  `just ci-report` and `just ci-gallery`. A pull request runs only the simulated jobs; the real VS Code jobs
-  (integration, stress with `just ci-stress [REPEAT]`) run on every push to `main`, and on a branch
-  with `gh workflow run ci.yml --ref <branch> -f heavy=true`
+  `just ci-static` (on Linux and Windows), `just ci-visual`, `just ci-viewer-graph`, `just ci-integration`,
+  `just ci-acceptance [GROUP]` (the acceptance tests of the use cases in real VS Code, one CI shard per
+  e2e group), then `just ci-report` and `just ci-gallery`. A pull request runs only the simulated jobs;
+  the real VS Code jobs (integration, acceptance, stress with `just ci-stress [REPEAT]`) run on every
+  push to `main`, and on a branch with `gh workflow run ci.yml --ref <branch> -f heavy=true`
 
 ## Guidelines
 

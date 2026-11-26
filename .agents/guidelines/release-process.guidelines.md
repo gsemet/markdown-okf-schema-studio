@@ -63,13 +63,13 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    check of `scripts/release_notes.py` and the release's asset upload take it as they take a PNG. The
    release-note file in the repository keeps the GIF, never a video link.
 4. The last merge of the stack started the heavy run on `main` HEAD. Wait for
-   `integration` and `stress` to be green on that exact commit, and read the result of each job:
-   a red `stress` does not turn this run red.
+   `integration`, every `acceptance` shard and `stress` to be green on that exact commit, and read
+   the result of each job: a red `stress` does not turn this run red.
 
    ```bash
    gh run list --workflow ci.yml --branch main --limit 3
    gh run watch <run-id>
-   gh run view <run-id> --json jobs --jq '.jobs[] | select(.name == "integration" or .name == "stress") | "\(.name) \(.conclusion)"'
+   gh run view <run-id> --json jobs --jq '.jobs[] | select(.name == "integration" or .name == "stress" or (.name | startswith("acceptance ("))) | "\(.name) \(.conclusion)"'
    ```
 
    Check that the run's `headSha` is the current `main` HEAD; a merge since then starts the step
@@ -91,7 +91,7 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    version commit, so no follow-up commit on `main` is ever needed for it.
    If the local `just preflight` stops at `ci-integration` because the screen is locked, do not
    wait: dispatch `gh workflow run ci.yml --ref <branch> -f heavy=true` at once on the release branch
-   and go on; its `integration` job is the real-window proof.
+   and go on; its `integration` job and `acceptance` shards are the real-window proof.
 6. The version push is monitored through the tag, the GitHub release with its notes and images,
    the Marketplace and Open VSX publications and Pages, recovering a red heavy job as in "After
    the merge" above. The version push dispatches a separate **Release VSIX** run (event
@@ -163,8 +163,9 @@ The version PR may be the top PR of a stack that is ready to merge:
    `gh workflow run ci.yml --ref <top-branch> -f heavy=true`. Find it with
    `gh run list --workflow ci.yml --branch <top-branch> --event workflow_dispatch --limit 3`. Then
    use the `gh run watch` and `gh run view ... --jq` commands of step 4, reading the result of each
-   of `integration` and `stress`. The run's `headSha` must be the top branch's head; a push to any
-   PR of the stack starts this step again. Red jobs and flakes are handled as in step 4.
+   of `integration`, every `acceptance` shard and `stress`. The run's `headSha` must be the top
+   branch's head; a push to any PR of the stack starts this step again. Red jobs and flakes are
+   handled as in step 4.
 4. Only then the version PR is marked ready. The owner merges the whole stack by rebase, bottom up,
    in order (`gh stack merge <version PR> --rebase`, see
    [stacked-prs.guidelines.md](stacked-prs.guidelines.md)).

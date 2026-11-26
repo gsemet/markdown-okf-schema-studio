@@ -2,6 +2,12 @@
 
 ## 2026-11-26
 
+### StRS acceptance tests of trust and security, and the acceptance job (CR-505, first round)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-CORE-076 covers the new CI job `acceptance` (one shard per e2e group with a file under `test/integration/acceptance/`): normative text and S1 to S6 name it beside `integration` and `stress` (S6: a dispatch run now needs `stress` too, as a push run does), and the new scenarios S7 (the shards and the refusals of the launcher and of the VSIX unpacking), S8 (their artifacts), S9 (the newest attempt and the acceptance stage of the report), S10 (tagging needs the job) and S11 (a later Pages deploy needs every shard). Reason: CR-505. No approved requirement is touched; StRS-MDOKFSTUDIO-CORE-007 names no job and does not change.
+- Changed (markers, no requirement text): five trust and security paths (StRS-MDOKFSTUDIO-TRUST-001 S1, TRUST-004 S1, TRUST-006 S1, TRUST-009 S1 and S2) are walked in a real VS Code window under `test/integration/acceptance/` (`@accepts_req StRS-MDOKFSTUDIO-TRUST-...#S<n>`). The checks of the installed package (the visible texts and the icon of StRS-MDOKFSTUDIO-TRUST-012) and of the built package (`test/security/builtPackage.test.ts`, StRS-MDOKFSTUDIO-TRUST-014) walk no path in full and accept none. The acceptance coverage mode of okfreq is not switched in this round.
+- Changed (`proposed`, verification notes and markers): `test/security/builtPackage.test.ts` carries `@tests_req SwRS-MDOKFSTUDIO-TRUST-092#S1` and `#S2`; the verification notes of that requirement name it.
+
 ### Scenario markers of the clip pages tests (CR-504, after the restack)
 
 - Changed (markers, no test and no requirement text changed): the nine `@tests_req SwRS-MDOKFSTUDIO-CORE-095` markers without a fragment in `test/site/siteClips.test.ts` (shipped documentation pages that play a feature clip as video, added by the changes below this one) name scenario S1. Reason: CR-504, a marker on a requirement that declares `scenarios:` needs a fragment.

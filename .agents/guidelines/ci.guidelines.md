@@ -38,13 +38,14 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     internal ids in the text (see
     [pull-request.guidelines.md](pull-request.guidelines.md)).
 11. **Every job has a `timeout-minutes`** (about twice its healthy duration: 30 for the VS Code
-    integration and stress jobs, 15 for the others, 10 for the report job). A hung job must fail fast and name
+    integration, acceptance and stress jobs, 15 for the others, 10 for the report job). A hung job must fail fast and name
     where it stopped, never run to the platform default of six hours. Never raise a timeout to
     make a slow or flaky run pass: find what waits.
     - **A hang names its step and leaves a dump.** The step that runs the tests has its own
-      `timeout-minutes` below the job's (20 for `integration`), so a hang cancels that step and the
-      `if: always()` steps still collect diagnostics (`just ci-hang-dump`) and upload the reports.
-      This is the one job with a third target, and it only collects files.
+      `timeout-minutes` below the job's (20 for `integration` and for each `acceptance` shard), so a
+      hang cancels that step and the `if: always()` steps still collect diagnostics
+      (`just ci-hang-dump`) and upload the reports. These two jobs are the ones with a third target,
+      and it only collects files.
     - **Real-window tests run under the hang watchdog** (`test/shared/hangWatchdog.ts`, one module
       for every threshold): each trusted-window step has a budget and logs `STEP start` / `STEP
       done`; a single VS Code call that must return is wrapped in `bounded()` so a timeout names the
@@ -76,19 +77,25 @@ The CI only runs what a developer can run locally. All logic lives in the task r
 13. **Real VS Code jobs run on every push to `main`, never on a pull request.**
     A pull request runs the simulated tests only: static checks and the Playwright/Chromium visual
     tests against a mock host, then `ci-report` with the real VS Code stage reported as skipped
-    (`just ci-report visual`). The real VS Code window jobs, `integration` and `stress`, are too
-    heavy for that path. They run on every push to `main`, so a red real-window scenario shows up
-    on the merge that causes it: a red `integration` fails `report`, then `checks`, and `stress`
-    stays advisory except on a version change (rule 14). The run's own conclusion stays green with
-    a red advisory `stress`: read the result of each job.
+    (`just ci-report visual`). The real VS Code window jobs, `integration`, `acceptance` and
+    `stress`, are too heavy for that path. They run on every push to `main`, so a red real-window
+    scenario shows up on the merge that causes it: a red `integration` or a red `acceptance` shard
+    fails `report`, then `checks`, and `stress` stays advisory except on a version change
+    (rule 14). The run's own conclusion stays green with a red advisory `stress`: read the result
+    of each job.
+    `acceptance` walks the StRS paths of `test/integration/acceptance/`, one shard
+    (`acceptance (<group>)`, `just ci-acceptance <group>`) per e2e group that has a file there. A
+    new group's first file adds the group to the job's matrix, in the order of
+    `test/shared/e2eGroups.ts`.
     On a branch, they run on demand:
     `gh workflow run ci.yml --ref <branch> -f heavy=true` (the gallery and site artifact,
     `studio-site-attempt-<n>`, are built too when `integration` and `report` succeed; `-f gallery=false`
     skips them, for example in a stress loop). To loop one flaky scenario many times, use
     `-f heavy=true -f stress_repeat=60 -f stress_scenarios=alert-dropdown` (narrow the scenarios
     above about 220 scenario runs per window, rounds times scenarios; the deadline is computed, capped at 24 min). Run them before merging a change to the extension host, the webview or the
-    real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).
-    A third on-demand job, `toc-loop`, is a repro tool for the edit-toggle flake of the steps that
+    real-window tests, and run `npm run test:integration` and `npm run test:acceptance` locally
+    (one VS Code window at a time).
+    Another on-demand job, `toc-loop`, is a repro tool for the edit-toggle flake of the steps that
     follow a side-bar reopen:
     `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]
     [-f toc_steps=readme-html,toc,myst-blocks] [-f toc_control=1]` (1 to 40 rounds, delay 0 to
@@ -105,10 +112,10 @@ The CI only runs what a developer can run locally. All logic lives in the task r
 14. **A release is tagged only after a green heavy run of its commit.** On a push to `main` that
     changes the package version, the `release-check` job detects the change
     (`scripts/version.py --bump-since`, the same test `tag-release` uses) and `stress` blocks
-    instead of being advisory. `tag-release` needs `checks` and both heavy jobs, and tags only when all three
+    instead of being advisory. `tag-release` needs `checks` and the three heavy jobs, and tags only when all four
     results are `success`. Otherwise it creates no tag, writes "Release not tagged" with the result
-    of `checks`, `integration` and `stress` to the job summary and fails (an integration failure
-    fails `report`, then `checks`; the summary is written all the same). If `release-check` itself
+    of `checks`, `integration`, `acceptance` and `stress` to the job summary and fails (an integration
+    or acceptance failure fails `report`, then `checks`; the summary is written all the same). If `release-check` itself
     fails or the run is cancelled, nothing is tagged and no summary is written; the run is red or
     cancelled. The Pages deploy of the tag reuses the reports of that run instead of running the
     suite again. A red heavy job on that push is recovered in the same run (next section). The version
@@ -124,16 +131,16 @@ The CI only runs what a developer can run locally. All logic lives in the task r
 ## Recovering from a red heavy job on a release push
 
 Only the push that changes the version can tag it: a later push without a version change does
-not. When a flake fails `integration` or `stress` on that push, re-run the failed jobs of the
-same run; no new commit and no manual tag are needed.
+not. When a flake fails `integration`, an `acceptance` shard or `stress` on that push, re-run
+the failed jobs of the same run; no new commit and no manual tag are needed.
 
 1. Open the run: Actions, workflow **CI**, the run of the version commit on `main` (its
    `tag-release` summary says "Release not tagged").
 2. Re-run jobs > **Re-run failed jobs**, then **Re-run jobs**. With the CLI:
    `gh run rerun <run-id> --failed` (the run id is in the summary and in the run URL).
 3. What to expect: GitHub re-runs the failed jobs and the jobs that depend on them, including the
-   ones that were skipped: the heavy job, then `report` and `checks` (after an integration
-   failure), `tag-release`, then `release` (which dispatches Release VSIX, a separate run) and
+   ones that were skipped: the heavy job (or the failed `acceptance` shards only), then `report`
+   and `checks` (after an integration or acceptance failure), `tag-release`, then `release` (which dispatches Release VSIX, a separate run) and
    `pages`. The jobs that passed are not re-run and keep
    their results and outputs (`release-check` keeps `bump=true`). The re-run uses the same commit
    and the same push event, so `tag-release` tags that commit when everything is green.
@@ -144,9 +151,13 @@ same run; no new commit and no manual tag are needed.
    artifact. A job that is not re-run keeps its outputs, so `report` merges the attempt-1 visual
    stage with the re-run integration stage, and Pages (`reports_artifact`, or
    `scripts/select_e2e_run.py`, which picks the newest attempt of `studio-reports`) uses the newest
-   merged reports. Both stages carry the run id pinned by the workflow (`STUDIO_E2E_RUN_ID`), so
-   `report` accepts them however far apart they started; the two-hour limit applies only to local
-   campaigns. Keep each upload and its download consistent (test/build/test_workflows.py).
+   merged reports. The `acceptance` shards upload `e2e-acceptance-<group>-attempt-<n>` and the job
+   outputs the pattern that covers them: `report` downloads each artifact into its own folder, and
+   `scripts/select-acceptance-attempts.mjs` (first step of `just ci-report`) keeps the newest
+   attempt of each group, never an older one when the newest holds no report. All stages carry the
+   run id pinned by the workflow (`STUDIO_E2E_RUN_ID`), so `report` accepts them however far apart
+   they started; the two-hour limit applies only to local campaigns. Keep each upload and its
+   download consistent (test/build/test_workflows.py).
 5. Once the tag exists, re-run only the failed jobs (`release`, `pages`). Never re-run all jobs
    then: `tag-release` would find the tag, output none, and skip `release` and `pages`. A failed
    publication is re-run in the Release VSIX run; in the CI run, re-run only `release` (if the
