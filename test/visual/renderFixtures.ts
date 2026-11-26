@@ -359,7 +359,7 @@ window.resolveVisualFrontmatterLinks = () => {
   );
 
   const css = [
-    themeBlock(theme.variables),
+    themeBlock({ ...theme.variables, ...options.themeVariables }),
     PREVIEW_ACCESSIBILITY_CSS,
     PREVIEW_THEME_CSS,
     ...(options.maxContentWidth === undefined ? [] : [previewContentWidthCss(options.maxContentWidth)]),
@@ -428,8 +428,9 @@ async function writeExportFile(scenario: (typeof SCENARIOS)[number]): Promise<vo
       : staticContent;
   if (content === undefined) throw new Error(`no content in the page of ${scenario.id}`);
   const tokens: Record<string, string> = {};
+  const variables = { ...theme.variables, ...scenario.render?.themeVariables };
   for (const name of THEME_TOKEN_NAMES) {
-    const value = theme.variables[`${VSCODE_VARIABLE_PREFIX}${name}`];
+    const value = variables[`${VSCODE_VARIABLE_PREFIX}${name}`];
     if (value !== undefined) tokens[name] = value;
   }
   const katexDirectory = path.resolve(__dirname, "../../../out/bundle/katex");

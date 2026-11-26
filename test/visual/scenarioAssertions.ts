@@ -280,43 +280,59 @@ export const STRICT_FIELD_ASSERTIONS: ContentAssertion[] = [
 
 const ISSUE_TABLE = `${MAIN} [data-okf-properties]`;
 const fieldRow = (field: string): string => `${ISSUE_TABLE} tr[data-okf-field="${field}"]`;
-const RED_HUE = "r > g * 1.25 && r > b * 1.25";
-const WARNING_HUE = "b < r * 0.6 && b < g * 0.6";
+/** The computed form of the colours of `STATUS_THEME_VARIABLES` (themes.ts), by the theme of the scenario. */
+const STATUS_COLOURS = {
+  light: { error: "rgb(248, 81, 73)", errorBackground: "rgb(242, 222, 222)", warning: "rgb(133, 95, 0)" },
+  dark: { error: "rgb(248, 81, 73)", errorBackground: "rgb(90, 29, 29)", warning: "rgb(204, 167, 0)" },
+} as const;
 
-/** True in the page when the text colour and the background of an element both pass `hue` and neither is transparent. */
-const textAndBackgroundHue = (selector: string, hue: string): string =>
-  `(() => { const style = getComputedStyle(document.querySelector('${selector}')); return [style.color, style.backgroundColor].every((value) => { const [r, g, b, a = 1] = value.match(/[\\d.]+/g).map(Number); return a !== 0 && ${hue}; }); })()`;
+/** The colours are the VS Code theme's only in the preview mode that follows it. */
+const FOLLOWS_HOST_THEME: ContentAssertion = {
+  message: "the preview follows the VS Code theme", selector: "html", attr: { name: "data-sphinx-preview-theme-mode", value: "current" },
+};
+
+/** True in the page when the background of an element is the stylesheet's 14 % tint of `colour`. */
+const tintedBackground = (selector: string, colour: string): string =>
+  `(() => { const probe = document.createElement('div'); probe.style.backgroundColor = 'color-mix(in srgb, ${colour} 14%, transparent)'; document.body.append(probe); const tint = getComputedStyle(probe).backgroundColor; probe.remove(); return tint !== '' && tint !== 'rgba(0, 0, 0, 0)' && getComputedStyle(document.querySelector('${selector}')).backgroundColor === tint; })()`;
 
 /** CR 513: fixture 98 with the strict setting on, one field with an error and one with a warning. */
-export const FIELD_ISSUE_ROW_ASSERTIONS: ContentAssertion[] = [
-  { message: "the badge counts one error", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-errors", value: "1" } },
-  { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
-  { message: "the value of the error field has a wavy underline", selector: `${fieldRow("status")}.okf-error > td.okf-error`, count: 1,
-    css: { textDecorationLine: "underline", textDecorationStyle: "wavy" } },
-  { message: "the value of the warning field has a wavy underline", selector: `${fieldRow("bonus_field")}.okf-warning > td.okf-warning`, count: 1,
-    css: { textDecorationLine: "underline", textDecorationStyle: "wavy" } },
-  { message: "the name of the error field is red on a light red background", selector: `${fieldRow("status")} > th`, count: 1,
-    expr: textAndBackgroundHue(`${fieldRow("status")} > th`, RED_HUE) },
-  { message: "the name of the warning field takes the warning colour on a light background of it", selector: `${fieldRow("bonus_field")} > th`, count: 1,
-    expr: textAndBackgroundHue(`${fieldRow("bonus_field")} > th`, WARNING_HUE) },
-  { message: "each underline has the colour of the name in its row", selector: `${ISSUE_TABLE} tr[data-okf-field] > td.okf-error, ${ISSUE_TABLE} tr[data-okf-field] > td.okf-warning`, count: 2,
-    expr: `[...document.querySelectorAll('${ISSUE_TABLE} tr[data-okf-field] > td.okf-error, ${ISSUE_TABLE} tr[data-okf-field] > td.okf-warning')].every((cell) => getComputedStyle(cell).textDecorationColor === getComputedStyle(cell.parentElement.querySelector(':scope > th')).color)` },
-  { message: "the name of a valid field has no background", selector: `${fieldRow("title")} > th`, count: 1, css: { backgroundColor: "rgba(0, 0, 0, 0)" } },
-  { message: "the value of a valid field is not underlined", selector: `${fieldRow("title")} > td[data-okf-value-cell]`, count: 1, css: { textDecorationLine: "none" } },
-];
+export function fieldIssueRowAssertions(theme: keyof typeof STATUS_COLOURS): ContentAssertion[] {
+  const { error, errorBackground, warning } = STATUS_COLOURS[theme];
+  return [
+    FOLLOWS_HOST_THEME,
+    { message: "the badge counts one error", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-errors", value: "1" } },
+    { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
+    { message: "the value of the error field has a wavy underline in the theme's error colour", selector: `${fieldRow("status")}.okf-error > td.okf-error`, count: 1,
+      css: { textDecorationLine: "underline", textDecorationStyle: "wavy", textDecorationColor: error } },
+    { message: "the value of the warning field has a wavy underline in the theme's warning colour", selector: `${fieldRow("bonus_field")}.okf-warning > td.okf-warning`, count: 1,
+      css: { textDecorationLine: "underline", textDecorationStyle: "wavy", textDecorationColor: warning } },
+    { message: "the name of the error field takes the theme's error colour and error background", selector: `${fieldRow("status")} > th`, count: 1,
+      css: { color: error, backgroundColor: errorBackground } },
+    { message: "the name of the warning field takes the theme's warning colour on a tint of it", selector: `${fieldRow("bonus_field")} > th`, count: 1,
+      css: { color: warning }, expr: tintedBackground(`${fieldRow("bonus_field")} > th`, warning) },
+    { message: "each underline has the colour of the name in its row", selector: `${ISSUE_TABLE} tr[data-okf-field] > td.okf-error, ${ISSUE_TABLE} tr[data-okf-field] > td.okf-warning`, count: 2,
+      expr: `[...document.querySelectorAll('${ISSUE_TABLE} tr[data-okf-field] > td.okf-error, ${ISSUE_TABLE} tr[data-okf-field] > td.okf-warning')].every((cell) => getComputedStyle(cell).textDecorationColor === getComputedStyle(cell.parentElement.querySelector(':scope > th')).color)` },
+    { message: "the name of a valid field has no background", selector: `${fieldRow("title")} > th`, count: 1, css: { backgroundColor: "rgba(0, 0, 0, 0)" } },
+    { message: "the value of a valid field is not underlined", selector: `${fieldRow("title")} > td[data-okf-value-cell]`, count: 1, css: { textDecorationLine: "none" } },
+  ];
+}
 
 const SCHEMA_WARNING_ROW = `${ISSUE_TABLE} tr.okf-info-row.okf-warning`;
 
 /** CR 513: fixture 99, whose schema cannot be parsed. */
-export const SCHEMA_WARNING_ROW_ASSERTIONS: ContentAssertion[] = [
-  { message: "one warning row says that the schema could not be parsed", selector: SCHEMA_WARNING_ROW, count: 1,
-    expr: `document.querySelector('${SCHEMA_WARNING_ROW}').textContent.replace(/^\\W+/, '').startsWith('Schema could not be parsed:')` },
-  { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
-  { message: "the row takes the warning colour on a light background of it", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
-    expr: textAndBackgroundHue(`${SCHEMA_WARNING_ROW} th`, WARNING_HUE) },
-  { message: "the row spans every column of the table, is as wide as it and holds its message", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
-    expr: `(() => { const cell = document.querySelector('${SCHEMA_WARNING_ROW} th'); const table = cell.closest('table'); const columns = [...table.querySelectorAll('thead th')].filter((header) => getComputedStyle(header).display !== 'none').length; return cell.colSpan === columns && Math.abs(cell.getBoundingClientRect().width - table.getBoundingClientRect().width) <= 2 && cell.scrollWidth <= cell.clientWidth + 1; })()` },
-];
+export function schemaWarningRowAssertions(theme: keyof typeof STATUS_COLOURS): ContentAssertion[] {
+  const { warning } = STATUS_COLOURS[theme];
+  return [
+    FOLLOWS_HOST_THEME,
+    { message: "one warning row says that the schema could not be parsed", selector: SCHEMA_WARNING_ROW, count: 1,
+      expr: `document.querySelector('${SCHEMA_WARNING_ROW}').textContent.replace(/^\\W+/, '').startsWith('Schema could not be parsed:')` },
+    { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
+    { message: "the row takes the theme's warning colour on a tint of it", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
+      css: { color: warning }, expr: tintedBackground(`${SCHEMA_WARNING_ROW} th`, warning) },
+    { message: "the row spans every column of the table, is as wide as it and holds its message", selector: `${SCHEMA_WARNING_ROW} th`, count: 1,
+      expr: `(() => { const cell = document.querySelector('${SCHEMA_WARNING_ROW} th'); const table = cell.closest('table'); const columns = [...table.querySelectorAll('thead th')].filter((header) => getComputedStyle(header).display !== 'none').length; return cell.colSpan === columns && Math.abs(cell.getBoundingClientRect().width - table.getBoundingClientRect().width) <= 2 && cell.scrollWidth <= cell.clientWidth + 1; })()` },
+  ];
+}
 
 export const PROPERTIES_HIDDEN_ASSERTIONS: ContentAssertion[] = [
   { message: "no properties table", selector: "[data-okf-properties]", count: 0 },

@@ -36,12 +36,15 @@ scenarios:
   title: Schema that cannot be compiled
 - id: S9
   title: Compile failure in a narrow preview
+- id: S10
+  title: Warning row in a forced preview mode
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/frontmatter/frontmatterParse.ts
 - src/core/frontmatter/okfFrontmatter.ts
+- src/core/preview/styles/pageChromeStyles.markers.ts
 - src/core/preview/styles/propertiesStyles.markers.ts
 tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
@@ -95,7 +98,7 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 
 | Input | Outcome |
 | --- | --- |
-| a Note.schema.json5 file that is not valid JSON after comments are stripped | the table is generic and one warning row starts with "Schema could not be parsed: {error}"; it is shown in the warning colour on a light background of that colour, spans every column and wraps its text, and the badge counts one warning |
+| a Note.schema.json5 file that is not valid JSON after comments are stripped | the table is generic and one warning row starts with "Schema could not be parsed: {error}"; it is shown in the warning colour on a tinted background of that colour, spans every column and wraps its text, and the badge counts one warning |
 | a Note.schema.json5 file with a trailing comma after the last property | the schema cannot be parsed and the warning row "Schema could not be parsed: {error}" is shown |
 
 ### Scenario S6 (refusal): YAML syntax error
@@ -123,6 +126,12 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 - WHEN the preview is rendered
 - THEN the row spans two columns and no text overflows
 
+### Scenario S10 (boundary): Warning row in a forced preview mode
+
+- GIVEN the warning row of a schema that cannot be parsed and the preview in the Dark, White or Cream mode, on a dark or on a light VS Code theme
+- WHEN the preview is rendered
+- THEN the text and the background of the row take their colours from the palette of the mode, whatever the VS Code theme: the background is as light or as dark as the page, the text has a contrast of at least 3:1 against what is painted behind it, and the row looks the same on both VS Code themes
+
 ### Known issues
 
 - Known issue: the reference cycle scenario has no test.
@@ -142,7 +151,8 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 - Method: test/core/frontmatter/schemaRegistry.test.ts (schema that cannot be compiled: the same error is reported at every analysis).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario in dark and light, 900 px and 460 px (schema that cannot be compiled, compile failure in a narrow preview).
 - Method: test/core/preview/fieldIssueStyles.test.ts, test `a warning row about the whole document takes the warning colour and wraps its message` (how the warning row is shown: schema that cannot be parsed).
-- Method: test/visual/scenarioDefinitions2.ts, visual scenarios `v34-schema-warning-row-light-900` and `v35-schema-warning-row-dark-900` (how the warning row is shown: schema that cannot be parsed).
+- Method: test/core/preview/fieldIssueStyles.test.ts, test `in a forced preview mode the whole-document warning row takes its colours from the mode's palette` (warning row in a forced preview mode; the colours are computed from the shipped stylesheet with the tokens of a dark and of a light VS Code theme, not in a browser).
+- Method: test/visual/scenarioDefinitions2.ts, visual scenarios `v34-schema-warning-row-light-900` and `v35-schema-warning-row-dark-900` (how the warning row is shown: schema that cannot be parsed; in a browser, in the Current mode, with the warning colour a light and a dark VS Code theme set).
 - Criteria: Only comment stripping is supported: trailing commas, unquoted keys and single-quote conversions are not. Only a node made of a single `$ref` key is inlined; a missing target leaves a reference to the schema root. The summary is 0 errors, 1 warning, 0 infos for a JSON or JSON5 failure, and the fields are listed in source order without documentation. The standard JSON-pointer scenario has no test (probed against the resolver).
 
 <!-- okf:links:start -->
