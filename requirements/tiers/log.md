@@ -2,6 +2,11 @@
 
 ## 2026-11-26
 
+### Auto width: only top-level blocks widen (CR-511)
+
+- Changed (`proposed`): SwRS-MDOKFSTUDIO-LAYOUT-023: the normative text states that only a top-level block, or an image alone in a top-level paragraph, widens in Auto, and a nested block keeps its Margin layout (new scenario S9; the list-item row moves from S8 to S9; the Known issue on nested blocks is removed). A Known issue is added on the image alone in a top-level paragraph: a linked one is not widened, and a paragraph holding no text and several images, at least one of them not wrapped in a link or another element, is measured and marked as a whole, once, from its first image's sizes.
+- Reason: the owner decided nested blocks stay in their container; widening them would be a new specification. The added Known issue records what the code does today. No behaviour change.
+
 ### Grid paste from a header cell: the missed editor reopen did not reproduce (CR-512)
 
 - Changed (`proposed`): SwRS-MDOKFSTUDIO-TABLE-120, verification notes only (the behaviour and its scenarios are unchanged; the real-window method names `scenarioTableGridPasteFromHeader`, scenario S3)

@@ -370,31 +370,37 @@ async function checkCell(t: TestContext, cell: Cell): Promise<void> {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
 test("Auto fits a code block's longest line (shipped code block settings)", async (t) => {
   await checkCell(t, DEFAULTS);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
 test("Auto fits a code block's longest line with the dark background off", async (t) => {
   await checkCell(t, { name: "dark background off", darkBackground: false, lineNumbers: true });
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
 test("Auto fits a code block's longest line with line numbers off", async (t) => {
   await checkCell(t, { name: "line numbers off", darkBackground: true, lineNumbers: false });
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
 test("Auto fits a code block's longest line with the dark background and line numbers off", async (t) => {
   await checkCell(t, { name: "both off", darkBackground: false, lineNumbers: false });
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
 test("Auto neither marks nor shifts a code block that fits at a display scaling of 125 %", async (t) => {
   await checkCell(t, { ...DEFAULTS, name: "scaling 125 %", deviceScaleFactor: 1.25 });
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S8
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023#S9
 test("Auto caps a code block at the area left of the open table of contents", async (t) => {
   await checkCell(t, { ...DEFAULTS, name: "TOC open", toc: true });
 });

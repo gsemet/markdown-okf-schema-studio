@@ -3,12 +3,15 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-LAYOUT-023
 uuid: fa4714cc-9f92-4a16-8606-54097bee0c8a
 title: Auto width lets wide blocks break out of the column
-description: When the width mode is Auto, the extension SHALL widen a table,
-  figure, image, code block or Mermaid diagram that is wider than the text
-  column to the width it needs (a code block until its longest line fits, its
-  border and a caption bar included, so that it scrolls only beyond the
-  available area), up to the available area, centred on that area, measuring it
-  again whenever the layout may have changed.
+description: When the width mode is Auto, the extension SHALL widen a top-level
+  table, figure, image, code block or Mermaid diagram (a direct child of the
+  page content, or an image alone in a top-level paragraph) that is wider than
+  the text column to the width it needs (a code block until its longest line
+  fits, its border and a caption bar included, so that it scrolls only beyond
+  the available area), up to the available area, centred on that area, measuring
+  it again whenever the layout may have changed; a block nested in a list item,
+  admonition, block quote, tab set, dropdown or card keeps the layout it has in
+  Margin.
 project: markdown-okf-schema-studio
 scope: layout-width
 req_lifecycle: proposed
@@ -34,6 +37,8 @@ scenarios:
   title: Re-measure keeps the sideways scroll
 - id: S8
   title: A code block fits its longest line
+- id: S9
+  title: Nested blocks keep their Margin layout
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -64,7 +69,7 @@ supersedes:
 
 ### Normative behavior
 
-When the width mode is Auto, the extension SHALL widen a table, figure, image, code block or Mermaid diagram that is wider than the text column to the width it needs (a code block until its longest line fits, its border and a caption bar included, so that it scrolls only beyond the available area), up to the available area, centred on that area, measuring it again whenever the layout may have changed.
+When the width mode is Auto, the extension SHALL widen a top-level table, figure, image, code block or Mermaid diagram (a direct child of the page content, or an image alone in a top-level paragraph) that is wider than the text column to the width it needs (a code block until its longest line fits, its border and a caption bar included, so that it scrolls only beyond the available area), up to the available area, centred on that area, measuring it again whenever the layout may have changed; a block nested in a list item, admonition, block quote, tab set, dropdown or card keeps the layout it has in Margin.
 
 ### Scenario S1 (nominal): Wide table and oversized block
 - GIVEN Auto mode, a column of 700 px, a pane of 1000 px, a table needing 900 px and a code block needing 1600 px
@@ -120,28 +125,37 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | A code block whose content overflows by 1 px | Marked wide with a breakout of 1 px (an overflowing code block has no 1 px tolerance) |
 | A code block that fits, with a fractional box width (700.4 px in a 700 px column) | Not marked wide, not shifted |
 | A code block of 1600 px of content | Capped at the available area (breakout 268 px) and scrolls inside it |
-| A code block inside a list item, wider than the item | Not marked; scrolls inside the item (Known issue) |
+
+### Scenario S9 (refusal): Nested blocks keep their Margin layout
+
+| Input | Outcome |
+| --- | --- |
+| Auto, a code block inside a list item, wider than the item | Neither the block, the item nor the list is marked wide or shifted; the block scrolls inside the item as in Margin |
+| Auto, a wide table inside an admonition | Neither the table nor the admonition is marked wide |
+| Auto, a wide image alone in a paragraph inside a block quote | Neither the image, the paragraph nor the block quote is marked wide |
+| Auto, a wide code block inside a card or a tab panel | Not marked wide |
 
 ### Several triggers in one frame (verification note)
 
 Five resizes, image loads or content-size changes before the next animation frame run the layout work (wide tables, width mode, measure, anchor, sticky headings) once in that frame, and a trigger after the frame ran asks for a new frame. This is checked by test/page/runtimeScroll.test.ts (`P-08: layout triggers within one frame measure the page once`).
 
 ### Known issues
-- Known issue: Only top-level blocks, or the paragraph holding only an image, break out; a code block in a list item, admonition, block quote, tab set or card scrolls inside it.
+- Known issue: A linked image alone in a top-level paragraph is not widened. A top-level paragraph holding no text and several images, at least one of them not wrapped in a link or another element, is measured and marked as a whole, once, from its first image's sizes, so a wide image after a narrow first one does not widen it.
 - Known issue: No visual scenario combines the open table-of-contents column with Auto; the TOC case is a unit test only, and the TOC column itself belongs to the toolbar requirements.
 - Known issue: The re-measure after a content patch, an image load and a table-of-contents toggle has no unit test (the content patch test builds the runtime but asserts nothing about width).
 
 ### Verification notes
 - Method: test/page/runtimePageControls.test.ts (wide table and oversized block, column off the centre, table-of-contents column, elements kept in the column, resize): unit tests T10 only elements wider than the column are flagged; T10b a wide element is centred on the available area; T10b a narrow element is not flagged; T10b with the TOC open the available area, its centre and the cap exclude the TOC column (the reserve is published by the CSS for panes of 760 px and more); T10b a wide table gets its fractional max-content width rounded up, so no cell wraps; T10b a table with row handles keeps their room left of it when it breaks out; T10b a layout pass in Auto keeps the sideways scroll of a wide table (re-measure keeps the sideways scroll); T10 the saved width mode applies at startup and an edited element keeps the column. The relative-size path is verified by inspection of widthMode.ts; the stabilizeLayout, content patch and toolbar callbacks are verified by inspection.
-- Method: test/page/runtimePageControls.test.ts (A code block fits its longest line, and the gain of 1 px): unit tests `T10b: a code block that breaks out is widened by its border too`, `T10b: a captioned code block breaks out through its inner code`, `T10b: a code block that overflows by 1 px still breaks out, a table that gains 1 px does not`, `T10b: a code block that fits is not marked at a fractional width`, `T10b: a code block wider than the available area is capped`, `T10b: a code block inside a list item is not measured` and `T10b: a Mermaid figure is not a code block`.
-- Method: test/page/codeBlockBreakout.test.ts (A code block fits its longest line, in a real browser on the rendered page and the shipped stylesheet): plain, numbered, diff, captioned and list-item blocks from 70 to 160 characters and one of 300, in Margin, Auto and Full width, with each code block setting off, at 125 % display scaling and with the table of contents open: a block that fits the available area has no horizontal scroll bar, a block that fits the column is not marked or shifted, a wider one is capped and scrolls.
+- Method: test/page/runtimePageControls.test.ts (A code block fits its longest line, and the gain of 1 px): unit tests `T10b: a code block that breaks out is widened by its border too`, `T10b: a captioned code block breaks out through its inner code`, `T10b: a code block that overflows by 1 px still breaks out, a table that gains 1 px does not`, `T10b: a code block that fits is not marked at a fractional width`, `T10b: a code block wider than the available area is capped` and `T10b: a Mermaid figure is not a code block`.
+- Method: test/page/runtimePageControls.test.ts (Nested blocks keep their Margin layout): unit tests `T10b: a code block inside a list item is not measured` and `T10b: a wide block nested in a container is not measured` (a table, an image alone in a paragraph and a code block, each inside a container faked by its tag).
+- Method: test/page/codeBlockBreakout.test.ts (A code block fits its longest line, in a real browser on the rendered page and the shipped stylesheet): plain, numbered, diff, captioned and list-item blocks from 70 to 160 characters and one of 300, in Margin, Auto and Full width, with each code block setting off, at 125 % display scaling and with the table of contents open: a block that fits the available area has no horizontal scroll bar, a block that fits the column is not marked or shifted, a wider one is capped and scrolls. The list-item blocks check S9 (Nested blocks keep their Margin layout): not marked, and scrolling as in Margin.
 - Method: test/page/tableBreakout.test.ts (measured again when the layout changes, in a real browser): `an editor opened on a paragraph does not measure the tables again; one opened on a table does`.
 - Method: test/page/runtimeScroll.test.ts (Several triggers in one frame): unit test `P-08: layout triggers within one frame measure the page once`.
 - Method: test/page/diagReq.layout.requirements.test.ts (author pixel width and a gain of 1 px): unit test `Auto measures an image from the width its author wrote, and ignores a gain of 1 px or less`.
 - Method: test/visual/capture_layout_checks.py (wide table and oversized block): visual checks with a minimum margin of 15 px from the pane edge, and visual scenario v84 (table uncapped and rounded up).
 - Method: test/visual/capture_width_scroll.py (re-measure keeps the sideways scroll): visual scenario v91 (Auto, edit mode, 656 px: the wide table scrolled to its end keeps its scrollLeft after a cell editor closes and after a 3 px pane resize).
 - Method: test/page/widthModeScenarios.test.ts (relative sizes, Mermaid wrapper, layout triggers): images sized 50%, 20em and 3rem are not marked wide; a Mermaid diagram wrapper wider than the column breaks out; a pane resize and the toolbar collapse measure again. The content patch, the image load and the table-of-contents toggle reach the same measure by call (contentPatch.ts, scrollCore.ts, runtime.ts) and are checked by inspection. The declared pixel width and the 1 px tolerance are tested in test/page/diagReq.layout.requirements.test.ts.
-- Criteria: The table cases (uncapped and rounded up, row handles, cell editor) are specified in SwRS-MDOKFSTUDIO-LAYOUT-044. Breakout equals the needed width minus the column, capped at the pane minus the TOC reserve minus 32 px (312 px and shift 72 px in the tested TOC layout); the breakout is the ceiling of the largest of scroll width, declared width, intrinsic width and box width, minus the column; for a code block (a top-level `pre`, or a `figure` whose direct child is a `pre`) the largest also includes the wrapper's box width minus the code box's client width plus its scroll width; marked elements never include an element whose source editor is open or a relative-sized figure, but do include a table whose cell editor is open, at the width it had before the editor opened (the same in every cell the editor moves to, and not marked when it fitted the column); no mark for a gain of 1 px or less (breakout 100 px for the declared case), except a code block whose code overflows, marked from a gain of 1 px; after the pass a code block that fits the available area has `scrollWidth <= clientWidth`; every listed event calls the width update; a re-measure leaves a sideways scroll at the same pixel offset, clamped to the new maximum.
+- Criteria: The table cases (uncapped and rounded up, row handles, cell editor) are specified in SwRS-MDOKFSTUDIO-LAYOUT-044. Breakout equals the needed width minus the column, capped at the pane minus the TOC reserve minus 32 px (312 px and shift 72 px in the tested TOC layout); the breakout is the ceiling of the largest of scroll width, declared width, intrinsic width and box width, minus the column; for a code block (a top-level `pre`, or a `figure` whose direct child is a `pre`) the largest also includes the wrapper's box width minus the code box's client width plus its scroll width; only a direct child of the content is ever measured, a paragraph only when it holds no text and an image is its direct child (once, with the declared, intrinsic and relative sizes of its first image, linked or not; see Known issues); a nested element is never marked, and no other nested element gets a container measured; marked elements never include an element whose source editor is open or a relative-sized figure, but do include a table whose cell editor is open, at the width it had before the editor opened (the same in every cell the editor moves to, and not marked when it fitted the column); no mark for a gain of 1 px or less (breakout 100 px for the declared case), except a code block whose code overflows, marked from a gain of 1 px; after the pass a code block that fits the available area has `scrollWidth <= clientWidth`; every listed event calls the width update; a re-measure leaves a sideways scroll at the same pixel offset, clamped to the new maximum.
 
 <!-- okf:links:start -->
 ### Links
