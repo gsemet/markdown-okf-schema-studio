@@ -468,8 +468,9 @@ export async function run(t) {
   };
   const toWorkbench = (r) => ({ x: area.x + r.x * area.k, y: area.y + r.y * area.k, w: r.w * area.k, h: r.h * area.k });
 
-  // The filmed picture shows each browser scroll as one cut, about 1 s after it is sent (12.0 and 14.1 s in the
-  // committed take), so marks 1 and 2 start after their cut. The mark times are those of clip.md's Mark rows.
+  // The filmed picture shows the browser scrolls as jumps, not as motion: in the committed clip the first is a short
+  // step at 11.0 s then a cut at 12.0 s, the second one cut at 14.1 s. Marks 1 and 2 start after their cut. The mark
+  // times are those of clip.md's Mark rows.
   await until(10.8);
   await scrollBy(t, view, await distanceTo(view, "wide"), 0.8);
   const wide = toWorkbench((await wideOf(view)).service.rect);

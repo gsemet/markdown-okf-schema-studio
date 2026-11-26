@@ -68,8 +68,8 @@ Pictures: ![Zoom on the page](frames/03-zoomed.png) ![Mark 1 on the wide table](
 
 | Field | Content |
 | --- | --- |
-| Time | 10.0 to 18.0 s (zoom from 10.2 s, held to 17.0 s; wheel scroll in the browser sent from 10.8 s to the wide table, then from 13.2 s to the flowchart and the bar chart, the filmed picture changing at 12.0 and 14.1 s; then back to the start for the loop) |
-| Shot *(filmed)* | Zoom (at most 2x, about 1.25x so the wide table fits) on the browser's page. The pointer scrolls the exported page with the wheel, and the filmed window shows each of the two scrolls as one cut, not as motion: first the 16-column table, breaking out of the column exactly as in Studio; then the flowchart and the bar chart, drawn, in the Cream colours. |
+| Time | 10.0 to 18.0 s (zoom from 10.2 s, held to 17.0 s; wheel scroll in the browser sent from 10.8 s to the wide table, then from 13.2 s to the flowchart and the bar chart, the filmed picture changing at 11.0, 12.0 and 14.1 s; then back to the start for the loop) |
+| Shot *(filmed)* | Zoom (at most 2x, about 1.25x so the wide table fits) on the browser's page. The pointer scrolls the exported page with the wheel, and the filmed window shows the two scrolls as jumps, not as motion: the first as a short step then a cut, the second as one cut. They bring first the 16-column table, breaking out of the column exactly as in Studio; then the flowchart and the bar chart, drawn, in the Cream colours. |
 | Zoom | page, hold to 17.0 s |
 | Mark 1 *(on screen)* | Orange outline around the wide table, 12.0 to 13.2 s |
 | Mark 2 *(on screen)* | Orange outline around the flowchart, 14.2 to 15.2 s |
@@ -107,7 +107,8 @@ Values below are measured by the take (`check.json`, the take's notes) on Window
   0.77 to 1.3); raw screencast 28.3 fps, 512 frames, 30 fps after retiming. The click on Export at
   6.0 s, the save dialog at 6.3 s, Enter at 7.0 s, the palette at 7.6 s, the browser on screen from
   9.3 s, the address entered at 9.4 s, the page shown at 10.0 s, the zoom at 10.2 s (held to 17.0 s), the
-  browser's picture changing at 12.0 s (the wide table) and 14.1 s (the diagrams), the end at 18.0 s.
+  browser's picture changing at 11.0 s (a short step of the first scroll), 12.0 s (the wide table) and
+  14.1 s (the diagrams), the end at 18.0 s.
 - **Mark times.** The render draws each mark at the times of its Mark row above (mark 1 from 12.0
   to 13.2 s, mark 2 from 14.2 to 15.2 s, mark 3 from 15.4 to 16.6 s) and takes only the mark's
   rectangle from the take. The committed take logged other times: 11.87 to 13.08 s, 14.07 to
@@ -177,11 +178,12 @@ Values below are measured by the take (`check.json`, the take's notes) on Window
   scroll helper and logs no wheel event. Both scrolls used the wheel (`scrollStudio` and
   `scrollBrowser` are `wheel` in the take's notes); the fallback, a smooth `scrollTo` in the page,
   was not needed. In Studio the clip shows a smooth scroll. In the browser it does not: the filmed
-  window sent no new frame while the browser's page scrolled (of the take's 512 frames only two come
-  after 11 s of it, at 12.0 and 14.1 s of the take), so each browser scroll shows as one cut, at
-  12.0 and 14.1 s of the clip. Marks 1 and 2 start after their cut, so no outline is drawn over the
-  wrong block. For the owner: keep the cuts, or ask for a follow-up in the clip kit that films the
-  browser's page itself.
+  window sent very few new frames for the browser's scrolls (of the take's 512 frames only three come
+  after 11 s of it, at 11.01, 12.05 and 14.13 s of the take: a position partway through the first
+  scroll, then the wide table, then the diagrams). So in the clip the first browser scroll shows as
+  two steps, a short step at 11.0 s then a cut at 12.0 s, and the second as one cut at 14.1 s. Marks 1
+  and 2 start after their cut, so no outline is drawn over the wrong block. For the owner: keep the
+  cuts, or ask for a follow-up in the clip kit that films the browser's page itself.
 - **The sticky heading band.** While Studio scrolls, its sticky band shows the current heading at
   the top of the view. It is Studio's reading aid, outside the page's content, so the exported
   file has none: the browser part does not show it. The captions say "same page", not "same
