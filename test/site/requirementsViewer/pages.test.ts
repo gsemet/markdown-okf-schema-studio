@@ -37,7 +37,7 @@ test("every relative link resolves from every depth", () => {
   const specs = viewerPages(load(), "/nonexistent-root");
   const folders = new Set(specs.map((spec) => spec.dir));
   const assets = new Set(["requirements/viewer.css", "requirements/viewer.js", "requirements/search-index.js"]);
-  const site = new Set(["index.html", "contributing.html", "docs/how-we-ship.html", "gallery.html"]);
+  const site = new Set(["index.html", "contributing.html", "docs/how-we-ship.html", "docs/how-we-test.html", "gallery.html"]);
   for (const spec of specs) {
     const html = viewerDocument(spec, FOOTER);
     assert.ok(resolved(spec.dir, html).length > 5);

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 640" width="1240" height="640" role="img" aria-labelledby="t d" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title id="t">How we test: test levels and the requirements they prove</title>
+  <desc id="d">Three lanes of test levels, from left to right by cost, and the requirement stack on the right. The first lane, every pull request (simulated), holds the simulated bench in the jobs visual and viewer-graph, unit and contract tests in the jobs static and static-windows, and security and release tooling tests in the same two jobs. The second lane, push to main and heavy dispatch (real VS Code), holds acceptance in the job acceptance with one shard per group with a file, integration in the job integration, and stress in the job stress. The third lane, manual, holds mutation testing, which has no CI job. In the requirement stack, a SwRS behaviour with scenarios S&lt;n&gt; derives from a StRS use case with paths S&lt;n&gt; through derives_from, and the code of src carries @implements_req for the SwRS. A solid arrow shows that the simulated bench, unit and contract, security and release tooling, and integration tests mark a SwRS scenario as tested with @tests_req. A dashed arrow shows that the simulated bench marks a StRS path as tested with @tests_req. A bold arrow shows that acceptance and integration tests mark a StRS path as accepted with @accepts_req. Stress repeats real VS Code scenarios and has no marker. Mutation has no marker and gives a score per SwRS. okfreq counts the markers into the coverage report and the viewer cards.</desc>
+  <defs>
+    <marker id="solid-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2b2a27"/></marker>
+    <marker id="bold-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a14e32"/></marker>
+  </defs>
+  <rect width="1240" height="640" fill="#f5f1e8"/>
+
+  <!-- lanes -->
+  <g fill="#ede7da" stroke="#d6cdbd">
+    <rect x="16" y="14" width="256" height="506" rx="10"/>
+    <rect x="296" y="14" width="276" height="506" rx="10"/>
+    <rect x="588" y="14" width="160" height="506" rx="10"/>
+  </g>
+  <g fill="#2b2a27" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="144" y="40">Every pull request</text>
+    <text x="144" y="59">(simulated)</text>
+    <text x="434" y="40">Push to main and heavy dispatch</text>
+    <text x="434" y="59">(real VS Code)</text>
+    <text x="668" y="40">Manual</text>
+  </g>
+
+  <!-- solid: @tests_req to a SwRS scenario -->
+  <g fill="none" stroke="#2b2a27" stroke-width="1.6">
+    <path d="M268 200H284"/>
+    <path d="M268 325H284"/>
+    <path d="M268 435H284"/>
+    <path d="M308 325H284"/>
+    <path d="M284 200V560H830V370H878" marker-end="url(#solid-head)"/>
+  </g>
+  <!-- dashed: @tests_req to a StRS path -->
+  <path d="M148 165V92H1150V163" fill="none" stroke="#2b2a27" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#solid-head)"/>
+  <!-- bold: @accepts_req to a StRS path -->
+  <g fill="none" stroke="#a14e32" stroke-width="3.5">
+    <path d="M560 325H580V128"/>
+    <path d="M434 165V128H930V162" marker-end="url(#bold-head)"/>
+  </g>
+  <!-- grey: no marker -->
+  <g fill="none" stroke="#8a857c" stroke-width="1.6" stroke-dasharray="2 4">
+    <path d="M434 400V360"/>
+    <path d="M738 320H880"/>
+  </g>
+
+  <g font-size="13" text-anchor="middle">
+    <text x="755" y="84" fill="#2b2a27">@tests_req &lt;StRS-ID&gt;#S&lt;n&gt;: path tested</text>
+    <text x="755" y="118" fill="#a14e32" font-weight="700">@accepts_req &lt;StRS-ID&gt;#S&lt;n&gt;: path accepted</text>
+    <text x="557" y="551" fill="#2b2a27">@tests_req &lt;SwRS-ID&gt;#S&lt;n&gt;: scenario tested</text>
+  </g>
+  <g font-size="12" fill="#67625a">
+    <text x="444" y="385">no marker</text>
+    <text x="814" y="298" text-anchor="middle">no marker,</text>
+    <text x="814" y="313" text-anchor="middle">score per SwRS</text>
+  </g>
+
+  <!-- levels -->
+  <g fill="#fffdf8" stroke="#d6cdbd" stroke-width="1.4">
+    <rect x="28" y="165" width="240" height="70" rx="8"/>
+    <rect x="28" y="290" width="240" height="70" rx="8"/>
+    <rect x="28" y="400" width="240" height="70" rx="8"/>
+    <rect x="308" y="165" width="252" height="85" rx="8"/>
+    <rect x="308" y="290" width="252" height="70" rx="8"/>
+  </g>
+  <g fill="#e4e0d8" stroke="#8a857c" stroke-width="1.4">
+    <rect x="308" y="400" width="252" height="70" rx="8"/>
+    <rect x="598" y="285" width="140" height="90" rx="8"/>
+  </g>
+  <g fill="#2b2a27" font-size="15" font-weight="700" text-anchor="middle">
+    <text x="148" y="195">Simulated bench</text>
+    <text x="148" y="320">Unit and contract</text>
+    <text x="148" y="430">Security, release tooling</text>
+    <text x="434" y="192">Acceptance</text>
+    <text x="434" y="320">Integration</text>
+    <text x="434" y="430">Stress</text>
+    <text x="668" y="313">Mutation</text>
+  </g>
+  <g fill="#67625a" font-size="12" text-anchor="middle">
+    <text x="148" y="218">visual, viewer-graph</text>
+    <text x="148" y="343">static, static-windows</text>
+    <text x="148" y="453">static, static-windows</text>
+    <text x="434" y="216">acceptance: one shard</text>
+    <text x="434" y="233">per group with a file</text>
+    <text x="434" y="343">integration</text>
+    <text x="434" y="453">stress</text>
+    <text x="668" y="336">no CI job</text>
+    <text x="668" y="356">just mutation-core</text>
+  </g>
+
+  <!-- requirement stack -->
+  <g fill="#fffdf8" stroke="#a14e32" stroke-width="1.8">
+    <rect x="880" y="165" width="344" height="70" rx="8"/>
+    <rect x="880" y="285" width="344" height="115" rx="8"/>
+  </g>
+  <rect x="880" y="455" width="344" height="65" rx="8" fill="#fffdf8" stroke="#d6cdbd" stroke-width="1.4"/>
+  <g fill="none" stroke="#2b2a27" stroke-width="1.6">
+    <path d="M1052 285V237" marker-end="url(#solid-head)"/>
+    <path d="M1052 455V402" marker-end="url(#solid-head)"/>
+  </g>
+  <g fill="#67625a" font-size="12">
+    <text x="1064" y="265">derives_from</text>
+    <text x="1064" y="433">@implements_req</text>
+  </g>
+  <g fill="#2b2a27" font-size="16" font-weight="700" text-anchor="middle">
+    <text x="1052" y="195">StRS: use case</text>
+    <text x="1052" y="335">SwRS: behaviour</text>
+    <text x="1052" y="483">src/: the code</text>
+  </g>
+  <g fill="#67625a" font-size="13" text-anchor="middle">
+    <text x="1052" y="218">paths S&lt;n&gt;</text>
+    <text x="1052" y="360">scenarios S&lt;n&gt;</text>
+    <text x="1052" y="505">@implements_req</text>
+  </g>
+
+  <rect x="820" y="578" width="404" height="44" rx="8" fill="#fffdf8" stroke="#d6cdbd" stroke-width="1.4"/>
+  <text x="1022" y="605" fill="#2b2a27" font-size="13" text-anchor="middle">okfreq counts markers → coverage report → viewer cards</text>
+</svg>

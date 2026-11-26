@@ -58,8 +58,8 @@ test("simpleCard puts the three lines in the body, escaped", () => {
   assert.ok(body.includes("Eye &lt;b&gt;") && body.includes("Head &amp; line") && body.includes("A &quot;line&quot;"));
 });
 
-test("SIMPLE_CARDS covers the home, Contributing and How we ship pages", () => {
-  assert.deepEqual(Object.keys(SIMPLE_CARDS).sort(), ["CONTRIBUTING.md", "README.md", "docs/how-we-ship.md"]);
+test("SIMPLE_CARDS covers the home, Contributing, How we ship and How we test pages", () => {
+  assert.deepEqual(Object.keys(SIMPLE_CARDS).sort(), ["CONTRIBUTING.md", "README.md", "docs/how-we-ship.md", "docs/how-we-test.md"]);
   for (const [source, entry] of Object.entries(SIMPLE_CARDS)) assert.equal(entry.card.page, outputPathForMarkdown(source));
 });
 

@@ -2,6 +2,10 @@
 
 ## 2026-11-26
 
+### How we test page
+
+- Changed (`proposed`, text): SwRS-MDOKFSTUDIO-CORE-086 names six links in the site header, How we test between How we ship and Gallery: description, normative text and the text of scenarios S1 and S2. The scenario titles do not change, and no approved requirement is touched.
+
 ### Enter and click in an admonition open the selected element
 
 Reason: CR-514, the owner's answers of 2026-11-26. All requirements below are `proposed`; StRS-MDOKFSTUDIO-BLOCK-003 is unchanged.
