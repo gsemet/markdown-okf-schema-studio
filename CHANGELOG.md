@@ -2,43 +2,45 @@
 
 ## Unreleased
 
+## 1.13.0 - 2026-11-27
+
 - Less work around comments on a large document: saving one now restyles a few elements instead of the whole
   page, with the same layout around aligned images and tables, and the Comment button, the copy button and the
   edit mode outline follow the selection or the pointer at most once per frame
-  (CR-516 comment-restyle, PR #549, issue #547)
+  (commit 0118f6fb, CR-516 comment-restyle, PR #549, issue #547)
 - In edit mode, a click or Enter inside an admonition or a GitHub alert now edits the selected paragraph,
   list item or directive only (a diagram, a formula or a code block opens whole); the title or the frame, and
   Enter on the admonition selected as a whole, still open all of it. The move chord moves a block of its body
   inside it, the arrows keep the caret at the edges of its lists, and erasing a block of an alert keeps the
-  alert (CR-514 enter-admonition, PR #540)
+  alert (commit 3873e96d, CR-514 enter-admonition, PR #540)
 - A frontmatter field with a schema error now shows its name in red on a red-tinted background and a wavy red
   underline under its value; a field with a warning shows the same in the warning colour, and a whole-table
-  warning row (such as "Schema could not be parsed") now shows in the warning colour too (CR-513 field-error, PR #535)
+  warning row (such as "Schema could not be parsed") now shows in the warning colour too (commit 5f0746d7, CR-513 field-error, PR #535)
 - Charts in the preview are live: hovering a Vega-Lite mark shows its values in a themed box (`"tooltip": null`
   on a mark turns it off; a Vega chart shows only the tooltips it defines), and the HTML export keeps the drawn
-  chart as a static inline SVG (CR-503 vega-charts-live-view, PR #523)
+  chart as a static inline SVG (commit 17b779d5, CR-503 vega-charts-live-view, PR #523)
 - Vega-Lite and Vega charts now draw their legend, axis and title text at a size that follows the page text
   (so the Markdown font size and the zoom), with horizontal discrete x labels and the subtitle in the label
   colour; the preview no longer shows the collapsed **Chart source** section under a chart (the HTML export
-  keeps it); a specification's own `config` still wins (CR-502 vega-charts-readable-legends, PR #520)
+  keeps it); a specification's own `config` still wins (commit e09285ef, CR-502 vega-charts-readable-legends, PR #520)
 - Each screenshot of the published gallery now has its own link, `gallery.html#<capture id>`, that opens it
-  directly, stays the same from one CI run to the next, and follows Back and Forward (CR-506 gallery-links, PR #526)
+  directly, stays the same from one CI run to the next, and follows Back and Forward (commit 797deff2, CR-506 gallery-links, PR #526)
 - New command **Open in Studio at This Line** (Command Palette and the title bar menu of a Markdown text
   editor): it opens the file in a Studio tab at the caret's line and marks it, keeps the text tab, and
   reveals a Studio tab of the file already open in another group instead of opening a second one. In a
   Studio tab, a link to another Markdown file and Studio's Back and Next now open the target at its
-  heading or line, in a Studio tab when it opens as one (CR-483 searched-line, PR #500)
+  heading or line, in a Studio tab when it opens as one (commit 3b45e105, CR-483 searched-line, PR #500)
 - Ctrl/Cmd+C of a text selection in the preview now copies the Markdown under the selection (as text) and the
-  rendered selection (as HTML), in reading and edit mode (PR #498)
+  rendered selection (as HTML), in reading and edit mode (commit 5742c426, PR #498)
 - New setting `preview.rawCopy.balanceEdges` (off by default): the raw Markdown copy of a text selection also gets the
-  opening and closing delimiters and lines of the constructs its edges cut through (PR #499)
+  opening and closing delimiters and lines of the constructs its edges cut through (commit 54d54119, PR #499)
 - The published docs site now plays a feature clip as a looping video where a page shows its GIF; the first one
-  shows the raw copy with `balanceEdges` on (PR #501)
+  shows the raw copy with `balanceEdges` on (commit 1ca60e83, PR #501)
 - In Auto width, a code block whose longest line is a little wider than the column now widens until the line
-  fits, instead of keeping a scroll bar; a captioned code block widens too (CR-508 code-auto-width, PR #525)
+  fits, instead of keeping a scroll bar; a captioned code block widens too (commit 8f6eb3e5, CR-508 code-auto-width, PR #525)
 - Less work in the preview when review comments change: adding, answering, resolving or deleting a comment now
   updates only the highlights, badges and orphan entries that differ, and no longer redraws the other comment
-  marks (CR-517 perf-547-comment-update-and-author, PR #550, issue #547)
+  marks (commit d8e1c9ea, CR-517 perf-547-comment-update-and-author, PR #550, issue #547)
 
 ## 1.12.1 - 2026-11-24
 
