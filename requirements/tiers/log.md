@@ -10,6 +10,7 @@ Reason: CR-521, the owner's decision that a drawn diagram or chart shows no sour
 - Changed: the "Diagram source" disclosure of a Mermaid or PlantUML figure is shown, in the preview and the HTML export, only when the render state is `error` or `unavailable` (SwRS-MDOKFSTUDIO-DIAG-001 S1; SwRS-MDOKFSTUDIO-DIAG-023 S1, S4 and S7; SwRS-MDOKFSTUDIO-DIAG-068 and DIAG-105 S3, wording).
 - Changed: the Chart source section follows the same rule, and the HTML export no longer shows it under a drawn chart (SwRS-MDOKFSTUDIO-DIAG-121, S4 retitled; SwRS-MDOKFSTUDIO-DIAG-123 S3).
 - Changed (wording only): SwRS-MDOKFSTUDIO-BLOCK-014 S3 and S7 name the source disclosure of a failed figure; StRS-MDOKFSTUDIO-DIAG-009 and DIAG-015 say when the source shows.
+- Changed after verification: the built-in PlantUML engine answers a source it cannot draw with a picture of its own error, and such a figure now ends in the state `error`, with the picture kept and its source shown; a diagram that writes the same words is drawn (SwRS-MDOKFSTUDIO-DIAG-032: statement, S5 first row, new scenario S8, Known issues and verification notes). The verification criteria of SwRS-MDOKFSTUDIO-DIAG-001 name when the "Diagram source" disclosure shows.
 
 ### A new comment updates only its highlights
 
