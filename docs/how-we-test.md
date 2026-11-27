@@ -122,13 +122,14 @@ VSIX and other repository checks (guideline isolation, main paths, merge commits
 ### Simulated bench
 
 No VS Code window opens. `test/visual` drives the preview page with Playwright Chromium against a
-mock host, and its screenshots feed the gallery. The table and code block breakout tests of
-`test/page` measure widths in Chromium. The use case map tests of `test/site/requirementsViewer` and
+mock host, and its screenshots feed the gallery. Some tests of `test/page` measure the real page in
+Chromium: the table and code block breakout widths, the aligned-float layout, the style cost of one
+comment and the selected text of a scroll. The use case map tests of `test/site/requirementsViewer` and
 the gallery link tests of `test/site` also run in Chromium.
 
-- Command: `just ci-visual` (visual scenarios and breakout tests); `just ci-viewer-graph` (use case
+- Command: `just ci-visual` (visual scenarios and those page tests); `just ci-viewer-graph` (use case
   map and gallery link tests). The visual scenarios come in two parts: `just ci-visual 1` runs the
-  first part and the breakout tests, `just ci-visual 2` the second part. With no part,
+  first part and those page tests, `just ci-visual 2` the second part. With no part,
   `just ci-visual` runs both and merges their reports.
 - CI job: `visual` (part 1), `visual-2` (part 2) and `viewer-graph`, on every pull request.
 - Marker: `@tests_req <SwRS-ID>#S<n>`; a simulated walk of a StRS path carries

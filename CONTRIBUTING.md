@@ -300,12 +300,15 @@ the manifest of an acceptance group, is missing or failed) and `just ci-gallery`
 from the existing outputs, no E2E re-run).
 On a pull request, CI runs only the simulated tests, which make up the required `checks` job:
 `ci-static` (on Linux, and again on Windows in the `static-windows` job), `ci-visual` (in two jobs:
-Playwright/Chromium against a mock host, and in part 1 then the table breakout width tests, run with
-`STUDIO_REQUIRE_CHROMIUM=1` so that a Chromium that cannot start fails them; the `static` jobs
-have no Chromium and skip those tests; their report is under `out/reports/breakout/`; the tests
-assert the widths and the owner's verdicts on Windows, the reference, and are report-only on
-Linux CI: they print the widths and the verdicts and name each difference from Windows, and
-never fail on one), `ci-viewer-graph` (the use case map tests, in a job of their own so that the visual jobs keep their time budget: they write the JSON requirements report and check in
+Playwright/Chromium against a mock host, and in part 1 then the page tests that need Chromium, run
+with `STUDIO_REQUIRE_CHROMIUM=1` so that a Chromium that cannot start fails them; the `static` jobs
+have no Chromium and skip those tests; their report is under `out/reports/breakout/`. The table and
+code block breakout width tests assert the widths and the owner's verdicts on Windows, the
+reference, and are report-only on Linux CI: they print the widths and the verdicts and name each
+difference from Windows, and never fail on one. The tests of the aligned-float layout, of the style
+cost of one comment and of the selected text of a scroll assert wherever Chromium runs),
+`ci-viewer-graph` (the use case map tests, in a job of their own so that the visual jobs keep their
+time budget: they write the JSON requirements report and check in
 Chromium, in pinned fonts, that no text or pill of any use case map overlaps another at 1280 px and
 at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`; the same target runs the
 gallery link tests in Chromium) and
@@ -585,11 +588,11 @@ folder is `<time>-trusted-part-<n>-<step>/`):
 `ps` output, the tails of the VS Code logs, the window state and tabs, the heartbeat and screenshots
 (through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step stops
 at 20 minutes, the test step of each acceptance shard at 3 (the `toc-loop` step at 35, the
-`perf-547` step at 13), and
-`just ci-hang-dump` adds the processes and logs left behind (`post-step/`). The acceptance step ends
-before the step budget and the launch deadline can expire: a hang there that neither the heartbeat nor
-`bounded()` catches in time leaves `post-step/` and no watchdog dump, with a `STEP start` line only if
-it is inside a `step()` call.
+`perf-547` step at 4), and
+`just ci-hang-dump` adds the processes and logs left behind (`post-step/`). The acceptance step and
+the `perf-547` step end before the step budget and the launch deadline can expire: a hang there that
+neither the heartbeat nor `bounded()` catches in time leaves `post-step/` and no watchdog dump, with
+a `STEP start` line only if it is inside a `step()` call.
 
 Run folders of the real-window suites pile up under `out/reports/e2e/screenshots/`.
 `npm run review:finish` keeps the latest 5 per kind (`STUDIO_E2E_KEEP_RUNS` changes it). Run

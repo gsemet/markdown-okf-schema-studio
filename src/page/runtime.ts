@@ -50,6 +50,7 @@ import { installRawCopy } from "./features/rawCopy";
 import { installThemeMode } from "./features/themeMode";
 import { createPageHostMessages } from "./hostMessages";
 import type { HostTransport } from "./hostTransport";
+import { installAlignedFloat } from "./modules/alignedFloat";
 import { createBlockSelection } from "./modules/blockSelection";
 import { installChipToggle } from "./modules/chipToggle";
 import { installTabs } from "./modules/tabs";
@@ -208,6 +209,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     (event) => linkActivationEdits(state.editMode, event));
   const firstClearance = installFirstClearance(document, window);
   pageDiagnostics.expose(firstClearance);
+  // The first or the last aligned float of the content moves the toolbar's float with it.
+  installAlignedFloat(document, () => firstClearance.update());
   // The button follows the host's answer (`hostRequests` is created below, before any click).
   const codeCopy = installCodeCopy(document, window, (text, done, userGesture) =>
     hostRequests.ask("previewCopyText", { text, userGesture }, {}, done));

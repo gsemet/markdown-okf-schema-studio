@@ -7,6 +7,7 @@
 
 import type { AnchorPoint } from "../../core/scroll/anchorPolicy";
 import { measureLineTops } from "../modules/lineTops";
+import { watchShownContent } from "../modules/shownContent";
 import { normalizeSourcePath } from "./mappedBlocks";
 import {
   MAPPINGS_SELECTOR,
@@ -29,6 +30,24 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   let lastPostedLine: number | undefined;
   let frame: number | undefined;
   let sourceScrollSequence = 0;
+  // The text of the selection, kept while the selection and what it covers stay as they are.
+  let keptSelection: { text: string | undefined; ends: unknown[] } | undefined;
+  const forgetSelectionText = (): void => { keptSelection = undefined; };
+  // Capture: the selection inside a text box announces itself on the box.
+  document.addEventListener?.("selectionchange", forgetSelectionText, true);
+  // A change of the content, or of what it shows, can change the text of an unmoved selection.
+  watchShownContent(document, forgetSelectionText);
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-108
+  // `reuse`: a scroll reports many times over the same selection, which is turned into text once.
+  function selectionText(reuse: boolean): string | undefined {
+    const selection = window.getSelection?.();
+    const ends = [selection?.anchorNode, selection?.anchorOffset, selection?.focusNode, selection?.focusOffset];
+    if (reuse && keptSelection?.ends.every((end, index) => end === ends[index])) return keptSelection.text;
+    const text = selection?.toString?.().slice(0, 4096) || undefined;
+    keptSelection = { text, ends };
+    return text;
+  }
 
   function stateSnapshot(line: number | undefined, throttled = false): PanelStateSnapshot {
     const details = Array.from(document.querySelectorAll("details"))
@@ -38,8 +57,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     const focusedBlockId = active?.closest?.(MAPPINGS_SELECTOR)?.getAttribute(
       "data-sphinx-preview-block",
     ) || undefined;
-    const selection = window.getSelection?.();
-    const selectedText = selection?.toString?.().slice(0, 4096) || undefined;
+    const selectedText = selectionText(throttled);
     const { themeMode, anchorMode, viewControls, widthMode, tocColumn, chipToggle, headingFold } = parts();
     const snapshot: PanelStateSnapshot = {
       documentId: context.documentId,

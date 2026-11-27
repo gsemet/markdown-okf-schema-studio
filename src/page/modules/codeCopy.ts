@@ -36,7 +36,12 @@ export function installCodeCopy(
     button.removeAttribute("title");
     button.innerHTML = copyIcon;
   };
+  // The latest element the pointer went to, until the next frame shows or hides the button for it.
+  // What acts on the button directly drops that move (show, hide) or applies it first.
+  let pointed: { target: EventTarget | null } | undefined;
+  let pointFrame: number | undefined;
   const hide = (): void => {
+    pointed = undefined;
     current = undefined;
     if (button) button.hidden = true;
     resetCopied();
@@ -143,6 +148,7 @@ export function installCodeCopy(
     control.hidden = false;
   };
   const show = (pre: Element): void => {
+    pointed = undefined;
     if (current !== pre) resetCopied();
     current = pre;
     place();
@@ -157,17 +163,35 @@ export function installCodeCopy(
       show(pre);
     }
   };
-  document.addEventListener("mouseover", (event) => pointTo(event.target));
+  const applyPointer = (): void => {
+    const waiting = pointed;
+    pointed = undefined;
+    if (waiting) pointTo(waiting.target);
+  };
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-017
+  // The pointer crosses many elements between two frames: the button follows the latest of them,
+  // once per frame.
+  const pointAtFrame = (target: EventTarget | null): void => {
+    pointed = { target };
+    if (pointFrame !== undefined) return;
+    pointFrame = window.requestAnimationFrame(() => {
+      pointFrame = undefined;
+      applyPointer();
+    });
+  };
+  document.addEventListener("mouseover", (event) => pointAtFrame(event.target));
   document.addEventListener("mouseout", (event) => {
     const related = event.relatedTarget;
     if (isButton(related)) return;
     if (related instanceof Element && current && current.contains(related)) return;
-    hide();
+    // A pointer that left the window goes to no element: the button goes at once.
+    if (related) pointAtFrame(related);
+    else hide();
   });
   document.addEventListener("mousemove", (event) => {
     pointerX = event.clientX;
     pointerY = event.clientY;
-    pointTo(event.target);
+    pointAtFrame(event.target);
   }, { passive: true });
   // Keyboard path: focusing a block reveals the button, Tab goes on to it, Shift+Tab comes back.
   document.addEventListener("focusin", (event) => {
@@ -176,6 +200,7 @@ export function installCodeCopy(
     if (pre && pre === event.target) show(pre);
   });
   document.addEventListener("focusout", (event) => {
+    applyPointer();
     const related = event.relatedTarget;
     if (isButton(related) || (related instanceof Element && current && current.contains(related))) return;
     if (current && event.target === button && related === current) return;
@@ -183,6 +208,7 @@ export function installCodeCopy(
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey) return;
+    applyPointer();
     if (!current || !button || button.hidden) return;
     if (!event.shiftKey && event.target === current) {
       event.preventDefault();
@@ -230,6 +256,7 @@ export function installCodeCopy(
   // A click inside the hovered block may open its editor: the button goes away and comes back
   // with the next pointer move over a block that is not being edited.
   document.addEventListener("click", (event) => {
+    applyPointer();
     if (current && !isButton(event.target) && event.target instanceof Element && current.contains(event.target)) {
       hide();
     }

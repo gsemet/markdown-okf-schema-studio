@@ -361,6 +361,7 @@ test("edit mode: hovering a link in a comment-thread body shows no edit outline 
   const link = commentLink(harness);
   harness.editModeButton.dispatch("click");
   harness.dispatchDocument("mouseover", { target: link });
+  harness.flushFrames();
   assert.deepEqual(outlined(harness), [], "no block is outlined: a click there follows the link");
   assert.equal(link.getAttribute(LINK_EDITS), null, "no text cursor marker: the link keeps its pointer cursor");
 });
@@ -375,6 +376,7 @@ test("edit mode: hovering a link of the properties table shows no edit outline a
   harness.contentLinks.push(link);
   harness.editModeButton.dispatch("click");
   harness.dispatchDocument("mouseover", { target: link });
+  harness.flushFrames();
   assert.deepEqual(outlined(harness), [], "the properties table is not outlined");
   assert.equal(link.getAttribute(LINK_EDITS), null, "no text cursor marker on a properties link");
 });
@@ -388,6 +390,7 @@ test("edit mode: hovering a link inside a paragraph outlines the paragraph and g
   harness.contentLinks.push(link);
   harness.editModeButton.dispatch("click");
   harness.dispatchDocument("mouseover", { target: link });
+  harness.flushFrames();
   assert.deepEqual(outlined(harness), [harness.mappings[1]], "the paragraph is outlined");
   assert.equal(link.getAttribute(LINK_EDITS), "true", "the link is marked: a plain click edits");
   harness.editModeButton.dispatch("click");

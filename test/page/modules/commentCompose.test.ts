@@ -9,12 +9,19 @@ interface Posted { type: string; fields: Record<string, any> }
 function setup(options: { busy?: () => boolean } = {}) {
   const document = new FakeDocument();
   let selection: any;
+  // How often the page turned the selection into text: what reading a selection costs.
+  let reads = 0;
   const timers = new Map<number, () => void>();
   const delays: number[] = [];
   let nextTimer = 1;
+  const frames: Array<() => void> = [];
+  const windowListeners = new Map<string, Array<() => void>>();
   const window: any = {
     innerWidth: 800, innerHeight: 600, getSelection: () => selection,
-    addEventListener: () => undefined,
+    addEventListener: (type: string, listener: () => void) => {
+      windowListeners.set(type, [...(windowListeners.get(type) ?? []), listener]);
+    },
+    requestAnimationFrame: (callback: () => void) => frames.push(callback),
     setTimeout: (callback: () => void, delay: number) => {
       // Refresh timers run at once; the 15 s answer timer waits for the test.
       if (delay === 0) { callback(); return 0; }
@@ -32,24 +39,35 @@ function setup(options: { busy?: () => boolean } = {}) {
   };
   provideGlobalElement(FakeElement);
   const compose = installCommentCompose(document as never, window as never, hooks);
-  const select = (start: [any, number], end: [any, number], text: string, rect = { left: 20, top: 40, right: 120, bottom: 60 }) => {
+  const frame = () => { for (const callback of frames.splice(0)) callback(); };
+  const scroll = () => { for (const listener of windowListeners.get("scroll") ?? []) listener(); };
+  // `drawn` false: the selection changes and the frame that follows has not come yet.
+  const select = (start: [any, number], end: [any, number], text: string, rect = { left: 20, top: 40, right: 120, bottom: 60 },
+    drawn = true) => {
     selection = {
       rangeCount: 1,
       isCollapsed: false,
-      toString: () => text,
+      toString: () => { reads += 1; return text; },
       removeAllRanges: () => { selection = undefined; },
       getRangeAt: () => ({
         startContainer: start[0], startOffset: start[1], endContainer: end[0], endOffset: end[1],
         getBoundingClientRect: () => rect,
       }),
     };
+    // The selection change and the frame that follows it (the button follows once per frame).
     document.fire("selectionchange");
+    if (drawn) frame();
   };
   const button = () => document.querySelector("[data-okf-comment-create]");
   const box = () => document.querySelector("[data-okf-comment-compose]");
   const click = (target: FakeElement) => document.fire("click", { target });
   const fireTimers = () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } };
-  return { fireTimers, timers, delays, document, compose, posted, select, button, box, click, clear: () => { selection = undefined; document.fire("selectionchange"); } };
+  const clear = () => { selection = undefined; document.fire("selectionchange"); frame(); };
+  const change = () => document.fire("selectionchange");
+  // The selection collapses, and the frame that would answer the change has not come yet.
+  const collapseBeforeFrame = () => { selection = undefined; change(); };
+  const textReads = () => reads;
+  return { fireTimers, timers, delays, document, compose, posted, select, button, box, click, clear, change, collapseBeforeFrame, textReads, frame, frames, scroll };
 }
 
 const textOf = (element: FakeElement) => element.childNodes[0] as FakeText;
@@ -320,3 +338,117 @@ test("a comment save waits 15 seconds for the host's answer", () => {
   assert.equal(posted.length, 1);
   assert.deepEqual(delays, [15000]);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038#S7
+test("selection changes between two frames are answered once, at the frame", () => {
+  const { document, select, button, change, textReads, frame, frames } = setup();
+  const p = document.add("p", { "data-line": "1" }, document.content, "some selectable text");
+  select([textOf(p), 0], [textOf(p), 4], "some");
+  const perAnswer = textReads();
+  assert.ok(perAnswer > 0);
+  for (let index = 0; index < 5; index += 1) change();
+  assert.equal(textReads(), perAnswer, "nothing is read before the frame");
+  assert.equal(frames.length, 1, "one frame is asked for");
+  frame();
+  assert.equal(textReads(), 2 * perAnswer, "five changes are read as one");
+  assert.ok(button());
+  change();
+  assert.equal(frames.length, 1, "the next change asks for the next frame");
+  frame();
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038#S8
+test("a scroll moves the Comment button with its text and does not read the selection again", () => {
+  const { document, select, button, textReads, frames, scroll } = setup();
+  const p = document.add("p", { "data-line": "1" }, document.content, "some selectable text");
+  scroll();
+  assert.equal(button(), null, "a scroll shows no button of its own");
+  const rect = { left: 20, top: 200, right: 120, bottom: 220 };
+  select([textOf(p), 0], [textOf(p), 4], "some", rect);
+  const before = button()!.styles.get("top");
+  const reads = textReads();
+  rect.top -= 100;
+  rect.bottom -= 100;
+  scroll();
+  scroll();
+  assert.ok(button(), "the button stays");
+  assert.notEqual(button()!.styles.get("top"), before, "it moved with the text");
+  assert.equal(Number.parseFloat(before!) - Number.parseFloat(button()!.styles.get("top")!), 100);
+  assert.equal(textReads(), reads, "the selection is not read");
+  assert.equal(frames.length, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038#S8
+test("a scroll hides the Comment button while the pointer is down or the page is busy, as a selection change does", () => {
+  for (const cause of ["busy", "pointer"] as const) {
+    let busy = false;
+    const { document, select, button, textReads, scroll } = setup({ busy: () => busy });
+    const p = document.add("p", { "data-line": "1" }, document.content, "some selectable text");
+    select([textOf(p), 0], [textOf(p), 4], "some");
+    const reads = textReads();
+    if (cause === "busy") busy = true;
+    else document.fire("mousedown", { target: p, button: 0 });
+    scroll();
+    assert.equal(button(), null, cause);
+    scroll();
+    assert.equal(button(), null, `${cause}: a further scroll does not bring it back`);
+    assert.equal(textReads(), reads, cause);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-049#S3
+test("a selection that ends at offset 0 of a block finds the block before it among nested blocks, without a search of the document", () => {
+  const { document, select, button, click, box, posted, compose } = setup();
+  const lines = (from: number, to: number) => ({ "data-line": String(from), "data-end-line": String(to) });
+  const intro = document.add("p", lines(1, 1), document.content, "Intro");
+  const section = document.add("div", {}, document.content);
+  const list = document.add("ul", lines(3, 6), section);
+  const one = document.add("li", lines(3, 4), list, "One");
+  document.add("li", lines(5, 6), list, "Two");
+  const after = document.add("p", lines(8, 8), document.content, "Next");
+  const searches: string[] = [];
+  const queryAll = document.querySelectorAll.bind(document);
+  document.querySelectorAll = (selector: string) => { searches.push(selector); return queryAll(selector); };
+  const save = (): number[] => {
+    click(button()!);
+    (box()!.querySelector("textarea") as any).value = "x";
+    click(box()!.querySelectorAll("button").find((candidate) => candidate.textContent === "Save")!);
+    const { anchor } = posted.at(-1)!.fields;
+    compose.result({ kind: "create", ok: true });
+    return [anchor.line, anchor.endLine];
+  };
+  select([textOf(one), 0], [textOf(after), 0], "One Two");
+  assert.deepEqual(save(), [3, 6], "the whole list is the block before the next paragraph");
+  select([textOf(intro), 0], [textOf(one), 0], "Intro");
+  assert.deepEqual(save(), [1, 1], "the block before the first item is outside its list");
+  assert.deepEqual(searches.filter((selector) => selector.includes("data-line")), [], "no search of the document");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038#S10
+test("the shortcut pressed before the frame answers the selection as it is then, collapsed or changed", () => {
+  const chord = { key: "m", altKey: true, ctrlKey: true };
+  for (const next of ["collapsed", "in code", "elsewhere"] as const) {
+    const { document, select, button, box, collapseBeforeFrame, textReads, frame } = setup();
+    const p = document.add("p", { "data-line": "1" }, document.content, "some selectable text");
+    const pre = document.add("pre", { "data-line": "3" }, document.content, "code");
+    const other = document.add("p", { "data-line": "5" }, document.content, "another paragraph");
+    select([textOf(p), 0], [textOf(p), 4], "some");
+    assert.ok(button(), next);
+    if (next === "collapsed") collapseBeforeFrame();
+    else if (next === "in code") select([textOf(pre), 0], [textOf(pre), 4], "code", undefined, false);
+    else select([textOf(other), 0], [textOf(other), 7], "another", undefined, false);
+    const calls = document.fire("keydown", { target: p, ...chord });
+    if (next === "elsewhere") {
+      assert.equal(calls.prevented, 1, next);
+      assert.equal(box()!.querySelector("[data-okf-comment-quote]")!.textContent, "another");
+    } else {
+      assert.equal(box(), null, `${next}: no box on the earlier selection`);
+      assert.equal(calls.prevented, 0, `${next}: the key is left alone`);
+      assert.equal(button(), null, `${next}: the button of the earlier selection goes`);
+    }
+    const reads = textReads();
+    frame();
+    assert.equal(textReads(), reads, `${next}: the frame does not read the answered change again`);
+  }
+});
+

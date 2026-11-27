@@ -1,4 +1,5 @@
 import { DISCARD_KEEP, DISCARD_YES, discardQuestion, floatingTop, isGone } from "./commentEditorBehaviour";
+import { watchShownContent } from "./shownContent";
 
 /**
  * Writing a review comment in the page (T43).
@@ -9,7 +10,9 @@ import { DISCARD_KEEP, DISCARD_YES, discardQuestion, floatingTop, isGone } from 
  * Escape (wherever the focus is) and a press outside the box close it when its text is blank, and
  * otherwise ask "Discard / Keep editing" inside the box (no `window.confirm`: a webview has none).
  * The box is placed entirely inside the window (above the text near the bottom) and follows the
- * selected text on scroll, even out of view. The anchor is `{ line, endLine, quote, prefix, suffix }`: the first block's line .. the last
+ * selected text on scroll, even out of view. The selection is read at most once per frame while it
+ * changes, and once more after the page changed under it; a scroll moves the button with the text
+ * and does not read it. The anchor is `{ line, endLine, quote, prefix, suffix }`: the first block's line .. the last
  * block's end line, the whitespace-collapsed selected text (at most 500 characters) and up to 32
  * characters of text before and after it in the first and last block.
  *
@@ -116,18 +119,32 @@ export function installCommentCompose(
     return block && spanOf(block) ? block : undefined;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-049
   // A selection that ends at offset 0 (a triple click ends at the start of the next block) belongs
   // to the block that comes before: the last mapped block that is not around the end point.
+  // The walk goes back from the end block, so it costs what lies between the two blocks, never the
+  // whole document.
   const blockBefore = (end: Element): Element | undefined => {
-    const all = Array.from(document.querySelectorAll("[data-line]"));
-    const index = all.indexOf(end);
-    for (let i = index - 1; i >= 0; i -= 1) {
-      if (all[i].contains(end) || !spanOf(all[i])) continue;
-      let best = all[i];
-      for (let parent = best.parentNode as Element | null; parent && parent.nodeType === 1; parent = parent.parentNode as Element | null) {
-        if (parent.matches?.("[data-line]") && !parent.contains(end) && spanOf(parent)) best = parent;
+    // The last mapped block of a node: of its descendants (last child first), then the node itself.
+    const lastMapped = (node: Node): Element | undefined => {
+      if (node.nodeType !== 1) return undefined;
+      for (let child = node.childNodes[node.childNodes.length - 1] as Node | null | undefined; child; child = child.previousSibling) {
+        const found = lastMapped(child);
+        if (found) return found;
       }
-      return best;
+      const element = node as Element;
+      return element.matches("[data-line]") && spanOf(element) ? element : undefined;
+    };
+    // Earlier siblings of the end block, then of each block around it (those hold the end: skipped).
+    for (let node: Node | null = end; node; node = node.parentNode) {
+      for (let before = node.previousSibling; before; before = before.previousSibling) {
+        let best = lastMapped(before);
+        if (!best) continue;
+        for (let parent = best.parentNode as Element | null; parent && parent.nodeType === 1; parent = parent.parentNode as Element | null) {
+          if (parent.matches?.("[data-line]") && !parent.contains(end) && spanOf(parent)) best = parent;
+        }
+        return best;
+      }
     }
     return undefined;
   };
@@ -259,8 +276,19 @@ export function installCommentCompose(
     (question.querySelector(`[${DISCARD_KEEP}]`) as HTMLElement | null)?.focus?.();
   };
 
+  // After a page change under the followed selection: the read the next frame makes (and whether a
+  // scroll waits for it), then what it found, which the next scroll shows.
+  let rereading: { scrolled: boolean } | undefined;
+  let reread: { found: typeof current } | undefined;
+
+  // A selection change announced and not yet answered: the next frame, or the shortcut, answers it.
+  let unanswered = false;
+
   const refresh = (): void => {
     if (box) return;
+    unanswered = false;
+    rereading = undefined;
+    reread = undefined;
     if (pointerDown || hooks.busy()) {
       current = undefined;
       hideButton();
@@ -270,6 +298,60 @@ export function installCommentCompose(
     if (current) showButton();
     else hideButton();
   };
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-038
+  // The selection changes many times between two frames (a drag): it is read once, at the frame.
+  let framed = false;
+  const refreshAtFrame = (): void => {
+    unanswered = true;
+    if (framed) return;
+    framed = true;
+    window.requestAnimationFrame(() => {
+      framed = false;
+      if (unanswered) refresh();
+    });
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-038
+  // A scroll moves the button with its text and does not read the selection.
+  const follow = (): void => {
+    if (box || !current) return;
+    if (pointerDown || hooks.busy()) {
+      current = undefined;
+      hideButton();
+      return;
+    }
+    // A page change is still to be read: its frame, which comes before the paint, answers this scroll.
+    if (rereading) {
+      rereading.scrolled = true;
+      return;
+    }
+    if (reread) {
+      current = reread.found;
+      reread = undefined;
+      if (!current) {
+        hideButton();
+        return;
+      }
+    }
+    current.rect = current.live();
+    showButton();
+  };
+
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-038
+  // The page can remove or hide the selected text without a selection change. The change, never the
+  // scroll, has the selection read again, once at the next frame; the button changes at a scroll.
+  watchShownContent(document, () => {
+    if (box || !current || rereading) return;
+    rereading = { scrolled: false };
+    window.requestAnimationFrame(() => {
+      const waiting = rereading;
+      rereading = undefined;
+      if (!waiting || box || !current) return;
+      reread = { found: readSelection() };
+      if (waiting.scrolled) follow();
+    });
+  });
 
   let sending: number | undefined;
   // True from Save until the host answers, even after the safety timeout (a late answer counts).
@@ -338,8 +420,11 @@ export function installCommentCompose(
   let pendingAnchor: Record<string, unknown> | undefined;
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-044
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-038
   const open = (): boolean => {
     if (box) return true;
+    // Before the frame, the earlier selection would be the fallback below.
+    if (unanswered) refresh();
     current = readSelection() ?? current;
     if (!current || hooks.busy()) return false;
     hooks.beforeOpen?.();
@@ -406,8 +491,8 @@ export function installCommentCompose(
   document.addEventListener("mouseup", released, true);
   document.addEventListener("dragend", released, true);
   window.addEventListener("blur", released);
-  document.addEventListener("selectionchange", () => refresh());
-  window.addEventListener("scroll", () => { if (button || current) refresh(); }, { passive: true } as AddEventListenerOptions);
+  document.addEventListener("selectionchange", refreshAtFrame);
+  window.addEventListener("scroll", follow, { passive: true } as AddEventListenerOptions);
   // The open box follows its text: scroll events of the page and of any scrolling container.
   document.addEventListener("scroll", () => placeBox(), { capture: true, passive: true } as AddEventListenerOptions);
   window.addEventListener("resize", () => refresh());

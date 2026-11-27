@@ -2,6 +2,17 @@
 
 ## 2026-11-26
 
+### Comment creation no longer restyles the whole document
+
+Reason: CR-516, issue 547. All requirements below are `proposed`; no StRS changes.
+
+- Added: saving one comment on the generated large review document restyles at most 100 elements (SwRS-MDOKFSTUDIO-REVIEW-223, from StRS-MDOKFSTUDIO-REVIEW-003).
+- Changed: the content root says with `data-okf-aligned-float` whether it holds an aligned image, figure or table, and no style rule tests it with `:has()`; the layout is unchanged (SwRS-MDOKFSTUDIO-LAYOUT-043, new scenarios S7 and S8).
+- Changed: the Comment button follows the selection at most once per animation frame, and a scroll moves it without reading the selection; after a change of the page under the selection, the selection is read again once at the next frame, and the next scroll keeps or removes the button as the selection then is; the comment shortcut pressed before that frame answers the selection as it is then (SwRS-MDOKFSTUDIO-REVIEW-038, new scenarios S7, S8, S9 and S10).
+- Changed: the copy button and the edit mode outline answer the pointer at most once per animation frame (SwRS-MDOKFSTUDIO-CODE-017, new scenario S10; SwRS-MDOKFSTUDIO-BLOCK-017, new scenario S8).
+- Added: the scroll report turns an unchanged selection into text once, and again after anything that can change that text (SwRS-MDOKFSTUDIO-LIFE-108, new scenario S11).
+- Clarified: a selection ending at offset 0 of a block is covered with nested blocks (SwRS-MDOKFSTUDIO-REVIEW-049, verification note); the page tests that need Chromium run in the visual stage (SwRS-MDOKFSTUDIO-CORE-076 S12).
+
 ### How we test page
 
 - Changed (`proposed`, text): SwRS-MDOKFSTUDIO-CORE-086 names six links in the site header, How we test between How we ship and Gallery: description, normative text and the text of scenarios S1 and S2. The scenario titles do not change, and no approved requirement is touched.

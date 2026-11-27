@@ -75,6 +75,7 @@ When a reader saves a comment on a selection, the page SHALL anchor it from the 
 ### Verification notes
 
 - Method: test/page/modules/commentCompose.test.ts, unit tests `T43: a selection across blocks anchors first block line to last block end line` (Selection across blocks), `T43: a triple-click selection that ends at offset 0 of the next block stays in its own block` (Triple click), `T43: the quote is whitespace-collapsed and capped at 500, prefix and suffix at 32` (Normal selection, Long selection).
+- Method: test/page/modules/commentCompose.test.ts, unit test `a selection that ends at offset 0 of a block finds the block before it among nested blocks, without a search of the document` (Triple click, nested lists).
 - Criteria: The anchor lines equal the data-line of the first block and the data-end-line of the last block. The lengths are 500, 32 and 32 at most.
 
 <!-- okf:links:start -->

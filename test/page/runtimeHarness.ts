@@ -159,6 +159,10 @@ export class RuntimeElement {
     return this.attributes[name] ?? null;
   }
 
+  public hasAttribute(name: string): boolean {
+    return this.getAttribute(name) !== null;
+  }
+
   public querySelector(selector: string): RuntimeElement | null {
     if (selector === ".okf-name-cell") {
       return this.childElements.find((child) => child.getAttribute("class") === "okf-name-cell") ?? null;

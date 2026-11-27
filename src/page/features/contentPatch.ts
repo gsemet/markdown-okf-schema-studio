@@ -7,6 +7,7 @@
  * before it got here.
  */
 
+import { syncAlignedFloat } from "../modules/alignedFloat";
 import { applyFigureSizes } from "../modules/figureSizes";
 import { applyLinkHint, linkBaseTitle } from "../modules/linkNavigation";
 import { applySpanColors, isSafeOkfColor } from "../modules/spanColors";
@@ -70,6 +71,8 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     parts.statusRegion.applyPendingOverlay({ visible: false, label: "", message: "" });
     // Blocks whose HTML did not change stay in place with what the page did to them (PERF-05).
     parts.contentMorph.replace(main, message.contentHtml);
+    // Before anything measures the new content: the styles ask the container.
+    syncAlignedFloat(main);
     parts.codeCopy.refresh();
     context.revision = next.revision;
     context.requestId = next.requestId;

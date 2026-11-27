@@ -10,6 +10,9 @@ from playwright.sync_api import Page
 
 from capture_support import Failure, VISUAL_REPORT_DIR, report_path, save_step
 
+# Two frames drawn: what the page does at its next frame (a hover that is followed there) is done.
+NEXT_FRAMES = "() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))"
+
 
 def check_figure_anchors(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Figure width and alignment follow data-okf-width and the align class; label anchors are visible and targetable."""
@@ -637,6 +640,8 @@ def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None
     failures.append(Failure(page_name, "a copy button exists before any block is hovered"))
   block = page.locator("#sphinx-myst-preview-content pre").first
   block.hover(position={"x": 120, "y": 40})
+  # The button follows the pointer at the next frame.
+  page.evaluate(NEXT_FRAMES)
   page.wait_for_timeout(120)
   if button.count() != 1 or not button.is_visible():
     failures.append(Failure(page_name, "hovering a code block did not show the copy button"))
@@ -733,6 +738,8 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
   item = page.locator("main ul > li").first
   item.scroll_into_view_if_needed()
   item.hover()
+  # The outline follows the pointer once per frame.
+  page.evaluate(NEXT_FRAMES)
   hovered = page.locator('main [data-sphinx-preview-edit-hover="true"]')
   if hovered.count() != 1:
     failures.append(Failure(page_name, f"hovering a list item marked {hovered.count()} elements, expected 1"))
@@ -752,6 +759,7 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
   # The editor replaces the paragraph and the page may reflow under the stationary pointer; the
   # browser then reports the pointer over whatever block lies there, and that block is rightly
   # outlined. The check is that no outline stays on the block being edited or inside its editor.
+  page.evaluate(NEXT_FRAMES)
   stale = page.evaluate("""() => [...document.querySelectorAll('main [data-sphinx-preview-edit-hover="true"]')]
     .filter(element => element.closest('.sphinx-preview-block-editor')
       || element.getAttribute('data-sphinx-preview-editing') === 'true')

@@ -401,6 +401,7 @@ function hoverFigure(harness: RuntimeHarness): RuntimeElement {
     "data-sphinx-source-end-line": "26",
   }, harness.windowState, 100, 80, "figure");
   harness.dispatchDocument("mouseover", { target: figure });
+  harness.flushFrames(); // the hover follows the pointer once per frame
   return figure;
 }
 
@@ -426,8 +427,10 @@ test("T32: hovering a figure in edit mode shows Edit figure; outside edit mode i
   assert.equal(prevented, true, "a press does not move the focus");
   // Moving from the figure onto the button is not leaving the figure.
   harness.dispatchDocument("mouseout", { target: figure, relatedTarget: button });
+  harness.flushFrames();
   assert.equal(button.getAttribute("hidden"), null);
   harness.dispatchDocument("mouseout", { target: figure, relatedTarget: harness.body });
+  harness.flushFrames();
   assert.notEqual(button.getAttribute("hidden"), null);
 });
 

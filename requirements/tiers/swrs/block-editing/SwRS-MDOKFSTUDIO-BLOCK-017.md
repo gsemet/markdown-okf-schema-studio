@@ -35,6 +35,8 @@ scenarios:
   title: Links whose click keeps its own behaviour
 - id: S7
   title: The text cursor over mapped blocks
+- id: S8
+  title: The outline follows the pointer once per frame
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,6 +48,7 @@ tested_in_files:
 - test/core/preview/blockReq.requirements.test.ts
 - test/integration/realInput/editorWidgets.ts
 - test/page/blockReq.requirements.test.ts
+- test/page/hoverFrames.test.ts
 - test/page/linkEditModeClick.test.ts
 - test/page/runtimeBlockEditor.test.ts
 default_owner_email: gaetan@xeberon.net
@@ -115,6 +118,15 @@ Only the links whose plain click opens the block editor (SwRS-MDOKFSTUDIO-BLOCK-
 | edit mode on | a link inside a mapped block whose plain click opens the block editor | text, like the rest of the block |
 | edit mode on | any other link | pointer |
 
+### Scenario S8 (boundary): The outline follows the pointer once per frame
+
+| Situation, edit mode on | Outcome |
+| --- | --- |
+| the pointer crosses several elements before the next animation frame | only the element a click at the latest of them would edit is outlined, in that frame |
+| the pointer leaves the window | the outline goes at once and a waiting move is dropped |
+| a focus change arrives while a pointer move waits for its frame | the focused element is outlined and the older move changes nothing |
+| the element the pointer went to left the page before the frame | no element is outlined |
+
 ### Verification notes
 
 - Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the list item that a click would edit`: hovering a list item and pointer or focus leaves) and test/page/blockReq.requirements.test.ts (`a list item is outlined and opened on its own lines, the list itself outlines and opens the whole list`: the list rows of the outlined element table).
@@ -123,6 +135,7 @@ Only the links whose plain click opens the block editor (SwRS-MDOKFSTUDIO-BLOCK-
 - Method: test/page/blockReq.requirements.test.ts (`the hover outline skips the properties table and an open editor, and outlines a block inside a link`: targets that are not outlined and the block inside a link row).
 - Method: test/page/blockReq.requirements.test.ts (`the hover outline of an admonition is the pointed body block, and the admonition over its title or frame`: the two admonition and alert rows of the outlined element table).
 - Method: visual scenarios block-editing/v29, v30, v33 and v34 in test/visual/linkEditModeScenarios.ts (the pointer over the link of a link-only paragraph outlines the paragraph; over the body of a linked card, the body paragraph only). The text cursor over a link is not asserted.
+- Method: test/page/hoverFrames.test.ts (the outline follows the pointer once per frame: the four rows).
 - Method: test/core/preview/blockReq.requirements.test.ts (`mapped blocks show the text cursor in edit mode only`: text cursor table).
 - Method: test/page/linkEditModeClick.test.ts (`edit mode: hovering a link in a comment-thread body shows no edit outline and keeps the pointer cursor`, `edit mode: hovering a link of the properties table shows no edit outline and keeps the pointer cursor`, `edit mode: hovering a link inside a paragraph outlines the paragraph and gives it the text cursor`, `edit mode stylesheet: only links a plain click edits get the text cursor; every other link keeps its pointer`: links whose click keeps its own behaviour and the link rows of the text cursor table).
 - Criteria: At most one element carries the attribute; the outline is a 1 px dashed line in the focus colour; editHoverTarget returns nothing for the targets that are not outlined and treats an element inside a link like any element of its mapped block, except inside a link whose click keeps its own behaviour (inLinkThatKeepsItsBehaviour in src/page/features/linkEditing.ts, the same rule as linkActivationEdits), where it returns nothing; the stylesheet holds the text cursor rule and only for edit mode, and gives it to a link only through the data-sphinx-preview-link-edits marker that syncLinkFollowHints sets on exactly the links linkActivationEdits would edit.

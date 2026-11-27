@@ -386,6 +386,7 @@ test("edit mode hover marks the list item that a click would edit", () => {
     }, harness.windowState, 0, 20, "li");
     list.appendChild(item);
     harness.dispatchDocument("mouseover", { target: item });
+    harness.flushFrames();
     assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), editMode ? "true" : null);
     assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
     if (editMode) {
@@ -396,6 +397,7 @@ test("edit mode hover marks the list item that a click would edit", () => {
       harness.dispatchDocument("focusout", { target: item });
       assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), null);
       harness.dispatchDocument("mouseover", { target: item });
+      harness.flushFrames();
       harness.editModeButton.dispatch("click");
       assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), null);
     }

@@ -367,6 +367,7 @@ test("the Edit figure button and the Start writing Enter shortcut ignore input w
       "data-sphinx-source-end-line": "26",
     }, harness.windowState, 100, 80, "figure");
     harness.dispatchDocument("mouseover", { target: figure });
+    harness.flushFrames();
     const button = harness.createdElements.find((element) =>
       element.getAttribute("data-sphinx-figure-edit") !== null);
     assert.ok(button);

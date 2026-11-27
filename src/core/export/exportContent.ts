@@ -5,6 +5,7 @@
  */
 
 import { classifyPreviewReference } from "../navigation/previewNavigation";
+import { markAlignedFloat } from "../preview/alignedFloat";
 import { COMMENT_MARKS, isChromeProbe } from "./chromeMarks";
 import {
   attr,
@@ -306,6 +307,8 @@ export function applyContentRules(
   unfold(root);
   convertProperties(root);
   removeChrome(root);
+  // The styles ask the content root, and an editor left out may have held the only aligned float.
+  childElements(root).filter((element) => element.tagName === "main").forEach(markAlignedFloat);
   const removedLinks: string[] = [];
   rewriteLinks(root, removedLinks);
   const missingImages = embedImages(root, imageData);
