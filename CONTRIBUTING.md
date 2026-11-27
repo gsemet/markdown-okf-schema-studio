@@ -444,7 +444,12 @@ document with 22 tables, 11 images and 9 comment threads (`test/probe/perf547Doc
 over running text and across table cells with the mouse, creates comments from the Comment button,
 and writes `out/reports/probe/perf-547.json`: every sample and the median of `selectionRelease` and
 `commentCreate`, the number of elements a comment creation restyles, and the longest main-thread
-task of each drag and release. It sets no limit and fails only when the measure cannot be taken.
+task of each drag and release. The comment author setting stays empty and the fixture folder is its
+own Git repository (a local `user.name`, no commit), so the report also holds `authorWait`: how long
+each comment write waited for the Git user name. A Node step then adds `threadIndex`
+(`test/probe/perf547ThreadIndex.ts`): the time of `createDocumentIndex` and of `reanchorThreads` on
+that document and on one four times as large with 36 threads, all anchored, measured outside VS
+Code. It sets no limit and fails only when the measure cannot be taken.
 
 ```bash
 just ci-perf-547

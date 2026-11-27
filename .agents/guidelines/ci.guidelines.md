@@ -113,7 +113,9 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     is red if any failed.
     A third on-demand job, `perf-547`, measures comments on a large generated document in a real
     window (issue 547): `gh workflow run ci.yml --ref <branch> -f perf_547=true`. It uploads
-    `out/reports/probe/perf-547.json` in the artifact `perf-547-attempt-<n>` and sets no limit: it is
+    `out/reports/probe/perf-547.json` in the artifact `perf-547-attempt-<n>` (the window figures, the
+    wait of each comment write for the Git user name, and the time of the comment thread index, taken
+    in plain Node after the window run) and sets no limit: it is
     red only when the measure cannot be taken. It does not gate merges and is not part of `checks`.
     Its job has 5 minutes and its measure step 4, about twice their healthy durations (rule 11): a
     hang that keeps the heartbeat is cancelled by the step before the 10-minute budget of the

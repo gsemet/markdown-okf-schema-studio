@@ -206,6 +206,34 @@ test("a comment for a document that is not a file is refused with 'save the docu
   assert.equal(s.posted.at(-1)!.ok, true);
 });
 
+// The perf-547 measure reads this probe (`authorWait`); the stub preview starts without the field.
+test("the probe holds how long each comment write waited for the Git user name, and none with the setting", async () => {
+  const s = setup();
+  const router = new Map<string, (message: any, preview: any) => Promise<void>>();
+  s.controller.register({ on: (type: string, handler: any) => { router.set(type, handler); } } as never);
+  const message = { anchor: { line: 1, endLine: 1, quote: "x", prefix: "", suffix: "" }, body: "Hello" };
+  const { host } = (s.controller as any).manager;
+  s.files.set(DOCUMENT, "x\n");
+  const preview = s.preview();
+  const create = async (): Promise<string> => {
+    await router.get("previewCommentCreate")!(message, preview);
+    return JSON.parse(s.files.get(SIDECAR)!).threads.at(-1).comments[0].author;
+  };
+
+  host.vcs.userName = () => new Promise((resolve) => setTimeout(() => resolve("Slow Git"), 40));
+  assert.equal(await create(), "Slow Git");
+  host.vcs.userName = async () => { throw new Error("no Git"); };
+  host.paths = { userName: () => "Os Name" };
+  assert.equal(await create(), "Os Name");
+  const waits: number[] = [...preview.probe.authorWaitsMs];
+  assert.equal(waits.length, 2, "one sample per write, a failed read included");
+  assert.ok(waits[0]! >= 25, `the write waited for the slow read: ${waits[0]} ms`);
+
+  host.settings = { section: () => ({ get: (key: string, fallback: unknown) => key === "authorName" ? "Alias" : fallback }) };
+  assert.equal(await create(), "Alias");
+  assert.deepEqual(preview.probe.authorWaitsMs, waits, "the setting never asks Git");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005#S6
 test("saving writes the moved lines to the comments file when the only preview has restricted reads", async () => {
   const s = setup();

@@ -136,8 +136,11 @@ export function getActivePreviewForTests():
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
     /** Side-by-side diff baselines posted to the page (CR 147). */
     baseline: { posts: number; last?: { hunks: number; htmlLength: number } };
-    /** Review comment threads posted to the page (T42). */
-    comments: { posts: number; last?: Array<CommentThread & { orphaned?: boolean }>; result?: { ok: boolean; reason?: string; kind: string; threadId?: string } };
+    /**
+     * Review comment threads posted to the page (T42), and the milliseconds the last comment writes
+     * waited for the Git user name.
+     */
+    comments: { posts: number; last?: Array<CommentThread & { orphaned?: boolean }>; result?: { ok: boolean; reason?: string; kind: string; threadId?: string }; authorWaitsMs: number[] };
     /** True while the host holds an open block edit (its final save has not completed). */
     blockEditOpen: boolean;
     /** True while the page has an inline editor open that page updates wait for (STAB-03). */
@@ -203,7 +206,12 @@ export function getActivePreviewForTests():
     pendingOverlayShown: probe.pendingOverlayShown,
     incomingChanges: { posts: probe.incomingPosts, last: probe.lastIncomingChanges },
     baseline: { posts: probe.baselinePosts, last: probe.lastBaseline },
-    comments: { posts: probe.commentPosts, last: probe.lastComments, result: probe.lastCommentResult },
+    comments: {
+      posts: probe.commentPosts,
+      last: probe.lastComments,
+      result: probe.lastCommentResult,
+      authorWaitsMs: [...probe.authorWaitsMs ?? []],
+    },
     blockEditOpen: preview.edits.active !== undefined,
     pageEditorOpen: preview.edits.lock.pageEditorOpen,
     history: {

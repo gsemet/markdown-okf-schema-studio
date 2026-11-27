@@ -60,6 +60,8 @@ export interface SessionProbe {
   commentPosts: number;
   lastComments?: Array<CommentThread & { orphaned?: boolean }>;
   lastCommentResult?: { ok: boolean; reason?: string; kind: string; threadId?: string };
+  /** Milliseconds the last comment writes waited for the Git user name; absent until one asked Git. */
+  authorWaitsMs?: number[];
   /** The last previewHistoryState posted to the page. */
   lastHistoryState?: { canBack: boolean; canForward: boolean };
 }

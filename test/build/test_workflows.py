@@ -1384,7 +1384,9 @@ def test_the_perf_547_job_runs_only_on_demand_and_uploads_its_report_whatever_ha
     assert after[1]["with"]["path"] == "out/reports/"
     recipe = (ROOT / "justfile").read_text().split("\nci-perf-547:", 1)[1].split("\n\n", 1)[0]
     assert "export STUDIO_REAL_INPUT_SCENARIO=perf-547" in recipe
-    assert "run test:integration -- --trusted-only" in recipe
+    # The thread index is timed after the window run, into its report; either one failing fails the job.
+    assert "run test:integration -- --trusted-only && node out/test/probe/perf547ThreadIndex.js; then" in recipe
+    assert (ROOT / "test/probe/perf547ThreadIndex.ts").is_file()
     assert "STUDIO_LAUNCH_TIMEOUT_MS" not in recipe
     # The name the recipe exports is a scenario of the real-window runner.
     assert '"perf-547": () => scenarioPerf547(' in (ROOT / "test/integration/realInput/run.ts").read_text()

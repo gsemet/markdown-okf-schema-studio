@@ -30,7 +30,7 @@ import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { RenamedFile } from "../hostEvents";
 import type { PreviewManager } from "../previewManager";
-import type { PreviewSession } from "../previewSession";
+import type { PreviewSession, SessionProbe } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";
 import { fireAndForget } from "../../host-api/logger";
 
@@ -69,6 +69,8 @@ export function createCommentsState(): CommentsState {
 }
 
 const COMMENTS_DEBOUNCE_MS = 150;
+/** How many of the last waits for the Git user name the probe keeps. */
+const AUTHOR_WAIT_SAMPLES = 50;
 const ANCHORS_UNCHANGED = "no anchor moved";
 /** The sidecar exists (or may) but could not be read; not the same as "there is none". */
 const UNREADABLE: unique symbol = Symbol("unreadable sidecar");
@@ -79,6 +81,18 @@ type CommentOutcome = { ok: true } | { ok: false; reason: string };
 
 function sidecarOf(documentPath: string): string {
   return path.join(path.dirname(documentPath), sidecarNameFor(path.basename(documentPath)));
+}
+
+/** Reads the Git user name and notes on the probe how long the write waited for it (perf-547). */
+async function timedGitName(probe: SessionProbe, read: () => Promise<string | undefined>): Promise<string | undefined> {
+  const started = performance.now();
+  try {
+    return await read();
+  } finally {
+    const waits = (probe.authorWaitsMs ??= []);
+    waits.push(performance.now() - started);
+    if (waits.length > AUTHOR_WAIT_SAMPLES) waits.shift();
+  }
 }
 
 /** Review comment threads of the previews. */
@@ -487,7 +501,7 @@ export class CommentsController {
     const documentId = host.documents.idOf(documentPath);
     const author = await resolveAuthor({
       setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION, documentId)).authorName,
-      gitName: () => host.vcs.userName(documentId),
+      gitName: () => timedGitName(preview.probe, () => host.vcs.userName(documentId)),
       osUserName: () => host.paths.userName(),
     });
     const now = new Date();

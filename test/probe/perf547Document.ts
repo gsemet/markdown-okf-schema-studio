@@ -7,6 +7,8 @@
  * `perf547Document()` returns the files by relative path (the document, its comments sidecar and
  * the images), ready to be written in a temporary folder. Used by the real-window scenario
  * (test/integration/perf547.ts) and by any test that renders the document without a window.
+ * `perf547Document(4)` is the same document with every count of the shape four times as large, for
+ * the thread index measure (perf547ThreadIndex.ts).
  */
 
 export const PERF547_FILE = "report.md";
@@ -84,8 +86,8 @@ interface Section {
   readonly cells: Mark[];
 }
 
-/** The files of the document, by path relative to its folder. */
-export function perf547Document(): Record<string, string> {
+/** The files of the document, by path relative to its folder; `scale` multiplies every count. */
+export function perf547Document(scale = 1): Record<string, string> {
   const random = seeded(SEED);
   const word = (): string => WORDS[Math.floor(random() * WORDS.length)]!;
   const words = (count: number): string => Array.from({ length: count }, word).join(" ");
@@ -105,7 +107,12 @@ export function perf547Document(): Record<string, string> {
     "# Lorem ipsum performance report",
     "",
   ];
-  const { tables, rows, images, threads, lines: totalLines } = PERF547_SHAPE;
+  const tables = PERF547_SHAPE.tables * scale;
+  const rows = PERF547_SHAPE.rows * scale;
+  const images = PERF547_SHAPE.images * scale;
+  const threads = PERF547_SHAPE.threads * scale;
+  const totalLines = PERF547_SHAPE.lines * scale;
+  const blockquotes = BLOCKQUOTES * scale;
   const sections: Section[] = [];
   let imageCount = 0;
   for (let index = 0; index < tables; index += 1) {
@@ -114,7 +121,7 @@ export function perf547Document(): Record<string, string> {
     const marker = `marker${index + 1}alpha beta ${words(2)}`;
     const paragraph = { offset: block.length, quote: marker };
     block.push(`${sentence(30)} The ${marker} closes this part, with **${words(2)}** and \`${word()}\` inline. ${sentence(24)}`, "");
-    if (index < BLOCKQUOTES) block.push(`> ${sentence(12)} Then **${word()}** and \`${word()}\` follow.`, "");
+    if (index < blockquotes) block.push(`> ${sentence(12)} Then **${word()}** and \`${word()}\` follow.`, "");
     block.push("| Item | Owner | Status | Notes | Value |", "|------|-------|--------|-------|-------|");
     const cells: Mark[] = [];
     for (let row = 1; row < rowCount; row += 1) {
