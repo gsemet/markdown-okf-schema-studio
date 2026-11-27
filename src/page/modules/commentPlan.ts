@@ -2,10 +2,10 @@ import { locate, type PageCommentThread } from "./commentThreadData";
 
 /**
  * Where each review thread belongs in the page. This module only reads: it answers for the content
- * as it is without any highlight or badge, whatever an earlier update left in it, so that placing
- * again over placed threads gives the same answer as placing on a fresh render
+ * as it is once every highlight is removed and its text merged back, badges aside, so that an
+ * update over placed threads places them as removing everything and placing again would
  * (commentPlacements.ts changes the page). One plan reads the `[data-line]` blocks of the document
- * once, and the text of each block it searches once.
+ * at most once, and walks the text of each block it searches once.
  */
 
 /** The attributes of the elements the review comments add to the page. */
@@ -146,7 +146,7 @@ export function planThreads(
     const quote = thread.anchor.quote;
     if (quote === "") return undefined;
     const block = blockFor(thread.anchor.line);
-    // The host re-anchored this thread and found no block to trust: do not guess a place here.
+    // The host re-anchored this thread to a line no block of the page covers: do not guess a place.
     if (!block && thread.orphaned === false) return undefined;
     // No block at the line (the text moved): look for the quote in every eligible block, in order.
     const searched = block ? [block] : blocks().map((candidate) => candidate.element);
@@ -191,7 +191,8 @@ export function planThreads(
     return undefined;
   };
 
-  // A badge sits inside the block, or after it when the block cannot take children.
+  // A badge sits inside the block, or after it for the blocks that take none inside: skipped
+  // content (code, diagrams, math, ...), tables, lists, details, images and rules.
   const badge = (thread: PageCommentThread): ThreadPlace | undefined => {
     const block = blockFor(thread.anchor.line);
     if (!block) return undefined;

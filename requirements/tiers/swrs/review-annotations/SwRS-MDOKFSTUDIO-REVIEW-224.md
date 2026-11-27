@@ -7,7 +7,8 @@ description: When the page receives the comment threads again, it SHALL change
   only the highlights, badges and orphan entries whose thread has another place
   or shown state than before, and measure its source positions again only when a
   block of the content can have moved, with the same result as placing every
-  thread from nothing.
+  thread from nothing unless an earlier highlight started or ended where two
+  text nodes of the content touch.
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -26,6 +27,8 @@ scenarios:
   title: Open popover
 - id: S4
   title: When the page is measured again
+- id: S5
+  title: When the page is not measured again
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -41,17 +44,18 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When the page receives the comment threads again, it SHALL change only the highlights, badges and orphan entries whose thread has another place or shown state than before, and measure its source positions again only when a block of the content can have moved, with the same result as placing every thread from nothing.
+When the page receives the comment threads again, it SHALL change only the highlights, badges and orphan entries whose thread has another place or shown state than before, and measure its source positions again only when a block of the content can have moved, with the same result as placing every thread from nothing unless an earlier highlight started or ended where two text nodes of the content touch.
 
 ### Scenario S1 (nominal): One thread added
 
-- GIVEN a page that shows threads as highlights, a badge and an orphan entry
+- GIVEN a page that shows threads as highlights, a badge and an orphan entry, where no highlight has started or ended between two text nodes that touch
 - WHEN the page receives the same threads and one new thread whose quote no other thread marks
 - THEN the highlight, badge and orphan entry elements of the other threads are the same elements in the same places, nothing of them is written again, and the update reads the document's `[data-line]` blocks once
 
 ### Scenario S2 (boundary): Same page as from nothing
 
 - GIVEN a page that shows threads, among them two threads in one block, overlapping quotes, threads on nested blocks, several badges below one block, resolved threads and orphaned threads
+- AND no highlight, of these threads or of the lists to come, starts or ends where two text nodes of the content touch
 - WHEN the page receives lists in which threads were created, replied to, resolved, reopened, moved or deleted, an empty list included, comments shown or hidden
 - THEN after each list the highlights, text nodes, badges, badged blocks and orphan box of the page are those of a fresh page that receives only that list
 
@@ -63,9 +67,15 @@ When the page receives the comment threads again, it SHALL change only the highl
 
 ### Scenario S4 (boundary): When the page is measured again
 
-- GIVEN a page that shows threads, comments shown
-- WHEN the page receives a list that adds, moves or removes a badge below a block, and when it receives a list that does not
-- THEN the page measures its source positions again in the first case only; with comments hidden it does not measure them
+- GIVEN a page that shows threads, comments shown or hidden
+- WHEN the page receives a list that adds, moves or removes a highlight or a badge below a block, or that gives the first badge inside it to a block that holds another element, or takes the last one away from it
+- THEN the page measures its source positions again
+
+### Scenario S5 (boundary): When the page is not measured again
+
+- GIVEN a page that shows threads, comments shown or hidden, where no highlight has started or ended between two text nodes that touch
+- WHEN the page receives a list that changes none of what S4 names: the same list, replies, resolved or reopened threads, a further badge or one badge fewer in a block that keeps one, badges inside a block that holds text only, or orphan entries
+- THEN the page does not measure its source positions again
 
 ### Related requirements
 
@@ -76,12 +86,14 @@ When the page receives the comment threads again, it SHALL change only the highl
 ### Known issues
 
 - Known issue: Each update still searches the text of the blocks of every thread to find its place; only the changes to the page are limited to what differs.
-- Known issue: A content patch or a new render places every thread from nothing.
+- Known issue: A content patch or a new render removes every comment element and places every thread again.
+- Known issue: The page does not compare the layout: it measures for every change that S4 names, also when no block moved. A new comment on selected words adds a highlight, so it measures.
+- Known issue: A highlight that starts or ends where two text nodes of the content touch (siblings side by side) joins them: the page reads them as one text while the highlight is there, and leaves one text node when it removes it. A later list, the same list or a reply included, and a content patch that keeps the block then highlight a quote that crosses that place, where a page that receives only that list shows a badge for it; a thread whose words this highlight takes gets a badge instead of its own highlight. No rendered page that was checked holds touching text nodes (headless Chromium 156: renders on load and after a content patch, one text of 200,000 characters, opening and closing an editor, find and view toggles), so no user action that meets this is known; a Chromium that splits one long text into several nodes was not checked.
 
 ### Verification notes
 
 - Method: test/page/modules/commentThreadsUpdate.test.ts (the page module on a fake DOM: element identity and read count, a comparison of the whole page after seeded random lists with a fresh page, the popover, and the host message handler with the module to count the measures).
-- Criteria: The elements of the unchanged threads are identical objects with no write; every compared page is equal, text node boundaries included; the measure count is 1 for a list that changes a badge below a block and 0 otherwise.
+- Criteria: The elements of the unchanged threads are identical objects with no write; every compared page is equal, text node boundaries included, where no highlight starts or ends between two text nodes that touch; the measure count is 1 for every list of S4 and 0 for every list of S5, comments shown and hidden.
 
 <!-- okf:links:start -->
 ### Links

@@ -9,42 +9,49 @@ import { BADGE, MARK, ORPHAN, POPOVER } from "./commentPlan";
  * Thread content comes from a file next to the document and is untrusted: every string reaches the
  * page through `textContent` or `setAttribute`, never as markup. For each thread the innermost
  * mapped block (`data-line` .. `data-end-line`) that covers the anchor line is searched for the
- * first occurrence of the quote inside ONE text node (a quote that spans several elements is not
- * found); that text is wrapped in `mark[data-okf-comment-thread]`. A thread whose quote is not
- * found gets an empty `button[data-okf-comment-badge]` on its block instead. Code, diagrams, math,
- * the properties table and open inline editors are never touched (O10). When the host posts the
- * threads again, `setThreads` changes only the elements of the threads whose place or state differs
- * (commentPlan.ts finds the places, commentPlacements.ts changes the page). The last threads are
- * kept, so `apply()` puts them back on content that was replaced by a patch; it first removes what
- * an earlier run added, so running it twice changes nothing. Clicking a mark or badge opens a
- * popover with the thread (author, date, plain-text bodies, resolved state). When `hooks.reply`
- * is given (writable previews only, T43), the popover ends with a reply box: Reply or
- * Cmd/Ctrl+Enter hands the thread id and the trimmed text (1 to 10 000 characters) to the hook.
- * The text stays in the box until the host answers `ok: true` through `result()`; a refusal shows
- * its reason (`textContent`, role="alert") and keeps the text, and so does a missing answer after
- * 15 seconds. A reply draft survives the threads being posted again while its thread exists.
+ * first occurrence of the quote that no earlier thread took, inside ONE run of text: a text node as
+ * it is without any highlight (a quote that spans several elements is not found). That text is
+ * wrapped in `mark[data-okf-comment-thread]`. A thread whose quote is not found gets an empty
+ * `button[data-okf-comment-badge]` inside its block, or below a block that cannot take it. No
+ * highlight is made in code, diagrams, math, the properties table, open inline editors or included
+ * content (O10). commentPlan.ts finds the places and commentPlacements.ts changes the page: when
+ * the host posts the threads again, `setThreads` changes only the elements of the threads whose
+ * place or state differs. The last threads are kept, so `apply()` puts them back on content that
+ * was replaced by a patch: it removes what the page holds and places every thread again. A second
+ * run gives the same page with new elements, unless a highlight starts or ends where two text nodes
+ * touch: removing it leaves one node, in which a quote across that place is then found. Clicking a
+ * mark or badge opens a popover with the thread (author, date, plain-text bodies, resolved state).
+ * When `hooks.reply` is given
+ * (writable previews only, T43), the popover ends with a reply box: Reply or Cmd/Ctrl+Enter hands
+ * the thread id and the trimmed text (1 to 10 000 characters) to the hook. The text stays in the
+ * box until the host answers `ok: true` through `result()`; a refusal shows its reason
+ * (`textContent`, role="alert") and keeps the text, and so does a missing answer after 15 seconds.
+ * A reply draft survives the threads being posted again while its thread exists.
  *
  * T44: `hooks.resolve` and `hooks.remove` (writable previews only) add Resolve / Reopen and Delete
  * to the popover. Delete asks "Delete thread?" with Yes / No inside the popover (no
  * `window.confirm`). Both wait for the host's answer like a reply: nothing changes before the
  * thread list is posted again, and a refusal shows its reason in an alert line.
  *
- * A thread the page cannot place (no mapped block at its line and the quote found in no eligible
- * block) is listed in an "Orphaned comments" box that this module creates after the content
- * element, never inside it, and re-creates on every `apply()`. Each entry opens the same popover.
- * The page never writes anything for an orphan: the thread stays in the file untouched.
+ * A thread with no mapped block at its line is highlighted elsewhere only when its quote has at
+ * least 12 characters and occurs exactly once in the eligible blocks; otherwise it is an orphan,
+ * listed in an "Orphaned comments" box that commentPlacements.ts keeps after the content element,
+ * never inside it (`setThreads` changes the entries that differ, `apply()` builds the box again).
+ * Each entry opens the same popover. The page never writes anything for an orphan: the thread
+ * stays in the file untouched.
  *
  * T45: the host re-anchors threads against the document text and posts `orphaned` with each
  * thread. `orphaned: true` goes straight to the box; `orphaned: false` trusts the posted lines
  * (the page never searches the quote elsewhere for such a thread). Threads without the field
- * (older hosts, tests) keep the T44 placement rules.
+ * (older hosts, tests) keep the T44 placement rules: the search elsewhere above.
  *
  * Placement and dismissal of the popover follow `commentEditorBehaviour.ts`: it sits inside the window,
  * follows its text on scroll, and Escape or a press outside closes it, or, when the reply box holds
  * text, asks "Discard / Keep editing" inside the popover first (no `window.confirm`).
  *
- * `trace` (diagnostics only) hears why an open popover went away: a press outside, Escape, a toggle,
- * a close by the page, or a re-apply that found no thread or holder.
+ * `trace` (diagnostics only) hears why an open popover went away: a press outside, Escape, a toggle
+ * of its own thread, a discarded draft, hidden comments, a close by the page, or new threads or a
+ * re-apply that left it no thread or no holder. Opening another thread over it is not traced.
  *
  * While comments are hidden (`<html>` carries `data-sphinx-preview-comments="off"` from the toolbar
  * Comments button or `data-okf-show-comments="false"` from the setting; the stylesheet hides the
@@ -63,8 +70,8 @@ export function installCommentThreads(
   trace?: (event: string, detail: string) => void,
 ): {
   /**
-   * Shows the threads the host posted. True when a block of the content may have moved: a badge
-   * below a block was added, moved or removed while comments are shown.
+   * Shows the threads the host posted. True when a block of the content can have moved (see
+   * commentPlacements.ts).
    */
   setThreads(threads: unknown): boolean;
   /** Places the threads again from nothing, after the content was replaced. */
@@ -272,7 +279,7 @@ export function installCommentThreads(
     const discardAsked = discarding;
     close();
     if (afresh) placements.update([]);
-    const moved = placements.update(threads) && !hidden();
+    const moved = placements.update(threads);
     if (reopen === undefined) return moved;
     if (threads.length === 0) {
       trace?.("comment popover closed", `re-apply without threads, thread ${reopen}`);
