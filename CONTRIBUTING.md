@@ -311,7 +311,7 @@ cost of one comment and of the selected text of a scroll assert wherever Chromiu
 time budget: they write the JSON requirements report and check in
 Chromium, in pinned fonts, that no text or pill of any use case map overlaps another at 1280 px and
 at 800 px, with captures of six frozen maps under `out/reports/requirements-viewer-graph/`; the same target runs the
-gallery link tests in Chromium) and
+gallery link and video gallery tests in Chromium) and
 `just ci-report visual`, which reports the real VS Code
 stages as skipped. The real VS Code window jobs (`ci-integration`, the `ci-acceptance` shards and
 the `stress` repetitions) are heavy, so they run on every push to `main` and never on a pull
@@ -367,7 +367,9 @@ extension, with `visual/` dropped (the scenario id, plus `--<step>`) and the run
 real-window capture dropped (the registry id `<group>/rNN-<slug>`), so it stays the same from one
 CI run to the next; when two captures share an id, only the first in name order keeps it and the
 others take their full path. Historical captures remain visible with their original metadata and
-are not certified as part of the latest passing campaign.
+are not certified as part of the latest passing campaign. `out/site/videos.html` ("Videos" in the
+site navigation) lists the presentation video and every feature clip that has a WebM, each with its
+poster; no video byte loads before a click, which plays that video.
 
 `just site` and `just ci-gallery` first write the requirements report (`just requirements-report`),
 and the published `out/site/requirements/` ("Requirements" in the site navigation) is built from

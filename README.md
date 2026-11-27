@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/gsemet/markdown-okf-schema-studio/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/gsemet/markdown-okf-schema-studio/actions/workflows/ci.yml) [![Latest release](https://img.shields.io/github/v/release/gsemet/markdown-okf-schema-studio?display_name=tag&sort=semver)](https://github.com/gsemet/markdown-okf-schema-studio/releases) [![License](https://img.shields.io/github/license/gsemet/markdown-okf-schema-studio)](LICENSE)
 
-[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio) | [Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio) | [Screenshot report/gallery](https://gsemet.github.io/markdown-okf-schema-studio/gallery.html) | [Requirements](https://gsemet.github.io/markdown-okf-schema-studio/requirements/)
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio) | [Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio) | [Screenshot report/gallery](https://gsemet.github.io/markdown-okf-schema-studio/gallery.html) | [Videos](https://gsemet.github.io/markdown-okf-schema-studio/videos.html) | [Requirements](https://gsemet.github.io/markdown-okf-schema-studio/requirements/)
 
 Markdown OKF-Schema Studio is a visual Markdown editor for VS Code. You read a clean rendered
 page and click any block to edit its source. It renders [CommonMark](https://commonmark.org/),
@@ -65,6 +65,8 @@ Edits touch only the block you change, in one undo step.
 This editor never rewraps or reformats the rest of the file,
 so edits stay small and the diff stays clean.
 
+![Drag a row or a column by its handle. The raw table follows, each cell keeps its spacing](docs/demo-video/clips/table-anchors/table-anchors.gif)
+
 ### Edit MyST visually
 
 Sphinx MyST is an awesome but underrated Markdown extension
@@ -79,6 +81,14 @@ Here is an example of edition on a MyST documentation,
 that will be later published on ReadTheDocs for instance:
 
 ![Editing a MyST admonition while the card grid and figure stay rendered](images/readme/showcase-myst-edit.png)
+
+The slash menu inserts a whole MyST structure, a card grid for instance:
+
+![Type /grid in a block to insert a card grid. A MyST card grid, rendered in place](docs/demo-video/clips/slash-menu-grid/slash-menu-grid.gif)
+
+A figure's options are changed in one form, with no directive syntax to remember:
+
+![Edit figure opens one form for the whole figure. Apply writes the options into the file](docs/demo-video/clips/figure-editor/figure-editor.gif)
 
 `{versionadded}`, `{versionchanged}` and `{deprecated}` get their title ("Added in version 0.47"),
 a standalone `{card}` shows its `:header:` and `:footer:`, and a `{tab-set}` becomes a tab bar with
@@ -117,7 +127,7 @@ toolbar button toggles the marks. A second button turns each changed block into 
 side-by-side diff (the block at the last commit on the left, as it is now on the right, with the
 removed and added words marked) in reading mode.
 
-![Blocks changed since the last commit marked with a green bar](images/readme/showcase-diff-cream.png)
+![Diff marks every block changed since the last commit. Side-by-side shows before and after, word by word](docs/demo-video/clips/diff-side-by-side/diff-side-by-side.gif)
 
 ### Review with comment threads
 
@@ -148,9 +158,7 @@ Fix direction:
 - ( ) Leave as is: edit link-only blocks in the source
 ```
 
-| Cream | Dark |
-| --- | --- |
-| ![A plan with two radio groups, the recommended option of each selected, and a task list on the cream page](images/readme/radio-plan-cream.png) | ![The same plan on the dark page](images/readme/radio-plan-dark.png) |
+![Lists of ( ) and (x) become a radio group. One click moves the (x) in the file](docs/demo-video/clips/radio-buttons/radio-buttons.gif)
 
 ### Mermaid and PlantUML, no Java
 

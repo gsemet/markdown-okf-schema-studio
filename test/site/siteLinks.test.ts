@@ -31,9 +31,9 @@ test("a viewer page brands and links the site relative to its own folder", () =>
   const html = viewerDocument({ dir: "requirements/area/StRS-X-001", level: "use-case", title: "T", shareTitle: "T", description: "d", body: "", crumbs: [] }, { sha: "abc", generatedAt: "" });
   assert.ok(html.includes('src="../../../images/logo.svg" alt="" width="44" height="44"'));
   assert.ok(html.includes('class="site-brand" href="../../../index.html"'));
-  const links = [["Home", "../../../index.html"], ["Contributing", "../../../contributing.html"], ["How we ship", "../../../docs/how-we-ship.html"], ["How we test", "../../../docs/how-we-test.html"], ["Gallery", "../../../gallery.html"], ["Requirements", "../../"]];
+  const links = [["Home", "../../../index.html"], ["Contributing", "../../../contributing.html"], ["How we ship", "../../../docs/how-we-ship.html"], ["How we test", "../../../docs/how-we-test.html"], ["Gallery", "../../../gallery.html"], ["Videos", "../../../videos.html"], ["Requirements", "../../"]];
   const nav = links.map(([text, target]) => `<a href="${target}">${text}</a>`).join("");
-  assert.ok(html.includes(`<nav class="site" aria-label="Site">${nav}</nav>`), "the six links, in order");
+  assert.ok(html.includes(`<nav class="site" aria-label="Site">${nav}</nav>`), "the seven links, in order");
 });
 
 test("rewrites rendered Markdown documents and preserves fragments", () => {

@@ -4,8 +4,8 @@ id: StRS-MDOKFSTUDIO-CORE-008
 uuid: 51fda375-eb0d-4561-b727-a26695371468
 title: A reviewer reads the published site and its requirements
 description: The Studio SHALL publish a site on GitHub Pages where a reviewer
-  browses use cases, behaviours, coverage and the e2e gallery without building
-  anything.
+  browses use cases, behaviours, coverage, the e2e gallery and the videos
+  without building anything.
 project: markdown-okf-schema-studio
 scope: rendering-core
 req_lifecycle: proposed
@@ -16,8 +16,8 @@ derives_from: []
 scenarios:
 - id: S1
   title: Find a use case and read it
-user_need: A reviewer browses use cases, behaviours, coverage and the e2e
-  gallery on GitHub Pages without building anything.
+user_need: A reviewer browses use cases, behaviours, coverage, the e2e gallery
+  and the videos on GitHub Pages without building anything.
 derived_by:
 - SwRS-MDOKFSTUDIO-CORE-069
 - SwRS-MDOKFSTUDIO-CORE-080
@@ -32,6 +32,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-093
 - SwRS-MDOKFSTUDIO-CORE-095
 - SwRS-MDOKFSTUDIO-CORE-096
+- SwRS-MDOKFSTUDIO-CORE-098
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -39,11 +40,11 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-The Studio SHALL publish a site on GitHub Pages where a reviewer browses use cases, behaviours, coverage and the e2e gallery without building anything.
+The Studio SHALL publish a site on GitHub Pages where a reviewer browses use cases, behaviours, coverage, the e2e gallery and the videos without building anything.
 
 ### Preserved stakeholder intent
 
-A reviewer browses use cases, behaviours, coverage and the e2e gallery on GitHub Pages without building anything.
+A reviewer browses use cases, behaviours, coverage, the e2e gallery and the videos on GitHub Pages without building anything.
 
 ### Rationale and constraints
 
@@ -99,4 +100,5 @@ flowchart LR
   - [SwRS-MDOKFSTUDIO-CORE-093](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-093.md): The site requirements viewer names every requirement by its full ID
   - [SwRS-MDOKFSTUDIO-CORE-095](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-095.md): The published site plays a feature clip as a looping video
   - [SwRS-MDOKFSTUDIO-CORE-096](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-096.md): Each screenshot of the site gallery has its own stable link
+  - [SwRS-MDOKFSTUDIO-CORE-098](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-098.md): The published site has a video gallery
 <!-- okf:links:end -->

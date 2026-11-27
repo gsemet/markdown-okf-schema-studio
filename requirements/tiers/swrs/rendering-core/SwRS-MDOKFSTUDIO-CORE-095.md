@@ -43,7 +43,7 @@ When a maintainer builds the Pages site, an image of a page that shows a feature
 
 ### Scenario S1 (nominal): A page shows a feature clip's GIF
 
-- GIVEN a docs page with a Markdown image of `docs/demo-video/clips/x/x.gif`, with `x.webm` and `poster.png` in the same folder
+- GIVEN a page written from Markdown (a docs page or the README) with a Markdown image of `docs/demo-video/clips/x/x.gif`, with `x.webm` and `poster.png` in the same folder
 - WHEN the site is built
 - THEN the image becomes a `<video>` of `x.webm` with `poster.png`, autoplay, loop, muted, playsinline and controls, the image's alt text as its `aria-label`, and the GIF as an `<img>` fallback inside it, and the site carries `x.webm`, `x.gif` and `poster.png` under `docs/demo-video/clips/x/`
 

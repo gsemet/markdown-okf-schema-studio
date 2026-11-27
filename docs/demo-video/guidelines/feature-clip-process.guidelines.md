@@ -11,7 +11,8 @@ A feature clip has no title or end card, plays 5 to 30 seconds, starts on the ac
 show one caption per beat, in turn, and several marks, in turn, on what the feature changed. It
 comes in three files: an MP4 for X and the published GitHub release, a WebM for the published docs
 site, and a light GIF for the release-note file in the repository and the feature's docs page. The
-README is not changed: it keeps its presentation video.
+README keeps its presentation video at the top; a clip's GIF may illustrate its feature in the
+README's section of that feature, by the maintainer's choice.
 
 The first rule of the short-demo process holds: **the maintainer always has an up-to-date
 storyboard**, here `clip.md` (section 2), and reviews it before the take and before a render ("The
@@ -227,6 +228,8 @@ clip's one zoom on the result stands in for the crop.
   highlight in `release-notes.md`, its MP4 replaces the hero image in post 1 of the announcement
   thread, and the owner uploads the MP4 into the GitHub release body. The steps are in
   [release-process.guidelines.md](../../../.agents/guidelines/release-process.guidelines.md).
+- **The site's Videos page** (`videos.html`) shows every clip that has a WebM, with its poster,
+  playing on a click, with no edit needed. Its title is the clip's first `Text 1` row.
 
 ## 5. Windows and macOS
 

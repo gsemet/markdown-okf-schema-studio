@@ -2,6 +2,15 @@
 
 ## 2026-11-27
 
+### The published site has a video gallery
+
+Reason: CR-522. All requirements below are `proposed`; no approved requirement is touched.
+
+- Added: the Pages site writes `videos.html` with the presentation video first, then one card per clip folder that holds its WebM; each card is a video, with its poster when the folder holds one, that loads no video file before a click. A script of the page starts a video on a click on its picture while it is neither loaded nor started, and leaves every other click to the browser's own controls (SwRS-MDOKFSTUDIO-CORE-098, from StRS-MDOKFSTUDIO-CORE-008).
+- Changed (text): SwRS-MDOKFSTUDIO-CORE-086 names seven links in the site header, Videos between Gallery and Requirements: description, normative text and the text of scenarios S1 and S2. The scenario titles do not change.
+- Clarified: scenario S1 of SwRS-MDOKFSTUDIO-CORE-095 covers a page written from Markdown, a docs page or the README; no behaviour changes.
+- Changed (text): StRS-MDOKFSTUDIO-CORE-008 adds the videos to what a reviewer browses on the published site: description, user need, normative behaviour and stakeholder intent.
+
 ### A new comment updates only its highlights
 
 Reason: CR-517, issue 547. The requirements below are `proposed`; no StRS changes.

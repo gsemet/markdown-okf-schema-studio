@@ -50,7 +50,7 @@ One example, from the `trust-security` area:
 | Contract | `sphinx/tests`, `test/core/render/*.contract.ts` (no such file today) | `just contracts`, `just sphinx-check` | `static`, `static-windows`; every pull request | SwRS scenario (no contract test carries a marker today) | `@tests_req <SwRS-ID>#S<n>` |
 | Security | `test/security` | `just security`, `just audit` | `static`, `static-windows`; every pull request | SwRS scenario; may accept a TRUST-014 path | `@tests_req <SwRS-ID>#S<n>`; `@accepts_req <StRS-ID>#S<n>` allowed for TRUST-014 |
 | Release and tooling | `test/build/*.py` | `just release-tests` | `static`, `static-windows`; every pull request | SwRS scenario; may accept a CORE-007 path | `@tests_req <SwRS-ID>#S<n>`; `@accepts_req <StRS-ID>#S<n>` allowed for CORE-007 |
-| Simulated bench | `test/visual`, `test/page/tableBreakout.test.ts`, `test/page/codeBlockBreakout.test.ts`, `test/site/requirementsViewer/*.browser.test.ts`, `test/site/galleryLinks.browser.test.ts` | `just ci-visual`, `just ci-viewer-graph` | `visual`, `visual-2`, `viewer-graph`; every pull request | SwRS scenario; StRS path **tested** | `@tests_req <SwRS-ID>#S<n>`, `@tests_req <StRS-ID>#S<n>` |
+| Simulated bench | `test/visual`, `test/page/tableBreakout.test.ts`, `test/page/codeBlockBreakout.test.ts`, `test/site/requirementsViewer/*.browser.test.ts`, `test/site/galleryLinks.browser.test.ts`, `test/site/videoGallery.browser.test.ts` | `just ci-visual`, `just ci-viewer-graph` | `visual`, `visual-2`, `viewer-graph`; every pull request | SwRS scenario; StRS path **tested** | `@tests_req <SwRS-ID>#S<n>`, `@tests_req <StRS-ID>#S<n>` |
 | Real VS Code integration | `test/integration` | `just ci-integration` | `integration`; push to `main`, heavy dispatch | SwRS scenario; StRS path **accepted** (suites that walk one) | `@tests_req <SwRS-ID>#S<n>`, `@accepts_req <StRS-ID>#S<n>` |
 | Acceptance | `test/integration/acceptance` | `just ci-acceptance [GROUP]` | `acceptance` (one shard per group with a file); push to `main`, heavy dispatch | StRS path **accepted** | `@accepts_req <StRS-ID>#S<n>` |
 | Stress | `test/shared/stressPlan.ts` | `just ci-stress [REPEAT]` | `stress`; push to `main`, heavy dispatch | that a passing test passes every time | none |
@@ -125,12 +125,12 @@ No VS Code window opens. `test/visual` drives the preview page with Playwright C
 mock host, and its screenshots feed the gallery. Some tests of `test/page` measure the real page in
 Chromium: the table and code block breakout widths, the aligned-float layout, the style cost of one
 comment and the selected text of a scroll. The use case map tests of `test/site/requirementsViewer` and
-the gallery link tests of `test/site` also run in Chromium.
+the gallery link and video gallery tests of `test/site` also run in Chromium.
 
 - Command: `just ci-visual` (visual scenarios and those page tests); `just ci-viewer-graph` (use case
-  map and gallery link tests). The visual scenarios come in two parts: `just ci-visual 1` runs the
-  first part and those page tests, `just ci-visual 2` the second part. With no part,
-  `just ci-visual` runs both and merges their reports.
+  map, gallery link and video gallery tests). The visual scenarios come in two parts:
+  `just ci-visual 1` runs the first part and those page tests, `just ci-visual 2` the second part.
+  With no part, `just ci-visual` runs both and merges their reports.
 - CI job: `visual` (part 1), `visual-2` (part 2) and `viewer-graph`, on every pull request.
 - Marker: `@tests_req <SwRS-ID>#S<n>`; a simulated walk of a StRS path carries
   `@tests_req <StRS-ID>#S<n>`.

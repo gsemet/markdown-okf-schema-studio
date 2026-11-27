@@ -14,6 +14,7 @@ import { REQUIREMENTS_REPORT_PATH, writeRequirementsViewer } from "./requirement
 import { siteHeader } from "./siteHeader";
 import { SITE_CSS } from "./siteTheme";
 import { cardDocument, escapeHtml, simpleCard, writeCardPictures, type SocialCard } from "./socialCard";
+import { buildVideoGallery, listVideos } from "./videoGalleryPage";
 
 interface HtmlAttribute {
   name: string;
@@ -80,6 +81,7 @@ video { max-width: 100%; height: auto; }
 .gallery h2 { margin: 0 0 .35rem; font-size: 1.05rem; }
 .gallery p { margin: 0; font-family: var(--sans); color: var(--soft); font-size: .94rem; }
 .gallery h2 { overflow-wrap: anywhere; }
+.video-gallery figure video { aspect-ratio: 16 / 9; object-fit: contain; }
 a.capture-open { display: block; width: 100%; padding: 0; border: 0; background: var(--code-bg); text-decoration: none; cursor: zoom-in; }
 a.capture-open:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
 [data-capture-missing][hidden] { display: none; }
@@ -188,6 +190,54 @@ function curatedMosaic(): string[] {
   return (curated.captures ?? []).slice(0, 3).map((capture) => pathToFileURL(path.join(EXTENSION_ROOT, capture.image)).toString());
 }
 
+interface CardPicture {
+  name: string;
+  html: string;
+}
+
+/**
+ * Writes `videos.html` and copies the files `copyClipMedia` does not: the presentation video and its
+ * poster, at their repository paths. Returns what the social card of the page shows.
+ */
+function writeVideoGallery(extensionRoot: string, outputRoot: string): { card: SocialCard; picture: CardPicture } {
+  const videos = listVideos(extensionRoot);
+  for (const file of videos.filter((video) => !video.clip).flatMap((video) => [video.source, video.poster])) {
+    if (!file) continue;
+    fs.mkdirSync(path.dirname(path.join(outputRoot, file)), { recursive: true });
+    fs.copyFileSync(path.join(extensionRoot, file), path.join(outputRoot, file));
+  }
+  const card: SocialCard = {
+    title: "Video gallery: Markdown OKF-Schema Studio",
+    description: `${videos.length} videos of Markdown OKF-Schema Studio, a VS Code extension that previews and edits Markdown and MyST: the feature clips and the one-minute demo.`,
+    page: "videos.html",
+    image: "og/videos.png",
+    imageAlt: `Video gallery: ${videos.length} videos`,
+  };
+  fs.writeFileSync(path.join(outputRoot, card.page), pageDocument("videos", card.page, buildVideoGallery(videos), card));
+  return { card, picture: { name: "videos", html: cardDocument(simpleCard("Video gallery", `${videos.length} videos`, "Feature clips and the one-minute demo")) } };
+}
+
+/**
+ * The last pages of the build: writes `videos.html` with its media, then `site-manifest.json`, which
+ * lists it. Returns every social card picture to draw, the screenshot gallery's first.
+ * @implements_req SwRS-MDOKFSTUDIO-CORE-098
+ */
+export function writeVideosAndManifest(extensionRoot: string, outputRoot: string, markdownPages: readonly string[], galleryPicture: CardPicture): CardPicture[] {
+  const videoGallery = writeVideoGallery(extensionRoot, outputRoot);
+  fs.writeFileSync(path.join(outputRoot, "site-manifest.json"), JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    pages: [...markdownPages, videoGallery.card.page],
+    gallery: fs.existsSync(E2E_SCREENSHOT_ROOT),
+    reports: fs.existsSync(REPORTS_ROOT),
+    cards: ["og/gallery.png", videoGallery.card.image, ...Object.values(SIMPLE_CARDS).map((entry) => entry.card.image)],
+  }, null, 2) + "\n");
+  return [
+    galleryPicture,
+    videoGallery.picture,
+    ...Object.values(SIMPLE_CARDS).map((entry) => ({ name: path.posix.basename(entry.card.image, ".png"), html: cardDocument(simpleCard(entry.eyebrow, entry.headline, entry.line)) })),
+  ];
+}
+
 /** The Markdown files the site renders: the README, Contributing and the docs pages, never a clip's own production files. */
 export function renderedMarkdownFiles(): string[] {
   const docs = walkMarkdown(path.join(EXTENSION_ROOT, "docs")).filter((file) => !isClipSource(path.relative(EXTENSION_ROOT, file).split(path.sep).join("/")));
@@ -228,18 +278,8 @@ async function main(): Promise<void> {
   };
   fs.writeFileSync(path.join(siteRoot, "gallery.html"), pageDocument("gallery", "gallery.html", buildGallery(), galleryPageCard));
   fs.writeFileSync(path.join(siteRoot, "reports", "index.html"), pageDocument("reports", "reports/index.html", "<h1>Reports</h1><p><a class=\"report-link\" href=\"e2e/REVIEW.md\">Open the E2E review index</a></p>"));
-  const pictures = [
-    { name: "gallery", html: cardDocument(galleryCard(captureCount, mosaic)) },
-    ...Object.values(SIMPLE_CARDS).map((entry) => ({ name: path.posix.basename(entry.card.image, ".png"), html: cardDocument(simpleCard(entry.eyebrow, entry.headline, entry.line)) })),
-  ];
-  await writeCardPictures(siteRoot, pictures);
-  fs.writeFileSync(path.join(siteRoot, "site-manifest.json"), JSON.stringify({
-    generatedAt: new Date().toISOString(),
-    pages: markdownFiles.map((sourcePath) => outputPathForMarkdown(path.relative(EXTENSION_ROOT, sourcePath).split(path.sep).join("/"))),
-    gallery: fs.existsSync(E2E_SCREENSHOT_ROOT),
-    reports: fs.existsSync(REPORTS_ROOT),
-    cards: ["og/gallery.png", ...Object.values(SIMPLE_CARDS).map((entry) => entry.card.image)],
-  }, null, 2) + "\n");
+  const markdownPages = markdownFiles.map((sourcePath) => outputPathForMarkdown(path.relative(EXTENSION_ROOT, sourcePath).split(path.sep).join("/")));
+  await writeCardPictures(siteRoot, writeVideosAndManifest(EXTENSION_ROOT, siteRoot, markdownPages, { name: "gallery", html: cardDocument(galleryCard(captureCount, mosaic)) }));
   console.log(`Built static site at ${siteRoot}`);
 }
 
