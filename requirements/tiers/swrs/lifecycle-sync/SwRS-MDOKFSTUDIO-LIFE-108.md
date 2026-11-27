@@ -40,19 +40,24 @@ scenarios:
   title: Accepted shape of previewScroll and previewReveal
 - id: S10
   title: Defaults, the setting off and the double click
+- id: S11
+  title: Scroll reports carry the selected text, read once
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/page/features/pageInput.ts
 - src/page/features/scrollCore.ts
+- src/page/modules/shownContent.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/host/diffPreview.requirements.test.ts
 - test/integration/sourceMapping.test.ts
+- test/page/frameReadsInChromium.test.ts
 - test/page/pageSettings.test.ts
 - test/page/runtimeScroll.test.ts
+- test/page/scrollSelection.test.ts
 - test/session/lifeReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -140,6 +145,15 @@ When the reader scrolls the preview to another source line or activates a render
 | scrollEditorWithPreview set to false and the reader scrolls or clicks in the preview | The editor does not move |
 | The reader double-clicks rendered content outside edit mode | The page posts nothing beyond the reveals of its two clicks; there is no double-click setting (a doubleClickToSwitchToEditor value left in the user settings is not a setting of the extension and has no effect) |
 
+### Scenario S11 (boundary): Scroll reports carry the selected text, read once
+
+| Situation | Outcome |
+| --- | --- |
+| several scrolls over an unchanged selection | every report carries the selected text, and the page turns the selection into text once |
+| the selection changes, or its ends move | the next report carries the new text |
+| the content under an unmoved selection changes, or a switch of the page hides or shows part of it (a collapsed properties table) | the next report carries the text as it then is |
+| no selected text | the report carries none |
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-LIFE-100: the reverse direction, from the text editor to the preview
 - SwRS-MDOKFSTUDIO-LIFE-119: the anchor line that previewScroll reports
@@ -154,6 +168,7 @@ When the reader scrolls the preview to another source line or activates a render
 - Method: test/session/lifeReq.requirements.test.ts (scenarios 6 and 7: "a reveal that names another source file moves nothing" and "a revealed line is clamped between the first and the last line of the document", by reading revealFromPage and revealEditorLine, Math.max(0, Math.min(lineCount - 1, line - 1)))
 - Method: scenario 8 is checked by the envelope tests of SwRS-MDOKFSTUDIO-TRUST-052 and by reading hasValidStateFields in src/core/protocol/pageToHost.ts (the shape of the two message types is checked in test/core/protocol/pageToHost.test.ts)
 - Method: test/page/pageSettings.test.ts (Defaults): "page settings default to following both ways, without selection marks or double-click reveal"; test/page/runtimeScroll.test.ts (the double click): "executes source and preview synchronization across layout changes" (a dblclick posts nothing more). The click path with scrollEditorWithPreview off has no test (untested); checked by reading revealFromPage and revealEditorLine.
+- Method: test/page/scrollSelection.test.ts (scenario 11: one text for several reports, a changed selection, no text) and, in Chromium in the `visual` CI job, test/page/frameReadsInChromium.test.ts (scenario 11: content hidden by an attribute, a style or a class, typed text and a collapsed properties table under an unmoved selection).
 - Criteria: readPreviewConfiguration returns true for no value of scrollEditorWithPreview; revealEditorLine returns before any reveal when scrollEditorWithPreview is false; the page registers no double-click listener; previewScroll is posted only when the rounded line changed; lastRevealedSourceLine equals the message line; visibleTextEditors is unchanged and the document equals the file on disk when no editor shows the file; revealEditorLine runs only when the resolved paths are equal or no file is named; the zero-based line is between 0 and lineCount - 1.
 
 <!-- okf:links:start -->

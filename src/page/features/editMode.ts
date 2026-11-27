@@ -14,8 +14,13 @@ export function installEditMode(rt: PageRuntime): EditMode {
   const { document, context, host, state } = rt;
   const { editorTrace, traceFocus, traceStack } = rt.diagnostics;
   let editHoverElement: Element | undefined;
+  // The latest element the pointer went to, until the next frame outlines what a click there edits.
+  let pointed: { target: EventTarget | null } | undefined;
+  let pointFrame = false;
 
   function setEditHover(element: Element | undefined): void {
+    // Whatever sets the outline now is newer than a pointer move that still waits for its frame.
+    pointed = undefined;
     if (editHoverElement === element) return;
     editHoverElement?.removeAttribute?.("data-sphinx-preview-edit-hover");
     editHoverElement = element;
@@ -47,6 +52,22 @@ export function installEditMode(rt: PageRuntime): EditMode {
       ? cell
       : (editing === mapped ? (mapped.closest("pre") || mapped) : editing);
     return element.getAttribute("data-sphinx-preview-editing") === "true" ? undefined : element;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
+  // The pointer crosses many elements between two frames: the outline (and the hover actions with
+  // it) follows the latest of them, once per frame.
+  function hoverAtFrame(target: EventTarget | null): void {
+    pointed = { target };
+    if (pointFrame) return;
+    pointFrame = true;
+    rt.window.requestAnimationFrame(() => {
+      pointFrame = false;
+      if (!pointed) return;
+      const node = pointed.target as Node | null;
+      // An element that left the page since the pointer was on it gets nothing.
+      setEditHover(node?.isConnected === false ? undefined : editHoverTarget(node));
+    });
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-001
@@ -277,11 +298,13 @@ export function installEditMode(rt: PageRuntime): EditMode {
       });
       document.addEventListener("mouseover", (event) => {
         if (rt.parts.figureEditButton.owns(event.target)) return;
-        setEditHover(editHoverTarget(event.target));
+        hoverAtFrame(event.target);
       });
       document.addEventListener("mouseout", (event) => {
         if (rt.parts.figureEditButton.owns(event.relatedTarget)) return;
-        setEditHover(editHoverTarget(event.relatedTarget));
+        // A pointer that left the window goes to no element: the outline goes at once.
+        if (event.relatedTarget) hoverAtFrame(event.relatedTarget);
+        else setEditHover(undefined);
       });
       document.addEventListener("focusin", (event) => setEditHover(editHoverTarget(event.target)));
       document.addEventListener("focusout", () => setEditHover(undefined));

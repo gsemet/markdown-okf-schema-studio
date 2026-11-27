@@ -1,5 +1,6 @@
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
 import { directiveAttributeRule } from "../directives/registry";
+import { markAlignedFloat } from "../preview/alignedFloat";
 import { isSafeOkfColor, SAFE_COLOR_NAME_PATTERN } from "./spanColors";
 import { isSafeSvgPresentationValue, SVG_ATTRIBUTE_NAMES } from "./svgSanitizer";
 
@@ -561,6 +562,7 @@ export function rewriteSphinxHtml(html: string, context: HtmlRewriteContext): Ht
     setAttr(main, "id", "sphinx-myst-preview-content");
     setAttr(main, "tabindex", "-1");
     setAttr(main, "aria-label", "Markdown OKF-Schema Studio preview content");
+    markAlignedFloat(main);
   }
   appendTableStylesheet(document, tableStyles, context.nonce);
   return {

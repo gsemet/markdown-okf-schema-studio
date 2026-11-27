@@ -1,4 +1,5 @@
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
+import { ALIGNED_FLOAT_ATTRIBUTE } from "../alignedFloat";
 
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-007
 /** The first element of the page starts 40px below the top (read and edit mode). */
@@ -35,10 +36,8 @@ const FIRST_ELEMENT_CLEARANCE_CSS = `/*
   margin-inline-end: var(--sphinx-preview-first-inset, 0px);
 }`;
 
-// An image, figure or table floated left or right (MyST :align: or the HTML align attribute).
-const ALIGNED_FLOAT = ':is(img, figure, table):is(.align-left, .align-right, [align="left" i], [align="right" i])';
-
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-043
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-223
 /** Text wraps around the floating toolbar where it overlaps the column; boxes start below it. */
 const TOOLBAR_FLOAT_CSS = `/*
  * An invisible float at the start of the column, the size of the part of the toolbar inside it at the
@@ -64,16 +63,18 @@ const TOOLBAR_FLOAT_CSS = `/*
  * box (edit-mode insert points, label anchor rows, comment chips, hidden and folded blocks); clearing
  * an empty one would push the text after it down too.
  */
-#sphinx-myst-preview-content:not(:has(${ALIGNED_FLOAT})) > :not(p:not([data-sphinx-preview-figure]), h1, h2, h3, h4, h5, h6, ul, ol, dl, [hidden], [data-okf-folded], .sphinx-preview-insert-point, .okf-anchor-row, div.okf-comment) {
+main#sphinx-myst-preview-content:not([${ALIGNED_FLOAT_ATTRIBUTE}]) > :not(p:not([data-sphinx-preview-figure]), h1, h2, h3, h4, h5, h6, ul, ol, dl, [hidden], [data-okf-folded], .sphinx-preview-insert-point, .okf-anchor-row, div.okf-comment) {
   clear: right;
 }
 
 /*
  * A document with an image, figure or table aligned left or right (anywhere) keeps the layout it had
  * before: no float, and no box clears (a box would clear the aligned float too, wherever it is, and a
- * per-block "comes after an aligned float" test costs too much in a long document).
+ * per-block "comes after an aligned float" test costs too much in a long document). The content root
+ * carries an attribute while there is one (core/preview/alignedFloat.ts): a :has() on the root would
+ * restyle the whole document at every change inside it.
  */
-#sphinx-myst-preview-content:has(${ALIGNED_FLOAT})::before {
+main#sphinx-myst-preview-content[${ALIGNED_FLOAT_ATTRIBUTE}]::before {
   display: none;
 }`;
 

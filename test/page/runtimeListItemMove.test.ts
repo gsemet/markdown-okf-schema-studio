@@ -353,6 +353,7 @@ test("a click on a handle opens no editor and the pointer over it outlines the i
   harness.dispatchDocument("click", { target: handle, preventDefault: () => undefined, stopPropagation: () => undefined });
   assert.equal(messagesOf(harness, "previewEditOpen").length, 0);
   harness.dispatchDocument("mouseover", { target: handle });
+  harness.flushFrames();
   assert.equal(items[1]!.getAttribute("data-sphinx-preview-edit-hover"), "true");
   harness.dispatchDocument("mouseout", { target: handle, relatedTarget: null });
   assert.equal(items[1]!.getAttribute("data-sphinx-preview-edit-hover"), null);

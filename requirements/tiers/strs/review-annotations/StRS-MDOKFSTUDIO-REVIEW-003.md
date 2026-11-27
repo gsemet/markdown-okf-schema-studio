@@ -54,6 +54,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-186
 - SwRS-MDOKFSTUDIO-REVIEW-217
 - SwRS-MDOKFSTUDIO-REVIEW-218
+- SwRS-MDOKFSTUDIO-REVIEW-223
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -161,4 +162,5 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-REVIEW-186](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a valid reply inside the thread comment under the author
   - [SwRS-MDOKFSTUDIO-REVIEW-217](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-217.md): The comment editors stay inside the window and follow their text
   - [SwRS-MDOKFSTUDIO-REVIEW-218](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-218.md): Escape or a press outside closes a comment editor and asks before dropping a draft
+  - [SwRS-MDOKFSTUDIO-REVIEW-223](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-223.md): Saving one comment restyles few elements of a large document
 <!-- okf:links:end -->

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Less work around comments on a large document: saving one now restyles a few elements instead of the whole
+  page, with the same layout around aligned images and tables, and the Comment button, the copy button and the
+  edit mode outline follow the selection or the pointer at most once per frame (CR-516 comment-restyle, issue #547)
 - In edit mode, a click or Enter inside an admonition or a GitHub alert now edits the selected paragraph,
   list item or directive only (a diagram, a formula or a code block opens whole); the title or the frame, and
   Enter on the admonition selected as a whole, still open all of it. The move chord moves a block of its body

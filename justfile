@@ -318,10 +318,11 @@ ci-static:
     fi
 
 # CI jobs "visual" (PART=1) and "visual-2" (PART=2): one part of the visual end-to-end stage,
-# reports under out/reports/e2e; part 1 then runs the table breakout width tests in Chromium (which
-# must start: STUDIO_REQUIRE_CHROMIUM=1), report under out/reports/breakout/. With no PART (local
-# runs, preflight): empty the screenshot folder and the first-gap and width-margins reports, run both
-# parts and merge their manifests into the full run's. Parts run one by one pass `ci-report` only
+# reports under out/reports/e2e; part 1 then runs the page tests that need Chromium (table and code
+# block breakout widths, aligned-float layout, style cost of a comment, selection text of a scroll;
+# Chromium must start: STUDIO_REQUIRE_CHROMIUM=1), report under out/reports/breakout/. With no PART
+# (local runs, preflight): empty the screenshot folder and the first-gap and width-margins reports,
+# run both parts and merge their manifests into the full run's. Parts run one by one pass `ci-report` only
 # under a pinned STUDIO_E2E_RUN_ID, as in CI. Every step runs even when an earlier one fails, so one
 # run reports all.
 ci-visual PART="":

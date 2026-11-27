@@ -163,11 +163,20 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
   return {
     button(): any { return body.querySelector("[data-sphinx-preview-code-copy]") as any; },
     body, content, band, makePre, posted, gestures, timers, runtime, window,
+    // A pointer event and the frame that follows it (the button answers the pointer once per frame).
     over(target: FakeElement, related: FakeElement | null = null) {
+      this.overEvent(target, related);
+      this.flushFrames();
+    },
+    overEvent(target: FakeElement, related: FakeElement | null = null) {
       hovered = target;
       for (const handler of documentListeners.get("mouseover") ?? []) handler({ target, relatedTarget: related });
     },
     out(target: FakeElement, related: FakeElement | null) {
+      this.outEvent(target, related);
+      this.flushFrames();
+    },
+    outEvent(target: FakeElement, related: FakeElement | null) {
       for (const handler of documentListeners.get("mouseout") ?? []) handler({ target, relatedTarget: related });
     },
     onDocumentClick(handler: Handler) { documentListeners.set("click", [...(documentListeners.get("click") ?? []), handler]); },
@@ -182,7 +191,8 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
       return calls;
     },
     click(target: FakeElement) { for (const handler of documentListeners.get("click") ?? []) handler({ target }); },
-    move(target: FakeElement) { hovered = target; for (const handler of documentListeners.get("mousemove") ?? []) handler({ target, clientX: 0, clientY: 0 }); },
+    move(target: FakeElement) { this.moveEvent(target); this.flushFrames(); },
+    moveEvent(target: FakeElement) { hovered = target; for (const handler of documentListeners.get("mousemove") ?? []) handler({ target, clientX: 0, clientY: 0 }); },
     // A scroll event and the frame that follows it (what the browser does between two events).
     scroll() { this.scrollEvent(); this.flushFrames(); },
     scrollEvent() { for (const handler of windowListeners.get("scroll") ?? []) handler({}); },
@@ -521,4 +531,70 @@ test("a second click within 1.5 s restarts the Copied confirmation from its own 
   } finally {
     reply = saved;
   }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S10
+test("pointer events between two frames place the button once, on the latest block", () => {
+  const t = harness();
+  const first = t.makePre("one\n", 100);
+  const second = t.makePre("two\n", 300);
+  t.overEvent(first.code);
+  t.moveEvent(first.code);
+  t.outEvent(first.pre, second.code);
+  t.overEvent(second.code);
+  t.moveEvent(second.code);
+  assert.equal(t.button(), null, "nothing happens before the frame");
+  assert.equal(t.pendingFrames(), 1, "one frame for all of them");
+  t.flushFrames();
+  assert.equal(t.button().styles.get("top"), "306px");
+  assert.equal(first.pre.rectReads, 0, "the block crossed on the way is not measured");
+  assert.equal(second.pre.rectReads, 1, "the button is placed once");
+
+  t.moveEvent(second.code);
+  t.flushFrames();
+  assert.equal(second.pre.rectReads, 1, "a move within the shown block measures nothing");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S10
+test("a pointer that leaves the block hides the button at the next frame, one that leaves the window at once", () => {
+  const t = harness();
+  const first = t.makePre("one\n", 100);
+  const second = t.makePre("two\n", 300);
+  t.over(first.code);
+  t.outEvent(first.pre, t.body);
+  assert.equal(t.button().hidden, false, "until the frame");
+  t.flushFrames();
+  assert.equal(t.button().hidden, true);
+
+  t.over(first.code);
+  t.overEvent(second.code);
+  t.outEvent(second.pre, null);
+  assert.equal(t.button().hidden, true, "no frame is awaited");
+  t.flushFrames();
+  assert.equal(t.button().hidden, true, "the waiting move is dropped");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017#S10
+test("a key, a click or a focus change right after a pointer move is answered for the block under the pointer", () => {
+  const keyboard = harness();
+  const keyed = keyboard.makePre("one\n", 100);
+  keyboard.overEvent(keyed.code);
+  const calls = keyboard.fireDocument("keydown", { key: "Tab", target: keyed.pre });
+  assert.equal(calls.prevented, 1, "Tab goes on to the button of that block");
+  assert.equal(keyboard.button().focused, 1);
+
+  const clicking = harness();
+  const clicked = clicking.makePre("one\n", 100);
+  clicking.overEvent(clicked.code);
+  clicking.click(clicked.code);
+  assert.equal(clicking.button().hidden, true, "the click inside the block hides the button");
+  clicking.flushFrames();
+  assert.equal(clicking.button().hidden, true, "and the older move does not bring it back");
+
+  const hidden = harness();
+  const patched = hidden.makePre("one\n", 100);
+  hidden.overEvent(patched.code);
+  hidden.runtime.hide();
+  hidden.flushFrames();
+  assert.equal(hidden.button(), null, "a content patch drops the waiting move");
 });

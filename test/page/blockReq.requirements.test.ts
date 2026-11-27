@@ -139,6 +139,7 @@ test("the hover outline skips the properties table and an open editor, and outli
   const cell = new RuntimeElement({}, harness.windowState, 0, 20, "td");
   harness.frontmatterProperties.appendChild(cell);
   harness.dispatchDocument("mouseover", { target: cell });
+  harness.flushFrames();
   assert.deepEqual(outlined(), [], "the properties table is not outlined");
 
   const linked = new SelectorElement(harness, ["a"], {
@@ -146,13 +147,16 @@ test("the hover outline skips the properties table and an open editor, and outli
   });
   harness.mappings[2].appendChild(linked);
   harness.dispatchDocument("mouseover", { target: linked });
+  harness.flushFrames();
   assert.equal(linked.getAttribute("data-sphinx-preview-edit-hover"), "true",
     "a block that is itself inside a link is outlined (CR 217)");
 
   harness.dispatchDocument("mouseover", { target: harness.mappings[0] });
+  harness.flushFrames();
   assert.deepEqual(outlined(), [harness.mappings[0]], "a plain mapped block is outlined");
   const textarea = openEditorOf(harness, 1, "Second paragraph.\n");
   harness.dispatchDocument("mouseover", { target: textarea });
+  harness.flushFrames();
   assert.deepEqual(outlined(), [], "nothing is outlined while the pointer is over the open editor");
 });
 
@@ -177,6 +181,7 @@ test("the hover outline of an admonition is the pointed body block, and the admo
   admonition.appendChild(paragraph);
   const outlinedOn = (target: RuntimeElement): RuntimeElement[] => {
     harness.dispatchDocument("mouseover", { target });
+    harness.flushFrames(); // the outline follows the pointer once per frame
     return harness.mappings.filter((element) => element.getAttribute("data-sphinx-preview-edit-hover") !== null);
   };
   assert.deepEqual(outlinedOn(paragraph), [paragraph], "a paragraph of the body is outlined on its own");
@@ -193,10 +198,13 @@ test("hovering a link inside a paragraph outlines the paragraph, like the text a
   const link = new SelectorElement(harness, ["a"], {}, "a");
   harness.mappings[1].appendChild(link);
   harness.dispatchDocument("mouseover", { target: link });
+  harness.flushFrames();
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), "true");
   harness.dispatchDocument("mouseover", { target: harness.mappings[0] });
+  harness.flushFrames();
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), null);
   harness.dispatchDocument("mouseover", { target: harness.mappings[1] });
+  harness.flushFrames();
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), "true");
 });
 
@@ -779,12 +787,15 @@ test("a list item is outlined and opened on its own lines, the list itself outli
   list.appendChild(second);
 
   harness.dispatchDocument("mouseover", { target: body });
+  harness.flushFrames();
   assert.equal(first.getAttribute("data-sphinx-preview-edit-hover"), "true", "the item is outlined");
   assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null, "the list is not");
   harness.dispatchDocument("mouseover", { target: secondText });
+  harness.flushFrames();
   assert.equal(second.getAttribute("data-sphinx-preview-edit-hover"), "true", "the hover moves to the second item");
   assert.equal(first.getAttribute("data-sphinx-preview-edit-hover"), null);
   harness.dispatchDocument("mouseover", { target: list });
+  harness.flushFrames();
   assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), "true", "the list itself outlines the whole list");
 
   const before = harness.messages.length;

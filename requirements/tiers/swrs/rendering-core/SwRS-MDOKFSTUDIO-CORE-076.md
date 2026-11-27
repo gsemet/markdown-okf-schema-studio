@@ -173,7 +173,7 @@ Every push to main SHALL run the heavy jobs (`integration`, `acceptance` and `st
 
 | Input | Outcome |
 | --- | --- |
-| the visual stage of a CI run | the job `visual` runs part 1 (`just ci-visual 1`, with the table breakout width tests) and the job `visual-2` runs part 2 (`just ci-visual 2`), side by side, each uploading its own artifact |
+| the visual stage of a CI run | the job `visual` runs part 1 (`just ci-visual 1`, with the page tests that need Chromium) and the job `visual-2` runs part 2 (`just ci-visual 2`), side by side, each uploading its own artifact |
 | `just ci-visual` without a part | the screenshot folder and the first-gap and width-margins reports are emptied, both parts run one after the other, then they are merged; a red step does not stop the next ones, and the target fails |
 | `just ci-visual` with another part | a usage line and exit 2; nothing runs |
 | the parts of the campaign | each e2e group is in exactly one part; a group in no part or in two parts stops `capture.py` with exit 2 and names the group |

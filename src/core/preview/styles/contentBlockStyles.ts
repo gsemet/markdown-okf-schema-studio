@@ -1,6 +1,7 @@
 import { directiveStyle } from "../../directives/registry";
 import { MERMAID_FONT_FAMILY, MERMAID_FONT_SIZE, MERMAID_MEASURE_CLASS } from "../../render/mermaidFont";
 import { gridColumnCss } from "../../render/mystGridToctree";
+import { ALIGNED_FLOAT_ATTRIBUTE } from "../alignedFloat";
 import { TABLE_CSS } from "./tableStyles";
 
 /** Rendered blocks up to the tables. */
@@ -14,9 +15,11 @@ const RENDERED_BLOCKS_CSS = `
 
 ${directiveStyle("figure")}
 /* Top-level headings clear images, figures and tables aligned left or right (MyST :align:, HTML
-   align), never the toolbar float (CONTENT_LAYOUT_CSS): such a page has none. One test on the
-   column, not a scan of each heading's earlier siblings (too slow in a long document). */
-#sphinx-myst-preview-content:has(:is(img, figure, table):is(.align-left, .align-right, [align="left" i], [align="right" i])) > :is(h1, h2, h3, h4, h5, h6) {
+   align), never the toolbar float (CONTENT_LAYOUT_CSS): such a page has none. One test of the
+   column's own attribute (core/preview/alignedFloat.ts), not a scan of each heading's earlier
+   siblings (too slow in a long document) nor a :has() on the column (it restyles the document at
+   every change inside it). */
+main#sphinx-myst-preview-content[${ALIGNED_FLOAT_ATTRIBUTE}] > :is(h1, h2, h3, h4, h5, h6) {
   clear: both;
 }
 

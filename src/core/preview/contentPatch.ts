@@ -16,6 +16,7 @@
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
 
 import { MAX_PAGE_TEXT_LENGTH } from "../protocol/hostToPage";
+import { ALIGNED_FLOAT_ATTRIBUTE } from "./alignedFloat";
 
 import {
   PREVIEW_STARTUP_SETTING_KEYS,
@@ -92,8 +93,10 @@ function analyze(html: string): PageAnalysis {
         if (start !== undefined && end !== undefined && end >= start) {
           content = { start, end, inner: html.slice(start, end) };
         }
-        // The content is what a patch replaces, so it is not part of the shell.
+        // The content is what a patch replaces, so it is not part of the shell; nor is what the
+        // container says of that content (the page sets it again after a patch).
         child.childNodes = [];
+        child.attrs = child.attrs.filter((attribute) => attribute.name !== ALIGNED_FLOAT_ATTRIBUTE);
         continue;
       }
       if (isRuntimeScript(child)) {

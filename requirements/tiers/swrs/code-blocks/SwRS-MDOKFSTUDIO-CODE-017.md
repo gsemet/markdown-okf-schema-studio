@@ -38,6 +38,8 @@ scenarios:
   title: The keyboard reaches the button
 - id: S9
   title: Blocks that are not tab stops
+- id: S10
+  title: The pointer is answered once per frame
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -139,6 +141,15 @@ When the pointer is over a code block of the preview content, or the block holds
 - WHEN the reader tabs through the page
 - THEN the block is not a tab stop and no copy button appears for it
 
+### Scenario S10 (boundary): The pointer is answered once per frame
+
+| Situation | Outcome |
+| --- | --- |
+| the pointer moves or enters several elements before the next animation frame | the button is shown, moved or hidden once, in that frame, for the latest element |
+| the pointer leaves the block for another element | the button is hidden in the next frame |
+| the pointer leaves the window | the button is hidden at once and a waiting move is dropped |
+| Tab, a click or a focus leaving arrives while a pointer move waits for its frame | the move is applied first, then the key, click or focus change |
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CODE-019: copies the raw code of the block and confirms it
@@ -150,6 +161,7 @@ When the pointer is over a code block of the preview content, or the block holds
 - Method: test/page/modules/codeCopy.test.ts (hover button geometry, created only on first hover, excluded block kinds, 30 px threshold, click hiding, pointer leaving and moving onto the button, 120 ms scroll settle, placement below the band and toolbar)
 - Method: test/page/modules/renderReq.codeCopy.requirements.test.ts (resize moves the button to the new top-right corner and hides it when too little shows, Copied reset on another block, hide on content patch)
 - Method: test/page/modules/codeCopy.test.ts (keyboard: tab stop on copyable blocks only, focus reveals the button, Tab and Shift+Tab between block and button, Enter on the button copies)
+- Method: test/page/modules/codeCopy.test.ts (the pointer is answered once per frame: one frame for several moves, hiding at once when the pointer leaves the window, Tab, click and hide after a waiting move)
 - Method: test/visual/scenarioDefinitions1.ts (copy-button visual scenarios: geometry and placement; keyboard focus scenarios in light and dark with the focus rings)
 - Criteria: button geometry matches the statement; the button is created only on first hover; no button for the excluded block kinds or for blocks outside the content element; visibility toggles at the 30 px threshold; hide is called once per applied patch; button position follows the block rect after resize; state reset only when the hovered block changes; button top is not above the bottom of the band or toolbar
 

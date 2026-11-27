@@ -547,7 +547,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -567,11 +567,13 @@ jobs:
         with:
           just-version: 1.58.0
       - run: just dev-ci
-      # Below the job's 20 minutes, above the 10-minute budget of the real-input step plus the build
-      # and the launch before it: the watchdog writes its dump first, and a hang cancels this step so
-      # the dump and upload steps still run.
+      # About twice a healthy run: this step took under 2 minutes and the job under 2 min 20 s (CI
+      # runs 45895473044, 45895477080, 45896724578). A hang cancels this step, below the job's 5
+      # minutes, so the dump and upload steps still run. This limit is below the 10-minute budget of
+      # the real-input step: the watchdog writes its own dump first only for a heartbeat silent for
+      # 90 seconds; another hang leaves what ci-hang-dump collects.
       - run: xvfb-run --auto-servernum -s "-screen 0 2600x1440x24" just ci-perf-547
-        timeout-minutes: 13
+        timeout-minutes: 4
         env:
           STUDIO_VIEWPORT_GUARD: strict
       - name: Collect hang diagnostics

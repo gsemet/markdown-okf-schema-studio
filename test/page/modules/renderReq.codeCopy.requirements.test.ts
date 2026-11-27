@@ -112,6 +112,7 @@ function harness() {
   const timers: Array<{ id: number; callback: () => void; delay: number }> = [];
   let nextTimer = 1;
   const posted: string[] = [];
+  const frames: Array<() => void> = [];
   const document = {
     body,
     createElement: (tag: string) => new FakeElement(tag),
@@ -126,14 +127,17 @@ function harness() {
     setTimeout: (callback: () => void, delay: number) => { const id = nextTimer++; timers.push({ id, callback, delay }); return id; },
     clearTimeout: (id: number) => { const index = timers.findIndex((timer) => timer.id === id); if (index >= 0) timers.splice(index, 1); },
     addEventListener: (type: string, handler: Handler) => windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]),
+    requestAnimationFrame: (callback: () => void) => frames.push(callback),
   };
   provideGlobalElement(FakeElement);
   const runtime = installCodeCopy(document as never, window as never, (text: string, done) => { posted.push(text); held.push(done); if (reply) done(reply); });
   return {
     button(): any { return body.querySelector("[data-sphinx-preview-code-copy]") as any; },
     makePre, posted, timers, runtime, window,
+    // A pointer event and the frame that follows it (the button answers the pointer once per frame).
     over(target: FakeElement) {
       for (const handler of documentListeners.get("mouseover") ?? []) handler({ target, relatedTarget: null });
+      for (const callback of frames.splice(0)) callback();
     },
     resize() { for (const handler of windowListeners.get("resize") ?? []) handler({}); },
   };
@@ -186,7 +190,8 @@ test("an applied content patch hides the copy button once", () => {
     apply: () => inert,
   });
   let hides = 0;
-  const main = { id: "sphinx-myst-preview-content" };
+  // A content root without an aligned float: the patch looks for one and finds none.
+  const main = { id: "sphinx-myst-preview-content", querySelector: () => null, hasAttribute: () => false };
   const document = {
     getElementById: () => main,
     querySelectorAll: () => [],

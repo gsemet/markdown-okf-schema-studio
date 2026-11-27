@@ -30,14 +30,22 @@ scenarios:
   title: No float
 - id: S6
   title: Headings clear aligned tables and images
+- id: S7
+  title: A change of the content switches the layout
+- id: S8
+  title: The content root says whether it holds an aligned float
 annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/preview/alignedFloat.ts
 - src/core/preview/styles/contentLayoutStyles.ts
+- src/page/modules/alignedFloat.ts
 - src/page/modules/firstClearance.ts
 tested_in_files:
+- test/core/preview/alignedFloat.test.ts
 - test/integration/realInput/qa210Replays.ts
+- test/page/alignedFloatLayout.test.ts
 - test/page/modules/firstClearance.test.ts
 - test/visual/toolbarFloatScenarios.ts
 default_owner_email: gaetan@xeberon.net
@@ -53,6 +61,7 @@ When the floating toolbar overlaps the text column at the top of a document whos
 - The rule is the same in every width mode (Margin, Auto, Full width) and at every pane width where the toolbar overlaps the column: in Full width mode that is every width, in Margin and Auto up to about 1100 px with the expanded toolbar.
 - The interactive first elements keep their own remedy (SwRS-MDOKFSTUDIO-LAYOUT-011) and no float is added. A first block that is a box keeps its 40 px gap (SwRS-MDOKFSTUDIO-LAYOUT-007) and no float is added either.
 - A top-level heading clears an image, figure or table aligned left or right (MyST `:align:` or the HTML `align` attribute) before it, never the toolbar float.
+- The content root `main#sphinx-myst-preview-content` carries the attribute `data-okf-aligned-float` exactly while it holds an image, figure or table aligned left or right (the class `align-left` or `align-right`, or the HTML `align` attribute with the value left or right in any case). The style rules that depend on such an element test this attribute; none tests the content root with `:has()`. The extension writes it in the page it renders and in the exported file, so the layout needs no page script; the page brings it up to date after a change of the content. The attribute alone never makes a page another one for a content patch.
 
 ### Scenario S1 (nominal): Expanded toolbar over a narrow column
 - GIVEN a 393 px pane whose column content box runs from 31 to 362 px, the expanded floating toolbar from 277 to 379 px and from 12 to 178 px, and a heading followed by a paragraph and a note as the first blocks
@@ -93,6 +102,24 @@ When the floating toolbar overlaps the text column at the top of a document whos
 - WHEN the page is laid out
 - THEN each paragraph wraps beside its table and each heading starts below the table before it
 
+### Scenario S7 (boundary): A change of the content switches the layout
+
+| Change of a shown page | Outcome, drawn without a reload |
+| --- | --- |
+| the first aligned image, figure or table is added, by the page itself or by a content patch | no toolbar float, no box clears it, and the top-level headings clear both sides |
+| the last one is removed, or loses its alignment | the toolbar float is back, the top-level boxes start below it, and no heading clears |
+| an element already there gets `align="left"` or `align="right"`, or the class `align-left` or `align-right` | the content root gets the attribute |
+| a content patch that only adds the first aligned float or removes the last | the page is patched, not replaced |
+
+### Scenario S8 (nominal): The content root says whether it holds an aligned float
+
+| Page or file | Content root |
+| --- | --- |
+| a rendered page with an aligned image, figure or table, at the top level or nested | carries `data-okf-aligned-float` |
+| a rendered page with centred ones only, with `align="right"` on a paragraph or a div, or with the class name in text | carries no attribute |
+| an exported file, with no page script | carries the attribute for the content it keeps: an aligned element that left with an open editor does not count |
+| a rendered page or an exported file opened with scripts off | has the layout of the two cases above |
+
 ### Known issues
 
 - Known issue: Only text lines wrap: the border of a heading (the h1 rule) that starts beside the float still runs under the toolbar.
@@ -105,7 +132,8 @@ When the floating toolbar overlaps the text column at the top of a document whos
 ### Verification notes
 
 - Method: Unit tests "CR 226: ..." in test/page/modules/firstClearance.test.ts (published properties for an overlapping narrow column, a scrolled page, a collapsed toolbar, a toolbar beside the column, a toolbar on the left, each interactive first element, a box first and a hidden float); visual scenarios in test/visual/toolbarFloatScenarios.ts: layout-width/v88-toolbar-float-first-lines-cream-393 (text wraps), layout-width/v89-toolbar-float-box-below-reach-cream-900 (a table below the toolbar, centred), layout-width/v90-heading-clears-raw-align-light-900 (headings clear aligned tables); palette-slash/v28-palette-clears-text-rule-cream-900 (an editor frame below the palette) and the first-gap scenarios of layout-width (a box first keeps its 40 px gap).
-- Criteria: The published width and height match the toolbar rectangle inside the column plus the 8 px margin, 0 px in the No float cases; in the headless pages, no client rectangle of the first paragraph's or the heading's text intersects the toolbar, the table's top is at or below the toolbar's bottom and its centre within 2 px of the column's, and each heading's top is at or below the bottom of the aligned table before it.
+- Method: test/core/preview/alignedFloat.test.ts (the attribute on the rendered page and on the exported file, the unchanged shell of a patched page, no `:has()` on the content root) and, in Chromium in the `visual` CI job, test/page/alignedFloatLayout.test.ts (the computed layout of a page and an exported file with scripts off, and the switch after changes of the page and after content patches, in both directions).
+- Criteria: The attribute is present exactly in the cases of the tables; the toolbar float is displayed and the top-level boxes clear right only without it, and the top-level headings clear both sides only with it. The published width and height match the toolbar rectangle inside the column plus the 8 px margin, 0 px in the No float cases; in the headless pages, no client rectangle of the first paragraph's or the heading's text intersects the toolbar, the table's top is at or below the toolbar's bottom and its centre within 2 px of the column's, and each heading's top is at or below the bottom of the aligned table before it.
 
 <!-- okf:links:start -->
 ### Links

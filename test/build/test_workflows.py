@@ -356,8 +356,11 @@ def test_ci_visual_runs_the_table_breakout_width_tests_with_chromium_required(
     starts = (tmp_path / "campaign-starts").read_text().splitlines()
     assert starts == [campaign["startedAt"]] * (len(expected) - (MERGE_CALL in expected))
     scripts = json.loads((ROOT / "package.json").read_text())["scripts"]
-    breakout_files = "out/test/page/tableBreakout.test.js out/test/page/codeBlockBreakout.test.js"
-    assert scripts["test:breakout"].endswith(breakout_files)
+    chromium_files = [
+        f"out/test/page/{name}.test.js"
+        for name in ("tableBreakout", "codeBlockBreakout", "alignedFloatLayout", "commentRestyle", "frameReadsInChromium")
+    ]
+    assert scripts["test:breakout"].endswith(" ".join(chromium_files))
 
 
 # @tests_req SwRS-MDOKFSTUDIO-CORE-076#S12
@@ -1371,8 +1374,9 @@ def test_the_perf_547_job_runs_only_on_demand_and_uploads_its_report_whatever_ha
     measure = next(s for s in job["steps"] if "ci-perf-547" in s.get("run", ""))
     assert measure["run"] == f'xvfb-run --auto-servernum -s "-screen 0 {XVFB_SCREEN}" just ci-perf-547'
     assert measure["env"] == {"STUDIO_VIEWPORT_GUARD": "strict"}
-    # Above the 10-minute budget of the real-input step, below the job's own limit.
-    assert 10 < measure["timeout-minutes"] < job["timeout-minutes"] <= 20
+    # About twice the healthy durations (step under 2 minutes, job under 2 min 20 s); the step
+    # stops below the job's limit, so the dump and upload steps still run.
+    assert (measure["timeout-minutes"], job["timeout-minutes"]) == (4, 5)
     after = job["steps"][job["steps"].index(measure) + 1:]
     assert after[0]["run"] == "just ci-hang-dump" and after[0]["if"] == "always()"
     assert UPLOAD in after[1]["uses"] and after[1]["if"] == "always()"

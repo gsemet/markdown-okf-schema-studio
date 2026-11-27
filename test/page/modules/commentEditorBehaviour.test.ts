@@ -40,6 +40,8 @@ function composeSetup() {
   const window: any = {
     innerWidth: 800, innerHeight: VIEWPORT, getSelection: () => selection,
     addEventListener: () => undefined,
+    // The frame comes at once: the button follows the selection at the next frame.
+    requestAnimationFrame: (callback: () => void) => { callback(); return 1; },
     setTimeout: (callback: () => void, delay: number) => { if (delay === 0) callback(); return 1; },
     clearTimeout: () => undefined,
   };
