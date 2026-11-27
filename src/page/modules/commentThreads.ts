@@ -1,5 +1,7 @@
-import { MAX_TEXT, locate, sanitize, type PageCommentThread } from "./commentThreadData";
+import { MAX_TEXT, sanitize, type PageCommentThread } from "./commentThreadData";
 import { DISCARD, DISCARD_KEEP, DISCARD_YES, discardQuestion, floatingTop } from "./commentEditorBehaviour";
+import { createCommentPlacements } from "./commentPlacements";
+import { BADGE, MARK, ORPHAN, POPOVER } from "./commentPlan";
 
 /**
  * Review comments in the page (T42).
@@ -10,7 +12,9 @@ import { DISCARD, DISCARD_KEEP, DISCARD_YES, discardQuestion, floatingTop } from
  * first occurrence of the quote inside ONE text node (a quote that spans several elements is not
  * found); that text is wrapped in `mark[data-okf-comment-thread]`. A thread whose quote is not
  * found gets an empty `button[data-okf-comment-badge]` on its block instead. Code, diagrams, math,
- * the properties table and open inline editors are never touched (O10). The last threads are
+ * the properties table and open inline editors are never touched (O10). When the host posts the
+ * threads again, `setThreads` changes only the elements of the threads whose place or state differs
+ * (commentPlan.ts finds the places, commentPlacements.ts changes the page). The last threads are
  * kept, so `apply()` puts them back on content that was replaced by a patch; it first removes what
  * an earlier run added, so running it twice changes nothing. Clicking a mark or badge opens a
  * popover with the thread (author, date, plain-text bodies, resolved state). When `hooks.reply`
@@ -58,7 +62,12 @@ export function installCommentThreads(
   },
   trace?: (event: string, detail: string) => void,
 ): {
-  setThreads(threads: unknown): void;
+  /**
+   * Shows the threads the host posted. True when a block of the content may have moved: a badge
+   * below a block was added, moved or removed while comments are shown.
+   */
+  setThreads(threads: unknown): boolean;
+  /** Places the threads again from nothing, after the content was replaced. */
   apply(): void;
   close(): void;
   openThread(id: string): boolean;
@@ -67,25 +76,10 @@ export function installCommentThreads(
   /** Feeds a `previewCommentResult` of the host; true when it answered a reply. */
   result(message: { kind?: unknown; threadId?: unknown; ok?: unknown; reason?: unknown }): boolean;
 } {
-  const MARK = "data-okf-comment-thread";
-  const BADGE = "data-okf-comment-badge";
-  const BADGED = "data-okf-comment-badged";
-  const POPOVER = "data-okf-comment-popover";
   const REPLY_INPUT = "data-okf-comment-reply-input";
   const REPLY_SEND = "data-okf-comment-reply-send";
-  const ORPHAN = "data-okf-comment-orphan";
-  const ORPHANS = "data-okf-orphans";
   const ACTIONS = "data-okf-comment-thread-actions";
   const ACTION_ERROR = "data-okf-comment-action-error";
-  const SKIP = "pre, code, script, style, textarea, svg, .katex, .math, .math-inline, .math-display, "
-    + ".myst-mermaid-figure, .myst-plantuml-figure, .myst-vega-figure, [data-okf-properties], "
-    + ".okf-comment, .okf-chip, [data-sphinx-preview-block-editor], [data-sphinx-preview-editing], "
-    + "[data-sphinx-preview-included], "
-    + `[${MARK}], [${BADGE}], [${POPOVER}]`;
-  const EDITING = "[data-sphinx-preview-block-editor], [data-sphinx-preview-editing]";
-  const NEXT_TO = new Set(["TABLE", "THEAD", "TBODY", "TR", "UL", "OL", "DL", "PRE", "DETAILS", "IMG", "HR", "SVG"]);
-  // A quote must have this many characters (whitespace collapsed) to be searched for elsewhere.
-  const MIN_MOVED_QUOTE = 12;
   let threads: PageCommentThread[] = [];
   let popover: Element | undefined;
   let openId: string | undefined;
@@ -99,8 +93,6 @@ export function installCommentThreads(
   // The thread whose reply draft is being asked about, and the element the popover is anchored to.
   let discarding: string | undefined;
   let openTarget: Element | undefined;
-  let orphanBox: Element | undefined;
-  let addedOrphans: Element[] = [];
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
   // Read at event time from the attributes the stylesheet hides the marks with.
@@ -112,14 +104,13 @@ export function installCommentThreads(
 
   // A shown highlight is a button in the Tab order; a hidden one is plain text.
   const paintFocus = (mark: Element): void => {
-    if (hidden()) {
-      for (const name of ["tabindex", "role", "aria-haspopup"]) mark.removeAttribute(name);
-      return;
+    const shown = !hidden();
+    for (const [name, value] of [["tabindex", "0"], ["role", "button"], ["aria-haspopup", "dialog"]] as const) {
+      if (!shown) mark.removeAttribute(name);
+      else if (mark.getAttribute(name) !== value) mark.setAttribute(name, value);
     }
-    mark.setAttribute("tabindex", "0");
-    mark.setAttribute("role", "button");
-    mark.setAttribute("aria-haspopup", "dialog");
   };
+  const placements = createCommentPlacements(document, paintFocus);
 
   const replyInput = (): { value: string } | undefined =>
     (popover?.querySelector(`[${REPLY_INPUT}]`) ?? undefined) as unknown as { value: string } | undefined;
@@ -271,262 +262,37 @@ export function installCommentThreads(
     return false;
   };
 
-  // Puts back the text a mark wrapped and merges it with its neighbouring text nodes.
-  const unwrap = (mark: Element): void => {
-    const parent = mark.parentNode;
-    if (!parent) return;
-    let merged = document.createTextNode(mark.textContent ?? "");
-    parent.replaceChild(merged, mark);
-    const before = merged.previousSibling;
-    if (before && before.nodeType === 3) {
-      before.nodeValue = (before.nodeValue ?? "") + (merged.nodeValue ?? "");
-      parent.removeChild(merged);
-      merged = before as Text;
-    }
-    const after = merged.nextSibling;
-    if (after && after.nodeType === 3) {
-      merged.nodeValue = (merged.nodeValue ?? "") + (after.nodeValue ?? "");
-      parent.removeChild(after);
-    }
-  };
-
-  // What the last run added, so clearing never searches the page (and works after a patch).
-  let addedMarks: Element[] = [];
-  let addedBadges: Element[] = [];
-  let badgedBlocks: Element[] = [];
-
-  const clear = (): void => {
-    addedMarks.forEach(unwrap);
-    addedBadges.forEach((badge) => badge.remove());
-    badgedBlocks.forEach((block) => block.removeAttribute(BADGED));
-    addedMarks = [];
-    addedBadges = [];
-    badgedBlocks = [];
-    orphanBox?.remove();
-    orphanBox = undefined;
-    addedOrphans = [];
-  };
-
-  const spanOf = (element: Element): [number, number] | undefined => {
-    const start = Number(element.getAttribute("data-line"));
-    if (!Number.isFinite(start)) return undefined;
-    const endValue = Number(element.getAttribute("data-end-line"));
-    return [start, Number.isFinite(endValue) && endValue >= start ? endValue : start];
-  };
-
-  // A block may carry a thread: not in an open editor or the properties table, not included content
-  // (it carries the lines of ANOTHER file), not under a skipped ancestor (diagram, chip, math, code).
-  const eligible = (element: Element): boolean => {
-    if (element.closest(EDITING) || element.closest("[data-okf-properties]")) return false;
-    if (element.closest("[data-sphinx-preview-included]")) return false;
-    const container = element.parentNode as Element | null;
-    return !(container && container.nodeType === 1 && container.closest(SKIP));
-  };
-
-  // The innermost mapped block that covers the line (smallest span; the deeper one on a tie).
-  const blockFor = (line: number): Element | undefined => {
-    let best: Element | undefined;
-    let bestSize = Infinity;
-    document.querySelectorAll("[data-line]").forEach((element) => {
-      const span = spanOf(element);
-      if (!span || line < span[0] || line > span[1]) return;
-      if (!eligible(element)) return;
-      const size = span[1] - span[0];
-      if (size <= bestSize) {
-        best = element;
-        bestSize = size;
-      }
-    });
-    return best;
-  };
-
-  const textNodesOf = (block: Element): Text[] => {
-    const found: Text[] = [];
-    const walk = (node: Node): void => {
-      for (let child = node.firstChild; child; child = child.nextSibling) {
-        if (child.nodeType === 3) {
-          found.push(child as Text);
-        } else if (child.nodeType === 1 && !(child as Element).matches(SKIP)) {
-          walk(child);
-        }
-      }
-    };
-    if (!block.matches(SKIP)) walk(block);
-    return found;
-  };
-
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-017
-  const attach = (thread: PageCommentThread): boolean => {
-    const quote = thread.anchor.quote;
-    if (quote === "") return false;
-    const block = blockFor(thread.anchor.line);
-    // The host re-anchored this thread and found no block to trust: do not guess a place here.
-    if (!block && thread.orphaned === false) return false;
-    // No block at the line (the text moved): look for the quote in every eligible block, in order.
-    const blocks: Element[] = block ? [block] : [];
-    if (!block) {
-      document.querySelectorAll("[data-line]").forEach((element) => {
-        if (eligible(element)) blocks.push(element);
-      });
-    }
-    const variants = [quote];
-    const collapsed = quote.replace(/\s+/gu, " ");
-    if (collapsed !== quote) variants.push(collapsed);
-    const seen = new Set<Text>();
-    const nodes: Text[] = [];
-    for (const candidate of blocks) {
-      for (const node of textNodesOf(candidate)) {
-        if (!seen.has(node)) {
-          seen.add(node);
-          nodes.push(node);
-        }
-      }
-    }
-    if (!block) {
-      // The text moved: place the thread only when the quote is long enough to be meaningful and
-      // occurs exactly once; a short or repeated quote would land on an unrelated place.
-      if (collapsed.trim().length < MIN_MOVED_QUOTE) return false;
-      let total = 0;
-      for (const node of nodes) {
-        const value = node.nodeValue ?? "";
-        for (const variant of variants) {
-          let found = locate(value, variant, 0);
-          if (!found) continue;
-          while (found) {
-            total += 1;
-            found = locate(value, variant, found.index + found.length);
-          }
-          break;
-        }
-      }
-      if (total !== 1) return false;
-    }
-    for (const node of nodes) {
-      const value = node.nodeValue ?? "";
-      for (const variant of variants) {
-        const found = locate(value, variant, 0);
-        if (!found) continue;
-        const { index, length } = found;
-        const parent = node.parentNode;
-        if (!parent) continue;
-        const mark = document.createElement("mark");
-        mark.setAttribute(MARK, thread.id);
-        if (thread.resolved) mark.setAttribute("data-okf-comment-resolved", "true");
-        paintFocus(mark);
-        mark.textContent = value.slice(index, index + length);
-        if (index === 0) {
-          // No empty text node before the mark: clear() then restores the original structure.
-          parent.replaceChild(mark, node);
-        } else {
-          node.nodeValue = value.slice(0, index);
-          parent.insertBefore(mark, node.nextSibling);
-        }
-        addedMarks.push(mark);
-        const rest = value.slice(index + length);
-        if (rest !== "") parent.insertBefore(document.createTextNode(rest), mark.nextSibling);
-        return true;
-      }
-    }
-    return false;
-  };
-
-  // A badge has no text, so a block keeps its text content (headings, edit offsets); the stylesheet
-  // draws it. It sits inside the block, or after it when the block cannot take children.
-  const badge = (thread: PageCommentThread): boolean => {
-    const block = blockFor(thread.anchor.line);
-    if (!block) return false;
-    const button = document.createElement("button");
-    button.setAttribute("type", "button");
-    button.setAttribute(BADGE, thread.id);
-    if (thread.resolved) button.setAttribute("data-okf-comment-resolved", "true");
-    button.setAttribute("aria-haspopup", "dialog");
-    button.setAttribute("aria-label", `Comment thread, ${thread.comments.length} comment${thread.comments.length === 1 ? "" : "s"}`);
-    if (block.matches(SKIP) || NEXT_TO.has(block.tagName.toUpperCase())) {
-      button.setAttribute("data-okf-comment-badge-after", "true");
-      block.parentNode?.insertBefore(button, block.nextSibling);
-    } else {
-      block.setAttribute(BADGED, "true");
-      badgedBlocks.push(block);
-      block.appendChild(button);
-    }
-    addedBadges.push(button);
-    return true;
-  };
-
-  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-028
-  // The "Orphaned comments" box: after the content element, outside the HTML a patch replaces. It
-  // adds no scroll height of its own where the content ends (see the stylesheet), so the end of
-  // the document, the first-element gap and the insert points do not change.
-  const renderOrphans = (orphans: PageCommentThread[]): void => {
-    if (orphans.length === 0) return;
-    const box = document.createElement("div");
-    box.setAttribute(ORPHANS, "true");
-    box.setAttribute("role", "region");
-    box.setAttribute("aria-label", "Orphaned comments");
-    const title = document.createElement("div");
-    title.setAttribute("data-okf-orphans-title", "true");
-    title.textContent = "Orphaned comments";
-    box.appendChild(title);
-    for (const thread of orphans) {
-      const item = document.createElement("button");
-      item.setAttribute("type", "button");
-      item.setAttribute(ORPHAN, thread.id);
-      item.setAttribute("aria-haspopup", "dialog");
-      if (thread.resolved) item.setAttribute("data-okf-comment-resolved", "true");
-      const quote = document.createElement("span");
-      quote.setAttribute("data-okf-orphan-quote", "true");
-      quote.textContent = thread.anchor.quote !== "" ? thread.anchor.quote : "(no quoted text)";
-      const first = thread.comments[0];
-      const meta = document.createElement("span");
-      meta.setAttribute("data-okf-orphan-meta", "true");
-      const count = thread.comments.length;
-      meta.textContent = `${first ? first.author + ": " + first.body.slice(0, 120) : ""}`
-        + ` (${count} comment${count === 1 ? "" : "s"}${thread.resolved ? ", resolved" : ""})`;
-      item.appendChild(quote);
-      item.appendChild(meta);
-      box.appendChild(item);
-      addedOrphans.push(item);
-    }
-    const main = document.getElementById?.("sphinx-myst-preview-content");
-    const parent = (main?.parentNode ?? document.body) as Node;
-    parent.insertBefore(box, main ? main.nextSibling : null);
-    orphanBox = box;
-  };
-
-  const apply = (): void => {
-    // An open popover stays open across a re-apply (a render re-posts the same threads) when its
-    // thread is still there; the holder is the new mark, badge or orphan entry. Not while hidden.
+  // Places the threads in the page, from nothing when the content was replaced. An open popover
+  // stays open (a render re-posts the same threads) when its thread is still there; the holder is
+  // its mark, badge or orphan entry. Not while hidden. True when a block may have moved.
+  const place = (afresh: boolean): boolean => {
     const reopen = hidden() ? undefined : openId;
     const draft = replyInput()?.value;
     const asking = confirming;
     const discardAsked = discarding;
     close();
-    clear();
+    if (afresh) placements.update([]);
+    const moved = placements.update(threads) && !hidden();
+    if (reopen === undefined) return moved;
     if (threads.length === 0) {
-      if (reopen !== undefined) trace?.("comment popover closed", `re-apply without threads, thread ${reopen}`);
-      return;
+      trace?.("comment popover closed", `re-apply without threads, thread ${reopen}`);
+      return moved;
     }
-    const orphans: PageCommentThread[] = [];
-    for (const thread of threads) {
-      if (thread.orphaned === true || (!attach(thread) && !badge(thread))) orphans.push(thread);
+    const holder = placements.holders().find((candidate) => idOf(candidate) === reopen);
+    const thread = threads.find((candidate) => candidate.id === reopen);
+    if (holder && thread) {
+      open(thread, holder);
+      const input = replyInput();
+      if (input && typeof draft === "string") input.value = draft;
+      confirming = asking === reopen ? asking : undefined;
+      discarding = discardAsked === reopen ? discardAsked : undefined;
+      paintReply();
+      paintActions();
+    } else {
+      trace?.("comment popover closed", `re-apply without ${thread ? "a holder" : "the thread"}, `
+        + `thread ${reopen}, ${threads.length} thread(s)`);
     }
-    renderOrphans(orphans);
-    if (reopen !== undefined) {
-      const holder = [...addedMarks, ...addedBadges, ...addedOrphans].find((candidate) => idOf(candidate) === reopen);
-      const thread = threads.find((candidate) => candidate.id === reopen);
-      if (holder && thread) {
-        open(thread, holder);
-        const input = replyInput();
-        if (input && typeof draft === "string") input.value = draft;
-        confirming = asking === reopen ? asking : undefined;
-        discarding = discardAsked === reopen ? discardAsked : undefined;
-        paintReply();
-        paintActions();
-      } else {
-        trace?.("comment popover closed", `re-apply without ${thread ? "a holder" : "the thread"}, `
-          + `thread ${reopen}, ${threads.length} thread(s)`);
-      }
-    }
+    return moved;
   };
 
   const formatDate = (iso: string): string => {
@@ -780,14 +546,14 @@ export function installCommentThreads(
     },
     setThreads(next) {
       threads = sanitize(next);
-      apply();
+      return place(false);
     },
-    apply,
+    apply: () => { place(true); },
     close: () => close("closed by the page"),
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
     visibilityChanged() {
       if (hidden()) close("comments hidden");
-      addedMarks.forEach(paintFocus);
+      placements.marks().forEach(paintFocus);
     },
     openThread(id) {
       if (hidden()) return false;

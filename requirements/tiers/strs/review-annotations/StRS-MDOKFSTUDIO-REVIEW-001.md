@@ -43,6 +43,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-119
 - SwRS-MDOKFSTUDIO-REVIEW-216
 - SwRS-MDOKFSTUDIO-REVIEW-219
+- SwRS-MDOKFSTUDIO-REVIEW-224
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -123,4 +124,5 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
   - [SwRS-MDOKFSTUDIO-REVIEW-216](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-216.md): A quote over a line break of the source is highlighted
   - [SwRS-MDOKFSTUDIO-REVIEW-219](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-219.md): An orphaned thread whose quote returns is placed again
+  - [SwRS-MDOKFSTUDIO-REVIEW-224](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-224.md): A posted thread list changes only the elements of the threads that differ
 <!-- okf:links:end -->

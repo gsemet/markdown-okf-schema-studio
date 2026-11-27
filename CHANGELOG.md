@@ -36,6 +36,9 @@
   shows the raw copy with `balanceEdges` on (PR #501)
 - In Auto width, a code block whose longest line is a little wider than the column now widens until the line
   fits, instead of keeping a scroll bar; a captioned code block widens too (CR-508 code-auto-width, PR #525)
+- Less work in the preview when review comments change: adding, answering, resolving or deleting a comment now
+  updates only the highlights, badges and orphan entries that differ, and no longer redraws the other comment
+  marks (CR-517 perf-547-comment-update-and-author, issue #547)
 
 ## 1.12.1 - 2026-11-24
 

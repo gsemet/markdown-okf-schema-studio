@@ -48,8 +48,8 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/page/modules/commentPlan.ts
 - src/page/modules/commentThreadData.ts
-- src/page/modules/commentThreads.ts
 tested_in_files:
 - test/page/modules/commentThreads.test.ts
 - test/page/modules/commentThreadsLongDocument.test.ts

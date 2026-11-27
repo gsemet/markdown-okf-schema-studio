@@ -55,6 +55,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-217
 - SwRS-MDOKFSTUDIO-REVIEW-218
 - SwRS-MDOKFSTUDIO-REVIEW-223
+- SwRS-MDOKFSTUDIO-REVIEW-224
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -163,4 +164,5 @@ sequenceDiagram
   - [SwRS-MDOKFSTUDIO-REVIEW-217](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-217.md): The comment editors stay inside the window and follow their text
   - [SwRS-MDOKFSTUDIO-REVIEW-218](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-218.md): Escape or a press outside closes a comment editor and asks before dropping a draft
   - [SwRS-MDOKFSTUDIO-REVIEW-223](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-223.md): Saving one comment restyles few elements of a large document
+  - [SwRS-MDOKFSTUDIO-REVIEW-224](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-224.md): A posted thread list changes only the elements of the threads that differ
 <!-- okf:links:end -->

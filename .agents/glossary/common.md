@@ -70,7 +70,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **MyST autodetect**: check of used MyST syntax against `myst_enable_extensions` in the nearest `conf.py` (`src/core/myst/`).
 - **Navigation history**: per-panel Back/Next stack of followed links (`src/core/state/navigationHistory.ts`).
 - **Open-With editor**: the custom editor offered through "Open With" (`markdown-okf-schema-studio.editor`).
-- **Orphaned thread**: comment thread whose quote can no longer be found; listed in the "Orphaned comments" box, never deleted (`src/page/modules/commentThreads.ts`).
+- **Orphaned thread**: comment thread whose quote can no longer be found; listed in the "Orphaned comments" box, never deleted (`src/page/modules/commentPlacements.ts`).
 - **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/session/workspaceChoices.ts`, select in `src/page/modules/editPalette.ts`).
 - **Path (StRS)**: a main path of a use case, declared as `{id: S<n>, title}` in the `scenarios:` of the StRS and written as `#### Path S<n>: <title>` in its `### Main paths`; it is tested (`@tests_req`) and accepted (`@accepts_req`) by marker, and listed with its files on the use case page of the Requirements viewer.
 - **Preview panel**: the webview panel that shows the rendered preview.
