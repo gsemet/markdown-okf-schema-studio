@@ -55,7 +55,8 @@ named by the date of the pull request (the date may differ from the tag's; nothi
    (or, in the stacked way, from the dispatch of the branch heavy run), every other merge is held
    until the release is published, and no work on a new change starts until then.
 3. The notes and the thread are drafted from `CHANGELOG.md` `## Unreleased` and the reports of the
-   changes, in `docs/releases-notes/`. They go in the version PR. A visible feature may get a feature
+   changes, in `docs/releases-notes/`. They go in the version PR, after the "Self-check" of
+   "Release notes". A visible feature may get a feature
    clip ([feature-clip-process.guidelines.md](../../docs/demo-video/guidelines/feature-clip-process.guidelines.md)):
    the maintainer decides which feature gets one, and the clip is made in the change of the feature
    or right after it, before the version pull request, so it ships with the feature. Its GIF is the
@@ -214,6 +215,28 @@ Write for a user of the extension, from the changelog lines. The notes show what
 brings to the user in a few highlights, each with its picture; what the release is stays in the
 folded sections.
 
+### The kind
+
+Decide the kind from what ships, before writing a line:
+
+- **feature**: the user can do something they could not do before;
+- **fix**: something that should have worked now works; nothing new;
+- **restore**: it undoes a mistake of an earlier release (a revert, a behaviour put back);
+- **breaking**: something the user relied on is removed or behaves differently and they must act;
+- **internal**: nothing the user sees changes (tooling, tests, docs process).
+
+The subtitle names the kind in its first words ("A bug-fix release: ...", "Restores ... that
+1.12.0 broke", "A breaking release: ..."). Every highlight and line keeps that tone: a fix release
+has no "you can now", a restore is never shown as new.
+
+Several kinds: the subtitle names first the one that comes first in this order: breaking, feature,
+restore, fix, internal. Each line keeps its own change's tone.
+
+When the kind does not match the version agreed in step 1 of "The steps of a release" (a patch
+whose content needs feature wording, a minor that ships only fixes), the notes take the tone of the
+real kind and the version PR's body says the version is probably wrong and why. The owner decides;
+the agent never changes the version itself.
+
 ### Writing
 
 Write like a maintainer telling a colleague what changed. Use short, complete sentences, plain
@@ -223,34 +246,50 @@ verbs, and "you". Write for the user: no ticket numbers, no requirement IDs, no 
 The references at the end of a changelog line (commit, change request, pull request, issue) are
 not copied into the notes.
 
-- Each highlight is a heading that says what you can now do, then at most two sentences, then the
-  picture. Nothing comes under the picture, except the short Markdown example of a new syntax.
-- When the change replaces a behaviour you can see, the picture puts the before and the after side
-  by side in one image, and the text does not describe the before again.
-- Each picture is cropped to the part of the screen where the change happens: no toolbar, no empty
-  margin, no unrelated content around it (for a change in a list, no floating toolbar or
-  frontmatter table). One exception: a feature clip's GIF is not cropped. It shows the whole filmed
-  window, and the clip's one zoom on the result stands in for the crop. The rest of the rule holds
-  for every still picture.
-- A joined before | after image crops both halves to the same region at the same scale.
-- A capture of a gesture (a drag, a hover) keeps the element and what the gesture acts on, not the
-  blocks around it (the list and its handles, not the alerts below it).
-- When the picture shows the whole change, the highlight has no sentence: its heading, then the
-  picture.
+- Each highlight is a heading that says the change in its kind's words, then at most two sentences,
+  then the picture. Nothing comes under the picture, except the short Markdown example of a new
+  syntax. The heading, by kind:
+  - feature: what you can now do;
+  - fix: "Fixed: <what works again>";
+  - restore: what works again and, in one clause, that the earlier release broke it;
+  - breaking: what changed and what you must do.
+- Each smaller change and folded line is **one sentence** (no bold lead followed by a second
+  sentence). A fix starts "Fixed:" and says what works now. A restore starts "Restored:" and owns
+  the earlier release's mistake in one clause, with no apology and no blame. Say the consequence
+  for the user, not the mechanism.
+- **Bad news**: a removal, a change of behaviour the user relies on and a user-facing known issue
+  each get a labelled line in the visible part, above the folded sections, starting `Removed:`,
+  `Changed:` or `Known issue:`, one sentence, with what the user should do. Never only in a folded
+  section, never inside a paragraph about something else, never softened ("streamlined",
+  "simplified") when the truth is "removed".
+- **Performance**: a performance gain the user can see is a highlight with figures (a time, a size,
+  a count, before and after), estimated if need be and then said as an estimate; never only a
+  folded line.
 - Name a setting as a setting: "the setting `markdownOkfSchemaStudio.…`", with its default value and
   where to turn it on (the VS Code settings).
+- The pictures follow "Images" below.
 
 Never use: "Before:" or "Now:" labels; invented scenes; punchy fragments; praise words (seamless,
-powerful, effortless, easily); a closing "why it matters" line.
+powerful, effortless, easily); a closing "why it matters" line. These constructions are banned too:
+
+| Banned | Before | After |
+| --- | --- | --- |
+| A fix worded as a new ability | "You can now edit a block without losing your cursor." | "Fixed: the cursor stays in the block you are editing." |
+| A restore shown as new | "New: paste whole blocks at once." | "Restored: pasting whole blocks, which 1.12.0 broke." |
+| A closing "why it matters" line | "... This means you stay in the flow." | (line removed) |
+| Mechanism instead of consequence | "The parser now debounces change events on the block node." | "Typing fast in a long block no longer freezes the editor." |
+| Bad news softened or buried | "We streamlined the settings (the `legacy.view` option is gone) and ..." | "Removed: the setting `legacy.view`; the new view is the only one." |
+| A sentence about a missing image | "No screenshot: this change has nothing to show." | (sentence removed) |
+| Feature tone in a fix release | subtitle "Faster editing, smarter blocks" | subtitle "A bug-fix release: block editing works again" |
 
 ### Structure
 
 In this order:
 
 1. **Header**, centred:
-   - `<h1 align="center">Markdown OKF-Schema Studio X.Y</h1>`;
-   - one bold line naming the two or three headline changes, as verbs
-     ("Decide in the page, review as a side-by-side diff, drop files as links.");
+   - `<h1 align="center">Markdown OKF-Schema Studio X.Y.Z</h1>` (the full version);
+   - one bold line, the subtitle: the kind in its first words, then the two or three main changes in
+     the kind's words, at most 16 words ("A bug-fix release: block editing works again");
    - one `<sub>` line: `N changes since X.Y'.Z' · VS Code 1.95 or later · MIT`, where N counts
      the commits of `vPREVIOUS..vX.Y.Z^` without merges and without the `chore: version` commits
      of unpublished versions (for 1.3.2: without the unpublished 1.3.0 and 1.3.1 version commits):
@@ -260,25 +299,53 @@ In this order:
    · `[Install from Open VSX](https://open-vsx.org/extension/GaetanSemet/markdown-okf-schema-studio)`
    · Read the guide · Full changelog (`blob/vX.Y.Z/CHANGELOG.md`) · 1.0 showcase. Then a `---`
    rule.
-3. **Two to four highlight sections**, `## <emoji> <what you can now do>`, each with at most
-   two sentences, then one picture cropped on the change, following "Writing". A new syntax may add
-   a short Markdown example under the picture.
-4. **`## 🛠 Smoother editing`**: the smaller visible changes, one line per bullet, with a bold lead.
+3. **Two to four highlight sections**, `## <emoji> <heading in the kind's words>`, each with at
+   most two sentences, then one picture cropped on the change, following "Writing". A new syntax may
+   add a short Markdown example under the picture.
+4. **Smaller changes**: the smaller visible changes, one line per bullet, with a bold lead. Their
+   heading is `## 🛠 Smoother editing` in a feature release; in a fix, restore or internal release
+   it takes the kind's tone (`## 🛠 Other fixes` for a fix release). The `Removed:`, `Changed:` and
+   `Known issue:` lines sit here or right above it, never only in a folded section.
 5. **Folded sections**:
    - `<details><summary><b>🐞 All fixes</b></summary>` with the remaining fixes, one line each;
    - `<details><summary><b>🔎 Details</b></summary>` with how things work: keyboard, defaults,
      limits;
-   - `<details><summary><b>🛠 For contributors</b></summary>` with the tooling changes and any
-     known issue.
+   - `<details><summary><b>🛠 For contributors</b></summary>` with the tooling changes and a known
+     issue that only contributors meet (a user-facing known issue goes in the visible part).
 
 Keyboard keys use `<kbd>`. Every changelog line of the release appears once, in a highlight, in
-"Smoother editing" or in a folded section.
+the smaller changes or in a folded section.
+
+**Length**: a judgement, not a check. Subtitle at most 16 words; each smaller change or folded line
+at most 20; each highlight's text at most 40 (heading included, picture excluded). The visible part
+(above the first folded section, links and HTML tags not counted) at most 120 words for a fix,
+restore or internal release and 250 for a feature or breaking one; a release of several kinds takes
+the budget of the kind its subtitle names first. Over a budget, cut words, not facts: a fact that
+does not fit moves to a folded line.
 
 ### Images
 
+- Only a visible change (a fix too) gets a picture, one per change.
+- Each still picture is cropped to the changed element: no toolbar, no empty margin, no unrelated
+  content around it (for a change in a list, no floating toolbar or frontmatter table).
+- A capture of a gesture (a drag, a hover) keeps the element and what the gesture acts on, not the
+  blocks around it (the list and its handles, not the alerts below it).
+- Size of a still picture: **900 to 1200 px wide, at most 600 px high**.
+- When the change replaces a behaviour you can see, the picture puts the before and the after side
+  by side in one image, and the text does not describe the before again.
+- A joined before | after image crops both halves to the same region at the same scale.
+- When the picture shows the whole change, the highlight has no sentence: its heading, then the
+  picture.
+- The alt text is the caption: one plain phrase on what the picture shows, and no caption line.
+- No picture within these bounds: the notes say nothing about it (no "no screenshot" sentence), and
+  the version PR's body names `no picture for <change>: <why>`.
+- One exception: a feature clip's GIF is not cropped and is exempt from the sizes. It shows the
+  whole filmed window, and the clip's one zoom on the result stands in for the crop. The other
+  rules (the alt text, one picture per change) hold for it.
+
 Images sit directly in the notes folder, next to `release-notes.md`, and the notes link them by file
 name. The joined before | after image of a highlight is one file, made from the Verifier's before
-and after captures of the merged changes, with any tool; the version PR says which. The captures are cropped as "Writing" says (same region,
+and after captures of the merged changes, with any tool; the version PR says which. The captures are cropped as above (same region,
 same scale for both halves) before they are joined. An image at an absolute URL or in a subfolder fails the check: a release must depend on no
 branch. The release attaches them as assets and points the links to
 `https://github.com/gsemet/markdown-okf-schema-studio/releases/download/vX.Y.Z/<file>`.
@@ -288,6 +355,24 @@ branch. The release attaches them as assets and points the links to
 CI publishes the reviewed file as it is, with `scripts/release_notes.py --prepare`, before the
 Marketplace and Open VSX publications. A typo found afterwards is fixed by editing the release on GitHub: the
 published text may then differ from the file, and that is accepted.
+
+### Self-check
+
+Before the version PR is opened, and again before its body is regenerated after review remarks, the
+agent answers each question yes or no and fixes each "no":
+
+1. Does the subtitle name the release's kind in its first words?
+2. Does the title carry the full version (`X.Y.Z`)?
+3. Does every highlight and line keep the tone of the release's kind?
+4. Does every fix start with "Fixed:" and say what works now?
+5. Does every restore own, in one clause, the earlier release that broke it?
+6. Is every removal, behaviour change and user-facing known issue on a `Removed:`, `Changed:` or
+   `Known issue:` line in the visible part?
+7. Is each smaller change and folded line one sentence, and is every budget of "Length" kept?
+8. Does every line say the consequence for the user, with none of the banned constructions?
+9. Does every picture show only the changed element, within the sizes of "Images" (a clip GIF
+   excepted), its alt text saying what it shows, with no sentence about a missing picture?
+10. Does the version match the kind, or does the version PR say it is probably wrong?
 
 ## Announcement thread
 
@@ -315,10 +400,11 @@ Read each post aloud: it should sound like a person, not a press release.
 ## Hero image
 
 A hero image is recommended for a minor or major release, not required: an existing capture is
-enough for a small one. It serves post 1 and the first highlight of the notes. When the release has a
-feature clip, the hero image is still made for the release folder but is not posted in the thread:
-the clip's MP4 takes its place in post 1. A dedicated one is a
-simulated visual scenario, so it is reproducible and checked:
+enough for a small one. It serves post 1 of the announcement thread. The first highlight of the
+notes takes a picture cropped within the bounds of "Images". When the release has a feature clip,
+the hero image is still made for the release folder but is not posted in the thread: the clip's MP4
+takes its place in post 1. A dedicated one is a simulated visual scenario, so it is reproducible
+and checked:
 
 - fixture `test/visual/fixtures/<NN>-release-<x>-<y>-showcase.md`, scenario
   `rendering-core/v<NN>-release-<x>-<y>-showcase-cream-1200` in
