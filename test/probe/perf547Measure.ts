@@ -101,7 +101,7 @@ function round(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function series(unit: Series["unit"], samples: number[]): Series {
+export function series(unit: Series["unit"], samples: number[]): Series {
   return { unit, samples, median: median(samples) };
 }
 

@@ -470,13 +470,16 @@ ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0" $STUDIO_TOC_LOOP_S
 # CI job "perf-547" (workflow_dispatch input perf_547), and the local command of the same measure:
 # one trusted window opens a generated large document, drags over its text and across its table cells
 # with the mouse, and creates comments (test/integration/perf547.ts). Reports every sample and the
-# median per interaction in out/reports/probe/perf-547.json. It sets no limit: it fails only when
-# the measure cannot be taken. It opens a VS Code window, so it is not part of `check` or `preflight`.
+# median per interaction, and of the wait for the Git user name per comment write, in
+# out/reports/probe/perf-547.json. A Node step then adds `threadIndex`, the time to index the
+# comment threads of two generated documents (test/probe/perf547ThreadIndex.ts). It sets no limit:
+# it fails only when the measure cannot be taken. It opens a VS Code window, so it is not part of
+# `check` or `preflight`.
 ci-perf-547: (_require-unlocked-screen "ci-perf-547" "perf_547=true")
     #!/usr/bin/env bash
     set -uo pipefail
     export STUDIO_REAL_INPUT_SCENARIO=perf-547
-    if {{ npm }} run test:integration -- --trusted-only; then
+    if {{ npm }} run test:integration -- --trusted-only && node out/test/probe/perf547ThreadIndex.js; then
         echo "ci-perf-547: passed (out/reports/probe/perf-547.json)"
     else
         echo "ci-perf-547: FAILED" >&2
