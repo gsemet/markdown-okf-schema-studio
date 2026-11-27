@@ -8,6 +8,8 @@ Reason: CR-517, issue 547. The requirements below are `proposed`; no StRS change
 
 - Added: when the page receives the comment threads again, it changes only the highlights, badges and orphan entries whose thread has another place or shown state than before, and measures its source positions again only when a block of the content can have moved, with the same result as placing every thread from nothing (SwRS-MDOKFSTUDIO-REVIEW-224, from StRS-MDOKFSTUDIO-REVIEW-001 and StRS-MDOKFSTUDIO-REVIEW-003).
 - Clarified: the verification note of SwRS-MDOKFSTUDIO-REVIEW-028 names the function that now writes an orphan entry; no behaviour changes.
+- Changed after review: a highlight can move a block (its line wraps anew, and it counts for `:last-child` rules), and so can a badge inside a block that holds another element, also while comments are hidden and also where the size of the content does not change. The page measures its source positions again for each of these changes and for a badge below a block, comments shown or hidden (SwRS-MDOKFSTUDIO-REVIEW-224, S4 rewritten, new scenario S5 for the changes that do not measure).
+- Changed after a second review: the result is that of placing every thread from nothing unless an earlier highlight started or ended where two text nodes of the content touch, as the first line above did not say. Such a highlight joins the two, and a new Known issue says what a later list then shows. The page code before this change, which removed and placed every thread for each list, gives the same pictures; no rendered page that was checked holds such nodes (SwRS-MDOKFSTUDIO-REVIEW-224: statement, S1, S2, S5, Known issues and verification criteria).
 
 ## 2026-11-26
 

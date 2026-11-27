@@ -398,7 +398,9 @@ html[data-okf-incoming-changes="false"] [data-sphinx-preview-sbs-toggle] {
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-002
 /** Review comment highlights, badges, popover, comment box and reply box; their text colors keep the 4.5:1 contrast on every theme. */
 const COMMENT_REVIEW_POPOVER_CSS = `/* Review comments: a highlighted quote (or a badge on its block) opens a popover with the thread.
-   Marks only paint; badges and the popover are out of the flow, so nothing moves. */
+   The popover is out of the flow. A highlight or a badge can move blocks: a highlight can wrap its
+   line anew, a badge below a block is in the flow, and either counts for :last-child rules, as a
+   badge inside a block does. */
 #sphinx-myst-preview-content mark[data-okf-comment-thread] {
   background: var(--studio-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
   color: inherit;

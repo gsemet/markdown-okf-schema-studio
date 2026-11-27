@@ -56,7 +56,7 @@ export function registerHostHandlers(rt: PageRuntime): void {
   });
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-224
   hostMessages.on("previewComments", (message) => {
-    // Highlights only paint: the page is measured again when a block can have moved.
+    // Measured again only when a block can have moved (commentPlacements.ts).
     if (parts.commentThreads.setThreads(message.threads)) rt.scroll.measure();
   });
   hostMessages.on("previewIncomingChanges", (message) => {

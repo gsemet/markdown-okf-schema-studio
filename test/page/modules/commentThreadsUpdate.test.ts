@@ -309,14 +309,14 @@ test("an open popover keeps its draft and its Delete question when the threads a
   }
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-REVIEW-224#S4
-test("the host's threads measure the page again only when a badge below a block changes", () => {
-  const { document, comments } = page();
+/** The page with the real handler of the host's threads; counts the measures one list causes. */
+function measuredPage() {
+  const opened = page();
   let receive: ((message: { threads: unknown }) => void) | undefined;
   let measures = 0;
   registerHostHandlers({
     hostMessages: { on: (type: string, handler: typeof receive) => { if (type === "previewComments") receive = handler; } },
-    parts: { commentThreads: comments },
+    parts: { commentThreads: opened.comments },
     scroll: { measure: () => { measures += 1; } },
   } as never);
   const measured = (threads: Thread[]): number => {
@@ -324,18 +324,71 @@ test("the host's threads measure the page again only when a badge below a block 
     receive!({ threads });
     return measures;
   };
-  assert.equal(measured(pick("a", "n", "x")), 0, "a highlight, a badge inside a block and an orphan move nothing");
-  assert.equal(measured(pick("a", "n", "x", "g")), 0, "one highlight more");
-  assert.equal(measured([...pick("a", "n"), { ...pick("g")[0]!, resolved: true }]), 0, "resolved, orphan gone");
-  assert.equal(measured(pick("a", "n", "q")), 1, "a badge below a block added");
-  assert.equal(measured(pick("a", "n", "q")), 0, "the same list again");
-  assert.equal(measured(pick("a", "n", "q", "g")), 0, "a highlight added beside it");
-  assert.equal(measured(pick("a", "n", "q", "r", "g")), 1, "a second badge below the block");
-  assert.equal(measured(pick("a", "n", "r", "q", "g")), 1, "the two badges change places");
-  assert.equal(measured([...pick("a", "n"), { ...pick("r")[0]!, anchor: { line: 16, quote: "other" } }, ...pick("q", "g")]), 1,
-    "a badge moved to another block");
-  assert.equal(measured(pick("a", "n", "q", "g")), 1, "a badge below a block removed");
-  hide(document, true);
-  assert.equal(measured(pick("a", "n", "q", "r", "g")), 0, "hidden comments take no room");
-  assert.equal(measured(pick("a")), 0);
+  return { ...opened, measured };
+}
+
+const replied = (one: Thread): Thread => ({
+  ...one, comments: [...(one.comments as unknown[]), { id: "r", author: "Bo", createdAt: "", body: "Reply" }],
 });
+
+// Line 1 holds an element beside its text, lines 10 and 11 hold text only.
+const inLine1 = thread("o", 1, "not in the paragraph");
+const alsoInLine1 = thread("D", 1, "nowhere in the first block");
+const inText = thread("n", 10, "not in the list");
+const alsoInText = thread("n2", 10, "not in the item either");
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-224#S4
+for (const hidden of [false, true]) {
+  const shown = hidden ? "hidden" : "shown";
+  test(`the host's threads measure the page again when a highlight changes, comments ${shown}`, () => {
+    const { document, measured } = measuredPage();
+    hide(document, hidden);
+    assert.equal(measured(pick("a")), 1, "a highlight added");
+    assert.equal(measured(pick("a", "g")), 1, "one highlight more");
+    assert.equal(measured([...pick("a"), { ...pick("g")[0]!, anchor: { line: 6, quote: "second nested" } }]), 1,
+      "a highlight moved to other words");
+    assert.equal(measured(pick("a")), 1, "a highlight removed");
+  });
+
+  test(`the host's threads measure the page again when a badge can move a block, comments ${shown}`, () => {
+    const { document, measured } = measuredPage();
+    hide(document, hidden);
+    assert.equal(measured([inLine1]), 1, "the first badge inside a block that holds an element");
+    assert.equal(measured([]), 1, "the last badge inside that block removed");
+    measured(pick("a"));
+    assert.equal(measured([...pick("a"), inLine1]), 1);
+    assert.equal(measured(pick("a")), 1, "the last badge inside that block removed");
+    assert.equal(measured([...pick("a"), inLine1]), 1);
+    assert.equal(measured([...pick("a"), inText]), 1, "a badge goes from a block with an element to a text block");
+    assert.equal(measured(pick("a", "q")), 1, "a badge below a block added");
+    assert.equal(measured(pick("a", "q", "r")), 1, "a second badge below the block");
+    assert.equal(measured(pick("a", "r", "q")), 1, "the two badges change places");
+    assert.equal(measured([...pick("a"), { ...pick("r")[0]!, anchor: { line: 16, quote: "other" } }, ...pick("q")]), 1,
+      "a badge below a block moved to another block");
+    assert.equal(measured(pick("a", "q")), 1, "a badge below a block removed");
+    assert.equal(measured(pick("a")), 1, "the last badge below the block removed");
+  });
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-224#S5
+for (const hidden of [false, true]) {
+  test(`the host's threads do not measure the page when no block can have moved, comments ${hidden ? "hidden" : "shown"}`, () => {
+    const { document, measured } = measuredPage();
+    hide(document, hidden);
+    const [a, o, q] = [...pick("a"), inLine1, ...pick("q")] as [Thread, Thread, Thread];
+    measured([a, o, q]);
+    assert.equal(measured([a, o, q]), 0, "the same list again");
+    assert.equal(measured([replied(a), replied(o), replied(q)]), 0, "replies");
+    assert.equal(measured([{ ...a, resolved: true }, { ...o, resolved: true }, { ...q, resolved: true }]), 0, "resolved");
+    assert.equal(measured([a, o, q]), 0, "reopened");
+    assert.equal(measured([a, o, alsoInLine1, q]), 0, "a second badge inside a block");
+    assert.equal(measured([a, alsoInLine1, o, q]), 0, "the badges inside the block change places");
+    assert.equal(measured([a, o, q]), 0, "one of the two badges removed");
+    assert.equal(measured([a, o, q, inText]), 0, "a badge inside a block that holds text only");
+    assert.equal(measured([a, o, q, inText, alsoInText]), 0);
+    assert.equal(measured([a, o, q]), 0, "the badges of the text block removed");
+    assert.equal(measured([a, o, q, ...pick("x", "w")]), 0, "orphan entries added");
+    assert.equal(measured([a, o, q, ...pick("w", "x")]), 0, "orphan entries change places");
+    assert.equal(measured([a, o, q]), 0, "the orphan box removed");
+  });
+}

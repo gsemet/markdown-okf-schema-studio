@@ -36,6 +36,11 @@ const paintText = (element: Element, value: string): void => {
   if (element.textContent !== value) element.textContent = value;
 };
 
+// A badge inside a block is out of the flow, but it is its last child: it can move a block only
+// through the style rules that treat a last child differently, among the other elements there.
+const holdsElement = (block: Node): boolean => Array.from(block.childNodes)
+  .some((child) => child.nodeType === 1 && !(child as Element).hasAttribute(BADGE));
+
 const sitsAt = (mark: Element, place: MarkPlace): boolean =>
   place.run.offsets.get(mark) === place.offset && (mark.textContent ?? "").length === place.length
   && mark.firstChild?.nodeType === 3 && !mark.firstChild.nextSibling;
@@ -43,16 +48,20 @@ const sitsAt = (mark: Element, place: MarkPlace): boolean =>
 /**
  * The highlights, badges and orphan entries of the review threads in the page. `update` changes
  * what differs between what is there and where the threads belong (commentPlan.ts): the elements of
- * the other threads stay the same elements. `update([])` removes everything and restores the text
- * nodes, so placing from nothing is an update of an empty page.
+ * the other threads stay the same elements. `update([])` removes everything and merges the text of
+ * each highlight back into the text nodes beside it, so placing from nothing is an update of a page
+ * that holds none of it.
  */
 export function createCommentPlacements(
   document: Document,
   paintMark: (mark: Element) => void,
 ): {
   /**
-   * Places the threads. True when a badge below a block was added, moved or removed: the only
-   * change that can move a block of the content.
+   * Places the threads. True when a block of the content can have moved, comments shown or hidden:
+   * a highlight was added or removed (its line can wrap anew, and it counts for `:last-child`
+   * rules), a badge below a block was added, moved or removed, or a block that holds another
+   * element got its first badge inside or lost its last one. Resolved states, labels and the orphan
+   * box move no block of the content.
    */
   update(threads: readonly PageCommentThread[]): boolean;
   marks(): readonly Element[];
@@ -112,7 +121,7 @@ export function createCommentPlacements(
     return mark;
   };
 
-  const updateMarks = (threads: readonly PageCommentThread[], places: ThreadPlace[]): void => {
+  const updateMarks = (threads: readonly PageCommentThread[], places: ThreadPlace[]): boolean => {
     const before = byThread(marks, MARK);
     const heads = new Map<Node, TextRun>();
     const wanted = places.flatMap((place, index) => {
@@ -123,21 +132,26 @@ export function createCommentPlacements(
       return [{ place, thread, mark: old && sitsAt(old, place) ? take(before, thread.id) : undefined }];
     });
     const kept = new Set(wanted.map((entry) => entry.mark));
+    let changed = false;
     for (const mark of marks) {
       if (kept.has(mark)) continue;
+      changed = true;
       const text = unwrap(mark);
       const run = heads.get(mark);
       if (run && text) run.head = text;
     }
     // From the end of each run: a new highlight leaves the text before it in the node it was in.
     for (const entry of [...wanted].sort((a, b) => b.place.offset - a.place.offset)) {
-      entry.mark ??= wrap(entry.place, entry.thread.id);
+      if (entry.mark) continue;
+      changed = true;
+      entry.mark = wrap(entry.place, entry.thread.id);
     }
     marks = wanted.map(({ mark, thread }) => {
       paintResolved(mark!, thread.resolved);
       paintMark(mark!);
       return mark!;
     });
+    return changed;
   };
 
   // A badge has no text, so a block keeps its text content (headings, edit offsets); the stylesheet
@@ -170,6 +184,8 @@ export function createCommentPlacements(
     });
     let moved = false;
     const kept = new Set(next);
+    const badgedNow = new Set<Node>(badges.flatMap((button) =>
+      button.getAttribute(AFTER) === null && button.parentNode ? [button.parentNode] : []));
     for (const old of badges) {
       if (kept.has(old)) continue;
       if (old.getAttribute(AFTER) !== null) moved = true;
@@ -200,6 +216,10 @@ export function createCommentPlacements(
     }
     for (const block of badgedBlocks) if (!inside.has(block)) block.removeAttribute(BADGED);
     badgedBlocks = new Set(inside.keys());
+    // A block got its first badge inside, or lost its last one.
+    for (const block of new Set<Node>([...badgedNow, ...inside.keys()])) {
+      if (badgedNow.has(block) !== inside.has(block as Element) && holdsElement(block)) moved = true;
+    }
     return moved;
   };
 
@@ -230,9 +250,9 @@ export function createCommentPlacements(
   };
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-028
-  // The "Orphaned comments" box: after the content element, outside the HTML a patch replaces. It
-  // adds no scroll height of its own where the content ends (see the stylesheet), so the end of
-  // the document, the first-element gap and the insert points do not change.
+  // The "Orphaned comments" box: after the content element, outside the HTML a patch replaces. The
+  // stylesheet puts it in the empty space under the end of the document, so no block of the content
+  // moves; the page scrolls further only when the box is taller than that space.
   const updateOrphans = (listed: PageCommentThread[]): void => {
     if (listed.length === 0) {
       orphans?.box.remove();
@@ -272,10 +292,10 @@ export function createCommentPlacements(
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-224
     update(threads) {
       const places = planThreads(document, threads, new Set<Node>(marks));
-      updateMarks(threads, places);
-      const moved = updateBadges(threads, places);
+      const marked = updateMarks(threads, places);
+      const badged = updateBadges(threads, places);
       updateOrphans(threads.filter((_thread, index) => places[index]!.kind === "orphan"));
-      return moved;
+      return marked || badged;
     },
     marks: () => marks,
     holders: () => [...marks, ...badges, ...(orphans?.entries.map((entry) => entry.element) ?? [])],

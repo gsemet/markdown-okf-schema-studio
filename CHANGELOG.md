@@ -38,7 +38,7 @@
   fits, instead of keeping a scroll bar; a captioned code block widens too (CR-508 code-auto-width, PR #525)
 - Less work in the preview when review comments change: adding, answering, resolving or deleting a comment now
   updates only the highlights, badges and orphan entries that differ, and no longer redraws the other comment
-  marks (CR-517 perf-547-comment-update-and-author, issue #547)
+  marks (CR-517 perf-547-comment-update-and-author, PR #550, issue #547)
 
 ## 1.12.1 - 2026-11-24
 
