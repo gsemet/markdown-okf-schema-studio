@@ -5,9 +5,9 @@ uuid: c243155e-1061-4502-b5b2-cc12b3494d49
 title: "A {uml} directive renders a PUML file as a render dependency"
 description: "When a {uml} directive or a {plantuml} directive without a body names
   a file, the extension SHALL render the diagram stored in that file, using the file
-  text as the diagram and as the expandable source and recording the file name on
-  the diagram element, record the file as a dependency of the render, or show the
-  reason it cannot be read in place of the diagram."
+  text as the diagram and as the expandable source shown when the diagram fails to
+  render and recording the file name on the diagram element, record the file as a
+  dependency of the render, or show the reason it cannot be read in place of the diagram."
 project: markdown-okf-schema-studio
 scope: diagrams
 req_lifecycle: proposed
@@ -45,6 +45,7 @@ tested_in_files:
 - test/core/render/diagReq.pipeline.requirements.test.ts
 - test/core/render/plantUmlFile.test.ts
 - test/page/modules/plantumlDiagram.test.ts
+- test/visual/scenarioAssertions.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -60,7 +61,7 @@ supersedes:
 
 ### Normative behavior
 
-When a {uml} directive or a {plantuml} directive without a body names a file, the extension SHALL render the diagram stored in that file, using the file text as the diagram and as the expandable source and recording the file name on the diagram element, record the file as a dependency of the render, or show the reason it cannot be read in place of the diagram.
+When a {uml} directive or a {plantuml} directive without a body names a file, the extension SHALL render the diagram stored in that file, using the file text as the diagram and as the expandable source shown when the diagram fails to render and recording the file name on the diagram element, record the file as a dependency of the render, or show the reason it cannot be read in place of the diagram.
 
 ### Scenario S1 (nominal): File diagram
 - GIVEN a {uml} directive and a {plantuml} directive without a body, both naming diagrams/flow.puml

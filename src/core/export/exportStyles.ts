@@ -12,11 +12,15 @@ export function styleText(css: string): string {
   return css.replace(/<\/(style)/giu, "<\\/$1");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-121
 /**
  * The preview sheet without its dependence on the host. The mapping of the tokens to `--vscode-*`
  * variables goes (the export writes the resolved values instead), and the `body` classes VS Code
  * sets for the theme kind are renamed to the classes the export writes on its own `body`, so the
- * file holds no `vscode-` name at all.
+ * file holds no `vscode-` name at all. Every other rule is kept: the exported file shows a source
+ * panel only under a figure that failed to render, as the preview does.
  */
 export function exportPreviewStylesheet(css: string): string {
   const mapping = new RegExp(`\\s*${STUDIO_TOKEN_PREFIX}[\\w-]+:\\s*var\\(${VSCODE_VARIABLE_PREFIX}[\\w-]+\\);`, "gu");
@@ -51,10 +55,8 @@ export function tokenRule(tokens: Record<string, string>): string {
 
 const CONTENT = "#sphinx-myst-preview-content";
 
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-121
 /**
- * The rules of the elements the export changes: CSS-only tab sets, the properties `details` and the
- * Chart source section, which the preview hides and the export shows again (closed).
+ * The rules of the elements the export changes: CSS-only tab sets and the properties `details`.
  */
 export function exportSheet(maxTabs: number, colorScheme: "light" | "dark"): string {
   const set = `${CONTENT} .myst-tab-set`;
@@ -101,10 +103,6 @@ ${perTab}
 
 ${CONTENT} details[data-okf-properties] > summary.okf-properties-title {
   cursor: pointer;
-}
-
-${CONTENT} details.myst-vega-source {
-  display: block;
 }
 
 ${CONTENT} details[data-okf-properties]:not([open]) > summary.okf-properties-title {

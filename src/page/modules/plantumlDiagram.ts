@@ -144,6 +144,24 @@ function clearChildren(element: HTMLElement): void {
   }
 }
 
+/**
+ * The engine also answers a source it cannot draw through its success callback, with a picture that
+ * says why: the lines it read under a "[From ... (line N) ]" banner, "Your data does not sound like
+ * JSON data" (or YAML), or "Diagram not supported by this release of PlantUML". Each form starts at
+ * the root of the SVG, where a drawn diagram puts its own shapes, so a diagram that writes these
+ * words does not match.
+ */
+const ENGINE_ERROR_PICTURE = new RegExp(
+  "^<svg\\b[^>]*><defs/><g>(?:"
+  + "(?:<text\\b[^>]*>[^<]*</text>)*<rect\\b[^>]*\\bfill=\"#33FF02\"[^>]*/>"
+  + "<text\\b[^>]*>\\[From [^<]*\\(line \\d+\\)[^<]*\\]</text>"
+  + "|<text\\b[^>]*>(?:Your data does not sound like (?:JSON|YAML) data"
+  + "|Diagram not supported by this release of PlantUML)</text>"
+  + ")",
+  "u",
+);
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-032
 function showImage(diagram: HTMLElement, svg: string): void {
   const image = diagram.ownerDocument.createElement("img");
   image.setAttribute("class", "myst-plantuml-image");
@@ -152,7 +170,8 @@ function showImage(diagram: HTMLElement, svg: string): void {
   image.setAttribute("src", `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
   clearChildren(diagram);
   diagram.appendChild(image);
-  diagram.setAttribute("data-render-state", "rendered");
+  // An error picture is shown as it is; the state says the figure failed, so its source is shown.
+  diagram.setAttribute("data-render-state", ENGINE_ERROR_PICTURE.test(svg) ? "error" : "rendered");
 }
 
 function showMessage(diagram: HTMLElement, text: string, state: "unavailable" | "error"): void {

@@ -5,8 +5,9 @@ uuid: 2475ef35-1d7e-4278-886f-8b0a85a0b9a1
 title: Vega-Lite and Vega fences become chart figures
 description: When a document contains a vega-lite or vega fenced code block, the
   extension SHALL render it, in every palette mode, as a figure holding the
-  chart specification and a collapsed Chart source section that the preview
-  hides and the HTML export shows, without changing the document source.
+  chart specification and a collapsed Chart source section shown, in the preview
+  and the HTML export, only when the chart fails to render, without changing the
+  document source.
 project: MDOKFSTUDIO
 scope: diagrams
 req_lifecycle: proposed
@@ -23,7 +24,7 @@ scenarios:
 - id: S3
   title: Other fences and an unreadable specification
 - id: S4
-  title: The preview hides the Chart source and the export shows it
+  title: The Chart source shows only when the chart fails
 annotation_exemption: false
 exemption_reason:
 derived_by: []
@@ -46,7 +47,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a document contains a vega-lite or vega fenced code block, the extension SHALL render it, in every palette mode, as a figure holding the chart specification and a collapsed Chart source section that the preview hides and the HTML export shows, without changing the document source.
+When a document contains a vega-lite or vega fenced code block, the extension SHALL render it, in every palette mode, as a figure holding the chart specification and a collapsed Chart source section shown, in the preview and the HTML export, only when the chart fails to render, without changing the document source.
 
 ### Scenario S1 (nominal): A vega-lite fence
 
@@ -66,11 +67,12 @@ When a document contains a vega-lite or vega fenced code block, the extension SH
 - WHEN the preview renders
 - THEN the mermaid fence stays a Mermaid figure, the json fence a code block, and the broken fence is a chart figure like any other (the page shows the error in place of the chart, see SwRS-MDOKFSTUDIO-DIAG-123)
 
-### Scenario S4 (nominal): The preview hides the Chart source and the export shows it
+### Scenario S4 (nominal): The Chart source shows only when the chart fails
 
 - GIVEN a page with a drawn chart and a chart in error, in reading mode and in edit mode
 - WHEN the page is shown, and when the document is exported to HTML
-- THEN in the preview each details myst-vega-source has display none and the find bar does not match its text, and in the exported file each one has display block and stays closed
+- THEN in the preview and in the exported file the details myst-vega-source of the drawn chart has display none, and that of the chart in error has display block and stays closed
+- AND the find bar does not match the text of a hidden one and searches that of a shown one
 
 ### Known issues
 
@@ -79,9 +81,9 @@ When a document contains a vega-lite or vega fenced code block, the extension SH
 ### Verification notes
 
 - Method: test/core/render/chartRendering.test.ts (the figure of a vega-lite and a vega fence, other fences, a broken specification); test/core/render/chartData.test.ts (the fence languages, JSON and YAML specifications)
-- Method: test/page/chartCsp.test.ts (the figures of a real page become charts; the Chart source is hidden in reading and edit mode; the HTML export shows it, closed)
-- Method: test/page/modules/chartError.test.ts (the preview sheet hides the section, the export sheet shows it); test/page/modules/findIndex.test.ts (the find bar skips it)
-- Criteria: A vega-lite or vega fence renders as one chart figure with the specification text, its kind and a collapsed Chart source section, in every palette mode, and no other fence does; the preview hides the section and the HTML export shows it, closed.
+- Method: test/page/chartCsp.test.ts (the figures of a real page become charts; in reading and edit mode and in the HTML export the Chart source is hidden under a drawn chart and shown, closed, under a chart in error)
+- Method: test/page/modules/chartError.test.ts (the preview sheet hides the section and shows it for a chart in error or unavailable, the export sheet adds no rule for it); test/page/modules/findIndex.test.ts (the find bar skips a hidden one and searches that of a failed chart)
+- Criteria: A vega-lite or vega fence renders as one chart figure with the specification text, its kind and a collapsed Chart source section, in every palette mode, and no other fence does; the section shows, closed, in the preview and the HTML export only when the chart fails to render.
 
 <!-- okf:links:start -->
 ### Links

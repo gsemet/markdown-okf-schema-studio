@@ -1,7 +1,7 @@
 # PlantUML success preview
 
 PlantUML renders through the optional external executable available on `PATH` in this
-environment. The source remains available below for the source-mapping check.
+environment. The source stays in the page and shows only when the diagram fails.
 
 ```plantuml
 @startuml

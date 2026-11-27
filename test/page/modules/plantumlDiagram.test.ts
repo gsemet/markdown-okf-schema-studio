@@ -414,6 +414,38 @@ test("after an included file changed, the diagrams that read files are drawn aga
   assert.equal(runs.length, 3, "the diagram without includes stays cached");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-032#S8
+test("an error picture keeps the error state from memory too, until a changed include draws the diagram", async () => {
+  // The engine's answer to a source it cannot draw: a success, with this banner at the root.
+  const errorPicture = "<svg xmlns=\"http://www.w3.org/2000/svg\"><defs/><g><rect x=\"5\" fill=\"#33FF02\"/>"
+    + "<text x=\"6\" fill=\"#000000\">[From textarea (line 2) ]</text></g></svg>";
+  const doc = new FakeDocument();
+  const source = "@startuml\n!include part.puml\n@enduml";
+  const first = diagram(doc, source);
+  const patched = diagram(doc, source);
+  const files = { "/docs/part.puml": errorPicture };
+  let renderer: PlantUmlDiagramRenderer | undefined;
+  let runs = 0;
+  // Answers with the text of the included file, as the picture it draws.
+  const engine: PlantUmlRenderToString = (_lines, onSuccess) => {
+    runs += 1;
+    renderer!.loadFile("part.puml", null, (_id, text) => onSuccess(text), () => onSuccess(""));
+  };
+  renderer = createPlantUmlDiagramRenderer(engine, { host: fakeHost(files).host });
+  await renderer.render(first as unknown as HTMLElement, false);
+  await renderer.render(patched as unknown as HTMLElement, false);
+  assert.equal(runs, 1, "the picture is kept by source");
+  for (const element of [first, patched]) {
+    assert.equal(element.getAttribute("data-render-state"), "error");
+    assert.equal(svgOf(element), errorPicture, "the engine's picture stays shown");
+  }
+
+  files["/docs/part.puml"] = "<svg/>";
+  renderer.forgetIncludedFiles();
+  await renderer.render(first as unknown as HTMLElement, false);
+  assert.equal(first.getAttribute("data-render-state"), "rendered");
+});
+
 test("diagrams render one at a time, so each include request belongs to the diagram that is drawing", async () => {
   const doc = new FakeDocument();
   const left = diagram(doc, "@startuml\n!include common.puml\n@enduml");

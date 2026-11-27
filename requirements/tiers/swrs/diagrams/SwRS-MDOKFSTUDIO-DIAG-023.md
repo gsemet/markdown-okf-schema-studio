@@ -6,8 +6,10 @@ title: "PlantUML fences become centred inert pictures drawn by the built-in engi
 description: "When a document contains a plantuml fence, or a {plantuml} or {uml}
   directive with a body, the extension SHALL render a figure whose diagram element
   is labelled \"PlantUML diagram\" and holds the diagram text for the engine, with
-  the same text in a collapsed \"Diagram source\" disclosure, which the built-in engine
-  draws as one inert centred picture in the light or dark variant of the preview."
+  the same text in a collapsed \"Diagram source\" disclosure shown, in the preview
+  and the HTML export, only when the render state is `error` or `unavailable`, and
+  have the built-in engine draw it as one inert centred picture in the light or dark
+  variant of the preview."
 project: markdown-okf-schema-studio
 scope: diagrams
 req_lifecycle: proposed
@@ -38,16 +40,21 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/export/exportStyles.ts
 - src/core/preview/styles/contentBlockStyles.markers.ts
 - src/core/render/mystNormalize.ts
+- src/page/modules/findIndex.ts
 - src/page/modules/plantumlDiagram.ts
 - src/page/modules/plantumlPreview.ts
 - src/session/webview.ts
 tested_in_files:
 - test/core/preview/diagReq.styles.requirements.test.ts
 - test/core/render/mystFeatures.test.ts
+- test/page/modules/chartError.test.ts
+- test/page/modules/findIndex.test.ts
 - test/page/modules/plantumlDiagram.test.ts
 - test/session/diagReq.webview.requirements.test.ts
+- test/visual/scenarioAssertions.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -64,13 +71,14 @@ supersedes:
 
 ### Normative behavior
 
-When a document contains a plantuml fence, or a {plantuml} or {uml} directive with a body, the extension SHALL render a figure whose diagram element is labelled "PlantUML diagram" and holds the diagram text for the engine, with the same text in a collapsed "Diagram source" disclosure, which the built-in engine draws as one inert centred picture in the light or dark variant of the preview.
+When a document contains a plantuml fence, or a {plantuml} or {uml} directive with a body, the extension SHALL render a figure whose diagram element is labelled "PlantUML diagram" and holds the diagram text for the engine, with the same text in a collapsed "Diagram source" disclosure shown, in the preview and the HTML export, only when the render state is `error` or `unavailable`, and have the built-in engine draw it as one inert centred picture in the light or dark variant of the preview.
 
 ### Scenario S1 (nominal): Three forms
 
 - GIVEN a plantuml fence, a {plantuml} directive and a {uml} directive, each with a body
 - WHEN the preview is rendered
 - THEN three PlantUML figures appear, each with a diagram element labelled "PlantUML diagram" holding the text and a collapsed "Diagram source" disclosure with the same text
+- AND each disclosure is shown, in the preview and the HTML export, only when the render state of its diagram element is `error` or `unavailable`, so a figure that is drawn or still drawing shows none
 
 ### Scenario S2 (boundary): Text kept as written
 
@@ -88,7 +96,7 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 
 - GIVEN a valid PlantUML sequence diagram
 - WHEN the page draws it with the built-in engine
-- THEN the diagram element holds one image of class myst-plantuml-image with alt text "PlantUML diagram", a data:image/svg+xml source and data-render-state rendered; the source disclosure stays below
+- THEN the diagram element holds one image of class myst-plantuml-image with alt text "PlantUML diagram", a data:image/svg+xml source and data-render-state rendered; the source disclosure is present and not shown
 
 ### Scenario S5 (boundary): SVG with a script
 
@@ -113,8 +121,8 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 | PlantUML picture wider than the content column | Displayed at the column width with height auto, never set to a fixed width |
 | PlantUML picture narrower than the column | Keeps its natural size and is centred (a block with margin-inline auto) |
 | PlantUML picture as wide as the column | Fills the column |
-| Source disclosure of a PlantUML figure | The summary uses the description colour, a pointer cursor and font size 0.9em, and the details has a top margin |
-| Source disclosure of a Mermaid figure | Uses the same rules |
+| Shown source disclosure of a PlantUML figure (render state error or unavailable) | The summary uses the description colour, a pointer cursor and font size 0.9em, and the details has a top margin |
+| Shown source disclosure of a Mermaid figure (same states) | Uses the same rules |
 
 ### Known issues
 
@@ -129,7 +137,10 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 - Method: test/page/modules/plantumlDiagram.test.ts (valid diagram drawn as a picture with a fake engine, light or dark rendering: luminance below 0.18 selects dark, transparent selects light)
 - Method: test/visual/scenarioDefinitions2.ts (visual scenarios diagrams v10 and v11: picture drawn, SVG with a script, the variant change redraws all diagrams)
 - Method: test/core/preview/diagReq.styles.requirements.test.ts (a PlantUML picture is scaled down to the column and never set to a fixed width; a PlantUML picture is a block centred with automatic inline margins; the PlantUML source disclosure has the rules of the Mermaid one)
-- Criteria: Every form gives the same figure structure and the text is unchanged; a data-URI image with the rendered state replaces the text; luminance below 0.18 selects dark; max-width 100 percent, height auto, centred, and the disclosure rules equal the Mermaid ones. The dark-to-light theme observer has no unit test.
+- Method: test/page/modules/chartError.test.ts `the preview sheet hides the three source panels and shows them for a failed figure; the export sheet adds no rule` (the style rules that hide the "Diagram source" disclosure and show it in the error or unavailable state)
+- Method: test/page/modules/findIndex.test.ts `the source panel of a drawn or drawing figure is hidden and not searched` and `the source panel of a failed figure is searched, and only that one` (the find bar follows the same states)
+- Method: test/visual/scenarioAssertions.ts `PLANTUML_UNSUPPORTED_ASSERTIONS` (visual scenario diagrams v12: the disclosure of a refused diagram is shown, closed)
+- Criteria: Every form gives the same figure structure, the text is unchanged and the disclosure shows only under a figure in the error or unavailable state; a data-URI image with the rendered state replaces the text; luminance below 0.18 selects dark; max-width 100 percent, height auto, centred, and the rules of a shown disclosure equal the Mermaid ones. The dark-to-light theme observer has no unit test.
 
 <!-- okf:links:start -->
 ### Links

@@ -845,7 +845,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     mermaidExpectation: "error" as const,
     mermaidErrorThemeSwitch: true as const,
     contentAssertions: MERMAID_ERROR_ASSERTIONS,
-    description: `An invalid Mermaid diagram in the ${theme} theme: the error message replaces the picture, the source stays available and the text after it continues.`,
+    description: `An invalid Mermaid diagram in the ${theme} theme: the error message replaces the picture, the source shows under it, closed, and the text after it continues.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-024#S4
@@ -859,7 +859,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     fullPage: true,
     contentAssertions: plantUmlBuiltinAssertions(theme === "dark"),
     description: `A sequence and a class diagram in the ${theme} preview, drawn by the PlantUML engine bundled in the extension `
-      + "(no Java, no plantuml command, no network): two pictures in the theme colours and the sources below them.",
+      + "(no Java, no plantuml command, no network): two pictures in the theme colours and no source shown below them.",
   })),
   {
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-032#S3
@@ -874,7 +874,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     contentAssertions: PLANTUML_UNSUPPORTED_ASSERTIONS,
     description: "A diagram with a standard-library !include in the built-in engine: instead of a broken picture, one message "
       + "names the directive and its line and says to tick markdownOkfSchemaStudio.plantuml.useJar; the host is never asked "
-      + "for a file and the source stays available.",
+      + "for a file and the source shows under it, closed.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S1
@@ -888,7 +888,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     fullPage: true,
     contentAssertions: plantUmlFileAssertions(theme === "dark"),
     description: `A {uml} directive and a body-less {plantuml} directive naming .puml files in the ${theme} preview: the host `
-      + "reads the files like {include} and the built-in engine draws both, with the file text as the source below them.",
+      + "reads the files like {include} and the built-in engine draws both, with no source shown below them.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-DIAG-046#S1

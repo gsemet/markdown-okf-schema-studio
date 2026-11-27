@@ -178,11 +178,24 @@ export const MYST_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "the inline math is typeset", selector: `${MAIN} .katex`, min: 1 },
 ];
 
+/** The source panels `selector` matches stay in the page and none is displayed: their figures rendered. */
+const hiddenSource = (selector: string, count: number, text: string): ContentAssertion => ({
+  message: "the source disclosure is present and not shown", selector, count, text,
+  expr: `[...document.querySelectorAll('${selector}')].every((source) => getComputedStyle(source).display === 'none')`,
+});
+
+/** The source panel `selector` matches is on the page, closed: its figure failed to render. */
+const shownSource = (selector: string, text: string): ContentAssertion => ({
+  message: "the source disclosure is shown, closed", selector, count: 1, visible: true, text,
+  expr: `document.querySelector('${selector}').open === false`,
+});
+
 export const MERMAID_ERROR_ASSERTIONS: ContentAssertion[] = [
   { message: "exactly one visible error message replaces the picture", selector: ".myst-mermaid-error", count: 1, visible: true, text: "Unable to render Mermaid diagram" },
   { message: "the error holds one closed details block with the parser message", selector: ".myst-mermaid-error details.myst-mermaid-error-details", count: 1, expr: "(() => { const d = document.querySelector('.myst-mermaid-error details'); return d.open === false && d.querySelector('pre').textContent.trim().length > 0; })()" },
   { message: "no rendered picture", selector: "img.myst-mermaid-image", count: 0 },
-  { message: "the source stays available", selector: "details.myst-mermaid-source", count: 1, text: "flowchart TD" },
+  // @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
+  shownSource("details.myst-mermaid-source", "flowchart TD"),
   { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
 ];
 
@@ -197,7 +210,8 @@ export function plantUmlBuiltinAssertions(dark: boolean): ContentAssertion[] {
     { message: `the engine drew the ${dark ? "dark" : "light"} variant`, selector: ".myst-plantuml-diagram", attr: { name: "data-plantuml-dark", value: String(dark) } },
     { message: "the picture holds the diagram labels", selector: "img.myst-plantuml-image", expr: `${FIRST_PLANTUML_SVG}.includes('>Alice<')` },
     { message: `the labels are ${dark ? "light on the dark" : "dark on the light"} page`, selector: "img.myst-plantuml-image", expr: `/<text[^>]*fill="${dark ? "#FFFFFF" : "#000000"}"[^>]*>Alice</.test(${FIRST_PLANTUML_SVG})` },
-    { message: "the source stays available", selector: "details.myst-plantuml-source", count: 2, text: "Alice -> Bob" },
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S4
+    hiddenSource("details.myst-plantuml-source", 2, "Alice -> Bob"),
     { message: "nothing is fetched from the network", selector: MAIN, expr: "performance.getEntriesByType('resource').every((entry) => entry.name.startsWith('file:'))" },
     { message: "the text after the diagrams continues", selector: `${MAIN} > p`, text: "continues normally" },
   ];
@@ -218,7 +232,8 @@ export const PLANTUML_UNSUPPORTED_ASSERTIONS: ContentAssertion[] = [
   { message: "one visible message names the standard-library include and its line", selector: ".myst-plantuml-error", count: 1, visible: true, text: "!include <C4/C4_Context> (line 2)" },
   { message: "the message hints at the useJar setting", selector: ".myst-plantuml-error", text: "markdownOkfSchemaStudio.plantuml.useJar" },
   { message: "no picture, not even the engine error picture", selector: "img.myst-plantuml-image", count: 0 },
-  { message: "the source stays available", selector: "details.myst-plantuml-source", count: 1, text: "!include <C4/C4_Context>" },
+  // @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S1
+  shownSource("details.myst-plantuml-source", "!include <C4/C4_Context>"),
   { message: "the host is never asked for a file", selector: MAIN, expr: "!window.visualMessages.some((message) => message.type === 'previewPlantUmlInclude')" },
   { message: "nothing is fetched from the network", selector: MAIN, expr: "performance.getEntriesByType('resource').every((entry) => entry.name.startsWith('file:'))" },
   { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
@@ -241,7 +256,8 @@ export function plantUmlFileAssertions(dark: boolean): ContentAssertion[] {
     { message: `the engine drew the ${dark ? "dark" : "light"} variant`, selector: ".myst-plantuml-diagram", attr: { name: "data-plantuml-dark", value: String(dark) } },
     { message: "the first picture is the sequence read from the file", selector: "img.myst-plantuml-image", expr: `${plantUmlSvg(0)}.includes('read from sequence.puml')` },
     { message: "the second picture is the class diagram read from the file", selector: "img.myst-plantuml-image", expr: `${plantUmlSvg(1)}.includes('DiagramFile')` },
-    { message: "the source of the file stays available", selector: "details.myst-plantuml-source", count: 2, text: "read from sequence.puml" },
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-068#S1
+    hiddenSource("details.myst-plantuml-source", 2, "read from sequence.puml"),
     { message: "the diagram files have no include to ask the host for", selector: MAIN, expr: "!window.visualMessages.some((message) => message.type === 'previewPlantUmlInclude')" },
     NO_NETWORK,
     { message: "the text after the diagrams continues", selector: `${MAIN} > p`, text: "continues normally" },
@@ -259,7 +275,8 @@ export function plantUmlIncludeAssertions(dark: boolean): ContentAssertion[] {
     { message: "the picture holds the participant of the nested include", selector: "img.myst-plantuml-image", expr: `${plantUmlSvg(0)}.includes('Included Carol')` },
     { message: "the page asked the host for the include, then for the nested one next to it", selector: MAIN, expr: `${requests}.length === 2 && ${requests}[0].path === 'plantuml/styles/common.puml' && ${requests}[0].from === null && ${requests}[1].path === 'participants.puml' && ${requests}[1].from.endsWith('/plantuml/styles/common.puml')` },
     { message: "the include requests carry the document context and an edit id", selector: MAIN, expr: `${requests}.every((message) => message.documentId && message.requestId === 1 && /^plantuml-\\d+$/u.test(message.editId))` },
-    { message: "the source stays available", selector: "details.myst-plantuml-source", count: 1, text: "!include plantuml/styles/common.puml" },
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S4
+    hiddenSource("details.myst-plantuml-source", 1, "!include plantuml/styles/common.puml"),
     NO_NETWORK,
     { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
   ];

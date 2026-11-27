@@ -6,18 +6,18 @@ title: A writer reads and inserts Mermaid diagrams that follow the theme
 description: When a writer previews a document with a Mermaid fence or
   directive, or picks Mermaid in the edition palette or the slash menu, the
   Studio SHALL draw the diagram as a picture sized to the content width in the
-  colours of the preview theme, keep its source available, show a message with
-  the parser reason on demand when the syntax is invalid, and insert a starter
-  flowchart fence that renders at once.
+  colours of the preview theme, keep its source available when the diagram fails
+  to render, show a message with the parser reason on demand when the syntax is
+  invalid, and insert a starter flowchart fence that renders at once.
 project: markdown-okf-schema-studio
 scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-25T15:37:43+01:00'
+approved_at: '2026-11-27T11:54:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-25T15:37:43+01:00'
+  at: '2026-11-27T11:54:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -28,7 +28,7 @@ scenarios:
   title: Break a diagram
 user_need: As a writer, I put a Mermaid diagram in my document, or insert one in
   a single step, and see the drawn diagram in the preview in the colours of my
-  theme, with the source one click away.
+  theme.
 derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-001
 - SwRS-MDOKFSTUDIO-DIAG-002
@@ -66,7 +66,7 @@ supersedes:
 
 ### Normative behavior
 
-When a writer previews a document with a Mermaid fence or directive, or picks Mermaid in the edition palette or the slash menu, the Studio SHALL draw the diagram as a picture sized to the content width in the colours of the preview theme, keep its source available, show a message with the parser reason on demand when the syntax is invalid, and insert a starter flowchart fence that renders at once.
+When a writer previews a document with a Mermaid fence or directive, or picks Mermaid in the edition palette or the slash menu, the Studio SHALL draw the diagram as a picture sized to the content width in the colours of the preview theme, keep its source available when the diagram fails to render, show a message with the parser reason on demand when the syntax is invalid, and insert a starter flowchart fence that renders at once.
 
 ### Preserved stakeholder intent
 
@@ -74,7 +74,7 @@ Writers expect a Mermaid diagram written in a fence or a directive to appear as 
 
 ### Rationale and constraints
 
-- Reading: a `mermaid` fence and a `{mermaid}` directive both produce the diagram, with its source in a collapsed "Diagram source" disclosure. The picture is drawn at its natural size, never enlarged, and scaled down to the content width.
+- Reading: a `mermaid` fence and a `{mermaid}` directive both produce the diagram, with its source in a collapsed "Diagram source" disclosure shown only when the diagram fails to render. The picture is drawn at its natural size, never enlarged, and scaled down to the content width.
 - The renderer is loaded only when the document holds a Mermaid diagram, from the extension bundle and under the page's Content Security Policy.
 - The picture is inert: scripts and links inside the diagram do nothing. Page tools leave diagrams alone, and a diagram being edited in the preview is hidden until the editor closes.
 - Theme: the colours come from the preview theme variables and the diagrams are drawn again when the theme mode changes; when a variable is missing a built-in fallback keeps the diagram readable.
@@ -97,7 +97,7 @@ sequenceDiagram
     P->>M: draw the fence in the theme colours
     alt valid syntax
         M-->>P: picture sized to the content width
-        P-->>W: picture with its source one click away
+        P-->>W: picture
     else invalid syntax
         M-->>P: parser reason
         P-->>W: message with the reason on demand, source kept
@@ -114,7 +114,7 @@ sequenceDiagram
    - SwRS-MDOKFSTUDIO-DIAG-017: the writer picks Mermaid and a starter flowchart fence is inserted with Start selected
    - Option SwRS-MDOKFSTUDIO-DIAG-017 (refusal): the Strict or MyST palette offers no Mermaid
 2. A Mermaid fence is in the document
-   - SwRS-MDOKFSTUDIO-DIAG-001: the preview renders the fence as one picture with its source in a collapsed "Diagram source" disclosure
+   - SwRS-MDOKFSTUDIO-DIAG-001: the preview renders the fence as one picture with its source in a collapsed "Diagram source" disclosure shown only when the diagram fails to render
    - Option SwRS-MDOKFSTUDIO-DIAG-001 (boundary): an empty fence is left blank, with no message
 3. The diagram is drawn as a picture
    - SwRS-MDOKFSTUDIO-DIAG-005: the reader changes the theme

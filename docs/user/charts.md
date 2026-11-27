@@ -88,10 +88,11 @@ the file next to the document, or paste the rows into `values`.
 ## Errors
 
 A specification that is not valid JSON or YAML, a Vega or Vega-Lite error, or a data file that
-cannot be read shows its message in place of the chart (like a Mermaid error). The preview shows no
-**Chart source** section under a chart, since the source is the document itself; the HTML export
-keeps it, closed, under each chart. The HTML export holds the drawn chart as it was, with no hover
-detail and no script. The document is never changed.
+cannot be read shows its message in place of the chart (like a Mermaid error), with a **Chart
+source** section, closed, under the message. A chart that draws shows no such section, since the
+source is the document itself. The HTML export follows the same rule: it holds the drawn chart as it
+was, with no hover detail, no script and no source section, and keeps the section under a chart that
+failed. The document is never changed.
 
 ## Your own `config`
 

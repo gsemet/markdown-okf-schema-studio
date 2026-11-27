@@ -6,8 +6,9 @@ title: "Mermaid fences become inert diagram pictures"
 description: "When a document contains a mermaid fence or a {mermaid} directive, the
   extension SHALL render a figure whose diagram element is labelled \"Mermaid diagram\"\
   \ and holds the diagram text, with the same text in a collapsed \"Diagram source\"\
-  \ disclosure, and have the page draw it as one inert picture that fits the content
-  column."
+  \ disclosure shown, in the preview and the HTML export, only when the render state
+  is `error` or `unavailable`, and have the page draw it as one inert picture that
+  fits the content column."
 project: markdown-okf-schema-studio
 scope: diagrams
 req_lifecycle: proposed
@@ -38,10 +39,12 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - scripts/page-bundle.mjs
+- src/core/export/exportStyles.ts
 - src/core/preview/styles/contentBlockStyles.markers.ts
 - src/core/preview/styles/editModeStyles.markers.ts
 - src/core/render/mermaidFont.ts
 - src/core/render/mystNormalize.ts
+- src/page/modules/findIndex.ts
 - src/page/modules/mermaidPreview.ts
 - src/session/webview.ts
 tested_in_files:
@@ -50,7 +53,11 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/page/diagReq.diagramEdit.requirements.test.ts
 - test/page/mermaidLabelFit.test.ts
+- test/page/modules/chartError.test.ts
+- test/page/modules/findIndex.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts
+- test/visual/capture_export_html.py
+- test/visual/scenarioAssertions.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
@@ -65,13 +72,14 @@ supersedes:
 
 ### Normative behavior
 
-When a document contains a mermaid fence or a {mermaid} directive, the extension SHALL render a figure whose diagram element is labelled "Mermaid diagram" and holds the diagram text, with the same text in a collapsed "Diagram source" disclosure, and have the page draw it as one inert picture that fits the content column.
+When a document contains a mermaid fence or a {mermaid} directive, the extension SHALL render a figure whose diagram element is labelled "Mermaid diagram" and holds the diagram text, with the same text in a collapsed "Diagram source" disclosure shown, in the preview and the HTML export, only when the render state is `error` or `unavailable`, and have the page draw it as one inert picture that fits the content column.
 
 ### Scenario S1 (nominal): Fence and directive
 
 - GIVEN a document with a mermaid fence and a {mermaid} directive, each holding a flowchart
 - WHEN the preview is rendered
 - THEN two Mermaid figures appear, each with a diagram element labelled "Mermaid diagram" holding the flowchart text and a collapsed details element whose summary reads "Diagram source" and whose code block holds the same text
+- AND that details element is shown, in the preview and the HTML export, only when the render state of its diagram element is `error` or `unavailable`, so a figure that is drawn or still drawing shows none
 
 ### Scenario S2 (boundary): Empty diagram
 
@@ -135,7 +143,11 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - Method: test/core/preview/previewStyles.test.ts (picture width against the content column)
 - Method: test/page/diagReq.diagramEdit.requirements.test.ts (a diagram block is hidden while its editor is open and shown again when it closes)
 - Method: line-break tags and the drawn picture have no unit test of the browser entry point mermaidPreview.ts (untested apart from the visual scenarios)
-- Criteria: Both syntaxes give the same figure structure; an empty fence gives an empty diagram element; a loaded image replaces the text and carries the rendered state; the stylesheet contains the containment rules and the picture is never larger than its natural size; the block is hidden only while its editor is open.
+- Method: test/page/modules/chartError.test.ts `the preview sheet hides the three source panels and shows them for a failed figure; the export sheet adds no rule` (the style rules that hide the "Diagram source" disclosure and show it in the error or unavailable state)
+- Method: test/page/modules/findIndex.test.ts `the source panel of a drawn or drawing figure is hidden and not searched` and `the source panel of a failed figure is searched, and only that one` (the find bar follows the same states)
+- Method: test/visual/scenarioAssertions.ts `MERMAID_ERROR_ASSERTIONS` (visual scenarios diagrams v08 and v09: the disclosure of a failed diagram is shown, closed)
+- Method: test/visual/capture_export_html.py `check_export_fixture` (the HTML export keeps the source of a drawn diagram in a closed disclosure and does not display it)
+- Criteria: Both syntaxes give the same figure structure; an empty fence gives an empty diagram element; a loaded image replaces the text and carries the rendered state; the "Diagram source" disclosure is shown, in the preview and the HTML export, only in the error or unavailable state; the stylesheet contains the containment rules and the picture is never larger than its natural size; the block is hidden only while its editor is open.
 - Method: test/page/mermaidLabelFit.test.ts (headless Chromium: the shown SVG opened as a document of its own, every label's text inside its box; the in-page measure of the real-window check agrees with it)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts (Mermaid measures in the styled measure element, removed after the drawing)
 - Method: test/integration/realInput/previewWindow.ts (real VS Code window: every label of the demo flowchart fits its box as the image draws it)

@@ -118,14 +118,14 @@ export async function openChartPage(
 
 /**
  * Opens `document` in headless Chromium with one diagram runtime bundled as the extension bundles
- * it: the Vega chart runtime, or the Mermaid runtime (an ES module with chunks, which Chromium
- * loads from file:// only with file access allowed). Undefined when no browser can start; a setup
+ * it: the Vega chart runtime, the built-in PlantUML engine, or the Mermaid runtime (an ES module
+ * with chunks, which Chromium loads from file:// only with file access allowed). Undefined when no browser can start; a setup
  * step that fails after the launch closes the browser and throws. `launched` (tests only) sees the
  * browser once it is launched. `pageRuntime` also bundles the page runtime (`pageRuntimeScript()`) and
  * stubs `acquireVsCodeApi`: the messages the page posts are in `window.__posted`.
  */
 export async function openPreviewPage(
-  markdown: string, files: Record<string, string>, themeId: string, mode: string | undefined, runtime: "vega" | "mermaid",
+  markdown: string, files: Record<string, string>, themeId: string, mode: string | undefined, runtime: "vega" | "mermaid" | "plantuml",
   options: {
     readonly launched?: (browser: Browser) => void;
     /** Also serves the page runtime (`out/bundle/preview.js`) and boots it: the zoom, edit, find and morph. */
@@ -143,11 +143,11 @@ export async function openPreviewPage(
   }
   const documentPath = path.join(workspace, "chart.md");
   fs.writeFileSync(documentPath, markdown);
-  const runtimeFile = runtime === "vega" ? "vegaPreview.js" : "mermaidPreview.js";
-  await build(runtime === "vega"
+  const runtimeFile = `${runtime}Preview.js`;
+  await build(runtime !== "mermaid"
     ? {
-      entryPoints: [path.join(EXTENSION_ROOT, "src/page/modules/vegaPreview.ts")],
-      outfile: path.join(root, "out/bundle/vegaPreview.js"),
+      entryPoints: [path.join(EXTENSION_ROOT, `src/page/modules/${runtime}Preview.ts`)],
+      outfile: path.join(root, "out/bundle", runtimeFile),
       bundle: true,
       platform: "browser",
       target: "es2020",

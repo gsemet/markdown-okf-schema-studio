@@ -313,6 +313,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 }
 
 #sphinx-myst-preview-content details.myst-mermaid-source {
+  display: none;
   margin-top: 0.75em;
   text-align: start;
 }
@@ -379,7 +380,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   margin-inline: auto;
 }
 
-/* @implements_req SwRS-MDOKFSTUDIO-DIAG-121: the source is the document itself; the export shows it again. */
+/* @implements_req SwRS-MDOKFSTUDIO-DIAG-121: the source is the document itself; it shows only when the chart fails. */
 #sphinx-myst-preview-content details.myst-vega-source {
   display: none;
   margin-top: 0.75em;
@@ -441,6 +442,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 }
 
 #sphinx-myst-preview-content details.myst-plantuml-source {
+  display: none;
   margin-top: 0.75em;
   text-align: start;
 }
@@ -449,6 +451,15 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   color: var(--studio-descriptionForeground, inherit);
   cursor: pointer;
   font-size: 0.9em;
+}
+
+/* A source panel shows only when the figure fails to render: the render state of the diagram before
+   it says so, in the preview and in the export, which copies the state. A sibling selector, not a
+   :has() on the figure. */
+#sphinx-myst-preview-content .myst-mermaid-diagram:is([data-render-state="error"], [data-render-state="unavailable"]) ~ details.myst-mermaid-source,
+#sphinx-myst-preview-content .myst-plantuml-diagram:is([data-render-state="error"], [data-render-state="unavailable"]) ~ details.myst-plantuml-source,
+#sphinx-myst-preview-content .myst-vega-diagram:is([data-render-state="error"], [data-render-state="unavailable"]) ~ details.myst-vega-source {
+  display: block;
 }
 
 #sphinx-myst-preview-content .myst-plantuml-error {

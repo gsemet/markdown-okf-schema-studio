@@ -8,6 +8,8 @@
 // @implements_req SwRS-MDOKFSTUDIO-CORE-022 — Constructs that only a project-wide build can resolve, shown as inert placeholders.
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-001 — #sphinx-myst-preview-content .myst-mermaid-diagram
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-023 — #sphinx-myst-preview-content .myst-plantuml-diagram
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001 — #sphinx-myst-preview-content details.myst-mermaid-source
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023 — #sphinx-myst-preview-content details.myst-plantuml-source
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-032 — #sphinx-myst-preview-content .myst-plantuml-error
 // @implements_req SwRS-MDOKFSTUDIO-CODE-007 — font-size: 0.92em
 // @implements_req SwRS-MDOKFSTUDIO-CODE-008 — #sphinx-myst-preview-content .myst-diff-line-addition

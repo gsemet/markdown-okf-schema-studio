@@ -431,8 +431,21 @@ test("the chart text follows the page text size, and the Quarter labels are hori
   }
 });
 
+/** The Chart source sections of the fixture's three drawn charts and of its broken one. */
+const CHART_SOURCES = [
+  ...Array.from({ length: 3 }, () => ({ open: false, display: "none" })),
+  { open: false, display: "block" },
+];
+
+/** How each Chart source section of `page` shows, in document order. */
+function chartSources(page: Page): Promise<Array<{ open: boolean; display: string }>> {
+  return page.evaluate(() => [...document.querySelectorAll<HTMLDetailsElement>("details.myst-vega-source")]
+    .map((source) => ({ open: source.open, display: getComputedStyle(source).display })));
+}
+
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
-test("the Chart source section is hidden in the preview, in reading and edit mode, and the broken chart keeps its message", async (t) => {
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-123#S3
+test("only the broken chart shows its Chart source section, closed, in reading and edit mode, under its message", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
     t.skip("no Chromium can start here (run `just dev` to install it)");
@@ -441,10 +454,11 @@ test("the Chart source section is hidden in the preview, in reading and edit mod
   try {
     const { page } = opened;
     await page.waitForFunction(() => document.querySelectorAll(".myst-vega-diagram[data-render-state]").length === 4, undefined, { timeout: 30_000 });
-    const displays = (): Promise<string[]> => page.evaluate(() => [...document.querySelectorAll("details.myst-vega-source")].map((source) => getComputedStyle(source).display));
-    assert.deepEqual(await displays(), ["none", "none", "none", "none"], "reading mode: a drawn chart and the broken chart show no source");
+    const states = await page.evaluate(() => [...document.querySelectorAll(".myst-vega-diagram")].map((chart) => chart.getAttribute("data-render-state")));
+    assert.deepEqual(states, ["rendered", "rendered", "rendered", "error"]);
+    assert.deepEqual(await chartSources(page), CHART_SOURCES, "reading mode");
     await page.evaluate(() => document.documentElement.setAttribute("data-sphinx-preview-edit-mode", "true"));
-    assert.deepEqual(await displays(), ["none", "none", "none", "none"], "edit mode");
+    assert.deepEqual(await chartSources(page), CHART_SOURCES, "edit mode");
     const error = await page.evaluate(() => ({
       message: document.querySelector(".myst-vega-error > p")?.textContent,
       reason: document.querySelector(".myst-vega-error pre")?.textContent,
@@ -457,7 +471,7 @@ test("the Chart source section is hidden in the preview, in reading and edit mod
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
-test("the HTML export shows each Chart source section again, closed, and keeps the charts as inline SVG", async (t) => {
+test("the HTML export shows only the Chart source section of the broken chart, closed, and keeps the charts as inline SVG", async (t) => {
   const opened = await openChartPage(CHART_DOCUMENT, FILES, "light", "cream");
   if (!opened) {
     t.skip("no Chromium can start here (run `just dev` to install it)");
@@ -476,9 +490,7 @@ test("the HTML export shows each Chart source section again, closed, and keeps t
     const { html } = buildHtmlExport(snapshot, { stem: "chart", maxContentWidth: 0, imageData: () => undefined });
     const exported = await browser.newPage();
     await exported.setContent(html);
-    const sources = await exported.evaluate(() => [...document.querySelectorAll<HTMLDetailsElement>("details.myst-vega-source")]
-      .map((source) => ({ open: source.open, display: getComputedStyle(source).display })));
-    assert.deepEqual(sources, Array.from({ length: 4 }, () => ({ open: false, display: "block" })));
+    assert.deepEqual(await chartSources(exported), CHART_SOURCES);
     assert.equal(await exported.evaluate(() => document.querySelectorAll(".myst-vega-diagram > .myst-vega-view > svg").length), 3);
   } finally {
     await opened.close();

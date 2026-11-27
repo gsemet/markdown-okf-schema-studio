@@ -116,7 +116,7 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 | the body of a `{versionadded}`, `{versionchanged}` or `{deprecated}` admonition | previewEditOpen carries the lines the clicked block is written on, after the blank lines and options before it; when those lines cannot be found (an included body, option lines the parser rewrites), the whole directive opens |
 | a fenced code block | the frame is a sibling after the pre, the pre carries data-sphinx-preview-editing true, and the text box holds the fence lines exactly as in the file; after the writer adds a line and presses Done, the final save still starts and ends with the fence lines |
 | a block that comes from an {include} | previewEditOpen names the lines of the {include} directive in the edited document and the editor holds the directive text; the included block carries data-sphinx-preview-included true |
-| the words Diagram source of the collapsed disclosure of a Mermaid or PlantUML figure | the default toggle is prevented, the disclosure stays closed and the editor of the figure opens on the lines of the diagram block |
+| the words Diagram source of the collapsed disclosure of a failed Mermaid or PlantUML figure | the default toggle is prevented, the disclosure stays closed and the editor of the figure opens on the lines of the diagram block |
 
 ### Scenario S4 (boundary): A link inside a mapped block
 
@@ -161,7 +161,7 @@ A link here is any link inside a mapped block: a link inside a paragraph, a para
 | Input in reading mode | Outcome |
 | --- | --- |
 | click on a paragraph | no previewEditOpen is posted and no editor frame appears |
-| click on the words Diagram source of a Mermaid figure | the disclosure opens or closes as usual, no editor opens, and the click reveals the source line |
+| click on the words Diagram source of a failed Mermaid figure | the disclosure opens or closes as usual, no editor opens, and the click reveals the source line |
 
 ### Scenario S8 (nominal): The host answers with previewEditSource
 

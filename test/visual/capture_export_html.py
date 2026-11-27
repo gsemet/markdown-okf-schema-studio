@@ -33,7 +33,7 @@ def check_export_html(page: Page, scenario: dict, failures: list[Failure]) -> No
   """Opens `<scenario>.export.html` (next to the page) in a context with JavaScript disabled and checks what
   a reader of the single file gets: no script, the preview's page colour and column width, a properties
   table that opens on a click, tabs that switch, links, the embedded image, the drawn Mermaid diagram with
-  its folded source and no review or editing control.
+  no source shown under it and no review or editing control.
   Saves a full-page shot as the `export` step."""
   export_file = scenario.get("exportFile")
   if not export_file:
@@ -102,6 +102,7 @@ def check_edited_cell(export: Page, cell_text: str, fail) -> None:
     fail("an editor control or a hidden wrapper is left in the file")
 
 
+# @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
 def check_export_fixture(export: Page, fail) -> None:
   """The checks written for the export fixture (87): properties, tabs, links, image, Mermaid, no control."""
   properties = export.locator(PROPERTIES)
@@ -150,6 +151,8 @@ def check_export_fixture(export: Page, fail) -> None:
   source = export.locator("details.myst-mermaid-source")
   if source.count() != 1 or export.evaluate("() => document.querySelector('details.myst-mermaid-source').open"):
     fail("the Mermaid source is not in one closed details")
+  elif source.is_visible():
+    fail("the source of the drawn Mermaid diagram is displayed")
   elif "flowchart LR" not in (source.text_content() or ""):
     fail("the folded Mermaid source lost its text")
   if export.locator(".myst-mermaid-diagram", has_text="flowchart LR").count() != 0:

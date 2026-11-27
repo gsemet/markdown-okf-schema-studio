@@ -73,17 +73,39 @@ test("the limit stops the search across blocks", () => {
   assert.equal(findInBlocks(collectTextBlocks(root as never), pattern("a"), 4).length, 4);
 });
 
+const SOURCE_KINDS = ["mermaid", "plantuml", "vega"] as const;
+
+/** A figure as the page holds it: the diagram with its render state (none while it draws), then its source panel. */
+const figure = (kind: (typeof SOURCE_KINDS)[number], state: string | undefined): FakeElement => el("figure", [
+  el("div", [`${kind} picture`], { class: `myst-${kind}-diagram`, ...(state === undefined ? {} : { "data-render-state": state }) }),
+  "\n",
+  el("details", [el("summary", ["Source"]), el("pre", [el("code", [`${kind} words`])])], { class: `myst-${kind}-source` }),
+], { class: `myst-${kind}-figure` });
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S1
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
-test("the Chart source section of a chart is not searched: its text is hidden in the preview", () => {
-  const root = el("main", [
-    el("p", ["body text"]),
-    el("figure", [
-      el("div", ["chart picture"], { class: "myst-vega-diagram" }),
-      el("details", [el("summary", ["Chart source"]), el("pre", [el("code", ["mark: bar"])])], { class: "myst-vega-source" }),
-    ], { class: "myst-vega-figure" }),
-  ]);
-  const texts = collectTextBlocks(root as never).map((block) => block.text);
-  assert.deepEqual(texts, ["body text", "chart picture"]);
-  assert.equal(findInBlocks(collectTextBlocks(root as never), pattern("mark: bar"), 10).length, 0, "a word of the chart source finds no match");
-  assert.equal(findInBlocks(collectTextBlocks(root as never), pattern("body"), 10).length, 1, "body text still finds its match");
+test("the source panel of a drawn or drawing figure is hidden and not searched", () => {
+  for (const kind of SOURCE_KINDS) {
+    for (const state of ["rendered", undefined]) {
+      const root = el("main", [el("p", ["body text"]), figure(kind, state)]);
+      const blocks = collectTextBlocks(root as never);
+      const label = `${kind} ${state ?? "pending"}`;
+      assert.deepEqual(blocks.map((block) => block.text), ["body text", `${kind} picture`], label);
+      assert.equal(findInBlocks(blocks, pattern(`${kind} words`), 10).length, 0, label);
+    }
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
+test("the source panel of a failed figure is searched, and only that one", () => {
+  for (const kind of SOURCE_KINDS) {
+    for (const state of ["error", "unavailable"]) {
+      const root = el("main", [figure(kind, "rendered"), figure(kind, state)]);
+      const matches = findInBlocks(collectTextBlocks(root as never), pattern(`${kind} words`), 10);
+      assert.equal(matches.length, 1, `${kind} ${state}`);
+    }
+  }
 });
