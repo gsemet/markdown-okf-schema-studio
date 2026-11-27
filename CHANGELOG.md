@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The published site has a **Videos** page with every feature clip and the one-minute demo, each shown as a
+  picture that plays on a click, and the README shows five features as GIFs (CR-522 pages-video-gallery)
+
 ## 1.13.0 - 2026-11-27
 
 - Less work around comments on a large document: saving one now restyles a few elements instead of the whole

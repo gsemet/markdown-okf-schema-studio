@@ -14,7 +14,8 @@ interface HtmlNode {
   childNodes?: HtmlNode[];
 }
 
-const CLIPS_ROOT = "docs/demo-video/clips";
+/** Repository path of the feature clips' folder, one folder per clip. */
+export const CLIPS_ROOT = "docs/demo-video/clips";
 const CLIP_GIF = /^docs\/demo-video\/clips\/([^/]+)\/\1\.gif$/u;
 
 function escapeAttribute(value: string): string {

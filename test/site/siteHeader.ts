@@ -12,8 +12,8 @@ export interface SiteHeaderExtras {
 
 /**
  * The Site header, the same on every page: the logo brand then Home, Contributing, How we ship,
- * How we test, Gallery and Requirements, all relative to `currentPage` (a path under the site, for
- * example `docs/guide.html`). The requirements pages pass `extras`.
+ * How we test, Gallery, Videos and Requirements, all relative to `currentPage` (a path under the
+ * site, for example `docs/guide.html`). The requirements pages pass `extras`.
  */
 export function siteHeader(currentPage: string, extras: SiteHeaderExtras = {}): string {
   const rootLink = relativeSitePath(currentPage, "index.html");
@@ -24,6 +24,7 @@ export function siteHeader(currentPage: string, extras: SiteHeaderExtras = {}): 
     ["How we ship", relativeSitePath(currentPage, "docs/how-we-ship.html")],
     ["How we test", relativeSitePath(currentPage, "docs/how-we-test.html")],
     ["Gallery", relativeSitePath(currentPage, "gallery.html")],
+    ["Videos", relativeSitePath(currentPage, "videos.html")],
     ["Requirements", relativeFolderLink(currentPage, "requirements")],
   ];
   const nav = links.map(([text, href]) => `<a href="${href}">${text}</a>`).join("");

@@ -48,9 +48,9 @@ test("no page or stylesheet has a dark mode, a theme switch or a former palette"
   }
 });
 
-test("a main page and a viewer page carry the same brand and the six links, only the viewer has a breadcrumb", () => {
+test("a main page and a viewer page carry the same brand and the seven links, only the viewer has a breadcrumb", () => {
   // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
-  const expected = ["Home", "Contributing", "How we ship", "How we test", "Gallery", "Requirements"];
+  const expected = ["Home", "Contributing", "How we ship", "How we test", "Gallery", "Videos", "Requirements"];
   const main = pageDocument("Studio", "index.html", "<h1>x</h1>");
   const viewer = viewerDocument(VIEWER_PAGE, FOOTER);
   assert.deepEqual(siteLinks(main), expected);

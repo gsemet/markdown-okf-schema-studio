@@ -14,10 +14,12 @@ import { redirectDocument, viewerPages, writeViewerPages } from "./write";
 const EXTENSION_ROOT = path.resolve(__dirname, "..", "..", "..", "..");
 
 test("the site navigation links requirements/ from the root and from nested pages", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-086#S1
   // The link pointed to requirements.html before the viewer; it points to the folder of the viewer now.
   for (const [currentPage, prefix] of [["index.html", ""], ["docs/guide.html", "../"], ["a/b/c.html", "../../"]]) {
     const html = pageDocument("Studio", currentPage, "");
     assert.ok(html.includes(`<a href="${prefix}requirements/">Requirements</a>`), currentPage);
+    assert.ok(html.includes(`<a href="${prefix}gallery.html">Gallery</a><a href="${prefix}videos.html">Videos</a><a href="${prefix}requirements/">`), currentPage);
     assert.ok(!html.includes("requirements.html"));
   }
 });
@@ -63,6 +65,7 @@ test("the viewer is written under requirements/ with its assets, index and redir
     const home = fs.readFileSync(path.join(site, "requirements", "index.html"), "utf8");
     // The dark mode was removed: the home has no dark rule and no data-theme, and still links its stylesheet.
     assert.ok(!home.includes("prefers-color-scheme: dark") && !home.includes("data-theme") && home.includes('href="viewer.css"'));
+    assert.match(home, /<a href="\.\.\/gallery\.html">Gallery<\/a><a href="\.\.\/videos\.html">Videos<\/a><a href="[^"]*">Requirements<\/a>/u);
     const css = fs.readFileSync(path.join(site, "requirements", "viewer.css"), "utf8");
     assert.ok(css.startsWith(":root{color-scheme:light;--bg:#f5f1e8") && css.includes(".crumbs{"), "the shared site stylesheet comes first, then viewer.css");
     assert.ok(!css.includes("prefers-color-scheme") && !css.includes("data-theme"));
