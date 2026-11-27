@@ -143,6 +143,10 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - Method: test/core/preview/previewStyles.test.ts (picture width against the content column)
 - Method: test/page/diagReq.diagramEdit.requirements.test.ts (a diagram block is hidden while its editor is open and shown again when it closes)
 - Method: line-break tags and the drawn picture have no unit test of the browser entry point mermaidPreview.ts (untested apart from the visual scenarios)
+- Method: test/page/modules/chartError.test.ts `the preview sheet hides the three source panels and shows them for a failed figure; the export sheet adds no rule` (the style rules that hide the "Diagram source" disclosure and show it in the error or unavailable state)
+- Method: test/page/modules/findIndex.test.ts `the source panel of a drawn or drawing figure is hidden and not searched` and `the source panel of a failed figure is searched, and only that one` (the find bar follows the same states)
+- Method: test/visual/scenarioAssertions.ts `MERMAID_ERROR_ASSERTIONS` (visual scenarios diagrams v08 and v09: the disclosure of a failed diagram is shown, closed)
+- Method: test/visual/capture_export_html.py `check_export_fixture` (the HTML export keeps the source of a drawn diagram in a closed disclosure and does not display it)
 - Criteria: Both syntaxes give the same figure structure; an empty fence gives an empty diagram element; a loaded image replaces the text and carries the rendered state; the stylesheet contains the containment rules and the picture is never larger than its natural size; the block is hidden only while its editor is open.
 - Method: test/page/mermaidLabelFit.test.ts (headless Chromium: the shown SVG opened as a document of its own, every label's text inside its box; the in-page measure of the real-window check agrees with it)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts (Mermaid measures in the styled measure element, removed after the drawing)

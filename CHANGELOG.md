@@ -4,7 +4,7 @@
 
 - A Mermaid or PlantUML diagram or a chart that draws no longer has a source section under it, in the preview
   and in the HTML export; a figure that fails to render still shows its source, closed, under its message
-  (CR-521 remove-diagram-source-disclosure)
+  (CR-521 remove-diagram-source-disclosure, PR #553)
 
 ## 1.13.0 - 2026-11-27
 

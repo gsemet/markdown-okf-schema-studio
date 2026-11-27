@@ -137,7 +137,10 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 - Method: test/page/modules/plantumlDiagram.test.ts (valid diagram drawn as a picture with a fake engine, light or dark rendering: luminance below 0.18 selects dark, transparent selects light)
 - Method: test/visual/scenarioDefinitions2.ts (visual scenarios diagrams v10 and v11: picture drawn, SVG with a script, the variant change redraws all diagrams)
 - Method: test/core/preview/diagReq.styles.requirements.test.ts (a PlantUML picture is scaled down to the column and never set to a fixed width; a PlantUML picture is a block centred with automatic inline margins; the PlantUML source disclosure has the rules of the Mermaid one)
-- Criteria: Every form gives the same figure structure and the text is unchanged; a data-URI image with the rendered state replaces the text; luminance below 0.18 selects dark; max-width 100 percent, height auto, centred, and the rules of a shown disclosure equal the Mermaid ones; the disclosure shows only under a figure in the error or unavailable state. The dark-to-light theme observer has no unit test.
+- Method: test/page/modules/chartError.test.ts `the preview sheet hides the three source panels and shows them for a failed figure; the export sheet adds no rule` (the style rules that hide the "Diagram source" disclosure and show it in the error or unavailable state)
+- Method: test/page/modules/findIndex.test.ts `the source panel of a drawn or drawing figure is hidden and not searched` and `the source panel of a failed figure is searched, and only that one` (the find bar follows the same states)
+- Method: test/visual/scenarioAssertions.ts `PLANTUML_UNSUPPORTED_ASSERTIONS` (visual scenario diagrams v12: the disclosure of a refused diagram is shown, closed)
+- Criteria: Every form gives the same figure structure, the text is unchanged and the disclosure shows only under a figure in the error or unavailable state; a data-URI image with the rendered state replaces the text; luminance below 0.18 selects dark; max-width 100 percent, height auto, centred, and the rules of a shown disclosure equal the Mermaid ones. The dark-to-light theme observer has no unit test.
 
 <!-- okf:links:start -->
 ### Links

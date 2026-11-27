@@ -230,8 +230,11 @@ PAGE_CHECKS = """
         failures.push(`PlantUML fallback ${index + 1} must show explicit configuration guidance without an image`);
       }
     }
-    if (!figure.querySelector('details.myst-plantuml-source')) {
+    const source = figure.querySelector('details.myst-plantuml-source');
+    if (!source) {
       failures.push(`PlantUML diagram ${index + 1} lost its expandable source`);
+    } else if (__PLANTUML_EXPECTATION__ === 'success' && getComputedStyle(source).display !== 'none') {
+      failures.push(`PlantUML diagram ${index + 1} must not display its source disclosure`);
     }
   }
 
