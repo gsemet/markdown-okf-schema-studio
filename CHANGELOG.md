@@ -3,7 +3,7 @@
 ## Unreleased
 
 - The published site has a **Videos** page with every feature clip and the one-minute demo, each shown as a
-  picture that plays on a click, and the README shows five features as GIFs (CR-522 pages-video-gallery)
+  picture that plays on a click, and the README shows five features as GIFs (CR-522 pages-video-gallery, PR #555)
 
 ## 1.13.0 - 2026-11-27
 
