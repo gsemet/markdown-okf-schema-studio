@@ -451,4 +451,3 @@ test("the shortcut pressed before the frame answers the selection as it is then,
     assert.equal(textReads(), reads, `${next}: the frame does not read the answered change again`);
   }
 });
-
