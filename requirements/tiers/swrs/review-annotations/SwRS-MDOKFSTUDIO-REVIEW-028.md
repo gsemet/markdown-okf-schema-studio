@@ -35,7 +35,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/styles/commentStyles.ts
-- src/page/modules/commentThreads.ts
+- src/page/modules/commentPlacements.ts
 tested_in_files:
 - test/core/preview/commentStyles.test.ts
 - test/core/preview/previewStylesGutter.test.ts
@@ -104,7 +104,7 @@ When the page cannot place a review thread, the extension SHALL list it as an en
 - Method: test/page/modules/commentThreads.test.ts (`T44: a thread with no block at its line and no quote anywhere goes to the Orphaned comments box`, `T44: the box lives outside the content, after it, and is re-created after content is replaced` and `T44: the box goes away when the orphan is resolved away, and its entries open the popover` check the listing, the empty case and the popover; `T44: orphans are never reported to the host as changes (the page only displays them)` checks the refusal; `T45: orphaned true goes to the box even when the quote is on the page`, `T45: orphaned false trusts the host lines and does not search the quote elsewhere` and `T45: orphaned false with a block at the line places the thread as before` check the verdict table; `T44 r2: a long quote that occurs once elsewhere is placed, not orphaned`, `T44 r2: a quote repeated elsewhere is orphaned, not marked on the first copy` and `T44 r2: a short quote is orphaned even when it occurs once elsewhere` check the quote search); visual scenario review-annotations/v19-orphaned-list-light-900 (the box and its entries).
 - Method: test/core/preview/previewStyles.test.ts (`T44: the Orphaned comments box sits in the content's bottom padding and adds no scroll height`); visual scenario review-annotations/v01-orphan-box-end-padding-dark-900.
 - Untested: the exact meta text and the 120-character cut of an entry are not asserted.
-- Criteria: The region has role region and the label Orphaned comments, is a sibling after the content element and exists only while an orphan exists. The entry text follows the template in renderOrphans. The post hook is never called while orphans are applied and opened. The stylesheet gives the box a negative top margin equal to the padding and the measured heights match. No mark is created for orphaned true; for orphaned false without a block no search happens; with a block the mark is created in the block of the posted line only. MIN_MOVED_QUOTE = 12 and a total count of exactly one occurrence decide the placement.
+- Criteria: The region has role region and the label Orphaned comments, is a sibling after the content element and exists only while an orphan exists. The entry text follows the template in updateOrphans. The post hook is never called while orphans are applied and opened. The stylesheet gives the box a negative top margin equal to the padding and the measured heights match. No mark is created for orphaned true; for orphaned false without a block no search happens; with a block the mark is created in the block of the posted line only. MIN_MOVED_QUOTE = 12 and a total count of exactly one occurrence decide the placement.
 
 <!-- okf:links:start -->
 ### Links

@@ -1,5 +1,14 @@
 # Update Log
 
+## 2026-11-27
+
+### A new comment updates only its highlights
+
+Reason: CR-517, issue 547. The requirements below are `proposed`; no StRS changes.
+
+- Added: when the page receives the comment threads again, it changes only the highlights, badges and orphan entries whose thread has another place or shown state than before, and measures its source positions again only when a block of the content can have moved, with the same result as placing every thread from nothing (SwRS-MDOKFSTUDIO-REVIEW-224, from StRS-MDOKFSTUDIO-REVIEW-001 and StRS-MDOKFSTUDIO-REVIEW-003).
+- Clarified: the verification note of SwRS-MDOKFSTUDIO-REVIEW-028 names the function that now writes an orphan entry; no behaviour changes.
+
 ## 2026-11-26
 
 ### Comment creation no longer restyles the whole document

@@ -54,9 +54,10 @@ export function registerHostHandlers(rt: PageRuntime): void {
     // The answer to a create or a reply: the compose box and the reply box keep the text until ok.
     if (!parts.commentCompose?.result(message)) parts.commentThreads.result(message);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-224
   hostMessages.on("previewComments", (message) => {
-    parts.commentThreads.setThreads(message.threads);
-    rt.scroll.measure();
+    // Highlights only paint: the page is measured again when a block can have moved.
+    if (parts.commentThreads.setThreads(message.threads)) rt.scroll.measure();
   });
   hostMessages.on("previewIncomingChanges", (message) => {
     parts.incomingChanges.setEnabled(message.enabled !== false);
