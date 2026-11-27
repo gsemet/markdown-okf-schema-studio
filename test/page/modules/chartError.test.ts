@@ -21,7 +21,7 @@ test("an invalid chart shown several times has exactly one error with one detail
   }
   assert.equal(chart.querySelectorAll(".myst-vega-error").length, 1);
   assert.equal(chart.querySelectorAll("details").length, 1);
-  // Tightened for CR-502: the Chart source section is hidden in the preview, so the message no longer points to it.
+  // Tightened for CR-502: the exact message, which does not point to the Chart source section.
   assert.equal(chart.querySelector("p")!.textContent, "Unable to render the chart.");
   assert.match(chart.querySelector("details")!.textContent, /Data file not found/u);
   assert.doesNotMatch(chart.querySelector("details")!.textContent, /Unknown mark/u);
@@ -54,8 +54,16 @@ test("the hover detail is fixed, lets the pointer through and has a stronger bor
   assert.match(PREVIEW_THEME_CSS, /\.myst-vega-tooltip-value\s*\{[^}]*font-weight: bold;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001#S1
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023#S1
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-121#S4
-test("the preview sheet hides the Chart source section and the export sheet shows it again", () => {
-  assert.match(PREVIEW_THEME_CSS, /#sphinx-myst-preview-content details\.myst-vega-source\s*\{[^}]*display: none;/u);
-  assert.match(exportSheet(0, "light"), /#sphinx-myst-preview-content details\.myst-vega-source\s*\{\s*display: block;\s*\}/u);
+test("the preview sheet hides the three source panels and shows them for a failed figure; the export sheet adds no rule", () => {
+  const kinds = ["mermaid", "plantuml", "vega"];
+  const shown = kinds.map((kind) => `#sphinx-myst-preview-content .myst-${kind}-diagram:is([data-render-state="error"], [data-render-state="unavailable"]) ~ details.myst-${kind}-source`);
+  assert.ok(PREVIEW_THEME_CSS.includes(`${shown.join(",\n")} {\n  display: block;\n}`), "one rule shows the panel of a figure in error or unavailable");
+  for (const kind of kinds) {
+    // The panel's own rule starts its line; in the rule above, the panel follows its diagram on one line.
+    assert.match(PREVIEW_THEME_CSS, new RegExp(`^#sphinx-myst-preview-content details\\.myst-${kind}-source\\s*\\{[^}]*display: none;`, "mu"), `${kind}: hidden otherwise`);
+  }
+  assert.doesNotMatch(exportSheet(0, "light"), /myst-(?:mermaid|plantuml|vega)-source/u);
 });

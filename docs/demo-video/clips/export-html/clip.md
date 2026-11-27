@@ -168,11 +168,12 @@ Values below are measured by the take (`check.json`, the take's notes) on Window
   small box. The pointer rests right of every chart and never crosses one while Studio is on screen,
   so no box is filmed; `setup` checks that every chart ends left of the pointer and `run` checks that
   no box is shown after each Studio scroll.
-- **One visible difference: "Chart source".** The preview hides a chart's source block and the
-  exported sheet shows it, closed (`src/core/preview/styles/contentBlockStyles.ts`,
-  `src/core/export/exportStyles.ts`, SwRS-MDOKFSTUDIO-DIAG-121). So the browser has a "Chart source"
-  line under a chart that Studio does not show; under the bar chart it sits partly behind the
-  caption. A diagram has its "Diagram source" line in both.
+- **Source lines in the filmed take.** The take predates CR-521: its browser shows a "Chart source"
+  line under a chart that Studio does not show (under the bar chart it sits partly behind the
+  caption), and both show a "Diagram source" line under a diagram. The preview and the exported file
+  now show no source line under a figure that rendered; the source block shows only under one that
+  failed (`src/core/preview/styles/contentBlockStyles.ts`, SwRS-MDOKFSTUDIO-DIAG-001,
+  SwRS-MDOKFSTUDIO-DIAG-121), so a new take has none.
 - **Scrolling.** The scroll is a CDP mouse wheel at the pointer (`t.page.mouse.wheel` in Studio,
   the browser page's `mouse.wheel` in the Integrated Browser), in small steps. The kit has no
   scroll helper and logs no wheel event. Both scrolls used the wheel (`scrollStudio` and

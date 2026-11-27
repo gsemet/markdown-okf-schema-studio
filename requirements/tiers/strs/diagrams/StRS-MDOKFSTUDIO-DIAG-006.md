@@ -13,10 +13,10 @@ scope: diagrams
 req_lifecycle: approved
 status: stable
 approved_by: gaetan@xeberon.net
-approved_at: '2026-11-25T15:37:43+01:00'
+approved_at: '2026-11-27T11:54:00+01:00'
 verified:
   by: human:gaetan@xeberon.net
-  at: '2026-11-25T15:37:43+01:00'
+  at: '2026-11-27T11:54:00+01:00'
 origin: native
 tier: StRS
 derives_from: []
@@ -83,7 +83,7 @@ Writers expect PlantUML to work from the first preview, without Java, Graphviz, 
 
 ### Rationale and constraints
 
-- Reading: `plantuml` fences and `{plantuml}` or `{uml}` directives produce a diagram, with the source in a collapsed "Diagram source" disclosure. The `@startuml` wrapper is the writer's.
+- Reading: `plantuml` fences and `{plantuml}` or `{uml}` directives produce a diagram, with the source in a collapsed "Diagram source" disclosure shown only when the diagram fails to render. The `@startuml` wrapper is the writer's.
 - The default engine is bundled and runs in the preview page: it starts no process, reads no executable or JAR, sends nothing over the network, and works in Restricted Mode. Its script is loaded only when the page has a PlantUML diagram, under the unchanged Content Security Policy.
 - Pictures follow the light or dark variant of the preview, are inert and stay inside the content width.
 - The engine is pinned to an exact version of `@plantuml/core`, because earlier versions are GPL, and its licence is packaged with it.

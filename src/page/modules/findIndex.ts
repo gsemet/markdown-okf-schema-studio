@@ -46,18 +46,36 @@ const BLOCK_TAGS = new Set([
 ]);
 /** Elements whose text is controls, code of the page or the find bar itself. */
 const SKIPPED_TAGS = new Set(["SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT", "BUTTON", "INPUT", "TEXTAREA", "SELECT"]);
-// @implements_req SwRS-MDOKFSTUDIO-DIAG-121
-const SKIPPED_SELECTOR = ".katex-mathml, .okf-comment, .myst-checkbox-refusal, .myst-vega-source, .myst-vega-view, [data-sphinx-preview-find], "
+const SKIPPED_SELECTOR = ".katex-mathml, .okf-comment, .myst-checkbox-refusal, .myst-vega-view, [data-sphinx-preview-find], "
   + "[data-find-ignore], [aria-hidden='true']";
+/** The source panels under the Mermaid, PlantUML and chart figures. */
+const SOURCE_PANEL_SELECTOR = ".myst-mermaid-source, .myst-plantuml-source, .myst-vega-source";
+const FAILED_RENDER_STATES = new Set(["error", "unavailable"]);
 
 const isSpace = (character: string): boolean => /\s/u.test(character);
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-121
+/**
+ * True for a source panel the preview sheet hides: no diagram before it in its figure failed to
+ * render (the figure rendered, or is still drawing).
+ */
+function isHiddenSourcePanel(element: Element): boolean {
+  if (element.matches?.(SOURCE_PANEL_SELECTOR) !== true) return false;
+  for (let node = element.previousSibling; node; node = node.previousSibling) {
+    const state = (node as Element).getAttribute?.("data-render-state");
+    if (FAILED_RENDER_STATES.has(state ?? "")) return false;
+  }
+  return true;
+}
 
 /** True for an element whose text the reader does not see. Folded sections stay searchable. */
 function isSkipped(element: Element): boolean {
   if (SKIPPED_TAGS.has(element.tagName.toUpperCase())) return true;
   const hidden = element.getAttribute("hidden");
   if (hidden !== null && hidden !== "until-found") return true;
-  return element.matches?.(SKIPPED_SELECTOR) === true;
+  return isHiddenSourcePanel(element) || element.matches?.(SKIPPED_SELECTOR) === true;
 }
 
 /**

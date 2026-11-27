@@ -2,6 +2,15 @@
 
 ## 2026-11-27
 
+### Source panels show only under a figure that failed (CR-521)
+
+Reason: CR-521, the owner's decision that a drawn diagram or chart shows no source panel. Two approved requirements change, StRS-MDOKFSTUDIO-DIAG-001 and StRS-MDOKFSTUDIO-DIAG-006, with a new `approved_at`; every other requirement below is `proposed`.
+
+- Changed (approved): a Mermaid or PlantUML figure keeps its source available when the diagram fails to render, where it was shown under every figure (StRS-MDOKFSTUDIO-DIAG-001: description, user need, Reading, use case diagram, scenario path and normative text; StRS-MDOKFSTUDIO-DIAG-006: Reading).
+- Changed: the "Diagram source" disclosure of a Mermaid or PlantUML figure is shown, in the preview and the HTML export, only when the render state is `error` or `unavailable` (SwRS-MDOKFSTUDIO-DIAG-001 S1; SwRS-MDOKFSTUDIO-DIAG-023 S1, S4 and S7; SwRS-MDOKFSTUDIO-DIAG-068 and DIAG-105 S3, wording).
+- Changed: the Chart source section follows the same rule, and the HTML export no longer shows it under a drawn chart (SwRS-MDOKFSTUDIO-DIAG-121, S4 retitled; SwRS-MDOKFSTUDIO-DIAG-123 S3).
+- Changed (wording only): SwRS-MDOKFSTUDIO-BLOCK-014 S3 and S7 name the source disclosure of a failed figure; StRS-MDOKFSTUDIO-DIAG-009 and DIAG-015 say when the source shows.
+
 ### A new comment updates only its highlights
 
 Reason: CR-517, issue 547. The requirements below are `proposed`; no StRS changes.

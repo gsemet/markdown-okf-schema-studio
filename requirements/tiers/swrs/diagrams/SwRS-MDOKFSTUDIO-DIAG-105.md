@@ -78,7 +78,7 @@ When the JAR pipeline finishes the diagrams of the current render, the extension
 ### Scenario S3 (nominal): A working installation draws a loaded picture in both themes
 - GIVEN a working JAR or plantuml command and a PlantUML diagram
 - WHEN the preview is shown in a light theme and then in a dark theme
-- THEN a loaded picture without an error appears in each and the expandable source disclosure is kept
+- THEN a loaded picture without an error appears in each, and the source disclosure is kept in the markup and not shown
 - AND the pipeline asks for no dark variant
 
 ### Scenario S4 (boundary): One failing diagram does not affect the others

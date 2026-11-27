@@ -335,11 +335,22 @@ test("Enter or Space on a link inside a paragraph opens the paragraph editor; Cm
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S3
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014#S7
 test("a click on Diagram source in edit mode opens the editor of the figure and not the disclosure", () => {
+  /** A figure that failed to render, the one case that shows its disclosure; returns the summary. */
+  const failedFigureSummary = (target: ReturnType<typeof createRuntimeHarness>): RuntimeElement => {
+    const diagram = new RuntimeElement({ "data-render-state": "error" }, target.windowState, 0, 20, "div");
+    const disclosure = new RuntimeElement({}, target.windowState, 0, 20, "details");
+    const summary = new RuntimeElement({}, target.windowState, 0, 20, "summary");
+    target.mappings[1].appendChild(diagram);
+    target.mappings[1].appendChild(disclosure);
+    disclosure.appendChild(summary);
+    return summary;
+  };
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
-  const summary = new RuntimeElement({}, harness.windowState, 0, 20, "summary");
-  harness.mappings[1].appendChild(summary);
+  const summary = failedFigureSummary(harness);
   let prevented = 0;
   harness.dispatchDocument("click", { target: summary, preventDefault: () => { prevented += 1; } });
   assert.equal(prevented, 1, "the default toggle is prevented");
@@ -348,8 +359,7 @@ test("a click on Diagram source in edit mode opens the editor of the figure and 
   assert.deepEqual([opens[0]!.line, opens[0]!.endLine], [50, 52]);
 
   const reading = createRuntimeHarness();
-  const readingSummary = new RuntimeElement({}, reading.windowState, 0, 20, "summary");
-  reading.mappings[1].appendChild(readingSummary);
+  const readingSummary = failedFigureSummary(reading);
   let readingPrevented = 0;
   reading.dispatchDocument("click", { target: readingSummary, preventDefault: () => { readingPrevented += 1; } });
   assert.equal(readingPrevented, 0, "the disclosure toggles as usual");

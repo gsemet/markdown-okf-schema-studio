@@ -77,7 +77,7 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 
 - GIVEN a chart whose text is not valid JSON or YAML, or that Vega-Lite or Vega rejects
 - WHEN the page draws it
-- THEN data-render-state is error and the chart shows one paragraph Unable to render the chart. with a details section holding the reason as plain text, the document is unchanged and no Chart source section is shown in the preview
+- THEN data-render-state is error and the chart shows one paragraph Unable to render the chart. with a details section holding the reason as plain text, the document is unchanged, and the Chart source section of the chart is shown, closed, under it in the preview
 
 | Input | Outcome |
 | --- | --- |
